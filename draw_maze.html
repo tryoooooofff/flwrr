@@ -1,0 +1,892 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>迷宫通道绘制器 · 正弦波凹凸 · 干细胞风格</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      text-align: center;
+      overflow-x: auto;
+    }
+    h1 { margin-bottom: 10px; color: #7af; }
+    .info {
+      margin-bottom: 15px;
+      color: #aaa;
+      font-size: 14px;
+    }
+    .main-layout {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .canvas-area {
+      flex-shrink: 0;
+    }
+    .canvas-container {
+      position: relative;
+      width: 800px;
+      height: 800px;
+      border: 2px dashed #666;
+      background: #111;
+      overflow: hidden;
+      cursor: grab;
+    }
+    .canvas-container:active {
+      cursor: grabbing;
+    }
+    #mazeCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: black;
+      transform-origin: 0 0;
+      pointer-events: none;
+    }
+    .minimap-container {
+      width: 200px;
+      height: 200px;
+      border: 2px solid #444;
+      background: #000;
+      position: relative;
+      cursor: crosshair;
+    }
+    #minimapCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+    .viewfinder {
+      position: absolute;
+      border: 2px solid #ffaa00;
+      box-sizing: border-box;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 5px rgba(255,170,0,0.5);
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 8px 16px;
+      margin: 0 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { background: #333; }
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #bbf;
+    }
+    .note {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #f96;
+    }
+    .coords {
+      font-size: 13px;
+      color: #8cf;
+      margin-top: 5px;
+    }
+    .control-panel {
+      margin: 15px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      max-width: 1100px;
+      background: #222;
+      padding: 15px 20px;
+      border-radius: 40px;
+    }
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .control-item label {
+      color: #aaa;
+      min-width: 70px;
+    }
+    #sizeSlider {
+      width: 150px;
+      cursor: pointer;
+    }
+    #waveAmplitudeSlider {
+      width: 150px;
+      cursor: pointer;
+    }
+    #waveFrequencySlider {
+      width: 150px;
+      cursor: pointer;
+    }
+    #sizeValue, #waveAmplitudeValue, #waveFrequencyValue {
+      min-width: 70px;
+      text-align: left;
+      color: #ffaa4f;
+      font-weight: bold;
+    }
+    select {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    select:hover {
+      background: #444;
+    }
+    .map-size {
+      font-size: 12px;
+      color: #8af;
+      margin-left: 10px;
+    }
+    .current-params {
+      background: #2a2a3a;
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-size: 13px;
+      color: #ffaa4f;
+      margin: 10px auto;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 迷宫通道绘制器 · 正弦波凹凸 · 干细胞风格</h1>
+  <div class="info">主画布 10000×10000 | 正弦波波动 | 每个点独立保存参数</div>
+
+  <div class="control-panel">
+    <div class="control-item">
+      <label>⚪ 直径</label>
+      <input type="range" id="sizeSlider" min="150" max="500" step="10" value="150">
+      <span id="sizeValue">150 px</span>
+    </div>
+
+    <div class="control-item">
+      <label>🌊 波动幅度</label>
+      <input type="range" id="waveAmplitudeSlider" min="0" max="40" step="1" value="15">
+      <span id="waveAmplitudeValue">15 px</span>
+    </div>
+
+    <div class="control-item">
+      <label>📊 波动频率</label>
+      <input type="range" id="waveFrequencySlider" min="1" max="20" step="1" value="6">
+      <span id="waveFrequencyValue">6</span>
+    </div>
+
+    <div class="control-item">
+      <label>🔷 形状</label>
+      <select id="shapeSelect">
+        <option value="circle" selected>圆形</option>
+        <option value="square">方形</option>
+        <option value="hexagon">六边形</option>
+        <option value="triangle">三角形</option>
+        <option value="star">星形</option>
+        <option value="diamond">菱形</option>
+      </select>
+    </div>
+
+    <span class="map-size">地图: 10000×10000</span>
+  </div>
+
+  <div class="current-params" id="currentParams">
+    当前参数: 圆形 | 直径150px | 振幅15px | 频率6
+  </div>
+
+  <div class="main-layout">
+    <!-- 左侧主画布区域 -->
+    <div class="canvas-area">
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="mazeCanvas" width="10000" height="10000"></canvas>
+      </div>
+      <div class="coords" id="coordsDisplay">画布坐标: (—, —)</div>
+    </div>
+
+    <!-- 右侧小地图区域 -->
+    <div class="minimap-container" id="minimapContainer">
+      <canvas id="minimapCanvas" width="10000" height="10000"></canvas>
+      <div class="viewfinder" id="viewfinder"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="clearBtn">🖤 重置全黑</button>
+    <button id="saveBtn">💾 保存 PNG (透明通道)</button>
+    <button id="downloadBtn">⬇️ 下载 maze.png</button>
+  </div>
+  <div class="status" id="status">已创建 <span id="channelCount">0</span> 个通道点</div>
+  <div class="note" id="hint">✨ 左键点击添加正弦波波动圆点 | 历史点不会改变 | 滑块只影响新点</div>
+
+  <script>
+    (function() {
+      // 地图尺寸
+      const MAP_SIZE = 10000;
+
+      // 主画布
+      const canvas = document.getElementById('mazeCanvas');
+      const ctx = canvas.getContext('2d', { alpha: true });
+      const container = document.getElementById('canvasContainer');
+
+      // 小地图
+      const minimapCanvas = document.getElementById('minimapCanvas');
+      const minimapCtx = minimapCanvas.getContext('2d', { alpha: true });
+      const minimapContainer = document.getElementById('minimapContainer');
+      const viewfinder = document.getElementById('viewfinder');
+
+      // 存储所有圆点，每个点保存自己的参数
+      let points = [];
+      let channelCount = 0;
+
+      // 当前参数（只影响新点）
+      let currentRadius = 75; // 默认150直径 => 半径75
+      let currentAmplitude = 15; // 波动幅度
+      let currentFrequency = 6; // 波动频率
+      let currentShape = 'circle';
+
+      // 主画布平移状态
+      let translateX = 0, translateY = 0;
+      const containerSize = 800;
+
+      // 拖动相关
+      let isDragging = false;
+      let dragStartX = 0, dragStartY = 0;
+      let startTranslateX = 0, startTranslateY = 0;
+
+      // 状态元素
+      const statusCount = document.getElementById('channelCount');
+      const statusEl = document.getElementById('status');
+      const hintEl = document.getElementById('hint');
+      const coordsDisplay = document.getElementById('coordsDisplay');
+      const currentParamsEl = document.getElementById('currentParams');
+
+      // 控件元素
+      const sizeSlider = document.getElementById('sizeSlider');
+      const sizeValue = document.getElementById('sizeValue');
+      const waveAmplitudeSlider = document.getElementById('waveAmplitudeSlider');
+      const waveAmplitudeValue = document.getElementById('waveAmplitudeValue');
+      const waveFrequencySlider = document.getElementById('waveFrequencySlider');
+      const waveFrequencyValue = document.getElementById('waveFrequencyValue');
+      const shapeSelect = document.getElementById('shapeSelect');
+
+      // 更新当前参数显示
+      function updateCurrentParams() {
+        const shapeNames = {
+          circle: '圆形',
+          square: '方形',
+          hexagon: '六边形',
+          triangle: '三角形',
+          star: '星形',
+          diamond: '菱形'
+        };
+        currentParamsEl.innerHTML = `当前参数: ${shapeNames[currentShape]} | 直径${currentRadius*2}px | 振幅${currentAmplitude}px | 频率${currentFrequency}`;
+      }
+
+      // 正弦波波动函数 - 类似干细胞
+      function getWaveRadius(baseRadius, angle, amplitude, frequency) {
+        // 使用多个正弦波叠加，产生类似干细胞的波动效果
+        const wave1 = Math.sin(angle * frequency) * amplitude;
+        const wave2 = Math.sin(angle * frequency * 2 + 1) * (amplitude * 0.4);
+        const wave3 = Math.cos(angle * frequency * 3 + 2) * (amplitude * 0.2);
+
+        return baseRadius + wave1 + wave2 + wave3;
+      }
+
+      // 绘制凹凸圆形（正弦波波动）
+      function drawWaveCircle(ctx, centerX, centerY, baseRadius, amplitude, frequency) {
+        ctx.beginPath();
+
+        const points = 120; // 增加点数使波动更平滑
+        const step = (Math.PI * 2) / points;
+
+        for (let i = 0; i <= points; i++) {
+          const angle = i * step;
+
+          // 计算波动后的半径
+          const waveRadius = getWaveRadius(baseRadius, angle, amplitude, frequency);
+
+          const x = centerX + Math.cos(angle) * waveRadius;
+          const y = centerY + Math.sin(angle) * waveRadius;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 绘制方形（正弦波波动）
+      function drawWaveSquare(ctx, centerX, centerY, size, amplitude, frequency) {
+        ctx.beginPath();
+
+        const halfSize = size / 2;
+        const steps = 80; // 每边分段数
+
+        // 上边
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const angle = Math.PI / 2; // 向上方向
+          const x = centerX - halfSize + t * size;
+          const y = centerY - halfSize;
+
+          const waveOffset = getWaveRadius(0, angle + t * Math.PI * 2, amplitude, frequency);
+          ctx.lineTo(x, y - waveOffset);
+        }
+
+        // 右边
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const angle = 0; // 向右方向
+          const x = centerX + halfSize;
+          const y = centerY - halfSize + t * size;
+
+          const waveOffset = getWaveRadius(0, angle + t * Math.PI * 2, amplitude, frequency);
+          ctx.lineTo(x + waveOffset, y);
+        }
+
+        // 下边
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const angle = -Math.PI / 2; // 向下方向
+          const x = centerX + halfSize - t * size;
+          const y = centerY + halfSize;
+
+          const waveOffset = getWaveRadius(0, angle + t * Math.PI * 2, amplitude, frequency);
+          ctx.lineTo(x, y + waveOffset);
+        }
+
+        // 左边
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const angle = Math.PI; // 向左方向
+          const x = centerX - halfSize;
+          const y = centerY + halfSize - t * size;
+
+          const waveOffset = getWaveRadius(0, angle + t * Math.PI * 2, amplitude, frequency);
+          ctx.lineTo(x - waveOffset, y);
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 绘制六边形（正弦波波动）
+      function drawWaveHexagon(ctx, centerX, centerY, size, amplitude, frequency) {
+        ctx.beginPath();
+
+        for (let i = 0; i <= 6; i++) {
+          const baseAngle = (i * Math.PI / 3) - Math.PI / 6;
+
+          // 在每两个顶点之间添加更多点使波动更平滑
+          if (i < 6) {
+            const nextAngle = ((i + 1) * Math.PI / 3) - Math.PI / 6;
+            const steps = 10;
+
+            for (let j = 0; j <= steps; j++) {
+              const t = j / steps;
+              const angle = baseAngle + (nextAngle - baseAngle) * t;
+
+              const waveRadius = getWaveRadius(size, angle, amplitude, frequency);
+
+              const x = centerX + Math.cos(angle) * waveRadius;
+              const y = centerY + Math.sin(angle) * waveRadius;
+
+              if (i === 0 && j === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+          }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 绘制三角形（正弦波波动）
+      function drawWaveTriangle(ctx, centerX, centerY, size, amplitude, frequency) {
+        ctx.beginPath();
+
+        for (let i = 0; i <= 3; i++) {
+          const baseAngle = (i * Math.PI * 2 / 3) - Math.PI / 2;
+
+          if (i < 3) {
+            const nextAngle = ((i + 1) * Math.PI * 2 / 3) - Math.PI / 2;
+            const steps = 10;
+
+            for (let j = 0; j <= steps; j++) {
+              const t = j / steps;
+              const angle = baseAngle + (nextAngle - baseAngle) * t;
+
+              const waveRadius = getWaveRadius(size, angle, amplitude, frequency);
+
+              const x = centerX + Math.cos(angle) * waveRadius;
+              const y = centerY + Math.sin(angle) * waveRadius;
+
+              if (i === 0 && j === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+          }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 绘制星形（正弦波波动）
+      function drawWaveStar(ctx, centerX, centerY, size, amplitude, frequency) {
+        ctx.beginPath();
+
+        const points = 10;
+        for (let i = 0; i <= points; i++) {
+          const angle = (i * Math.PI * 2 / points) - Math.PI / 2;
+          const outerRadius = (i % 2 === 0) ? size : size * 0.4;
+
+          const waveRadius = getWaveRadius(outerRadius, angle, amplitude, frequency);
+
+          const x = centerX + Math.cos(angle) * waveRadius;
+          const y = centerY + Math.sin(angle) * waveRadius;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 绘制菱形（正弦波波动）
+      function drawWaveDiamond(ctx, centerX, centerY, size, amplitude, frequency) {
+        ctx.beginPath();
+
+        const angles = [
+          -Math.PI / 2,  // 上
+          0,             // 右
+          Math.PI / 2,   // 下
+          Math.PI        // 左
+        ];
+
+        for (let i = 0; i <= 4; i++) {
+          const idx = i % 4;
+          const angle = angles[idx];
+
+          if (i < 4) {
+            const nextAngle = angles[(i + 1) % 4];
+            const steps = 10;
+
+            for (let j = 0; j <= steps; j++) {
+              const t = j / steps;
+              const currentAngle = angle + (nextAngle - angle) * t;
+
+              // 菱形的基础半径随角度变化
+              const baseRadius = size * (0.7 + 0.3 * Math.abs(Math.cos(currentAngle)));
+              const waveRadius = getWaveRadius(baseRadius, currentAngle, amplitude, frequency);
+
+              const x = centerX + Math.cos(currentAngle) * waveRadius;
+              const y = centerY + Math.sin(currentAngle) * waveRadius;
+
+              if (i === 0 && j === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+          }
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 根据保存的参数绘制点
+      function drawPoint(ctx, point) {
+        ctx.fillStyle = 'white';
+
+        switch(point.shape) {
+          case 'circle':
+            drawWaveCircle(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+            break;
+          case 'square':
+            drawWaveSquare(ctx, point.x, point.y, point.radius * 2, point.amplitude, point.frequency);
+            break;
+          case 'hexagon':
+            drawWaveHexagon(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+            break;
+          case 'triangle':
+            drawWaveTriangle(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+            break;
+          case 'star':
+            drawWaveStar(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+            break;
+          case 'diamond':
+            drawWaveDiamond(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+            break;
+          default:
+            drawWaveCircle(ctx, point.x, point.y, point.radius, point.amplitude, point.frequency);
+        }
+      }
+
+      // 初始化：全黑背景
+      function initBlackBackground() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        points = [];
+        channelCount = 0;
+        updateStatus();
+        redrawAllPoints();
+        updateMinimap();
+        updateViewfinder();
+      }
+
+      // 重绘所有点（使用每个点保存的参数）
+      function redrawAllPoints() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let p of points) {
+          drawPoint(ctx, p);
+        }
+      }
+
+      // 更新小地图
+      function updateMinimap() {
+        minimapCtx.fillStyle = 'black';
+        minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+        minimapCtx.fillStyle = 'white';
+        for (let p of points) {
+          // 小地图简化绘制
+          minimapCtx.beginPath();
+          minimapCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          minimapCtx.fill();
+        }
+      }
+
+      // 更新取景框位置
+      function updateViewfinder() {
+        const maxTranslateX = MAP_SIZE - containerSize;
+        const maxTranslateY = MAP_SIZE - containerSize;
+        translateX = Math.max(0, Math.min(maxTranslateX, translateX));
+        translateY = Math.max(0, Math.min(maxTranslateY, translateY));
+
+        const mapScale = 200 / MAP_SIZE;
+        const viewfinderX = translateX * mapScale;
+        const viewfinderY = translateY * mapScale;
+        const viewfinderWidth = containerSize * mapScale;
+        const viewfinderHeight = containerSize * mapScale;
+
+        viewfinder.style.left = viewfinderX + 'px';
+        viewfinder.style.top = viewfinderY + 'px';
+        viewfinder.style.width = viewfinderWidth + 'px';
+        viewfinder.style.height = viewfinderHeight + 'px';
+
+        canvas.style.transform = `translate(${-translateX * (containerSize/MAP_SIZE)}px, ${-translateY * (containerSize/MAP_SIZE)}px) scale(1)`;
+        canvas.style.width = '800px';
+        canvas.style.height = '800px';
+      }
+
+      // 添加新点（使用当前参数）
+      function addPoint(centerX, centerY) {
+        if (centerX < 0 || centerX > canvas.width || centerY < 0 || centerY > canvas.height) return;
+
+        const newPoint = {
+          x: centerX,
+          y: centerY,
+          radius: currentRadius,
+          amplitude: currentAmplitude,
+          frequency: currentFrequency,
+          shape: currentShape
+        };
+        points.push(newPoint);
+
+        drawPoint(ctx, newPoint);
+        updateMinimap();
+
+        channelCount++;
+        updateStatus();
+
+        const shapeNames = {circle:'圆形', square:'方形', hexagon:'六边形', triangle:'三角形', star:'星形', diamond:'菱形'};
+        hintEl.innerHTML = `➕ 在 (${Math.round(centerX)}, ${Math.round(centerY)}) 添加 ${shapeNames[currentShape]} (振幅${currentAmplitude}px, 频率${currentFrequency})`;
+        setTimeout(() => {
+          hintEl.innerHTML = '✨ 左键点击添加正弦波波动圆点 | 历史点不会改变 | 滑块只影响新点';
+        }, 2000);
+      }
+
+      // 更新计数
+      function updateStatus() {
+        statusCount.textContent = channelCount;
+        statusEl.innerHTML = `已创建 <span id="channelCount">${channelCount}</span> 个通道点`;
+      }
+
+      // 获取主画布上的实际坐标
+      function getCanvasCoordsFromEvent(e) {
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const visibleX = (mouseX / containerSize) * MAP_SIZE;
+        const visibleY = (mouseY / containerSize) * MAP_SIZE;
+
+        const canvasX = visibleX + translateX;
+        const canvasY = visibleY + translateY;
+
+        return { x: Math.max(0, Math.min(MAP_SIZE, canvasX)), y: Math.max(0, Math.min(MAP_SIZE, canvasY)) };
+      }
+
+      // 主画布鼠标事件
+      container.addEventListener('mousedown', (e) => {
+        if (e.button === 0) {
+          isDragging = true;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+          startTranslateX = translateX;
+          startTranslateY = translateY;
+          container.style.cursor = 'grabbing';
+        }
+      });
+
+      container.addEventListener('mousemove', (e) => {
+        const canvasCoords = getCanvasCoordsFromEvent(e);
+        coordsDisplay.textContent = `画布坐标: (${Math.round(canvasCoords.x)}, ${Math.round(canvasCoords.y)})`;
+
+        if (isDragging) {
+          e.preventDefault();
+          const dx = e.clientX - dragStartX;
+          const dy = e.clientY - dragStartY;
+          const deltaX = -dx * (MAP_SIZE / containerSize);
+          const deltaY = -dy * (MAP_SIZE / containerSize);
+          translateX = startTranslateX + deltaX;
+          translateY = startTranslateY + deltaY;
+
+          const maxTranslateX = MAP_SIZE - containerSize;
+          const maxTranslateY = MAP_SIZE - containerSize;
+          translateX = Math.max(0, Math.min(maxTranslateX, translateX));
+          translateY = Math.max(0, Math.min(maxTranslateY, translateY));
+
+          updateViewfinder();
+        }
+      });
+
+      container.addEventListener('mouseup', (e) => {
+        if (e.button === 0 && isDragging) {
+          isDragging = false;
+          container.style.cursor = 'grab';
+        }
+      });
+
+      container.addEventListener('mouseleave', (e) => {
+        if (isDragging) {
+          isDragging = false;
+          container.style.cursor = 'grab';
+        }
+      });
+
+      // 左键点击绘制
+      let clickStartTime = 0;
+      container.addEventListener('mousedown', (e) => {
+        if (e.button === 0) {
+          clickStartTime = Date.now();
+        }
+      });
+
+      container.addEventListener('mouseup', (e) => {
+        if (e.button === 0 && !isDragging) {
+          const clickDuration = Date.now() - clickStartTime;
+          if (clickDuration < 200) {
+            const canvasCoords = getCanvasCoordsFromEvent(e);
+            addPoint(canvasCoords.x, canvasCoords.y);
+          }
+        }
+      });
+
+      // 小地图点击跳转
+      minimapContainer.addEventListener('click', (e) => {
+        const rect = minimapContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const mapScale = MAP_SIZE / 200;
+        const targetX = x * mapScale;
+        const targetY = y * mapScale;
+
+        translateX = targetX - containerSize / 2;
+        translateY = targetY - containerSize / 2;
+
+        const maxTranslateX = MAP_SIZE - containerSize;
+        const maxTranslateY = MAP_SIZE - containerSize;
+        translateX = Math.max(0, Math.min(maxTranslateX, translateX));
+        translateY = Math.max(0, Math.min(maxTranslateY, translateY));
+
+        updateViewfinder();
+      });
+
+      // 小地图拖拽跳转
+      let isMinimapDragging = false;
+      minimapContainer.addEventListener('mousedown', (e) => {
+        isMinimapDragging = true;
+      });
+
+      minimapContainer.addEventListener('mousemove', (e) => {
+        if (isMinimapDragging) {
+          const rect = minimapContainer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          if (x >= 0 && x <= 200 && y >= 0 && y <= 200) {
+            const mapScale = MAP_SIZE / 200;
+            const targetX = x * mapScale;
+            const targetY = y * mapScale;
+            translateX = targetX - containerSize / 2;
+            translateY = targetY - containerSize / 2;
+            const maxTranslateX = MAP_SIZE - containerSize;
+            const maxTranslateY = MAP_SIZE - containerSize;
+            translateX = Math.max(0, Math.min(maxTranslateX, translateX));
+            translateY = Math.max(0, Math.min(maxTranslateY, translateY));
+            updateViewfinder();
+          }
+        }
+      });
+
+      minimapContainer.addEventListener('mouseup', () => {
+        isMinimapDragging = false;
+      });
+
+      minimapContainer.addEventListener('mouseleave', () => {
+        isMinimapDragging = false;
+      });
+
+      // 滑块事件
+      sizeSlider.addEventListener('input', (e) => {
+        const diameter = parseInt(e.target.value);
+        currentRadius = diameter / 2;
+        sizeValue.textContent = diameter + ' px';
+        updateCurrentParams();
+      });
+
+      waveAmplitudeSlider.addEventListener('input', (e) => {
+        currentAmplitude = parseInt(e.target.value);
+        waveAmplitudeValue.textContent = currentAmplitude + ' px';
+        updateCurrentParams();
+      });
+
+      waveFrequencySlider.addEventListener('input', (e) => {
+        currentFrequency = parseInt(e.target.value);
+        waveFrequencyValue.textContent = currentFrequency;
+        updateCurrentParams();
+      });
+
+      shapeSelect.addEventListener('change', (e) => {
+        currentShape = e.target.value;
+        updateCurrentParams();
+      });
+
+      // 重置全黑
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        initBlackBackground();
+        hintEl.innerHTML = '🖤 已重置为全黑背景';
+        setTimeout(() => {
+          hintEl.innerHTML = '✨ 左键点击添加正弦波波动圆点 | 历史点不会改变 | 滑块只影响新点';
+        }, 2000);
+      });
+
+      // 导出PNG
+      function exportWithTransparentChannels(filename) {
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = canvas.width;
+        offCanvas.height = canvas.height;
+        const offCtx = offCanvas.getContext('2d', { alpha: true });
+
+        offCtx.fillStyle = 'black';
+        offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+        offCtx.save();
+        offCtx.globalCompositeOperation = 'destination-out';
+        offCtx.fillStyle = 'white';
+
+        for (let p of points) {
+          switch(p.shape) {
+            case 'circle':
+              drawWaveCircle(offCtx, p.x, p.y, p.radius, p.amplitude, p.frequency);
+              break;
+            case 'square':
+              drawWaveSquare(offCtx, p.x, p.y, p.radius * 2, p.amplitude, p.frequency);
+              break;
+            case 'hexagon':
+              drawWaveHexagon(offCtx, p.x, p.y, p.radius, p.amplitude, p.frequency);
+              break;
+            case 'triangle':
+              drawWaveTriangle(offCtx, p.x, p.y, p.radius, p.amplitude, p.frequency);
+              break;
+            case 'star':
+              drawWaveStar(offCtx, p.x, p.y, p.radius, p.amplitude, p.frequency);
+              break;
+            case 'diamond':
+              drawWaveDiamond(offCtx, p.x, p.y, p.radius, p.amplitude, p.frequency);
+              break;
+          }
+        }
+
+        offCtx.restore();
+
+        offCanvas.toBlob(blob => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.click();
+          URL.revokeObjectURL(url);
+
+          alert(`✅ 已下载 ${filename} (10000×10000)\n包含 ${points.length} 个正弦波波动点`);
+        }, 'image/png');
+      }
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        exportWithTransparentChannels('map_plain.png');
+      });
+
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        exportWithTransparentChannels('map_ocean.png');
+      });
+
+      // 初始
+      initBlackBackground();
+      container.style.cursor = 'grab';
+      updateViewfinder();
+      updateCurrentParams();
+
+      // 滑块初始值显示
+      sizeValue.textContent = '150 px';
+      waveAmplitudeValue.textContent = '15 px';
+      waveFrequencyValue.textContent = '6';
+    })();
+  </script>
+</body>
+</html>

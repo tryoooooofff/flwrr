@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flwrr - GitHub 配置</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #00a8ff;
+            text-align: center;
+        }
+        .step {
+            background: #0f3460;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00a8ff;
+        }
+        .step h3 {
+            margin: 0 0 10px 0;
+            color: #00a8ff;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #1a1a2e;
+            border: 1px solid #00a8ff;
+            color: white;
+            border-radius: 5px;
+        }
+        button {
+            background: #00a8ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0080ff;
+        }
+        .success {
+            color: #4caf50;
+            background: #1e3a2e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error {
+            color: #f44336;
+            background: #3a1e1e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .code {
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 GitHub 存档配置</h1>
+
+        <div class="step">
+            <h3>📝 步骤 1: 创建 GitHub Token</h3>
+            <p>1. 访问 <a href="https://github.com/settings/tokens" target="_blank" style="color:#00a8ff;">GitHub Token 设置</a></p>
+            <p>2. 点击 "Generate new token (classic)"</p>
+            <p>3. 勾选 "gist" 权限</p>
+            <p>4. 生成并复制 Token</p>
+            <input type="text" id="tokenInput" placeholder="输入 GitHub Token">
+            <button onclick="saveToken()">保存 Token</button>
+        </div>
+
+        <div class="step">
+            <h3>📦 步骤 2: 创建存档 Gist</h3>
+            <button onclick="createGist()">创建新存档</button>
+            <div id="gistResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>🔗 步骤 3: 分享链接给同学</h3>
+            <div id="shareLinks" style="display:none;">
+                <p>你的永久存档链接：</p>
+                <div class="code" id="gistLink"></div>
+                <p>游戏邀请链接：</p>
+                <div class="code" id="gameLink"></div>
+                <button onclick="copyLinks()">复制所有链接</button>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>💾 当前存档数据</h3>
+            <button onclick="loadAllData()">加载所有玩家数据</button>
+            <pre id="dataDisplay" style="background:#1a1a2e; padding:10px; border-radius:5px; max-height:300px; overflow:auto;"></pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import { dataManager } from './data_manager.js';
+
+        window.saveToken = function() {
+            const token = document.getElementById('tokenInput').value;
+            if (token) {
+                dataManager.setGithubToken(token);
+                alert('✅ Token 已保存！');
+            }
+        };
+
+        window.createGist = async function() {
+            try {
+                const gistId = await dataManager.createGist();
+                document.getElementById('gistResult').innerHTML =
+                    `<div class="success">✅ Gist 创建成功！ID: ${gistId}</div>`;
+
+                // 显示分享链接
+                document.getElementById('shareLinks').style.display = 'block';
+                const baseUrl = window.location.origin + window.location.pathname.replace('github_config.html', 'index.html');
+                document.getElementById('gistLink').textContent = `https://gist.github.com/${gistId}`;
+                document.getElementById('gameLink').textContent = `${baseUrl}?gist=${gistId}`;
+
+            } catch (error) {
+                document.getElementById('gistResult').innerHTML =
+                    `<div class="error">❌ 创建失败: ${error.message}</div>`;
+            }
+        };
+
+        window.loadAllData = async function() {
+            const data = await dataManager.getAllPlayersData();
+            document.getElementById('dataDisplay').textContent =
+                JSON.stringify(data, null, 2);
+        };
+
+        window.copyLinks = function() {
+            const links = [
+                document.getElementById('gistLink').textContent,
+                document.getElementById('gameLink').textContent
+            ].join('\n');
+            navigator.clipboard.writeText(links);
+            alert('✅ 链接已复制！');
+        };
+    </script>
+</body>
+</html>

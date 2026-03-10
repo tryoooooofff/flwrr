@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灰调十边形 · 眼镜挂链版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 30px 20px 30px 20px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 40px;
+            box-shadow: 0 10px 0 #0d2c3a, 0 20px 30px rgba(0,0,0,0.6);
+            cursor: none;
+            background-color: #d9eaf5;
+            width: 600px;
+            height: 600px;
+            border: 4px solid #3c2e1f;
+        }
+        .panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 24px;
+        }
+        button {
+            background: #f5e7d3;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 32px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f3f4d;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 0 #9b7e5f, 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: 0.1s ease-out;
+            border: 2px solid #fcf3e2;
+        }
+        button:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #9b7e5f, 0 8px 15px rgba(0,0,0,0.3);
+        }
+        .status {
+            background: #203e4b;
+            color: #ffeecc;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 10px 32px;
+            border-radius: 50px;
+            border: 2px solid #d4b28c;
+            box-shadow: inset 0 -3px 0 #10262e;
+            text-transform: uppercase;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            color: #bbd1d4;
+            font-weight: 500;
+            text-shadow: 2px 2px 0 #153845;
+        }
+        .footer-note span {
+            background: #284b5a;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <canvas id="diggerCanvas" width="600" height="600"></canvas>
+
+    <div class="panel">
+        <button id="smileBtn">😊 微笑</button>
+        <div class="status" id="moodDisplay">微笑</div>
+        <button id="angryBtn">😠 愤怒</button>
+    </div>
+    <div class="footer-note">
+        <span>⚡ 眼镜右侧增加向下黑线 | 身体 #494545 内环 #6C6767</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('diggerCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 配色
+        const BODY_COLOR = '#494545';        // 身体主色 深灰
+        const BODY_BORDER = '#6C6767';        // 身体内环高光 浅灰
+        const BLACK = '#000000';               // 纯黑外框 & 眼眶 & 嘴巴 & 眼镜框
+        const WHITE = '#f0f0f0';                // 眼白
+
+        const CENTER_X = 300;
+        const CENTER_Y = 300;
+
+        // 鼠标追踪
+        let mouseX = CENTER_X;
+        let mouseY = CENTER_Y;
+
+        // 愤怒状态
+        let isAngry = false;
+
+        // 旋转角
+        let rotation = 0;
+
+        const moodDisplay = document.getElementById('moodDisplay');
+
+        // 眼睛参数
+        const EYE_SPACING = 20;
+        const viewScale = 1.2;
+        const rarityFactor = 1.0;
+
+        // --------------------------------------------------------------
+        // 生成浅内凹十边形 (外框黑色)
+        // --------------------------------------------------------------
+        function getShallowConcavePolygon(cx, cy, outerRadius, shallowDepth, sides, rot) {
+            const vertices = [];
+            for (let i = 0; i < sides; i++) {
+                const baseAngle = (i * 360 / sides - 90) * Math.PI / 180;
+                const angle = baseAngle + rot;
+                const x = cx + outerRadius * Math.cos(angle);
+                const y = cy + outerRadius * Math.sin(angle);
+                vertices.push({x, y});
+            }
+
+            const segmentsPerEdge = 8;
+            const points = [];
+
+            for (let i = 0; i < sides; i++) {
+                const start = vertices[i];
+                const end = vertices[(i + 1) % sides];
+
+                const midX = (start.x + end.x) / 2;
+                const midY = (start.y + end.y) / 2;
+
+                const dx = cx - midX;
+                const dy = cy - midY;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 1e-6) continue;
+
+                const nx = dx / dist;
+                const ny = dy / dist;
+
+                for (let s = 0; s < segmentsPerEdge; s++) {
+                    const t = s / segmentsPerEdge;
+                    const linearX = start.x * (1 - t) + end.x * t;
+                    const linearY = start.y * (1 - t) + end.y * t;
+
+                    const factor = 4 * t * (1 - t);
+                    const offsetX = nx * factor * shallowDepth;
+                    const offsetY = ny * factor * shallowDepth;
+
+                    points.push({x: linearX + offsetX, y: linearY + offsetY});
+                }
+            }
+            return points;
+        }
+
+        // 瞳孔偏移
+        function getPupilOffset(eyeCenterX, eyeCenterY, mouseX, mouseY, maxOffset) {
+            let dx = mouseX - eyeCenterX;
+            let dy = mouseY - eyeCenterY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance === 0) return {dx: 0, dy: 0};
+            if (distance > maxOffset) {
+                const ratio = maxOffset / distance;
+                dx *= ratio;
+                dy *= ratio;
+            }
+            return {dx, dy};
+        }
+
+        // 绘制主循环
+        function drawDigger() {
+            ctx.clearRect(0, 0, 600, 600);
+
+            // 背景渐变
+            const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+            gradient.addColorStop(0, '#b5d6e8');
+            gradient.addColorStop(1, '#e2f0fa');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 600);
+
+            // --- 1. 绘制浅内凹十边形 (外框黑色) ---
+            const outerRadius = 105;          // 加大外框
+            const concaveDepth = 6;            // 浅凹深度
+            const sides = 10;                   // 十边形
+
+            const polyPoints = getShallowConcavePolygon(CENTER_X, CENTER_Y, outerRadius, concaveDepth, sides, rotation);
+
+            ctx.beginPath();
+            ctx.moveTo(polyPoints[0].x, polyPoints[0].y);
+            for (let i = 1; i < polyPoints.length; i++) {
+                ctx.lineTo(polyPoints[i].x, polyPoints[i].y);
+            }
+            ctx.closePath();
+
+            ctx.fillStyle = BLACK;
+            ctx.fill();
+            ctx.strokeStyle = BLACK;
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            // --- 2. 绘制身体 (内部大圆) 使用 #494545 和 #6C6767 ---
+            const bodyRadius = outerRadius - 15;
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, bodyRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = BODY_COLOR;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, bodyRadius - 6, 0, 2 * Math.PI);
+            ctx.fillStyle = BODY_BORDER;
+            ctx.fill();
+
+            // --- 3. 眼睛 (黑色眼眶 + 白色瞳孔) ---
+            const eyeWidth = 18;
+            const eyeHeight = 27;
+            const pupilW = 7;
+            const pupilH = 13;
+            const pupilMaxOffset = 6;
+
+            const eyeY = CENTER_Y - 24;
+            const eyeLeftCenter = {x: CENTER_X - EYE_SPACING, y: eyeY};
+            const eyeRightCenter = {x: CENTER_X + EYE_SPACING, y: eyeY};
+
+            const leftOffset = getPupilOffset(eyeLeftCenter.x, eyeLeftCenter.y, mouseX, mouseY, pupilMaxOffset);
+            const rightOffset = getPupilOffset(eyeRightCenter.x, eyeRightCenter.y, mouseX, mouseY, pupilMaxOffset);
+
+            // 左眼眶黑色
+            ctx.fillStyle = BLACK;
+            ctx.fillRect(eyeLeftCenter.x - eyeWidth/2, eyeLeftCenter.y - eyeHeight/2, eyeWidth, eyeHeight);
+
+            // 右眼眶黑色 (先画眼眶，眼镜会覆盖在上面)
+            ctx.fillRect(eyeRightCenter.x - eyeWidth/2, eyeRightCenter.y - eyeHeight/2, eyeWidth, eyeHeight);
+
+            // 左眼珠白色
+            ctx.fillStyle = WHITE;
+            const leftPupilX = eyeLeftCenter.x + leftOffset.dx;
+            const leftPupilY = eyeLeftCenter.y + leftOffset.dy;
+            ctx.fillRect(leftPupilX - pupilW/2, leftPupilY - pupilH/2, pupilW, pupilH);
+
+            // 右眼珠白色
+            const rightPupilX = eyeRightCenter.x + rightOffset.dx;
+            const rightPupilY = eyeRightCenter.y + rightOffset.dy;
+            ctx.fillRect(rightPupilX - pupilW/2, rightPupilY - pupilH/2, pupilW, pupilH);
+
+            // --- 4. 在右眼上面增加半透明圆形眼镜 (带细黑框) ---
+            const glassRadius = 24;  // 眼镜半径比眼眶稍大
+
+            ctx.save();
+            // 半透明填充 (白色半透明，极淡)
+            ctx.beginPath();
+            ctx.arc(eyeRightCenter.x, eyeRightCenter.y, glassRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';  // 半透明白色
+            ctx.fill();
+
+            // 细黑色边框
+            ctx.strokeStyle = BLACK;
+            ctx.lineWidth = 2;     // 细框
+            ctx.stroke();
+            ctx.restore();
+
+            // --- 5. 眼镜右侧增加一条向下的黑色直线 ---
+            ctx.save();
+            ctx.strokeStyle = BLACK;
+            ctx.lineWidth = 2;  // 与眼镜边框一致
+            ctx.beginPath();
+            // 从眼镜最右侧的点开始向下画线
+            // 眼镜最右侧坐标: 圆心 + (半径, 0)
+            const lineStartX = eyeRightCenter.x + glassRadius;
+            const lineStartY = eyeRightCenter.y;
+            const lineEndY = lineStartY + 70;  // 向下延伸28像素
+            ctx.moveTo(lineStartX, lineStartY);
+            ctx.lineTo(lineStartX, lineEndY);
+            ctx.stroke();
+            ctx.restore();
+
+            // --- 6. 嘴巴 (纯黑色) ---
+            ctx.save();
+            ctx.strokeStyle = BLACK;
+            ctx.lineWidth = Math.max(1, 4.0 * viewScale);
+            ctx.lineCap = 'round';
+
+            const mouthY = CENTER_Y + 20;
+
+            if (!isAngry) {
+                ctx.beginPath();
+                ctx.ellipse(CENTER_X, mouthY,
+                           18 * viewScale,
+                           9 * viewScale,
+                           0, 0, Math.PI, false);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.ellipse(CENTER_X, mouthY + 8,
+                           18 * viewScale,
+                           9.5 * viewScale,
+                           0, Math.PI, 2 * Math.PI, false);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 旋转增量
+            rotation += 0.010;
+            requestAnimationFrame(drawDigger);
+        }
+
+        // --- 鼠标追踪 ---
+        function onMouseMove(event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let rawX = (event.clientX - rect.left) * scaleX;
+            let rawY = (event.clientY - rect.top) * scaleY;
+            mouseX = Math.min(canvas.width, Math.max(0, rawX));
+            mouseY = Math.min(canvas.height, Math.max(0, rawY));
+        }
+
+        function onMouseLeave() {
+            mouseX = CENTER_X;
+            mouseY = CENTER_Y;
+        }
+
+        document.getElementById('smileBtn').addEventListener('click', () => {
+            isAngry = false;
+            moodDisplay.innerText = '微笑';
+        });
+
+        document.getElementById('angryBtn').addEventListener('click', () => {
+            isAngry = true;
+            moodDisplay.innerText = '愤怒';
+        });
+
+        canvas.addEventListener('mousemove', onMouseMove);
+        canvas.addEventListener('mouseleave', onMouseLeave);
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            if (!touch) return;
+            const rawX = (touch.clientX - rect.left) * (canvas.width / rect.width);
+            const rawY = (touch.clientY - rect.top) * (canvas.height / rect.height);
+            mouseX = Math.min(canvas.width, Math.max(0, rawX));
+            mouseY = Math.min(canvas.height, Math.max(0, rawY));
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => {
+            mouseX = CENTER_X;
+            mouseY = CENTER_Y;
+        });
+
+        drawDigger();
+    })();
+</script>
+</body>
+</html>
