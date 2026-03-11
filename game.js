@@ -8858,114 +8858,113 @@ class EnemyDrawer {
         this.drawCircle(context, Math.floor(x), Math.floor(y), Math.floor(radius * 0.65), DEEP_RED);
     }
     // ==================== Leech 绘制 (强制重新计算点位，确保柔软) ====================
-// ==================== Leech 绘制 ====================
     drawLeech(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-        if (!enemyObj) return;
+            if (!enemyObj) return;
 
-        // 获取 segmentColliders
-        let points = enemyObj.segmentColliders;
+            // 获取 segmentColliders
+            let points = enemyObj.segmentColliders;
 
-        // 如果没有 segmentColliders 或长度不够，回退到默认绘制
-        if (!points || points.length < 2) {
-            this.drawCircle(context, x, y, size * viewScale * 0.5, '#353535');
-            return;
+            // 如果没有 segmentColliders 或长度不够，回退到默认绘制
+            if (!points || points.length < 2) {
+                this.drawCircle(context, x, y, size * viewScale * 0.5, '#353535');
+                return;
+            }
+
+            // 获取稀有度缩放
+            const rarity = enemyObj?.rarity || "Common";
+            const raritySizeFactors = {
+                "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+                "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
+            };
+            const rarityFactor = raritySizeFactors[rarity] || 1.0;
+
+            // 判断是否为友方
+            const isFriendly = enemyObj?.isFriendly === true;
+
+            // 颜色定义 - 友方使用金色，敌方使用深灰色
+            let bodyColor, outlineColor, highlightColor, mouthColor;
+
+            if (isFriendly) {
+                // 友方 - 金色系
+                bodyColor = '#FFD700';        // 金色
+                outlineColor = '#B8860B';      // 深金色
+                highlightColor = '#FFFACD';     // 柠檬金色
+                mouthColor = '#DAA520';         // 金杖色
+            } else {
+                // 敌方 - 深灰色
+                bodyColor = '#353535';          // 深灰色
+                outlineColor = '#000000';        // 黑色
+                highlightColor = '#ffffff40';    // 半透明白色
+                mouthColor = '#353535';          // 深灰色
+            }
+
+            // 转换为屏幕坐标
+            const cameraOffset = {
+                x: enemyObj?.gameInstance?.cameraOffset?.x || 0,
+                y: enemyObj?.gameInstance?.cameraOffset?.y || 0
+            };
+
+            const screenPoints = [];
+            for (let i = 0; i < points.length; i++) {
+                screenPoints.push({
+                    x: points[i].x - cameraOffset.x,
+                    y: points[i].y - cameraOffset.y,
+                    radius: points[i].radius
+                });
+            }
+
+            const segmentWidth = 22 * viewScale * rarityFactor;
+
+            context.save();
+
+            // ===== 1. 绘制口器 =====
+            this.drawLeechMouthScreen(context, screenPoints, segmentWidth, animationTimer, angleToPlayer, mouthColor, viewScale, rarityFactor);
+
+            // ===== 2. 绘制身体路径 =====
+            context.beginPath();
+            context.moveTo(screenPoints[0].x, screenPoints[0].y);
+
+            for (let i = 0; i < screenPoints.length - 1; i++) {
+                const p0 = screenPoints[i];
+                const p1 = screenPoints[i + 1];
+                // 贝塞尔曲线控制点
+                const cp1x = p0.x + (p1.x - p0.x) * 0.3;
+                const cp1y = p0.y + (p1.y - p0.y) * 0.3;
+                const cp2x = p1.x - (p1.x - p0.x) * 0.3;
+                const cp2y = p1.y - (p1.y - p0.y) * 0.3;
+                context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
+            }
+
+            // 描边（外轮廓）
+            context.strokeStyle = outlineColor;
+            context.lineWidth = segmentWidth + 2;
+            context.lineCap = 'round';
+            context.lineJoin = 'round';
+            context.stroke();
+
+            // 填充（主色）
+            context.strokeStyle = bodyColor;
+            context.lineWidth = segmentWidth;
+            context.stroke();
+
+            // 高光（内部亮色）
+            context.beginPath();
+            context.moveTo(screenPoints[0].x, screenPoints[0].y);
+            for (let i = 0; i < screenPoints.length - 1; i++) {
+                const p0 = screenPoints[i];
+                const p1 = screenPoints[i + 1];
+                const cp1x = p0.x + (p1.x - p0.x) * 0.3;
+                const cp1y = p0.y + (p1.y - p0.y) * 0.3;
+                const cp2x = p1.x - (p1.x - p0.x) * 0.3;
+                const cp2y = p1.y - (p1.y - p0.y) * 0.3;
+                context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
+            }
+            context.strokeStyle = highlightColor;
+            context.lineWidth = segmentWidth - 4;
+            context.stroke();
+
+            context.restore();
         }
-
-        // 获取稀有度缩放
-        const rarity = enemyObj?.rarity || "Common";
-        const raritySizeFactors = {
-            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
-            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
-        };
-        const rarityFactor = raritySizeFactors[rarity] || 1.0;
-
-        // 判断是否为友方
-        const isFriendly = enemyObj?.isFriendly === true;
-
-        // 颜色定义 - 友方使用金色，敌方使用深灰色
-        let bodyColor, outlineColor, highlightColor, mouthColor;
-
-        if (isFriendly) {
-            // 友方 - 金色系
-            bodyColor = '#FFD700';        // 金色
-            outlineColor = '#B8860B';      // 深金色
-            highlightColor = '#FFFACD';     // 柠檬金色
-            mouthColor = '#DAA520';         // 金杖色
-        } else {
-            // 敌方 - 深灰色
-            bodyColor = '#353535';          // 深灰色
-            outlineColor = '#000000';        // 黑色
-            highlightColor = '#ffffff40';    // 半透明白色
-            mouthColor = '#353535';          // 深灰色
-        }
-
-        // 转换为屏幕坐标
-        const cameraOffset = {
-            x: enemyObj?.gameInstance?.cameraOffset?.x || 0,
-            y: enemyObj?.gameInstance?.cameraOffset?.y || 0
-        };
-
-        const screenPoints = [];
-        for (let i = 0; i < points.length; i++) {
-            screenPoints.push({
-                x: points[i].x - cameraOffset.x,
-                y: points[i].y - cameraOffset.y,
-                radius: points[i].radius
-            });
-        }
-
-        const segmentWidth = 22 * viewScale * rarityFactor;
-
-        context.save();
-
-        // ===== 1. 绘制口器 =====
-        this.drawLeechMouthScreen(context, screenPoints, segmentWidth, animationTimer, angleToPlayer, mouthColor, viewScale, rarityFactor);
-
-        // ===== 2. 绘制身体路径 =====
-        context.beginPath();
-        context.moveTo(screenPoints[0].x, screenPoints[0].y);
-
-        for (let i = 0; i < screenPoints.length - 1; i++) {
-            const p0 = screenPoints[i];
-            const p1 = screenPoints[i + 1];
-            // 贝塞尔曲线控制点
-            const cp1x = p0.x + (p1.x - p0.x) * 0.3;
-            const cp1y = p0.y + (p1.y - p0.y) * 0.3;
-            const cp2x = p1.x - (p1.x - p0.x) * 0.3;
-            const cp2y = p1.y - (p1.y - p0.y) * 0.3;
-            context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
-        }
-
-        // 描边（外轮廓）
-        context.strokeStyle = outlineColor;
-        context.lineWidth = segmentWidth + 2;
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        context.stroke();
-
-        // 填充（主色）
-        context.strokeStyle = bodyColor;
-        context.lineWidth = segmentWidth;
-        context.stroke();
-
-        // 高光（内部亮色）
-        context.beginPath();
-        context.moveTo(screenPoints[0].x, screenPoints[0].y);
-        for (let i = 0; i < screenPoints.length - 1; i++) {
-            const p0 = screenPoints[i];
-            const p1 = screenPoints[i + 1];
-            const cp1x = p0.x + (p1.x - p0.x) * 0.3;
-            const cp1y = p0.y + (p1.y - p0.y) * 0.3;
-            const cp2x = p1.x - (p1.x - p0.x) * 0.3;
-            const cp2y = p1.y - (p1.y - p0.y) * 0.3;
-            context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
-        }
-        context.strokeStyle = highlightColor;
-        context.lineWidth = segmentWidth - 4;
-        context.stroke();
-
-        context.restore();
-    }
 
     // 屏幕坐标版本的口器绘制
     drawLeechMouthScreen(context, screenPoints, segmentWidth, animationTimer, angleToPlayer, mouthColor, viewScale, rarityFactor) {
@@ -14221,7 +14220,6 @@ class Enemy {
 
         return bodies;
     }
-    // ===== 更新方法 =====
     update(playerPos, dt, enemies, gameInstance = null) {
         if (this.isDead) {
             return false;
@@ -14429,17 +14427,16 @@ class Enemy {
             }
         }
 
-        // ===== 🆕 更新多节碰撞箱位置（软体物理，平滑弯曲）=====
-        if (this.hasMultiSegmentCollision && this.segmentColliders && this.segmentColliders.length > 0) {
+        // ===== 🆕 更新多节碰撞箱位置（只跟随头部，无主动扭动）=====
+        if (this.hasMultiSegmentCollision && this.segmentColliders.length > 0) {
             // 第 0 节永远是头部（物理身体）
             this.segmentColliders[0].x = this.physicsBody.position.x;
             this.segmentColliders[0].y = this.physicsBody.position.y;
 
-            const targetDist = this.segmentColliders[0].radius * 1.8;
-            const targetDistSq = targetDist * targetDist;
-            const iterations = 3; // 减少迭代次数，让插值更平滑
+            const targetDist = this.segmentColliders[0].radius * 1.8; // 节间距
+            const iterations = 4; // Leech 和 Parasite 都用相同的迭代次数
 
-            // 使用 Verlet 积分实现平滑弯曲
+            // 多轮约束求解，让身体自然跟随
             for (let iter = 0; iter < iterations; iter++) {
                 for (let i = 1; i < this.segmentColliders.length; i++) {
                     const prev = this.segmentColliders[i - 1];
@@ -14447,65 +14444,51 @@ class Enemy {
 
                     const dx = curr.x - prev.x;
                     const dy = curr.y - prev.y;
-                    const distSq = dx * dx + dy * dy; // 使用平方距离避免开方
+                    const dist = Math.sqrt(dx*dx + dy*dy);
 
-                    if (distSq > 0.01) {
-                        if (distSq > targetDistSq * 1.1) { // 距离太远，拉近
-                            const dist = Math.sqrt(distSq);
-                            const ratio = (dist - targetDist) / dist * 0.3; // 减小系数让弯曲更平滑
+                    if (dist > 0.1) {
+                        // 如果距离太远，拉近
+                        if (dist > targetDist) {
+                            const ratio = (dist - targetDist) / dist;
 
+                            // 统一处理，不加额外惯性效果
                             curr.x -= dx * ratio;
                             curr.y -= dy * ratio;
 
+                            // 让前一节也稍微移动，使身体更柔软
                             if (i < this.segmentColliders.length - 1) {
-                                prev.x += dx * ratio * 0.2;
-                                prev.y += dy * ratio * 0.2;
+                                prev.x += dx * ratio * 0.5;
+                                prev.y += dy * ratio * 0.5;
                             }
-                        } else if (distSq < targetDistSq * 0.7) { // 距离太近，推开
-                            const dist = Math.sqrt(distSq);
-                            const ratio = (targetDist - dist) / dist * 0.15;
-
+                        }
+                        // 如果距离太近，推开（防止重叠）
+                        else if (dist < targetDist * 0.7) {
+                            const ratio = (targetDist - dist) / dist * 0.3;
                             curr.x += dx * ratio;
                             curr.y += dy * ratio;
                             prev.x -= dx * ratio;
                             prev.y -= dy * ratio;
                         }
+                    } else {
+                        // 如果重合，沿速度方向推开一点
+                        const velX = this.physicsBody.velocity.x || 1;
+                        const velY = this.physicsBody.velocity.y || 1;
+                        const velMag = Math.sqrt(velX*velX + velY*velY);
+                        if (velMag > 0) {
+                            curr.x = prev.x - (velX / velMag) * targetDist;
+                            curr.y = prev.y - (velY / velMag) * targetDist;
+                        } else {
+                            // 没有速度时，随机方向
+                            const angle = Math.random() * Math.PI * 2;
+                            curr.x = prev.x - Math.cos(angle) * targetDist;
+                            curr.y = prev.y - Math.sin(angle) * targetDist;
+                        }
                     }
                 }
             }
 
-            // 添加惯性效果，让尾部有延迟感（但不主动扭动）
-            const velX = this.physicsBody.velocity.x;
-            const velY = this.physicsBody.velocity.y;
-            const speedSq = velX * velX + velY * velY;
-
-            if (speedSq > 25) { // 速度大于5
-                const moveDirX = velX / Math.sqrt(speedSq);
-                const moveDirY = velY / Math.sqrt(speedSq);
-
-                for (let i = this.segmentColliders.length - 1; i > 1; i--) {
-                    const target = this.segmentColliders[i - 1];
-                    const curr = this.segmentColliders[i];
-
-                    // 平滑插值，让尾部跟随
-                    curr.x += (target.x - curr.x) * 0.05;
-                    curr.y += (target.y - curr.y) * 0.05;
-
-                    // 添加轻微的离心效果
-                    const perpX = -moveDirY;
-                    const perpY = moveDirX;
-                    const offset = (this.segmentColliders.length - i) * 0.5;
-                    curr.x += perpX * offset * 0.1;
-                    curr.y += perpY * offset * 0.1;
-                }
-            }
-
-            // 边界检查，确保身体不超出地图
-            for (let i = 1; i < this.segmentColliders.length; i++) {
-                const seg = this.segmentColliders[i];
-                seg.x = Math.max(this.radius, Math.min(this.worldWidth - this.radius, seg.x));
-                seg.y = Math.max(this.radius, Math.min(this.worldHeight - this.radius, seg.y));
-            }
+            // ===== 完全移除所有惯性滞后效果 =====
+            // 不再根据移动速度添加任何额外的移动
         }
 
         this.physicsBody.update(dt);
@@ -15743,44 +15726,63 @@ class Petal {
         };
         return rarityMultipliers[this.rarity] || 1.0;
     }
-        // 在 Petal 类中添加 Chromosome 修复方法（可以修复自己）
+
+// 在 Petal 类中修改 repairPetalsWithChromosome 方法
     repairPetalsWithChromosome(dt) {
         if (!this.player || !this.player.petals) return;
 
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Chromosome") return;
+        // 检查玩家快捷栏中是否有 Chromosome（无论是否破碎）
+        let hasChromosome = false;
+        let totalRepairRate = 0;
+        let highestRarity = "Common";
+        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
 
-        // 获取基础修复速度 (25/s)
-        const baseRepairRate = ITEM_STATS["Chromosome"].repair_rate || 25;
+        // 遍历快捷栏所有槽位
+        for (let i = 0; i < this.player.quickSlot.slots.length; i++) {
+            const slotItem = this.player.quickSlot.slots[i];
+            if (slotItem && slotItem.type === "Chromosome") {
+                hasChromosome = true;
 
-        // 获取稀有度倍率
-        const rarityMultiplier = ITEM_STATS["Chromosome"].repair_rate_multiplier?.[currentItem.rarity] || 1.0;
+                // 获取该 Chromosome 的修复速度
+                const baseRepairRate = ITEM_STATS["Chromosome"].repair_rate || 25;
+                const rarityMultiplier = ITEM_STATS["Chromosome"].repair_rate_multiplier?.[slotItem.rarity] || 1.0;
+                const repairRate = baseRepairRate * rarityMultiplier;
 
-        // 计算每秒修复量
-        const repairPerSecond = baseRepairRate * rarityMultiplier;
+                // 累加修复速度
+                totalRepairRate += repairRate;
+
+                // 记录最高稀有度（用于视觉效果）
+                if (rarityOrder.indexOf(slotItem.rarity) > rarityOrder.indexOf(highestRarity)) {
+                    highestRarity = slotItem.rarity;
+                }
+            }
+        }
+
+        // 如果没有 Chromosome，直接返回
+        if (!hasChromosome || totalRepairRate <= 0) return;
 
         // 计算这一帧的修复量
-        const frameRepair = repairPerSecond * dt;
+        const frameRepair = totalRepairRate * dt;
 
         let totalRepaired = 0;
 
         // 遍历所有花瓣进行修复（包括自己）
         for (const petal of this.player.petals) {
-            // 跳过已破碎的花瓣
+            // 跳过已破碎的花瓣（可选：也可以修复破碎的？）
             if (petal.isBroken) continue;
 
-            // 修复耐久度和血量（同时修复）
-            if (petal.durability < petal.maxDurability || petal.health < petal.maxHealth) {
+            // 修复耐久度
+            if (petal.durability < petal.maxDurability) {
                 const oldDurability = petal.durability;
-                const oldHealth = petal.health;
-
-                // 同时修复耐久和血量
                 petal.durability = Math.min(petal.maxDurability, petal.durability + frameRepair);
-                petal.health = Math.min(petal.maxHealth, petal.health + frameRepair);
+                totalRepaired += petal.durability - oldDurability;
 
-                totalRepaired += (petal.durability - oldDurability);
+                // 如果耐久度恢复，清除破碎标记
+                if (petal.durability > 0 && petal.isBroken) {
+                    petal.isBroken = false;
+                }
 
-                // 同步到物品
+                // 同步回物品
                 const item = petal.getCurrentItem();
                 if (item) {
                     item.durability = petal.durability;
@@ -15789,12 +15791,13 @@ class Petal {
                     }
                 }
             }
+
+            // 修复生命值（如果花瓣有生命值）
+            if (petal.health < petal.maxHealth) {
+                petal.health = Math.min(petal.maxHealth, petal.health + frameRepair * 0.5);
+            }
         }
 
-        // 调试输出（1%概率）
-        if (Math.random() < 0.01 && totalRepaired > 0) {
-            console.log(`🔧 Chromosome 修复: +${totalRepaired.toFixed(1)} 耐久/血量`);
-        }
     }
     // 在 Petal 类中的完整 update 方法
     update(dt, spreadMode = false, playerWorldPos = null) {
@@ -16018,9 +16021,7 @@ class Petal {
         }
 
         // ===== Chromosome 修复逻辑 =====
-        if (currentItem && currentItem.type === "Chromosome" && !this.isBroken && !this.isReloading) {
-            this.repairPetalsWithChromosome(dt);
-        }
+        this.repairPetalsWithChromosome(dt);
 
         // === 检查是否有 DNA 物品 ===
         const hasDNA = this.player && this.player.petals && this.player.petals.some(petal => {
