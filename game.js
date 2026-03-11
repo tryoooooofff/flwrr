@@ -3219,7 +3219,6 @@ class PhysicsBody {
     }
 }
 
-// ==================== 碰撞系统 ====================
 class CollisionSystem {
     constructor(worldWidth = WORLD_WIDTH, worldHeight = WORLD_HEIGHT, cellSize = 150) {
         this.worldWidth = worldWidth;
@@ -3242,10 +3241,12 @@ class CollisionSystem {
     }
 
     addObject(obj, objId) {
-        if (obj.constructor.name === 'Petal') {
+        // 如果是花瓣，跳过（花瓣碰撞单独处理）
+        if (obj.constructor && obj.constructor.name === 'Petal') {
             return;
         }
 
+        // 获取物体的物理身体
         const body = obj.physicsBody ? obj.physicsBody : obj;
 
         // 添加到网格
@@ -3256,7 +3257,7 @@ class CollisionSystem {
         if (!this.grid.has(key)) {
             this.grid.set(key, []);
         }
-        this.grid.get(key).push({obj, objId});
+        this.grid.get(key).push({ obj, objId });
 
         // 添加到四叉树
         const rect = [
@@ -3287,10 +3288,10 @@ class CollisionSystem {
     }
 
     _shouldSkipCollision(obj1, obj2) {
-        const isPlayer1 = obj1.constructor.name === 'Player';
-        const isPlayer2 = obj2.constructor.name === 'Player';
-        const isPetal1 = obj1.constructor.name === 'Petal';
-        const isPetal2 = obj2.constructor.name === 'Petal';
+        const isPlayer1 = obj1.constructor && obj1.constructor.name === 'Player';
+        const isPlayer2 = obj2.constructor && obj2.constructor.name === 'Player';
+        const isPetal1 = obj1.constructor && obj1.constructor.name === 'Petal';
+        const isPetal2 = obj2.constructor && obj2.constructor.name === 'Petal';
         const isFriendly1 = obj1.isFriendly === true;
         const isFriendly2 = obj2.isFriendly === true;
 
@@ -3331,7 +3332,7 @@ class CollisionSystem {
         // 使用四叉树快速找到可能碰撞的对象
         for (const [key, objects] of this.grid.entries()) {
             for (let i = 0; i < objects.length; i++) {
-                const {obj: obj1} = objects[i];
+                const { obj: obj1 } = objects[i];
                 const body1 = obj1.physicsBody ? obj1.physicsBody : obj1;
 
                 // 查询附近的物体
@@ -3387,7 +3388,7 @@ class CollisionSystem {
         for (const [key, objects] of this.grid.entries()) {
             // 检查当前单元格内的碰撞
             for (let i = 0; i < objects.length; i++) {
-                const {obj: obj1} = objects[i];
+                const { obj: obj1 } = objects[i];
                 const body1 = obj1.physicsBody ? obj1.physicsBody : obj1;
 
                 // 最近一次碰撞后冷却
@@ -3396,14 +3397,14 @@ class CollisionSystem {
                 }
 
                 for (let j = i + 1; j < objects.length; j++) {
-                    const {obj: obj2} = objects[j];
+                    const { obj: obj2 } = objects[j];
                     const body2 = obj2.physicsBody ? obj2.physicsBody : obj2;
 
                     if (this._shouldSkipCollision(obj1, obj2)) {
                         continue;
                     }
 
-                    const distanceSq = body1.position.distanceSquaredTo(body2.position);
+                    const distanceSq = this._getDistanceSquared(body1.position, body2.position);
                     const minDistance = body1.radius + body2.radius;
 
                     if (distanceSq < minDistance * minDistance && distanceSq > 0) {
@@ -3423,16 +3424,22 @@ class CollisionSystem {
         }
     }
 
-    // 在 CollisionSystem 类的 _checkPetalEnemyCollisions 方法中
+    _getDistanceSquared(pos1, pos2) {
+        const dx = pos1.x - pos2.x;
+        const dy = pos1.y - pos2.y;
+        return dx * dx + dy * dy;
+    }
 
     _checkPetalEnemyCollisions(petals) {
         for (const petal of petals) {
-            if (!petal.canTakeDamage()) continue;
+            if (!petal.canTakeDamage()) {
+                continue;
+            }
 
             const petalPos = petal.getPosition();
             const petalRadius = petal.getRadius();
 
-            // 使用四叉树查询附近的敌人 (依然基于头部位置查询，保证性能)
+            // 使用四叉树查询附近的敌人
             const rect = [
                 petalPos.x - petalRadius - 100,
                 petalPos.y - petalRadius - 100,
@@ -3442,43 +3449,26 @@ class CollisionSystem {
             const nearbyObjects = this.quadtree.query(rect);
 
             for (const obj of nearbyObjects) {
-                if (!obj.type || !ENEMY_DROP_TABLE[obj.type]) continue;
-                if (obj.health <= 0 || (obj.isSpawning && obj.isSpawning)) continue;
+                // 检查是否是敌人（有type且是敌人类型）
+                if (!obj.type) continue;
 
-                const enemyPos = obj.physicsBody.position;
-                const enemyRadius = obj.physicsBody.radius;
+                // 跳过友方
+                if (obj.isFriendly) continue;
 
-                let collisionDetected = false;
-
-                // 🆕 检查是否为多节生物
-                if (obj.hasMultiSegmentCollision && obj.segmentColliders) {
-                    // 遍历每一节进行碰撞检测
-                    for (const segment of obj.segmentColliders) {
-                        if (!segment.active) continue;
-
-                        const dx = petalPos.x - segment.x;
-                        const dy = petalPos.y - segment.y;
-                        const distanceSq = dx * dx + dy * dy;
-                        const minDistance = petalRadius + segment.radius;
-
-                        if (distanceSq < minDistance * minDistance) {
-                            collisionDetected = true;
-                            break; // 只要碰到任何一节就算碰撞
-                        }
-                    }
-                } else {
-                    // 普通单点碰撞检测
-                    const dx = petalPos.x - enemyPos.x;
-                    const dy = petalPos.y - enemyPos.y;
-                    const distanceSq = dx * dx + dy * dy;
-                    const minDistance = petalRadius + enemyRadius;
-
-                    if (distanceSq < minDistance * minDistance) {
-                        collisionDetected = true;
-                    }
+                // 跳过已死亡的敌人
+                if (obj.health <= 0 || (obj.isSpawning && obj.isSpawning)) {
+                    continue;
                 }
 
-                if (collisionDetected) {
+                const enemyPos = obj.physicsBody ? obj.physicsBody.position : obj.position;
+                const enemyRadius = obj.physicsBody ? obj.physicsBody.radius : obj.radius;
+
+                const dx = petalPos.x - enemyPos.x;
+                const dy = petalPos.y - enemyPos.y;
+                const distanceSq = dx * dx + dy * dy;
+                const minDistance = petalRadius + enemyRadius;
+
+                if (distanceSq < minDistance * minDistance) {
                     this.petalCollisions.push([petal, obj]);
                 }
             }
@@ -3499,14 +3489,13 @@ class CollisionSystem {
         }
     }
 
-    // 在 CollisionSystem 类中修改 resolveCollisions 方法
     resolveCollisions() {
         for (const [obj1, obj2, body1, body2] of this.collisionPairs) {
             if (this._shouldSkipCollision(obj1, obj2)) {
                 continue;
             }
 
-            const distance = body1.position.distanceTo(body2.position);
+            const distance = this._getDistance(body1.position, body2.position);
             if (distance === 0) {
                 continue;
             }
@@ -3516,31 +3505,32 @@ class CollisionSystem {
                 continue;
             }
 
-            const direction = new Vector2(
-                body1.position.x - body2.position.x,
-                body1.position.y - body2.position.y
-            ).normalize();
+            const direction = {
+                x: (body1.position.x - body2.position.x) / distance,
+                y: (body1.position.y - body2.position.y) / distance
+            };
             const totalMass = body1.mass + body2.mass;
 
-            // ========== 关键修改：减少推送强度 ==========
-            // 原来的是 0.7，现在降低到 0.4 减少过度挤压
+            // 减少推送强度
             const pushStrength = overlap * 0.4;
 
-            const isPlayer1 = obj1.constructor.name === 'Player';
-            const isPlayer2 = obj2.constructor.name === 'Player';
-            const isEnemy1 = obj1.type && ENEMY_DROP_TABLE[obj1.type];
-            const isEnemy2 = obj2.type && ENEMY_DROP_TABLE[obj2.type];
+            const isPlayer1 = obj1.constructor && obj1.constructor.name === 'Player';
+            const isPlayer2 = obj2.constructor && obj2.constructor.name === 'Player';
+            const isEnemy1 = obj1.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj1.type];
+            const isEnemy2 = obj2.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj2.type];
 
             // 计算推送向量
             let push1X = 0, push1Y = 0, push2X = 0, push2Y = 0;
 
             if (isPlayer1 && isEnemy2) {
                 if (!obj1.isBouncing) {
-                    const bounceDirection = new Vector2(
-                        body1.position.x - body2.position.x,
-                        body1.position.y - body2.position.y
-                    );
-                    obj1.applyBounce(bounceDirection, 15);
+                    const bounceDirection = {
+                        x: body1.position.x - body2.position.x,
+                        y: body1.position.y - body2.position.y
+                    };
+                    if (obj1.applyBounce) {
+                        obj1.applyBounce(bounceDirection, 15);
+                    }
                 }
 
                 push1X = direction.x * (pushStrength * (body2.mass / totalMass));
@@ -3550,11 +3540,13 @@ class CollisionSystem {
 
             } else if (isPlayer2 && isEnemy1) {
                 if (!obj2.isBouncing) {
-                    const bounceDirection = new Vector2(
-                        body2.position.x - body1.position.x,
-                        body2.position.y - body1.position.y
-                    );
-                    obj2.applyBounce(bounceDirection, 15);
+                    const bounceDirection = {
+                        x: body2.position.x - body1.position.x,
+                        y: body2.position.y - body1.position.y
+                    };
+                    if (obj2.applyBounce) {
+                        obj2.applyBounce(bounceDirection, 15);
+                    }
                 }
 
                 push1X = direction.x * (pushStrength * (body2.mass / totalMass));
@@ -3568,8 +3560,7 @@ class CollisionSystem {
                 push2Y = -direction.y * pushStrength * (body1.mass / totalMass);
             }
 
-            // ========== 新增：分段移动 + 墙壁检查 ==========
-            // 将移动分成小步，每步都检查墙壁
+            // 分段移动 + 墙壁检查
             const steps = 3;
             for (let step = 0; step < steps; step++) {
                 // 临时移动 obj1
@@ -3577,14 +3568,20 @@ class CollisionSystem {
                 const tempY1 = body1.position.y + push1Y / steps;
 
                 // 检查 obj1 的新位置是否在墙内
-                if (obj1.gameInstance && !obj1.gameInstance.isInMazeWall(tempX1, tempY1)) {
+                if (obj1.gameInstance && obj1.gameInstance.isInMazeWall) {
+                    if (!obj1.gameInstance.isInMazeWall(tempX1, tempY1)) {
+                        body1.position.x = tempX1;
+                        body1.position.y = tempY1;
+                    } else {
+                        if (body1.velocity) {
+                            body1.velocity.x *= -0.3;
+                            body1.velocity.y *= -0.3;
+                        }
+                        break;
+                    }
+                } else {
                     body1.position.x = tempX1;
                     body1.position.y = tempY1;
-                } else {
-                    // 撞墙了，停止移动并反向速度
-                    body1.velocity.x *= -0.3;
-                    body1.velocity.y *= -0.3;
-                    break;
                 }
 
                 // 临时移动 obj2
@@ -3592,14 +3589,20 @@ class CollisionSystem {
                 const tempY2 = body2.position.y + push2Y / steps;
 
                 // 检查 obj2 的新位置是否在墙内
-                if (obj2.gameInstance && !obj2.gameInstance.isInMazeWall(tempX2, tempY2)) {
+                if (obj2.gameInstance && obj2.gameInstance.isInMazeWall) {
+                    if (!obj2.gameInstance.isInMazeWall(tempX2, tempY2)) {
+                        body2.position.x = tempX2;
+                        body2.position.y = tempY2;
+                    } else {
+                        if (body2.velocity) {
+                            body2.velocity.x *= -0.3;
+                            body2.velocity.y *= -0.3;
+                        }
+                        break;
+                    }
+                } else {
                     body2.position.x = tempX2;
                     body2.position.y = tempY2;
-                } else {
-                    // 撞墙了，停止移动并反向速度
-                    body2.velocity.x *= -0.3;
-                    body2.velocity.y *= -0.3;
-                    break;
                 }
             }
 
@@ -3607,6 +3610,12 @@ class CollisionSystem {
             body2.lastCollisionTime = this.currentTime;
             this._checkCollisionTypes(obj1, obj2);
         }
+    }
+
+    _getDistance(pos1, pos2) {
+        const dx = pos1.x - pos2.x;
+        const dy = pos1.y - pos2.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     _handlePetalCollisions() {
@@ -3618,8 +3627,8 @@ class CollisionSystem {
     _checkCollisionTypes(obj1, obj2) {
         const isFriendly1 = obj1.isFriendly === true;
         const isFriendly2 = obj2.isFriendly === true;
-        const isEnemy1 = obj1.type && ENEMY_DROP_TABLE[obj1.type];
-        const isEnemy2 = obj2.type && ENEMY_DROP_TABLE[obj2.type];
+        const isEnemy1 = obj1.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj1.type];
+        const isEnemy2 = obj2.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj2.type];
 
         if (isFriendly1 && isEnemy2) {
             this._handleFriendlyEnemyCollision(obj1, obj2);
@@ -3633,8 +3642,7 @@ class CollisionSystem {
             (enemy.isSpawning && enemy.isSpawning)) {
             return;
         }
-        // 在这里添加友方单位和敌人碰撞的逻辑
-        // 例如：友方单位对敌人造成伤害
+        // 友方单位和敌人碰撞的逻辑
     }
 }
 
@@ -8850,64 +8858,60 @@ class EnemyDrawer {
         this.drawCircle(context, Math.floor(x), Math.floor(y), Math.floor(radius * 0.65), DEEP_RED);
     }
     // ==================== Leech 绘制 (强制重新计算点位，确保柔软) ====================
-// ==================== Leech 绘制 (强制重新计算点位，确保柔软) ====================
+// ==================== Leech 绘制 ====================
     drawLeech(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-        // 1. 获取稀有度缩放
+        if (!enemyObj) return;
+
+        // 获取 segmentColliders
+        let points = enemyObj.segmentColliders;
+
+        // 如果没有 segmentColliders 或长度不够，回退到默认绘制
+        if (!points || points.length < 2) {
+            this.drawCircle(context, x, y, size * viewScale * 0.5, '#353535');
+            return;
+        }
+
+        // 获取稀有度缩放
         const rarity = enemyObj?.rarity || "Common";
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
             "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
         };
         const rarityFactor = raritySizeFactors[rarity] || 1.0;
-        const scaledSize = size * viewScale * rarityFactor;
-        if (scaledSize <= 0) return;
 
+        // 判断是否为友方
         const isFriendly = enemyObj?.isFriendly === true;
 
-        // 颜色定义
-        const bodyColor = '#353535';
-        const outlineColor = '#000000';
-        const highlightColor = '#ffffff40';
-        const mouthColor = '#353535';
+        // 颜色定义 - 友方使用金色，敌方使用深灰色
+        let bodyColor, outlineColor, highlightColor, mouthColor;
 
-        // 2. 获取点位（世界坐标）
-        let worldPoints = [];
-        if (enemyObj && enemyObj.segmentColliders && enemyObj.segmentColliders.length > 1) {
-            worldPoints = enemyObj.segmentColliders;
+        if (isFriendly) {
+            // 友方 - 金色系
+            bodyColor = '#FFD700';        // 金色
+            outlineColor = '#B8860B';      // 深金色
+            highlightColor = '#FFFACD';     // 柠檬金色
+            mouthColor = '#DAA520';         // 金杖色
         } else {
-            // Fallback
-            const segmentCount = 10;
-            const segmentLength = 20 * viewScale * rarityFactor;
-            const dx = Math.cos(angleToPlayer) * segmentLength;
-            const dy = Math.sin(angleToPlayer) * segmentLength;
-            for (let i = 0; i <= segmentCount; i++) {
-                worldPoints.push({ x: x - dx * i * 0.7, y: y - dy * i * 0.7, radius: 10 });
-            }
+            // 敌方 - 深灰色
+            bodyColor = '#353535';          // 深灰色
+            outlineColor = '#000000';        // 黑色
+            highlightColor = '#ffffff40';    // 半透明白色
+            mouthColor = '#353535';          // 深灰色
         }
 
-        // 3. 转换为屏幕坐标（相对于相机）
+        // 转换为屏幕坐标
         const cameraOffset = {
             x: enemyObj?.gameInstance?.cameraOffset?.x || 0,
             y: enemyObj?.gameInstance?.cameraOffset?.y || 0
         };
 
         const screenPoints = [];
-        for (let i = 0; i < worldPoints.length; i++) {
+        for (let i = 0; i < points.length; i++) {
             screenPoints.push({
-                x: worldPoints[i].x - cameraOffset.x,
-                y: worldPoints[i].y - cameraOffset.y,
-                radius: worldPoints[i].radius
+                x: points[i].x - cameraOffset.x,
+                y: points[i].y - cameraOffset.y,
+                radius: points[i].radius
             });
-        }
-
-        // 4. 【双重保险】如果点位还挤在一起，运行一次快速松弛
-        if (screenPoints.length > 1) {
-            const head = screenPoints[0];
-            const second = screenPoints[1];
-            const dist = Math.hypot(second.x - head.x, second.y - head.y);
-            if (dist < 5) {
-                this.applyLeechPhysics(screenPoints, 20 * viewScale * rarityFactor, 1);
-            }
         }
 
         const segmentWidth = 22 * viewScale * rarityFactor;
@@ -8932,19 +8936,19 @@ class EnemyDrawer {
             context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
         }
 
-        // 描边
+        // 描边（外轮廓）
         context.strokeStyle = outlineColor;
         context.lineWidth = segmentWidth + 2;
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.stroke();
 
-        // 填充
+        // 填充（主色）
         context.strokeStyle = bodyColor;
         context.lineWidth = segmentWidth;
         context.stroke();
 
-        // 高光
+        // 高光（内部亮色）
         context.beginPath();
         context.moveTo(screenPoints[0].x, screenPoints[0].y);
         for (let i = 0; i < screenPoints.length - 1; i++) {
@@ -9004,7 +9008,6 @@ class EnemyDrawer {
         }
         context.restore();
     }
-
     // 辅助：应用物理约束 (增加 iterations 参数以便强制调用时更平滑)
     applyLeechPhysics(points, segmentLength, iterations = 3) {
         if (!points || points.length < 2) return;
@@ -9074,7 +9077,7 @@ class EnemyDrawer {
         context.restore();
     }
 
-// ==================== Parasite 绘制 (强制重新计算点位) ====================
+    // ==================== Parasite 绘制 (强制重新计算点位) ====================
     drawParasite(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const rarity = enemyObj?.rarity || "Common";
         const raritySizeFactors = {
@@ -9087,10 +9090,10 @@ class EnemyDrawer {
 
         const isFriendly = enemyObj?.isFriendly === true;
 
-        // 颜色定义 (半透明)
-        const bodyColor = isFriendly ? 'rgba(255, 215, 0, 0.6)' : 'rgba(255, 255, 255, 0.5)';
-        const outlineColor = isFriendly ? 'rgba(255, 215, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)';
-        const highlightColor = isFriendly ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.3)';
+        // 颜色定义 (更淡的白色)
+        const bodyColor = isFriendly ? 'rgba(255, 215, 0, 0.6)' : 'rgba(246, 246, 246, 0.3)'; // 从0.5降到0.25
+        const outlineColor = isFriendly ? 'rgba(255, 215, 0, 0.8)' : 'rgba(255, 255, 255, 0.5)'; // 从0.9降到0.5
+        const highlightColor = isFriendly ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.2)'; // 从0.3降到0.15
         const mouthColor = outlineColor;
 
         // 获取点位（世界坐标）
@@ -10342,6 +10345,9 @@ class ShopSystem {
             "CrabHole egg": 40,
             "WhiteBloodCell egg": 12,
             "RedBloodCell egg": 18,
+            "Leech Egg": 12,
+            "Parasite Egg": 12,
+            "Chromosome":18,
             "StemCell egg": 45,
             "queen ant egg": 20,
             "WorkerFireAnt egg": 12,
@@ -13528,7 +13534,7 @@ function isPointInRect(point, rect) {
 }
 
 class Enemy {
-    // Enemy 类的完整构造函数
+    // 修复后的 Enemy 类构造函数
     constructor(enemyType, x, y, regionLevel = 1, rarity = null) {
         // 属性定义
         this.type = enemyType;
@@ -13630,11 +13636,12 @@ class Enemy {
         this.wanderDirection.rotate(initialAngle * Math.PI / 180);
 
         this.lastTurnTime = Date.now();
-        // 统一转向间隔，不分类型
-        this.turnInterval = 4000 + Math.random() * 4000; // 4-8秒
+        this.turnInterval = 4000 + Math.random() * 4000;
 
+        // 获取基础属性
         const [baseHealth, baseRadius, baseSpeed, baseWeight, baseAttackDamage] = this._getBaseStats(enemyType);
 
+        // 血量倍率
         const ENEMY_HEALTH_MULTIPLIERS = {
             "Common": 1,
             "Unusual": 3.75,
@@ -13647,10 +13654,10 @@ class Enemy {
             "Omega": 105510,
             "Eternal": 784830
         };
-
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
         const levelHealthMultiplier = 1 + (this.level - 1) * 0.1;
 
+        // 攻击力倍率
         const PROGRESSIVE_RARITY_MULTIPLIERS = {
             "Common": 1.0,
             "Unusual": 3.0,
@@ -13663,7 +13670,6 @@ class Enemy {
             "Omega": 6561.0,
             "Eternal": 19683.0
         };
-
         const rarityAttackMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0;
 
         this.maxHealth = baseHealth * healthMultiplier * levelHealthMultiplier;
@@ -13671,6 +13677,7 @@ class Enemy {
         this.knockbackDecay = 0.85;
         this.health = this.maxHealth;
 
+        // 稀有度尺寸因子
         const raritySizeFactors = {
             "Common": 1.0,
             "Unusual": 1.1,
@@ -13696,19 +13703,8 @@ class Enemy {
             "Omega": 11.8,
             "Eternal": 14.5
         };
-            // 先创建 physicsBody
-        this.physicsBody = new PhysicsBody(new Vector2(x, y), this.radius, this.weight, "circle");
-                // ===== 🆕 多节碰撞箱初始化 - 放在这里，确保在所有属性设置完成后 =====
-        this.segmentColliders = [];
-        this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede");
 
-
-
-        if (this.hasMultiSegmentCollision) {
-            this.initSegmentColliders();
-            console.log(`[Enemy] ${enemyType} segmentColliders initialized:`, this.segmentColliders.length);
-        }
-
+        // 计算 sizeFactor
         let sizeFactor;
         if (this.type === "Sandstorm" || this.type === "Rock") {
             if (this.isFriendly) {
@@ -13722,15 +13718,18 @@ class Enemy {
             sizeFactor = raritySizeFactors[this.rarity] || 1.0;
         }
 
+        // 计算碰撞半径
         let collisionRadius = this._calculateCollisionRadius(enemyType, baseRadius, sizeFactor);
+        this.radius = Math.max(3, collisionRadius);
 
-        this.radius = collisionRadius;
+        // 设置其他属性
         this.speed = baseSpeed;
         this.weight = baseWeight * sizeFactor;
         this.facingAngle = 0.0;
         this.knockbackTimer = 0.0;
         this.knockbackDuration = 0.3;
 
+        // 攻击伤害计算
         if (enemyType === "Bush") {
             this.attackDamage = Math.min(baseAttackDamage * rarityAttackMultiplier, 50);
         } else if (enemyType === "Cactus") {
@@ -13740,6 +13739,9 @@ class Enemy {
         } else {
             this.attackDamage = baseAttackDamage * rarityAttackMultiplier;
         }
+
+        // 创建 physicsBody
+        this.physicsBody = new PhysicsBody(new Vector2(x, y), this.radius, this.weight, "circle");
 
         // 护甲计算
         this.armor = this._calculateArmor(enemyType);
@@ -13766,13 +13768,18 @@ class Enemy {
             }
         }
 
-        // ===== 🆕 多节碰撞箱初始化 =====
+        // ===== 🆕 多节碰撞箱初始化 - 使用新的方法 =====
         this.segmentColliders = [];
         this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede");
 
+        console.log(`[Enemy] ${enemyType} - radius: ${this.radius}, hasMultiSegmentCollision: ${this.hasMultiSegmentCollision}`);
+
         if (this.hasMultiSegmentCollision) {
-            this.initSegmentColliders();
+            this.initMultiSegmentCollision(); // 调用新方法
+            console.log(`[Enemy] ${enemyType} segmentColliders initialized:`, this.segmentColliders.length);
         }
+
+        this.clampPosition();
     }
 
     // ===== 辅助方法：计算碰撞半径 =====
@@ -13890,56 +13897,93 @@ class Enemy {
         return baseArmor * (ARMOR_CLASS_MULTIPLIERS[armorClass] || 1.0);
     }
 
-    // 在 Enemy 类的构造函数中，修改 initSegmentColliders 方法
-    initSegmentColliders() {
+    // ===== 🆕 新的多节碰撞箱初始化方法 =====
+    initMultiSegmentCollision() {
+        // 先检查是否为多节生物
+        this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede");
+
+        if (!this.hasMultiSegmentCollision) {
+            this.segmentColliders = [];
+            return;
+        }
+
+        console.log(`[Enemy] Initializing multi-segment collision for ${this.type}`);
+        console.log(`[Enemy] Current radius: ${this.radius}`);
+
+        // 确保 radius 有效
+        if (!this.radius || this.radius <= 0) {
+            console.warn(`[Enemy] Invalid radius for ${this.type}, using default`);
+            this.radius = 20; // 默认值
+        }
+
         this.segmentColliders = [];
 
-        let segmentCount, segmentLength;
+        let segmentCount, segmentLength, segmentRadius;
 
+        // 根据类型设置参数 - 让 Parasite 比 Leech 短
         if (this.type === "Leech") {
-            segmentCount = 12;
-            segmentLength = this.radius * 1.2;
+            segmentCount = 10;
+            segmentLength = this.radius * 1.4;
+            segmentRadius = this.radius * 0.9;
         } else if (this.type === "Parasite") {
-            segmentCount = 12;
-            segmentLength = this.radius * 1.1;
+            segmentCount = 6; // 减少节数
+            segmentLength = this.radius * 1.1; // 缩短每节长度
+            segmentRadius = this.radius * 0.8;
         } else if (this.type === "Centipede") {
             segmentCount = this.segmentCount || 8;
-            segmentLength = this.radius * 0.8;
+            segmentLength = this.radius * 1.0;
+            segmentRadius = this.radius * 0.7;
         } else {
             return;
         }
 
-        // 获取头部方向（初始朝向）
-        const headX = this.physicsBody.position.x;
-        const headY = this.physicsBody.position.y;
+        console.log(`[Enemy] Creating ${segmentCount} segments, length: ${segmentLength}, radius: ${segmentRadius}`);
 
-        // 生成一个随机的初始方向，让身体有一定的弯曲
-        const baseAngle = this.facingAngle || Math.random() * Math.PI * 2;
+        // 获取头部位置
+        const headX = this.physicsBody?.position?.x || 0;
+        const headY = this.physicsBody?.position?.y || 0;
 
-        // 为每个节添加一些随机偏移，让初始身体不是完全直线
-        for (let i = 0; i < segmentCount; i++) {
-            // 基础位置：沿着身体方向向后延伸
-            const t = i / segmentCount; // 0 到 1
-            const angle = baseAngle + Math.sin(i * 0.5) * 0.3; // 轻微弯曲
-
-            // 计算位置
-            let x = headX - Math.cos(angle) * segmentLength * i * 0.9;
-            let y = headY - Math.sin(angle) * segmentLength * i * 0.9;
-
-            // 添加一些随机变化，让身体看起来更自然
-            if (i > 0) {
-                x += (Math.random() - 0.5) * segmentLength * 0.3;
-                y += (Math.random() - 0.5) * segmentLength * 0.3;
+        // 获取移动方向（如果没有则用随机方向）
+        let dirX = 0, dirY = -1; // 默认向上
+        if (this.physicsBody?.velocity) {
+            const vel = this.physicsBody.velocity;
+            const mag = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+            if (mag > 0) {
+                dirX = vel.x / mag;
+                dirY = vel.y / mag;
             }
+        }
+
+        // 如果没有速度，用 facingAngle 或随机方向
+        if (dirX === 0 && dirY === 0) {
+            const angle = this.facingAngle || Math.random() * Math.PI * 2;
+            dirX = Math.cos(angle);
+            dirY = Math.sin(angle);
+        }
+
+        // 创建所有身体节
+        for (let i = 0; i < segmentCount; i++) {
+            // 沿着移动方向的反方向延伸
+            const offset = i * segmentLength;
+            const x = headX - dirX * offset;
+            const y = headY - dirY * offset;
+
+            // 添加一些随机性，让身体更自然
+            const randomOffset = i > 0 ? (Math.random() - 0.5) * segmentLength * 0.3 : 0;
+            const perpX = -dirY; // 垂直向量
+            const perpY = dirX;
 
             this.segmentColliders.push({
-                x: x,
-                y: y,
-                radius: this.radius * (1.0 - i * 0.02) // 尾部稍微变细
+                x: x + perpX * randomOffset,
+                y: y + perpY * randomOffset,
+                radius: segmentRadius * (1 - i * 0.02) // 尾部稍微变细
             });
         }
 
+        console.log(`[Enemy] Created ${this.segmentColliders.length} segments`);
+
         // 运行几次物理约束，让身体自然展开
+        const targetDist = segmentLength * 0.8;
         for (let iter = 0; iter < 5; iter++) {
             for (let i = 1; i < this.segmentColliders.length; i++) {
                 const prev = this.segmentColliders[i - 1];
@@ -13948,7 +13992,6 @@ class Enemy {
                 const dx = curr.x - prev.x;
                 const dy = curr.y - prev.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                const targetDist = segmentLength * 0.9;
 
                 if (dist > 0.1) {
                     const diff = dist - targetDist;
@@ -13956,12 +13999,18 @@ class Enemy {
 
                     curr.x -= dx * ratio;
                     curr.y -= dy * ratio;
-                    prev.x += dx * ratio * 0.3;
-                    prev.y += dy * ratio * 0.3;
+
+                    if (i > 1) {
+                        prev.x += dx * ratio * 0.3;
+                        prev.y += dy * ratio * 0.3;
+                    }
                 }
             }
         }
+
+        console.log(`[Enemy] Final segmentColliders count:`, this.segmentColliders.length);
     }
+
 
     // 在 Enemy 类中修改 updateSegmentColliders 方法
     updateSegmentColliders(dt) {
@@ -14143,6 +14192,36 @@ class Enemy {
 
         // ===== 更新方法 =====
 // ===== 更新方法 =====
+    // 在 Enemy 类中添加这个方法
+    getAllCollisionBodies() {
+        const bodies = [{
+            position: this.physicsBody.position,
+            radius: this.physicsBody.radius,
+            velocity: this.physicsBody.velocity,
+            mass: this.weight,
+            type: "main",
+            enemy: this
+        }];
+
+        // 添加多节碰撞箱
+        if (this.hasMultiSegmentCollision && this.segmentColliders && this.segmentColliders.length > 0) {
+            for (let i = 1; i < this.segmentColliders.length; i++) { // 从1开始，跳过头部（已经添加）
+                const segment = this.segmentColliders[i];
+                bodies.push({
+                    position: { x: segment.x, y: segment.y },
+                    radius: segment.radius,
+                    velocity: { x: 0, y: 0 }, // 身体节没有独立速度
+                    mass: this.weight * 0.3,
+                    type: "segment",
+                    segmentIndex: i,
+                    enemy: this
+                });
+            }
+        }
+
+        return bodies;
+    }
+    // ===== 更新方法 =====
     update(playerPos, dt, enemies, gameInstance = null) {
         if (this.isDead) {
             return false;
@@ -14350,16 +14429,17 @@ class Enemy {
             }
         }
 
-        // ===== 🆕 更新多节碰撞箱位置（只跟随头部，无主动扭动）=====
-        if (this.hasMultiSegmentCollision && this.segmentColliders.length > 0) {
+        // ===== 🆕 更新多节碰撞箱位置（软体物理，平滑弯曲）=====
+        if (this.hasMultiSegmentCollision && this.segmentColliders && this.segmentColliders.length > 0) {
             // 第 0 节永远是头部（物理身体）
             this.segmentColliders[0].x = this.physicsBody.position.x;
             this.segmentColliders[0].y = this.physicsBody.position.y;
 
-            const targetDist = this.segmentColliders[0].radius * 1.8; // 节间距
-            const iterations = 4; // Leech 和 Parasite 都用相同的迭代次数
+            const targetDist = this.segmentColliders[0].radius * 1.8;
+            const targetDistSq = targetDist * targetDist;
+            const iterations = 3; // 减少迭代次数，让插值更平滑
 
-            // 多轮约束求解，让身体自然跟随
+            // 使用 Verlet 积分实现平滑弯曲
             for (let iter = 0; iter < iterations; iter++) {
                 for (let i = 1; i < this.segmentColliders.length; i++) {
                     const prev = this.segmentColliders[i - 1];
@@ -14367,51 +14447,65 @@ class Enemy {
 
                     const dx = curr.x - prev.x;
                     const dy = curr.y - prev.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    const distSq = dx * dx + dy * dy; // 使用平方距离避免开方
 
-                    if (dist > 0.1) {
-                        // 如果距离太远，拉近
-                        if (dist > targetDist) {
-                            const ratio = (dist - targetDist) / dist;
+                    if (distSq > 0.01) {
+                        if (distSq > targetDistSq * 1.1) { // 距离太远，拉近
+                            const dist = Math.sqrt(distSq);
+                            const ratio = (dist - targetDist) / dist * 0.3; // 减小系数让弯曲更平滑
 
-                            // 统一处理，不加额外惯性效果
                             curr.x -= dx * ratio;
                             curr.y -= dy * ratio;
 
-                            // 让前一节也稍微移动，使身体更柔软
                             if (i < this.segmentColliders.length - 1) {
-                                prev.x += dx * ratio * 0.5;
-                                prev.y += dy * ratio * 0.5;
+                                prev.x += dx * ratio * 0.2;
+                                prev.y += dy * ratio * 0.2;
                             }
-                        }
-                        // 如果距离太近，推开（防止重叠）
-                        else if (dist < targetDist * 0.7) {
-                            const ratio = (targetDist - dist) / dist * 0.3;
+                        } else if (distSq < targetDistSq * 0.7) { // 距离太近，推开
+                            const dist = Math.sqrt(distSq);
+                            const ratio = (targetDist - dist) / dist * 0.15;
+
                             curr.x += dx * ratio;
                             curr.y += dy * ratio;
                             prev.x -= dx * ratio;
                             prev.y -= dy * ratio;
                         }
-                    } else {
-                        // 如果重合，沿速度方向推开一点
-                        const velX = this.physicsBody.velocity.x || 1;
-                        const velY = this.physicsBody.velocity.y || 1;
-                        const velMag = Math.sqrt(velX*velX + velY*velY);
-                        if (velMag > 0) {
-                            curr.x = prev.x - (velX / velMag) * targetDist;
-                            curr.y = prev.y - (velY / velMag) * targetDist;
-                        } else {
-                            // 没有速度时，随机方向
-                            const angle = Math.random() * Math.PI * 2;
-                            curr.x = prev.x - Math.cos(angle) * targetDist;
-                            curr.y = prev.y - Math.sin(angle) * targetDist;
-                        }
                     }
                 }
             }
 
-            // ===== 完全移除所有惯性滞后效果 =====
-            // 不再根据移动速度添加任何额外的移动
+            // 添加惯性效果，让尾部有延迟感（但不主动扭动）
+            const velX = this.physicsBody.velocity.x;
+            const velY = this.physicsBody.velocity.y;
+            const speedSq = velX * velX + velY * velY;
+
+            if (speedSq > 25) { // 速度大于5
+                const moveDirX = velX / Math.sqrt(speedSq);
+                const moveDirY = velY / Math.sqrt(speedSq);
+
+                for (let i = this.segmentColliders.length - 1; i > 1; i--) {
+                    const target = this.segmentColliders[i - 1];
+                    const curr = this.segmentColliders[i];
+
+                    // 平滑插值，让尾部跟随
+                    curr.x += (target.x - curr.x) * 0.05;
+                    curr.y += (target.y - curr.y) * 0.05;
+
+                    // 添加轻微的离心效果
+                    const perpX = -moveDirY;
+                    const perpY = moveDirX;
+                    const offset = (this.segmentColliders.length - i) * 0.5;
+                    curr.x += perpX * offset * 0.1;
+                    curr.y += perpY * offset * 0.1;
+                }
+            }
+
+            // 边界检查，确保身体不超出地图
+            for (let i = 1; i < this.segmentColliders.length; i++) {
+                const seg = this.segmentColliders[i];
+                seg.x = Math.max(this.radius, Math.min(this.worldWidth - this.radius, seg.x));
+                seg.y = Math.max(this.radius, Math.min(this.worldHeight - this.radius, seg.y));
+            }
         }
 
         this.physicsBody.update(dt);
@@ -23283,52 +23377,55 @@ class WorldMapGame {
         }
     }
 
-    // 更新碰撞系统（抽离公共逻辑）
     updateCollisions() {
         this.collisionSystem.clear();
 
+        // 保存玩家原始半径
         const originalPlayerRadius = this.player.physicsBody.radius;
         this.player.physicsBody.radius = this.player.getScaledRadius();
-        this.collisionSystem.addObject(this.player, -1);
 
-        const enemyOriginalRadii = [];
+        // 添加玩家
+        this.collisionSystem.addObject(this.player, "player");
+
+        // 添加所有敌人及其身体节
         for (let i = 0; i < this.enemies.length; i++) {
             const enemy = this.enemies[i];
-            enemyOriginalRadii.push(enemy.physicsBody.radius);
-            enemy.physicsBody.radius = enemy.getScaledRadius ?
-                enemy.getScaledRadius() :
-                enemy.physicsBody.radius * this.viewScale;
-            this.collisionSystem.addObject(enemy, i);
-        }
+            if (enemy.isDead) continue;
 
-        if (this.multiplayerMode) {
-            this.otherPlayers.forEach(other => {
-                if (!other.isDead) {
-                    if (!other._originalRadius) {
-                        other._originalRadius = other.physicsBody.radius;
-                    }
-                    other.physicsBody.radius = other.getScaledRadius();
-                    this.collisionSystem.addObject(other, -hashCode(other.playerId));
+            // 添加主碰撞体
+            this.collisionSystem.addObject(enemy, `enemy_${i}`);
+
+            // 添加所有身体节作为独立碰撞体
+            if (enemy.hasMultiSegmentCollision && enemy.segmentColliders) {
+                for (let j = 1; j < enemy.segmentColliders.length; j++) {
+                    const segment = enemy.segmentColliders[j];
+
+                    // 创建身体节碰撞对象
+                    const segmentObj = {
+                        physicsBody: {
+                            position: { x: segment.x, y: segment.y },
+                            radius: segment.radius * this.viewScale,
+                            velocity: { x: 0, y: 0 },
+                            mass: enemy.weight * 0.3,
+                            collisionType: "circle"
+                        },
+                        isFriendly: enemy.isFriendly,
+                        type: enemy.type,
+                        parentEnemy: enemy,
+                        isSegment: true,
+                        segmentIndex: j
+                    };
+
+                    this.collisionSystem.addObject(segmentObj, `enemy_${i}_segment_${j}`);
                 }
-            });
-        }
-
-        this.collisionSystem.checkAllCollisions(this.player, this.dt);
-
-        this.player.physicsBody.radius = originalPlayerRadius;
-        for (let i = 0; i < this.enemies.length; i++) {
-            if (i < enemyOriginalRadii.length) {
-                this.enemies[i].physicsBody.radius = enemyOriginalRadii[i];
             }
         }
 
-        if (this.multiplayerMode) {
-            this.otherPlayers.forEach(other => {
-                if (other._originalRadius) {
-                    other.physicsBody.radius = other._originalRadius;
-                }
-            });
-        }
+        // 执行碰撞检测
+        this.collisionSystem.checkAllCollisions(this.player, this.dt);
+
+        // 恢复原始半径
+        this.player.physicsBody.radius = originalPlayerRadius;
     }
 
 
