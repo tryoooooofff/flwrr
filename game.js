@@ -2,9 +2,15 @@
 // 墙壁颜色
 export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
+
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
+const WALL_MARGIN = 20; // 墙边20像素禁区
+const MIN_SPAWN_DISTANCE = 300; // 最小生成距离（原来是150）
+const SAFE_SPAWN_DISTANCE = 400; // 安全生成距离
+const MAX_SPAWN_DISTANCE = 600;  // 最大生成距离
+const SPAWN_ATTEMPTS = 30;        // 生成尝试次数
 export const WIDTH = 1550;
 export const HEIGHT = 850;
 export const SCREEN_CONFIG = {
@@ -92,7 +98,7 @@ export const REGIONS = [
 // Load region settings
 export const LOAD_DISTANCE = 700;  // Strong load region radius
 export const WEAK_LOAD_DISTANCE = 1300;  // Weak load region radius
-export const MAX_ENEMIES_WORLD = 600;  // Increased max enemies for the entire map
+export const MAX_ENEMIES_WORLD = 500;  // Increased max enemies for the entire map
 
 // Friendly unit level → Size multiplier (linked to player level or petal level)
 export const FRIENDLY_SIZE_MULTIPLIERS = {
@@ -3489,6 +3495,7 @@ class CollisionSystem {
         }
     }
 
+    // ===== CollisionSystem.resolveCollisions 方法 =====
     resolveCollisions() {
         for (const [obj1, obj2, body1, body2] of this.collisionPairs) {
             if (this._shouldSkipCollision(obj1, obj2)) {
@@ -3505,13 +3512,11 @@ class CollisionSystem {
                 continue;
             }
 
-            const direction = {
-                x: (body1.position.x - body2.position.x) / distance,
-                y: (body1.position.y - body2.position.y) / distance
-            };
-            const totalMass = body1.mass + body2.mass;
+            // ✅ 计算方向向量（使用归一化的单位向量）
+            const dirX = (body1.position.x - body2.position.x) / distance;
+            const dirY = (body1.position.y - body2.position.y) / distance;
 
-            // 减少推送强度
+            const totalMass = body1.mass + body2.mass;
             const pushStrength = overlap * 0.4;
 
             const isPlayer1 = obj1.constructor && obj1.constructor.name === 'Player';
@@ -3519,97 +3524,89 @@ class CollisionSystem {
             const isEnemy1 = obj1.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj1.type];
             const isEnemy2 = obj2.type && ENEMY_DROP_TABLE && ENEMY_DROP_TABLE[obj2.type];
 
-            // 计算推送向量
             let push1X = 0, push1Y = 0, push2X = 0, push2Y = 0;
 
+            // ===== 🔧 关键修复：玩家↔敌人碰撞处理 =====
             if (isPlayer1 && isEnemy2) {
                 if (!obj1.isBouncing) {
-                    const bounceDirection = {
-                        x: body1.position.x - body2.position.x,
-                        y: body1.position.y - body2.position.y
-                    };
-                    if (obj1.applyBounce) {
-                        obj1.applyBounce(bounceDirection, 15);
+                    // ✅ 创建 Vector2 实例（不是普通对象！）
+                    const bounceDir = new Vector2(dirX, dirY);
+
+                    if (typeof obj1.applyBounce === 'function') {
+                        obj1.applyBounce(bounceDir, 15);
                     }
                 }
 
-                push1X = direction.x * (pushStrength * (body2.mass / totalMass));
-                push1Y = direction.y * (pushStrength * (body2.mass / totalMass));
-                push2X = -direction.x * (pushStrength * (body1.mass / totalMass));
-                push2Y = -direction.y * (pushStrength * (body1.mass / totalMass));
+                push1X = dirX * (pushStrength * (body2.mass / totalMass));
+                push1Y = dirY * (pushStrength * (body2.mass / totalMass));
+                push2X = -dirX * (pushStrength * (body1.mass / totalMass));
+                push2Y = -dirY * (pushStrength * (body1.mass / totalMass));
 
             } else if (isPlayer2 && isEnemy1) {
                 if (!obj2.isBouncing) {
-                    const bounceDirection = {
-                        x: body2.position.x - body1.position.x,
-                        y: body2.position.y - body1.position.y
-                    };
-                    if (obj2.applyBounce) {
-                        obj2.applyBounce(bounceDirection, 15);
+                    // ✅ 创建 Vector2 实例
+                    const bounceDir = new Vector2(-dirX, -dirY);  // 注意方向取反
+
+                    if (typeof obj2.applyBounce === 'function') {
+                        obj2.applyBounce(bounceDir, 15);
                     }
                 }
 
-                push1X = direction.x * (pushStrength * (body2.mass / totalMass));
-                push1Y = direction.y * (pushStrength * (body2.mass / totalMass));
-                push2X = -direction.x * (pushStrength * (body1.mass / totalMass));
-                push2Y = -direction.y * (pushStrength * (body1.mass / totalMass));
+                push1X = dirX * (pushStrength * (body2.mass / totalMass));
+                push1Y = dirY * (pushStrength * (body2.mass / totalMass));
+                push2X = -dirX * (pushStrength * (body1.mass / totalMass));
+                push2Y = -dirY * (pushStrength * (body1.mass / totalMass));
             } else {
-                push1X = direction.x * pushStrength * (body2.mass / totalMass);
-                push1Y = direction.y * pushStrength * (body2.mass / totalMass);
-                push2X = -direction.x * pushStrength * (body1.mass / totalMass);
-                push2Y = -direction.y * pushStrength * (body1.mass / totalMass);
+                // 普通物体之间的碰撞
+                push1X = dirX * pushStrength * (body2.mass / totalMass);
+                push1Y = dirY * pushStrength * (body2.mass / totalMass);
+                push2X = -dirX * pushStrength * (body1.mass / totalMass);
+                push2Y = -dirY * pushStrength * (body1.mass / totalMass);
             }
 
-            // 分段移动 + 墙壁检查
-            const steps = 3;
-            for (let step = 0; step < steps; step++) {
-                // 临时移动 obj1
-                const tempX1 = body1.position.x + push1X / steps;
-                const tempY1 = body1.position.y + push1Y / steps;
+            // ===== 应用位置修正 =====
+            body1.position.x += push1X;
+            body1.position.y += push1Y;
+            body2.position.x += push2X;
+            body2.position.y += push2Y;
 
-                // 检查 obj1 的新位置是否在墙内
-                if (obj1.gameInstance && obj1.gameInstance.isInMazeWall) {
-                    if (!obj1.gameInstance.isInMazeWall(tempX1, tempY1)) {
-                        body1.position.x = tempX1;
-                        body1.position.y = tempY1;
-                    } else {
-                        if (body1.velocity) {
-                            body1.velocity.x *= -0.3;
-                            body1.velocity.y *= -0.3;
-                        }
-                        break;
-                    }
-                } else {
-                    body1.position.x = tempX1;
-                    body1.position.y = tempY1;
-                }
-
-                // 临时移动 obj2
-                const tempX2 = body2.position.x + push2X / steps;
-                const tempY2 = body2.position.y + push2Y / steps;
-
-                // 检查 obj2 的新位置是否在墙内
-                if (obj2.gameInstance && obj2.gameInstance.isInMazeWall) {
-                    if (!obj2.gameInstance.isInMazeWall(tempX2, tempY2)) {
-                        body2.position.x = tempX2;
-                        body2.position.y = tempY2;
-                    } else {
-                        if (body2.velocity) {
-                            body2.velocity.x *= -0.3;
-                            body2.velocity.y *= -0.3;
-                        }
-                        break;
-                    }
-                } else {
-                    body2.position.x = tempX2;
-                    body2.position.y = tempY2;
-                }
-            }
-
+            // ===== 更新最后碰撞时间（防止重复处理）=====
             body1.lastCollisionTime = this.currentTime;
             body2.lastCollisionTime = this.currentTime;
-            this._checkCollisionTypes(obj1, obj2);
+
+            // ===== 可选：处理多节生物的碰撞节更新 =====
+            if (obj2.hasMultiSegmentCollision && isPlayer1) {
+                // 玩家撞到了多节敌人，可以记录碰撞的节用于特效/伤害
+                this._handleMultiSegmentCollision(obj1, obj2, dirX, dirY);
+            } else if (obj1.hasMultiSegmentCollision && isPlayer2) {
+                this._handleMultiSegmentCollision(obj2, obj1, -dirX, -dirY);
+            }
         }
+    }
+
+    // ===== 辅助方法：处理多节生物碰撞（可选）=====
+    _handleMultiSegmentCollision(player, enemy, dirX, dirY) {
+        if (!enemy.segmentColliders || enemy.segmentColliders.length === 0) return;
+
+        // 找到离玩家最近的节
+        let closestIndex = 0;
+        let closestDist = Infinity;
+        const playerPos = player.physicsBody.position;
+
+        for (let i = 0; i < enemy.segmentColliders.length; i++) {
+            const seg = enemy.segmentColliders[i];
+            const dx = playerPos.x - seg.x;
+            const dy = playerPos.y - seg.y;
+            const dist = dx * dx + dy * dy;
+
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestIndex = i;
+            }
+        }
+
+        // 可以在此添加：显示击中特效、播放音效、记录击中节等
+        // console.log(`Hit ${enemy.type} segment ${closestIndex}`);
     }
 
     _getDistance(pos1, pos2) {
@@ -10399,7 +10396,6 @@ class ShopSystem {
         // Player's Star count
         this.stars = 100; // Initial stars
 
-        console.log("✅ Shop system initialized, items count:", this.shopItems.length);
     }
 
     // Get item price based on rarity
@@ -12912,16 +12908,6 @@ class StarCraftUI {
             effectiveChancePercent = baseChancePercent;
         }
 
-        // 调试输出
-        console.log(`📊 合成概率计算: ${currentRarity}`, {
-            基础概率: baseChancePercent.toFixed(3) + '%',
-            卡片数量: totalCards,
-            额外卡片: Math.max(0, totalCards - 5),
-            最大加成: maxBonusPercent.toFixed(3) + '%',
-            实际加成: (effectiveChancePercent - baseChancePercent).toFixed(3) + '%',
-            最终概率: effectiveChancePercent.toFixed(3) + '%'
-        });
-
         return effectiveChancePercent / 100.0;
     }
 
@@ -13771,11 +13757,8 @@ class Enemy {
         this.segmentColliders = [];
         this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede");
 
-        console.log(`[Enemy] ${enemyType} - radius: ${this.radius}, hasMultiSegmentCollision: ${this.hasMultiSegmentCollision}`);
-
         if (this.hasMultiSegmentCollision) {
             this.initMultiSegmentCollision(); // 调用新方法
-            console.log(`[Enemy] ${enemyType} segmentColliders initialized:`, this.segmentColliders.length);
         }
 
         this.clampPosition();
@@ -13896,9 +13879,10 @@ class Enemy {
         return baseArmor * (ARMOR_CLASS_MULTIPLIERS[armorClass] || 1.0);
     }
 
-    // ===== 🆕 新的多节碰撞箱初始化方法 =====
+
+    // ===== 🆕 多节碰撞箱初始化方法（宽度也使用稀有度乘数）=====
+// ===== 保留原乘数但确保顺序正确 =====
     initMultiSegmentCollision() {
-        // 先检查是否为多节生物
         this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede");
 
         if (!this.hasMultiSegmentCollision) {
@@ -13906,110 +13890,66 @@ class Enemy {
             return;
         }
 
-        console.log(`[Enemy] Initializing multi-segment collision for ${this.type}`);
-        console.log(`[Enemy] Current radius: ${this.radius}`);
-
-        // 确保 radius 有效
-        if (!this.radius || this.radius <= 0) {
-            console.warn(`[Enemy] Invalid radius for ${this.type}, using default`);
-            this.radius = 20; // 默认值
-        }
-
         this.segmentColliders = [];
 
         let segmentCount, segmentLength, segmentRadius;
 
-        // 根据类型设置参数 - 让 Parasite 比 Leech 短
-        if (this.type === "Leech") {
-            segmentCount = 10;
-            segmentLength = this.radius * 1.4;
-            segmentRadius = this.radius * 0.9;
-        } else if (this.type === "Parasite") {
-            segmentCount = 6; // 减少节数
-            segmentLength = this.radius * 1.1; // 缩短每节长度
-            segmentRadius = this.radius * 0.8;
-        } else if (this.type === "Centipede") {
-            segmentCount = this.segmentCount || 8;
-            segmentLength = this.radius * 1.0;
-            segmentRadius = this.radius * 0.7;
+        const BASE_VALUES = {
+            "Leech": { count: 6, length: 20, radius: 12 },
+            "Parasite": { count: 4, length: 16, radius: 10 },
+            "Centipede": { count: 8, length: 18, radius: 10 }
+        };
+
+        // 您提供的乘数，但确保 Omega > Ultra
+        const RARITY_MULTIPLIER = {
+            "Common": 1.0,
+            "Unusual": 1.1,
+            "Rare": 1.2,
+            "Epic": 1.6,
+            "Legendary": 1.8,
+            "Mythic": 2.4,
+            "Ultra": 3.8,
+            "Super": 5.8,
+            "Omega": 7.5,    // 确保 7.5 > 3.8
+            "Eternal": 10.2
+        };
+
+        const base = BASE_VALUES[this.type];
+        if (!base) return;
+
+        const multiplier = RARITY_MULTIPLIER[this.rarity] || 1.0;
+
+        segmentCount = base.count;
+        segmentLength = base.length * multiplier;
+        segmentRadius = base.radius * multiplier;
+
+
+
+        const headX = this.physicsBody.position.x;
+        const headY = this.physicsBody.position.y;
+
+        let dirX = 0, dirY = -1;
+        if (this.physicsBody.velocity.x !== 0 || this.physicsBody.velocity.y !== 0) {
+            const mag = Math.sqrt(
+                this.physicsBody.velocity.x * this.physicsBody.velocity.x +
+                this.physicsBody.velocity.y * this.physicsBody.velocity.y
+            );
+            dirX = this.physicsBody.velocity.x / mag;
+            dirY = this.physicsBody.velocity.y / mag;
         } else {
-            return;
-        }
-
-        console.log(`[Enemy] Creating ${segmentCount} segments, length: ${segmentLength}, radius: ${segmentRadius}`);
-
-        // 获取头部位置
-        const headX = this.physicsBody?.position?.x || 0;
-        const headY = this.physicsBody?.position?.y || 0;
-
-        // 获取移动方向（如果没有则用随机方向）
-        let dirX = 0, dirY = -1; // 默认向上
-        if (this.physicsBody?.velocity) {
-            const vel = this.physicsBody.velocity;
-            const mag = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-            if (mag > 0) {
-                dirX = vel.x / mag;
-                dirY = vel.y / mag;
-            }
-        }
-
-        // 如果没有速度，用 facingAngle 或随机方向
-        if (dirX === 0 && dirY === 0) {
             const angle = this.facingAngle || Math.random() * Math.PI * 2;
             dirX = Math.cos(angle);
             dirY = Math.sin(angle);
         }
 
-        // 创建所有身体节
         for (let i = 0; i < segmentCount; i++) {
-            // 沿着移动方向的反方向延伸
-            const offset = i * segmentLength;
-            const x = headX - dirX * offset;
-            const y = headY - dirY * offset;
-
-            // 添加一些随机性，让身体更自然
-            const randomOffset = i > 0 ? (Math.random() - 0.5) * segmentLength * 0.3 : 0;
-            const perpX = -dirY; // 垂直向量
-            const perpY = dirX;
-
             this.segmentColliders.push({
-                x: x + perpX * randomOffset,
-                y: y + perpY * randomOffset,
-                radius: segmentRadius * (1 - i * 0.02) // 尾部稍微变细
+                x: headX - dirX * i * segmentLength,
+                y: headY - dirY * i * segmentLength,
+                radius: segmentRadius * (1 - i * 0.02)
             });
         }
-
-        console.log(`[Enemy] Created ${this.segmentColliders.length} segments`);
-
-        // 运行几次物理约束，让身体自然展开
-        const targetDist = segmentLength * 0.8;
-        for (let iter = 0; iter < 5; iter++) {
-            for (let i = 1; i < this.segmentColliders.length; i++) {
-                const prev = this.segmentColliders[i - 1];
-                const curr = this.segmentColliders[i];
-
-                const dx = curr.x - prev.x;
-                const dy = curr.y - prev.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist > 0.1) {
-                    const diff = dist - targetDist;
-                    const ratio = diff / dist * 0.5;
-
-                    curr.x -= dx * ratio;
-                    curr.y -= dy * ratio;
-
-                    if (i > 1) {
-                        prev.x += dx * ratio * 0.3;
-                        prev.y += dy * ratio * 0.3;
-                    }
-                }
-            }
-        }
-
-        console.log(`[Enemy] Final segmentColliders count:`, this.segmentColliders.length);
     }
-
 
     // 在 Enemy 类中修改 updateSegmentColliders 方法
     updateSegmentColliders(dt) {
@@ -14141,18 +14081,46 @@ class Enemy {
         return this.attackRange * this.currentViewScale;
     }
 
+    // 在 Player 类中修改 applyBounce 方法
     applyBounce(bounceDirection, bounceSpeed = 15) {
-        if (this.isDead || this.isSpawning) return;
+        /** 应用反弹效果 */
+        if (this.isDead || this.isBouncing) {
+            return;
+        }
 
-        if (bounceDirection.magnitude() > 0) {
-            const normalizedDirection = bounceDirection.normalize();
+        this.isBouncing = true;
+        this.bounceCooldown = 200;
+
+        // 处理不同类型的输入
+        let x = 0, y = 0;
+
+        // 如果是 Vector2 实例
+        if (bounceDirection && bounceDirection.x !== undefined && bounceDirection.y !== undefined) {
+            x = bounceDirection.x;
+            y = bounceDirection.y;
+        }
+        // 如果是普通对象
+        else if (bounceDirection && typeof bounceDirection === 'object') {
+            x = bounceDirection.x || 0;
+            y = bounceDirection.y || 0;
+        }
+
+        const mag = Math.sqrt(x * x + y * y);
+
+        if (mag > 0) {
+            // 手动归一化，不使用 normalize 方法
+            const normX = x / mag;
+            const normY = y / mag;
+
             this.physicsBody.velocity = new Vector2(
-                normalizedDirection.x * bounceSpeed,
-                normalizedDirection.y * bounceSpeed
+                normX * bounceSpeed,
+                normY * bounceSpeed
             );
         } else {
             this.physicsBody.velocity = new Vector2(0, 0);
         }
+
+        this.speed = 0;
     }
 
     clampPosition() {
@@ -16510,17 +16478,6 @@ class Petal {
             }
         }
 
-        // 每60帧打印一次花瓣状态（调试用）
-        if (this._petalIndex === 0 && Math.random() < 0.001) { // 约每1000帧打印一次
-            console.log(`[Petal 0] 状态:`, {
-                type: this.itemType,
-                rarity: this.rarity,
-                durability: `${this.durability.toFixed(0)}/${this.maxDurability}`,
-                isBroken: this.isBroken,
-                isReloading: this.isReloading,
-                reloadTime: this.reloadTime
-            });
-        }
     }
 
     // ===== 辅助方法：更新已存在的召唤物 =====
@@ -16564,7 +16521,6 @@ class Petal {
         if (currentItem) {
             // 如果itemType或rarity发生变化，更新属性
             if (this.itemType !== currentItem.type || this.rarity !== currentItem.rarity) {
-                console.log(`[Petal ${this._petalIndex}] 检测到物品变化: ${this.itemType}(${this.rarity}) -> ${currentItem.type}(${currentItem.rarity})`);
                 // 使用缓存的索引更新
                 this.updateFromQuickSlot(this._petalIndex);
                 return true;
@@ -16586,7 +16542,6 @@ class Petal {
         } else {
             // 如果没有物品但花瓣还有物品类型，说明物品被移除了
             if (this.itemType !== null) {
-                console.log(`[Petal ${this._petalIndex}] 物品被移除，重置花瓣`);
                 this.resetToDefault();
             }
         }
@@ -16743,17 +16698,8 @@ class Petal {
         this.health -= actualDamage;
         this.durability -= actualDamage;
 
-        this.collisionCooldown = 500;
+        this.collisionCooldown = 300;
 
-        // 调试输出（1%概率）
-        if (Math.random() < 0.01) {
-            console.log(`💔 花瓣受伤:`, {
-                原伤害: damage.toFixed(0),
-                实际伤害: actualDamage.toFixed(0),
-                剩余血量: `${this.health.toFixed(0)}/${this.maxHealth}`,
-                剩余耐久: `${this.durability.toFixed(0)}/${this.maxDurability}`
-            });
-        }
 
         // 如果血量归零或耐久归零，花瓣破碎
         if (this.health <= 0 || this.durability <= 0) {
@@ -17654,7 +17600,6 @@ class Petal {
         const maxCount = this.maxSquare || 2;
 
         if (currentCount >= maxCount) {
-            console.log(`[Square] 已达到最大数量 (${currentCount}/${maxCount})`);
             return false;
         }
 
@@ -17796,7 +17741,6 @@ class Petal {
     // 尝试生成 Cancer 细胞（带DNA升级）
     trySpawnCancerWithDNA(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) {
-            console.log('❌ Cancer Egg: 花瓣损坏或重载中');
             return false;
         }
 
@@ -17806,12 +17750,10 @@ class Petal {
         }
 
         if (this.spawnCooldown > 0) {
-            console.log(`⏳ Cancer Egg 冷却中: ${this.spawnCooldown}ms`);
             return false;
         }
 
         if (!this.player || this.player.isDead) {
-            console.log('❌ Cancer Egg: 玩家死亡');
             return false;
         }
 
@@ -17827,10 +17769,7 @@ class Petal {
         const currentCount = this.cancerList.length;
         const toSpawn = Math.max(0, 2 - currentCount);
 
-        console.log(`🔍 Cancer Egg 检查: 当前数量=${currentCount}, 需要生成=${toSpawn}, 冷却=${this.spawnCooldown}`);
-
         if (toSpawn <= 0) {
-            console.log(`✅ Cancer 数量已满 (${currentCount}/2)`);
             return false;
         }
 
@@ -17838,7 +17777,6 @@ class Petal {
         const finalRarity = this.player.getSummonRarityWithDna(this);
         const summonLevel = this.player.getRandomSummonLevel(finalRarity);
 
-        console.log(`🥚 Cancer Egg 生成 ${toSpawn} 只 Cancer，稀有度: ${finalRarity}, 等级: ${summonLevel}`);
 
         for (let i = 0; i < toSpawn; i++) {
             const angle = Math.random() * Math.PI * 2;
@@ -17861,14 +17799,12 @@ class Petal {
             gameEnemies.push(cancer);
             this.cancerList.push(cancer);
 
-            console.log(`✅ Cancer #${i+1} 生成成功，位置: (${x.toFixed(0)}, ${y.toFixed(0)})`);
         }
 
         // 设置冷却时间（基于稀有度）
         const baseCooldown = ITEM_STATS["Cancer Egg"]?.base_cooldown || 12000;
         this.spawnCooldown = this.getSpawnCooldownByRarity(baseCooldown);
 
-        console.log(`⏲️ Cancer Egg 冷却设置为: ${this.spawnCooldown}ms`);
 
         return true;
     }
@@ -20244,7 +20180,6 @@ class Player {
         this.isDead = true;
         this.health = 0;
 
-        console.log("💀 玩家死亡，海绵伤害队列已清空");
     }
     getScreenPosition() {
         /** 获取玩家的屏幕坐标（始终在屏幕中心） */
@@ -20713,7 +20648,6 @@ class Player {
             this.maxHealth = this.baseMaxHealth + totalHealthBonus;
             this._health = this.maxHealth;
 
-            console.log(`🎉 升级到 Lv.${this.levelSystem.level}！血量: ${this.maxHealth.toFixed(0)}`);
         }
 
         // 调试输出
@@ -20756,7 +20690,6 @@ class Player {
 
 
         if (!hasValidDna) {
-            console.log("No valid DNA, returning mapped rarity:", mappedRarity);
             return mappedRarity;
         }
 
@@ -20770,8 +20703,6 @@ class Player {
             // 升级到更高稀有度（索引+1）
             if (idx !== -1 && idx < RARITY_LIST.length - 1) {  // 不是最高才能升级
                 const upgradedRarity = RARITY_LIST[idx + 1];  // 索引+1 是更高稀有度
-                console.log(`Upgrade calculation: ${mappedRarity} (${idx}) -> ${upgradedRarity} (${idx+1})`);
-                console.log("✓ Upgraded to:", upgradedRarity);
                 return upgradedRarity;
             } else if (idx === RARITY_LIST.length - 1) {
                 console.log("Already at highest rarity (Omega)");
@@ -21311,7 +21242,6 @@ class Player {
         this.collisionCooldown = 1000;
         this.bounceCooldown = 0;
         this.isBouncing = false;
-        this.speed = 150;
         this.physicsBody.position = new Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
         this._lastWorldPos = new Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
         this.mousePosition = new Vector2(WIDTH / 2, HEIGHT / 2);
@@ -21346,7 +21276,6 @@ class Player {
         // ✅ 确保所有花瓣从快捷栏同步属性
         this.quickSlot.updateAllPetals();
 
-        console.log('✅ 玩家重置完成，物品数:', this.inventory.items.length);
     }
 }
 
@@ -22125,8 +22054,6 @@ class WorldMapGame {
         this.effectiveViewWidth = WIDTH;
         this.effectiveViewHeight = HEIGHT;
         this.SAFE_BORDER = 100;
-        this.MIN_SPAWN_DISTANCE = 150;
-        this.MAX_SPAWN_DISTANCE = 400;
 
         // Canvas设置
         this.screen = document.getElementById('gameCanvas');
@@ -22368,19 +22295,17 @@ class WorldMapGame {
     }
     // 在 WorldMapGame 类中
 
-    // 查找最近的可用重生点
+    // 在 WorldMapGame 类中改进 findNearestSafeRespawn 方法
     findNearestSafeRespawn(playerPos) {
         const currentBlock = this.blockManager.getBlockAt(playerPos.x, playerPos.y);
         if (!currentBlock) return this.getDefaultSpawnPoint();
 
         const currentLevel = this.getBlockLevel(currentBlock.type);
-        const targetLevel = Math.max(1, currentLevel - 1); // 低一级，最低1级
+        const targetLevel = Math.max(1, currentLevel - 1);
 
-        console.log(`🔍 寻找重生点: 当前区块等级 ${currentLevel}，目标等级 ${targetLevel}`);
 
         // 搜索范围（逐步扩大）
-        const searchRadius = 1; // 先搜索周围1圈
-        const maxRadius = 10;   // 最大搜索半径
+        const maxRadius = 15; // 最大搜索半径
 
         for (let radius = 1; radius <= maxRadius; radius++) {
             for (let dx = -radius; dx <= radius; dx++) {
@@ -22411,18 +22336,89 @@ class WorldMapGame {
                         // 在区块内寻找安全位置
                         const safePos = this.findSafePositionInBlock(block);
                         if (safePos) {
-                            console.log(`✅ 找到重生点: 区块 ${block.type} (等级 ${blockLevel}) 在 (${safePos.x.toFixed(0)}, ${safePos.y.toFixed(0)})`);
-                            return safePos;
+                            // 双重检查：确保位置不在墙内
+                            if (!this.isInMazeWall(safePos.x, safePos.y) &&
+                                !this.isTooCloseToWall(safePos.x, safePos.y, 30)) {
+                                return safePos;
+                            }
                         }
                     }
                 }
             }
         }
 
-        console.log('⚠️ 未找到合适重生点，使用默认出生点');
-        return this.getDefaultSpawnPoint();
-    }
 
+        return this.findSafeSpawnPoint(playerPos.x, playerPos.y, 500, 200);
+    }
+// 在 WorldMapGame 类中添加这个方法
+    findSafeSpawnPoint(baseX, baseY, searchRadius = 200, maxAttempts = 50) {
+        // 先检查原始位置是否安全
+        if (!this.isInMazeWall(baseX, baseY)) {
+            // 再检查周围是否有墙
+            if (!this.isTooCloseToWall(baseX, baseY, 30)) {
+                return { x: baseX, y: baseY };
+            }
+        }
+
+
+        // 螺旋搜索：从近到远寻找安全位置
+        for (let radius = 20; radius <= searchRadius; radius += 20) {
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                // 在圆周上随机取点
+                const angle = Math.random() * Math.PI * 2;
+                const offsetX = Math.cos(angle) * radius;
+                const offsetY = Math.sin(angle) * radius;
+
+                const testX = baseX + offsetX;
+                const testY = baseY + offsetY;
+
+                // 检查是否在地图范围内
+                if (testX < this.SAFE_BORDER || testX > WORLD_WIDTH - this.SAFE_BORDER ||
+                    testY < this.SAFE_BORDER || testY > WORLD_HEIGHT - this.SAFE_BORDER) {
+                    continue;
+                }
+
+                // 检查是否在墙内
+                if (this.isInMazeWall(testX, testY)) {
+                    continue;
+                }
+
+                // 检查是否离墙太近
+                if (this.isTooCloseToWall(testX, testY, 30)) {
+                    continue;
+                }
+
+
+                return { x: testX, y: testY };
+            }
+        }
+
+
+
+        const centerX = WORLD_WIDTH / 2;
+        const centerY = WORLD_HEIGHT / 2;
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const testX = centerX + (Math.random() - 0.5) * 400;
+            const testY = centerY + (Math.random() - 0.5) * 400;
+
+            if (testX < this.SAFE_BORDER || testX > WORLD_WIDTH - this.SAFE_BORDER ||
+                testY < this.SAFE_BORDER || testY > WORLD_HEIGHT - this.SAFE_BORDER) {
+                continue;
+            }
+
+            if (!this.isInMazeWall(testX, testY) && !this.isTooCloseToWall(testX, testY, 30)) {
+                return { x: testX, y: testY };
+            }
+        }
+
+        // 最后的备选：返回修改后的原始位置（稍微偏移）
+
+        return {
+            x: Math.max(this.SAFE_BORDER, Math.min(WORLD_WIDTH - this.SAFE_BORDER, baseX + 50)),
+            y: Math.max(this.SAFE_BORDER, Math.min(WORLD_HEIGHT - this.SAFE_BORDER, baseY + 50))
+        };
+    }
     // 获取区块等级
     getBlockLevel(blockType) {
         const levelMap = {
@@ -22437,18 +22433,19 @@ class WorldMapGame {
     }
 
     // 在区块内寻找安全位置（不在墙内）
+// 在 WorldMapGame 类中改进 findSafePositionInBlock 方法
     findSafePositionInBlock(block) {
         const blockX = block.x;
         const blockY = block.y;
         const blockSize = this.blockManager.blockSize;
 
         // 在区块内尝试多个位置
-        const attempts = 20;
+        const attempts = 50;
         const safeDistance = 50; // 距离墙壁的安全距离
+        const margin = 40; // 距离区块边缘的边距
 
         for (let i = 0; i < attempts; i++) {
             // 在区块内随机生成位置（避开边缘）
-            const margin = 30;
             const x = blockX + margin + Math.random() * (blockSize - 2 * margin);
             const y = blockY + margin + Math.random() * (blockSize - 2 * margin);
 
@@ -22475,10 +22472,16 @@ class WorldMapGame {
         }
 
         // 如果找不到安全位置，返回区块中心
-        return {
-            x: blockX + blockSize / 2,
-            y: blockY + blockSize / 2
-        };
+        const centerX = blockX + blockSize / 2;
+        const centerY = blockY + blockSize / 2;
+
+        // 检查中心是否安全
+        if (!this.isInMazeWall(centerX, centerY) && !this.isTooCloseToWall(centerX, centerY, 30)) {
+            return { x: centerX, y: centerY };
+        }
+
+        // 如果中心也不安全，返回null，让上层函数继续搜索
+        return null;
     }
 
     // 获取默认出生点
@@ -24492,18 +24495,55 @@ class WorldMapGame {
         this.markers.set(marker.id, marker);
     }
 
-    // 在特殊区域内生成敌人
+    // 在 WorldMapGame 类中修改 spawnEnemyInSpecialZone 方法
     spawnEnemyInSpecialZone(zone) {
         const playerPos = this.player.physicsBody.position;
+        const WALL_MARGIN = 20;
 
         // 从特殊区域的规则中选择敌人
         const selected = this.selectEnemyFromRules(zone.spawnRules);
         const level = Math.floor(Math.random() * (selected.maxLevel - selected.minLevel + 1)) + selected.minLevel;
-
-        // 从指定的稀有度列表中随机选择一个
         const rarity = selected.rarities[Math.floor(Math.random() * selected.rarities.length)];
 
-        this.trySpawnEnemyInZone(selected.type, level, rarity, zone);
+        this.trySpawnEnemyInZoneWithWallCheck(selected.type, level, rarity, zone);
+    }
+
+    // 新增：带墙边检查的区域生成方法
+    trySpawnEnemyInZoneWithWallCheck(enemyType, level, rarity, zone) {
+        const maxAttempts = 30;
+        const playerX = this.player.physicsBody.position.x;
+        const playerY = this.player.physicsBody.position.y;
+        const WALL_MARGIN = 20;
+
+        const minX = Math.min(zone.bounds.x1, zone.bounds.x2);
+        const maxX = Math.max(zone.bounds.x1, zone.bounds.x2);
+        const minY = Math.min(zone.bounds.y1, zone.bounds.y2);
+        const maxY = Math.max(zone.bounds.y1, zone.bounds.y2);
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const x = minX + Math.random() * (maxX - minX);
+            const y = minY + Math.random() * (maxY - minY);
+
+            const distanceToPlayer = Math.sqrt((x - playerX) ** 2 + (y - playerY) ** 2);
+            if (distanceToPlayer < this.MIN_SPAWN_DISTANCE) continue;
+
+            if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
+
+            // 检查是否离墙太近
+            if (this.isTooCloseToWall(x, y, WALL_MARGIN)) continue;
+
+            const enemy = new Enemy(enemyType, x, y, level, rarity);
+            enemy.spawnTime = Date.now();
+            enemy.spawnProtection = 1500;
+            enemy.isSpawning = true;
+
+            this.enemies.push(enemy);
+
+            if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
+            this.zoneEnemyCounts[zone.name] = (this.zoneEnemyCounts[zone.name] || 0) + 1;
+
+            return;
+        }
     }
 
     // 在区块内生成敌人
@@ -24525,23 +24565,127 @@ class WorldMapGame {
         const enemyType = availableEnemies[randomIndex];
         this.trySpawnEnemyWithBlockRarity(enemyType, block);
     }
+    // 在 WorldMapGame 类中添加这个方法
+    isTooCloseToWall(x, y, margin) {
+        // 如果没有迷宫系统，返回false
+        if (!this.isInMazeWall) return false;
 
-    // 使用区块稀有度生成敌人
-    trySpawnEnemyWithBlockRarity(enemyType, block) {
-        const maxAttempts = 20;
+        // 检查8个方向是否有墙
+        const directions = [
+            [0, 0],           // 中心
+            [margin, 0],      // 右
+            [-margin, 0],     // 左
+            [0, margin],      // 下
+            [0, -margin],     // 上
+            [margin, margin], // 右下
+            [margin, -margin],// 右上
+            [-margin, margin],// 左下
+            [-margin, -margin]// 左上
+        ];
+
+        for (const [dx, dy] of directions) {
+            const checkX = x + dx;
+            const checkY = y + dy;
+
+            // 检查是否在地图范围内
+            if (checkX < 0 || checkX >= WORLD_WIDTH || checkY < 0 || checkY >= WORLD_HEIGHT) {
+                continue;
+            }
+
+            // 如果任何检查点是在墙内，说明离墙太近
+            if (this.isInMazeWall(checkX, checkY)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    // 修改 spawnEnemyForced 方法
+    spawnEnemyForced(enemyType, block) {
         const playerX = this.player.physicsBody.position.x;
         const playerY = this.player.physicsBody.position.y;
+        const WALL_MARGIN = 20;
+
+        const maxAttempts = 20;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * (this.MAX_SPAWN_DISTANCE - this.MIN_SPAWN_DISTANCE) + this.MIN_SPAWN_DISTANCE;
+            const distance = 500 + Math.random() * 300;
+
             let x = playerX + Math.cos(angle) * distance;
             let y = playerY + Math.sin(angle) * distance;
 
             x = Math.max(this.SAFE_BORDER, Math.min(WORLD_WIDTH - this.SAFE_BORDER, x));
             y = Math.max(this.SAFE_BORDER, Math.min(WORLD_HEIGHT - this.SAFE_BORDER, y));
 
-            // 检查生成位置是否在特殊区域内
+            // 检查是否离墙太近
+            if (this.isTooCloseToWall(x, y, WALL_MARGIN)) {
+                continue;
+            }
+
+            if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
+
+            const enemyRarity = this.blockManager.getRandomRarityForBlock(block.type);
+            const levelRange = this.blockManager.getLevelRangeForBlock(block.type);
+            const enemyLevel = Math.floor(Math.random() * (levelRange.max - levelRange.min + 1)) + levelRange.min;
+
+            const enemy = new Enemy(enemyType, x, y, enemyLevel, enemyRarity);
+
+            enemy.spawnTime = Date.now();
+            enemy.spawnProtection = 2000;
+            enemy.isSpawning = true;
+
+            this.enemies.push(enemy);
+            return;
+        }
+
+        // 如果还是失败，就在绝对安全的位置生成（比如地图中心？不行，太近了）
+        // 实在没办法，就生成在玩家背后较远的位置
+        const angle = Math.atan2(playerY - WORLD_HEIGHT/2, playerX - WORLD_WIDTH/2);
+        const fallbackX = playerX + Math.cos(angle) * 700;
+        const fallbackY = playerY + Math.sin(angle) * 700;
+
+        const safeX = Math.max(this.SAFE_BORDER, Math.min(WORLD_WIDTH - this.SAFE_BORDER, fallbackX));
+        const safeY = Math.max(this.SAFE_BORDER, Math.min(WORLD_HEIGHT - this.SAFE_BORDER, fallbackY));
+
+        const enemyRarity = this.blockManager.getRandomRarityForBlock(block.type);
+        const levelRange = this.blockManager.getLevelRangeForBlock(block.type);
+        const enemyLevel = Math.floor(Math.random() * (levelRange.max - levelRange.min + 1)) + levelRange.min;
+
+        const enemy = new Enemy(enemyType, safeX, safeY, enemyLevel, enemyRarity);
+        enemy.spawnTime = Date.now();
+        enemy.spawnProtection = 2500; // 更长的无敌时间
+        enemy.isSpawning = true;
+
+        this.enemies.push(enemy);
+    }
+    // 在 WorldMapGame 类中修改 trySpawnEnemyWithBlockRarity 方法
+    trySpawnEnemyWithBlockRarity(enemyType, block) {
+        const maxAttempts = 40; // 增加尝试次数
+        const playerX = this.player.physicsBody.position.x;
+        const playerY = this.player.physicsBody.position.y;
+
+        const MIN_SAFE_DISTANCE = 350;
+        const MAX_SPAWN_DISTANCE = 600;
+        const WALL_MARGIN = 20; // 墙边20像素禁区
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = MIN_SAFE_DISTANCE + Math.random() * (MAX_SPAWN_DISTANCE - MIN_SAFE_DISTANCE);
+
+            let x = playerX + Math.cos(angle) * distance;
+            let y = playerY + Math.sin(angle) * distance;
+
+            // 确保在地图范围内
+            x = Math.max(this.SAFE_BORDER, Math.min(WORLD_WIDTH - this.SAFE_BORDER, x));
+            y = Math.max(this.SAFE_BORDER, Math.min(WORLD_HEIGHT - this.SAFE_BORDER, y));
+
+            // ===== 检查是否离墙太近 =====
+            if (this.isTooCloseToWall(x, y, WALL_MARGIN)) {
+                continue; // 离墙太近，重新尝试
+            }
+
+            // 检查是否在特殊区域内
             const spawnSpecialZone = this.getSpecialZoneAt(x, y);
             if (spawnSpecialZone) {
                 // 如果在特殊区域内，使用特殊区域的规则生成
@@ -24550,6 +24694,12 @@ class WorldMapGame {
                 const rarity = selected.rarities[Math.floor(Math.random() * selected.rarities.length)];
 
                 const enemy = new Enemy(selected.type, x, y, level, rarity);
+
+                // 设置无敌时间
+                enemy.spawnTime = Date.now();
+                enemy.spawnProtection = 1500;
+                enemy.isSpawning = true;
+
                 this.enemies.push(enemy);
 
                 // 更新特殊区域计数
@@ -24563,29 +24713,32 @@ class WorldMapGame {
             const spawnBlock = this.blockManager.getBlockAt(x, y);
             if (!spawnBlock) continue;
 
+            // 检查是否在墙内
+            if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
+
+            // 计算到玩家的距离
+            const distanceToPlayer = Math.sqrt((x - playerX) ** 2 + (y - playerY) ** 2);
+
+            if (distanceToPlayer < MIN_SAFE_DISTANCE) continue;
+
             // 使用区块的稀有度生成
             const enemyRarity = this.blockManager.getRandomRarityForBlock(spawnBlock.type);
             const levelRange = this.blockManager.getLevelRangeForBlock(spawnBlock.type);
             const enemyLevel = Math.floor(Math.random() * (levelRange.max - levelRange.min + 1)) + levelRange.min;
 
-            if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
-
-            const distanceToPlayer = Math.sqrt((x - playerX) ** 2 + (y - playerY) ** 2);
-            if (distanceToPlayer < this.MIN_SPAWN_DISTANCE) continue;
-
             const enemy = new Enemy(enemyType, x, y, enemyLevel, enemyRarity);
-            this.enemies.push(enemy);
 
-            // 🗑️ 删除或注释掉区域计数
-            /*
-            const region = this.getRegionForPosition({x, y});
-            if (region) {
-                this.regionEnemyCounts[region.name] = (this.regionEnemyCounts[region.name] || 0) + 1;
-            }
-            */
+            enemy.spawnTime = Date.now();
+            enemy.spawnProtection = 1500;
+            enemy.isSpawning = true;
+
+            this.enemies.push(enemy);
 
             return;
         }
+
+        // 如果所有尝试都失败，在更远的地方强制生成一个
+        this.spawnEnemyForced(enemyType, block);
     }
 
     // 修改原有的 trySpawnEnemyInZone 方法，添加区域计数检查
@@ -25160,7 +25313,6 @@ class WorldMapGame {
         // 清空海绵伤害队列
         if (this.player) {
             this.player.spongeDamageQueue = [];
-            console.log("🧽 玩家死亡，海绵伤害已清零");
         }
 
         // 清除所有友方生物
@@ -25173,15 +25325,23 @@ class WorldMapGame {
         this.player.health = this.player.maxHealth;
         this.player.isDead = false;
 
-        // ===== ✅ 查找低一级的最近安全重生点 =====
+        // ===== 查找安全的重生点 =====
         const playerPos = this.player.physicsBody.position;
-        const spawnPoint = this.findNearestSafeRespawn(playerPos);
 
-        this.spawnPoint = spawnPoint; // 更新重生点
+        // 方法1：使用区块系统查找安全位置
+        let spawnPoint = this.findNearestSafeRespawn(playerPos);
+
+        // 方法2：如果区块系统返回的位置不安全，使用安全搜索
+        if (this.isInMazeWall(spawnPoint.x, spawnPoint.y) ||
+            this.isTooCloseToWall(spawnPoint.x, spawnPoint.y, 30)) {
+            console.log(`⚠️ 区块重生点不安全，搜索安全位置`);
+            spawnPoint = this.findSafeSpawnPoint(spawnPoint.x, spawnPoint.y, 300, 100);
+        }
+
+        this.spawnPoint = spawnPoint;
         this.player.physicsBody.position.x = spawnPoint.x;
         this.player.physicsBody.position.y = spawnPoint.y;
 
-        console.log(`✨ 玩家在新区块重生: (${spawnPoint.x.toFixed(0)}, ${spawnPoint.y.toFixed(0)})`);
 
         // 更新相机
         this.cameraOffset.x = spawnPoint.x - WIDTH / 2;
