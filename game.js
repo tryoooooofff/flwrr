@@ -1023,7 +1023,8 @@ const ITEM_IMAGE_URLS = {
     "Square Egg":"images/Square_egg.png",
     "Leech Egg":"images/Leech_egg.png",
     "Parasite Egg":"images/Parasite_egg.png",
-    "Chromosome":"images/Chromosome.png"
+    "Chromosome":"images/Chromosome.png",
+    "Controller":"images/Controller.png"
 
 };
 
@@ -1037,11 +1038,11 @@ export const ITEM_STATS = {
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, bleed_damage:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:160, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
-    "Corn": {base_attack:20, base_cooldown:100, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
+    "Corn": {base_attack:10, base_cooldown:100, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Root": {base_attack:19, base_cooldown:220, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
     "Web": {base_attack:10, base_cooldown:180, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
-
+    "Controller": {base_attack:1000000, base_cooldown:100, durability_bonus:700, use_rarity_multiplier: true, base_reload_time:1000},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000},
     "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -1337,7 +1338,7 @@ export const ITEM_ARMOR_VALUES = {
 };
 
 export const ARMOR_ELIGIBLE_ITEMS = new Set([
-    "Wing","Heavy","Corn","Pearl","Rock","Jelly"
+    "Wing","Heavy","Corn","Pearl","Rock","Jelly","Controller"
 ]);
 
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
@@ -3867,7 +3868,8 @@ class Item {
             "Stinger": 0.8,    // 刺耐久较低（高伤害代价）
             "Lightning": 0.7,  // 闪电耐久较低
             "Jelly": 0.9,      // 果冻耐久较低
-            "Magnet": 1.5,     // 磁铁耐久较高
+            "Magnet": 1.5,
+            "Controller":10000.0,
             "Antennae": 0.8,   // 触角耐久较低
             "Iris": 1.1,       // 虹膜耐久略高
             "Lotus": 1.2,      // 莲花耐久较高
@@ -5780,7 +5782,7 @@ class ArmorSystem {
         this.ARMOR_ELIGIBLE_ITEMS = new Set([
             "Wing", "Leaf", "Claw", "Fang", "Powder", "Root", "Antennae",
             "Cactus", "Magnet", "Iris", "Lotus", "Heavy", "Corn", "Stinger",
-            "Yucca", "Pearl", "Rock", "Jelly", "ThirdEye"
+            "Yucca", "Pearl", "Rock", "Jelly", "ThirdEye","Controller"
         ]);
 
         // 敌人护甲等级分类（来自 ENEMY_ARMOR_CLASSES）
@@ -6613,8 +6615,8 @@ class EnemyDrawer {
             WHITE = [255, 255, 255];
         } else {
             // 敌方模式（HTML 演示颜色）
-            bodyColor = [73, 69, 69];        // #494545
-            bodyBorder = [108, 103, 103];    // #6C6767
+            bodyColor = [108, 103, 103];        // #494545
+            bodyBorder = [73, 69, 69 ];   // #6C6767
             BLACK = [0, 0, 0];
             WHITE = [240, 240, 240];         // #f0f0f0
         }
@@ -6912,8 +6914,8 @@ class EnemyDrawer {
             BLACK = [0, 0, 0];
             WHITE = [255, 255, 255];
         } else {
-            bodyColor = [73, 69, 69];
-            bodyBorder = [108, 103, 103];
+            bodyColor = [108, 103, 103];
+            bodyBorder = [73, 69, 69];
             BLACK = [0, 0, 0];
             WHITE = [240, 240, 240];
         }
@@ -10327,6 +10329,7 @@ class ShopSystem {
             "Coral": 5,
             "Cotton": 4,
             "Cancer": 15,
+            "Controller":100000000000000000,
             "Bacteria_egg": 10,
             "Spider egg": 12,
             "Digger egg": 40,
@@ -10374,6 +10377,14 @@ class ShopSystem {
         // Sort items for better display
         this.shopItems.sort((a, b) => a.type.localeCompare(b.type));
 
+        // ===== 🆕 打折系统 =====
+        this.discountItems = []; // 打折商品列表
+        this.discountEndTime = 0; // 折扣结束时间
+        this.discountUpdateTime = 0; // 上次更新时间
+
+        // 初始化打折商品
+        this.refreshDailyDiscounts();
+
         // Currently selected item (for detail page)
         this.selectedItem = null;
         this.selectedItemPrice = 0;
@@ -10398,12 +10409,176 @@ class ShopSystem {
 
     }
 
+    // ===== 🆕 刷新每日折扣 =====
+    refreshDailyDiscounts() {
+        // 清空之前的折扣
+        this.discountItems = [];
+
+        // 获取当前日期作为随机种子
+        const today = new Date().toDateString();
+        const seed = this.hashCode(today);
+
+        // 使用种子生成随机数
+        const random = this.seededRandom(seed);
+
+        // 筛选出所有 Omega 和 Eternal 物品
+        const highRarityItems = [];
+        for (const item of this.shopItems) {
+            // 检查这个物品是否有 Omega 和 Eternal 版本（价格计算后是否合理）
+            const omegaPrice = this.getItemPrice(item.type, "Omega");
+            const eternalPrice = this.getItemPrice(item.type, "Eternal");
+
+            // 价格大于1000才考虑，避免太便宜
+            if (omegaPrice > 1000 || eternalPrice > 1000) {
+                highRarityItems.push(item);
+            }
+        }
+
+        console.log(`[Shop] Found ${highRarityItems.length} Omega/Eternal items for discount`);
+
+        if (highRarityItems.length === 0) return;
+
+        // 随机选择5个物品（如果少于5个就全选）
+        const discountCount = Math.min(5, highRarityItems.length);
+        const selectedIndices = [];
+
+        while (selectedIndices.length < discountCount) {
+            const index = Math.floor(random() * highRarityItems.length);
+            if (!selectedIndices.includes(index)) {
+                selectedIndices.push(index);
+            }
+        }
+
+        // 为每个选中的物品生成随机折扣（5%-30%）
+        for (const index of selectedIndices) {
+            const item = highRarityItems[index];
+            const discountPercent = 5 + Math.floor(random() * 26); // 5-30
+            const discountMultiplier = (100 - discountPercent) / 100;
+
+            // 计算 Omega 和 Eternal 的折扣价格
+            const omegaOriginal = this.getItemPrice(item.type, "Omega");
+            const eternalOriginal = this.getItemPrice(item.type, "Eternal");
+
+            this.discountItems.push({
+                type: item.type,
+                discountPercent: discountPercent,
+                discountMultiplier: discountMultiplier,
+                omegaOriginalPrice: omegaOriginal,
+                omegaDiscountedPrice: Math.floor(omegaOriginal * discountMultiplier),
+                eternalOriginalPrice: eternalOriginal,
+                eternalDiscountedPrice: Math.floor(eternalOriginal * discountMultiplier)
+            });
+        }
+
+        // 设置折扣结束时间（24小时后）
+        this.discountEndTime = Date.now() + 24 * 60 * 60 * 1000;
+        this.discountUpdateTime = Date.now();
+
+        console.log(`[Shop] Daily discounts refreshed: ${this.discountItems.length} items on sale`);
+        for (const item of this.discountItems) {
+            console.log(`  - ${item.type}: ${item.discountPercent}% off (Omega: ${this.formatPrice(item.omegaOriginalPrice)} -> ${this.formatPrice(item.omegaDiscountedPrice)})`);
+            console.log(`    Eternal: ${this.formatPrice(item.eternalOriginalPrice)} -> ${this.formatPrice(item.eternalDiscountedPrice)}`);
+        }
+    }
+
+    // ===== 🆕 简单的哈希函数 =====
+    hashCode(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return Math.abs(hash);
+    }
+
+    // ===== 🆕 种子随机数生成器 =====
+    seededRandom(seed) {
+        return function() {
+            seed = (seed * 9301 + 49297) % 233280;
+            return seed / 233280;
+        };
+    }
+
+    // ===== 🆕 检查是否需要更新折扣 =====
+    checkDiscountUpdate() {
+        const now = Date.now();
+
+        // 如果超过24小时，更新折扣
+        if (now > this.discountEndTime) {
+            console.log("[Shop] Discount expired, refreshing...");
+            this.refreshDailyDiscounts();
+            return true;
+        }
+
+        // 如果跨天了也更新（确保每天不同）
+        const lastUpdateDay = new Date(this.discountUpdateTime).toDateString();
+        const today = new Date().toDateString();
+
+        if (lastUpdateDay !== today) {
+            console.log("[Shop] New day, refreshing discounts...");
+            this.refreshDailyDiscounts();
+            return true;
+        }
+
+        return false;
+    }
+
+    // ===== 新增：格式化价格显示 =====
+    formatPrice(price) {
+        if (price >= 1000000000000) {
+            return (price / 1000000000000).toFixed(2) + 'T';
+        } else if (price >= 1000000000) {
+            return (price / 1000000000).toFixed(2) + 'B';
+        } else if (price >= 1000000) {
+            return (price / 1000000).toFixed(2) + 'M';
+        } else if (price >= 1000) {
+            return (price / 1000).toFixed(2) + 'K';
+        } else {
+            return price.toString();
+        }
+    }
+
     // Get item price based on rarity
     getItemPrice(itemType, rarity) {
         const basePrice = this.BASE_PRICES[itemType] || 10;
         const multiplier = this.PRICE_MULTIPLIERS[rarity] || 1;
         return basePrice * multiplier;
     }
+
+    // ===== 🆕 获取折扣后的价格（对 Omega 和 Eternal 生效）=====
+    getDiscountedPrice(itemType, rarity) {
+        // 只有 Omega 和 Eternal 稀有度才有折扣
+        if (rarity !== "Omega" && rarity !== "Eternal") {
+            return this.getItemPrice(itemType, rarity);
+        }
+
+        // 检查是否是打折商品
+        for (const discount of this.discountItems) {
+            if (discount.type === itemType) {
+                if (rarity === "Omega") {
+                    return discount.omegaDiscountedPrice;
+                } else if (rarity === "Eternal") {
+                    return discount.eternalDiscountedPrice;
+                }
+            }
+        }
+
+        // 不是打折商品，返回原价
+        return this.getItemPrice(itemType, rarity);
+    }
+
+    // 获取格式化后的价格（考虑折扣）
+    getFormattedPrice(itemType, rarity) {
+        const price = this.getDiscountedPrice(itemType, rarity);
+        return this.formatPrice(price);
+    }
+
+    // 获取原价（用于显示）
+    getOriginalPrice(itemType, rarity) {
+        return this.getItemPrice(itemType, rarity);
+    }
+
     // 在 ShopSystem 类中
     forceRedraw() {
         console.log("🔄 Forcing shop redraw");
@@ -10412,10 +10587,17 @@ class ShopSystem {
             // 不需要额外操作，主循环会重绘
         }
     }
+
     // Get item sell price (1/10 of buy price)
     getItemSellPrice(itemType, rarity) {
         const buyPrice = this.getItemPrice(itemType, rarity);
         return Math.max(1, Math.floor(buyPrice / 12));
+    }
+
+    // 获取格式化后的出售价格
+    getFormattedSellPrice(itemType, rarity) {
+        const price = this.getItemSellPrice(itemType, rarity);
+        return this.formatPrice(price);
     }
 
     // 修改 getStarCount 方法，直接从 this.stars 返回
@@ -10440,13 +10622,16 @@ class ShopSystem {
         // 如果余额不足，返回 false
         return false;
     }
+
     // Buy item
     buyItem(shopItem, rarity) {
-        const price = this.getItemPrice(shopItem.type, rarity);
+        // 获取实际价格（考虑折扣）
+        const price = this.getDiscountedPrice(shopItem.type, rarity);
         const starCount = this.getStarCount();
+        const formattedPrice = this.formatPrice(price);
 
         if (starCount < price) {
-            this.showMessage(`❌ Need ${price} Stars, you have ${starCount}`);
+            this.showMessage(`❌ Need ${formattedPrice} Stars, you have ${this.formatPrice(starCount)}`);
             return false;
         }
 
@@ -10474,7 +10659,8 @@ class ShopSystem {
                 rarity: item.rarity,
                 level: item.level,
                 count: 1,
-                pricePerUnit: this.getItemSellPrice(item.type, item.rarity)
+                pricePerUnit: this.getItemSellPrice(item.type, item.rarity),
+                formattedPrice: this.getFormattedSellPrice(item.type, item.rarity)
             };
             this.sellSlotCount = 1;
 
@@ -10535,6 +10721,7 @@ class ShopSystem {
         }
 
         const totalPrice = this.sellSlot.count * this.sellSlot.pricePerUnit;
+        const formattedTotal = this.formatPrice(totalPrice);
 
         // Add Stars
         this.addStars(totalPrice);
@@ -10543,7 +10730,7 @@ class ShopSystem {
         this.sellSlot = null;
         this.sellSlotCount = 0;
 
-        this.showMessage(`✅ Sold! Got ${totalPrice} Stars`);
+        this.showMessage(`✅ Sold! Got ${formattedTotal} Stars`);
         return true;
     }
 
@@ -10557,6 +10744,9 @@ class ShopSystem {
         if (this.messageTimer > 0) {
             this.messageTimer--;
         }
+
+        // ===== 🆕 检查折扣更新 =====
+        this.checkDiscountUpdate();
     }
 
     handleClick(pos) {
@@ -10727,6 +10917,9 @@ class ShopSystem {
     draw(ctx) {
         if (!this.visible) return;
 
+        // 检查折扣更新
+        this.checkDiscountUpdate();
+
         // Semi-transparent background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -10744,6 +10937,17 @@ class ShopSystem {
         ctx.textAlign = 'center';
         ctx.fillText('SHOP', this.shopArea[0] + this.shopArea[2]/2, this.shopArea[1] + 45);
 
+        // ===== 🆕 显示折扣信息 =====
+        if (this.discountItems.length > 0) {
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#ff6b6b';
+            ctx.textAlign = 'center';
+            const discountEndDate = new Date(this.discountEndTime);
+            const hoursLeft = Math.max(0, Math.floor((this.discountEndTime - Date.now()) / (60 * 60 * 1000)));
+            ctx.fillText(`🔥 Omega/Eternal SALE! ${this.discountItems.length} items ${hoursLeft}h left`,
+                        this.shopArea[0] + this.shopArea[2]/2, this.shopArea[1] + 80);
+        }
+
         // Close button
         ctx.fillStyle = '#e74c3c';
         ctx.fillRect(...this.closeButton);
@@ -10760,7 +10964,7 @@ class ShopSystem {
         ctx.font = 'bold 24px Arial';
         ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'right';
-        ctx.fillText(`⭐ ${starCount}`, this.shopArea[0] + this.shopArea[2] - 30, this.shopArea[1] + 45);
+        ctx.fillText(`⭐ ${this.formatPrice(starCount)}`, this.shopArea[0] + this.shopArea[2] - 30, this.shopArea[1] + 45);
 
         // Tab buttons
         // Buy button
@@ -10838,6 +11042,15 @@ class ShopSystem {
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, this.slotSize, this.slotSize);
 
+            // 检查是否是打折商品
+            const isDiscounted = this.discountItems.some(d => d.type === item.type);
+            if (isDiscounted) {
+                // 绘制金色边框表示打折
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x - 2, y - 2, this.slotSize + 4, this.slotSize + 4);
+            }
+
             // Item icon
             const tempItem = new Item(item.type, 1, "Common");
             if (tempItem.draw) {
@@ -10850,11 +11063,54 @@ class ShopSystem {
             ctx.textAlign = 'center';
             ctx.fillText(item.type.substring(0, 6), x + this.slotSize/2, y + this.slotSize + 15);
 
-            // Common price
+            // Common price with formatting
             const price = this.getItemPrice(item.type, "Common");
-            ctx.font = 'bold 12px Arial';
+            const formattedPrice = this.formatPrice(price);
+            ctx.font = 'bold 16px Arial';
             ctx.fillStyle = '#ffd700';
-            ctx.fillText(`⭐${price}`, x + this.slotSize/2, y + this.slotSize + 30);
+            ctx.fillText(`⭐${formattedPrice}`, x + this.slotSize/2, y + this.slotSize + 30);
+
+            // ===== 🆕 如果是打折商品，在右上角显示斜角长方形折扣标签 =====
+            if (isDiscounted) {
+                const discount = this.discountItems.find(d => d.type === item.type);
+                if (discount) {
+                    // 保存当前上下文状态
+                    ctx.save();
+
+                    // 折扣标签位置（物品格右上角）
+                    const tagWidth = 35;
+                    const tagHeight = 20;
+                    const tagX = x + this.slotSize - tagWidth - 2;
+                    const tagY = y + 2;
+
+                    // 绘制斜角长方形（平行四边形）
+                    ctx.beginPath();
+                    ctx.moveTo(tagX + 5, tagY); // 左上角（带斜角）
+                    ctx.lineTo(tagX + tagWidth, tagY); // 右上角
+                    ctx.lineTo(tagX + tagWidth - 5, tagY + tagHeight); // 右下角（带斜角）
+                    ctx.lineTo(tagX, tagY + tagHeight); // 左下角
+                    ctx.closePath();
+
+                    // 填充红色背景
+                    ctx.fillStyle = '#414141';
+                    ctx.fill();
+
+                    // 白色边框
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // 白色文字显示折扣比例
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(`-${discount.discountPercent}%`, tagX + tagWidth/2 - 2, tagY + tagHeight/2);
+
+                    // 恢复上下文
+                    ctx.restore();
+                }
+            }
         }
 
         // Simple scrollbar
@@ -10906,12 +11162,26 @@ class ShopSystem {
             const rarity = rarities[i];
             const btnX = this.shopArea[0] + 200 + (i % 5) * 110;
             const btnY = this.shopArea[1] + 300 + Math.floor(i / 5) * 50;
-            const price = this.getItemPrice(item.type, rarity);
+
+            // 获取价格（考虑折扣）
+            let price = this.getDiscountedPrice(item.type, rarity);
+            let formattedPrice = this.formatPrice(price);
+
+            // 检查是否是打折的商品（Omega 或 Eternal）
+            const isDiscounted = (rarity === "Omega" || rarity === "Eternal") &&
+                this.discountItems.some(d => d.type === item.type);
 
             // Button background
             ctx.fillStyle = '#34495e';
             ctx.fillRect(btnX, btnY, 100, 40);
-            ctx.strokeStyle = RARITY_COLORS[rarity] || 'white';
+
+            // 如果是打折的商品，使用金色边框
+            if (isDiscounted) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+            } else {
+                ctx.strokeStyle = RARITY_COLORS[rarity] || 'white';
+            }
             ctx.strokeRect(btnX, btnY, 100, 40);
 
             // Rarity text
@@ -10920,10 +11190,59 @@ class ShopSystem {
             ctx.textAlign = 'center';
             ctx.fillText(rarity, btnX + 50, btnY + 18);
 
-            // Price
-            ctx.font = 'bold 12px Arial';
+            // Price with formatting
+            ctx.font = 'bold 18px Arial';
             ctx.fillStyle = '#ffd700';
-            ctx.fillText(`⭐${price}`, btnX + 50, btnY + 32);
+            ctx.fillText(`⭐${formattedPrice}`, btnX + 50, btnY + 25);
+
+            // 如果是打折的商品，显示原价划线
+            if (isDiscounted) {
+                const originalPrice = this.getOriginalPrice(item.type, rarity);
+                const originalFormatted = this.formatPrice(originalPrice);
+                ctx.font = '13px Arial';
+                ctx.fillStyle = '#ff6b6b';
+                ctx.textAlign = 'center';
+
+                // 绘制删除线
+                const textX = btnX + 50;
+                const textY = btnY + 38;
+                ctx.fillText(`was ${originalFormatted}`, textX, textY);
+
+                // 获取折扣百分比
+                const discount = this.discountItems.find(d => d.type === item.type);
+                if (discount) {
+                    // 在按钮右上角显示斜角长方形折扣标签
+                    ctx.save();
+
+                    // 标签位置（按钮右上角）
+                    const tagWidth = 35;
+                    const tagHeight = 20;
+                    const tagX = btnX + 100 - tagWidth - 2;
+                    const tagY = btnY + 2;
+
+                    // 绘制斜角长方形
+                    ctx.beginPath();
+                    ctx.moveTo(tagX + 4, tagY);
+                    ctx.lineTo(tagX + tagWidth, tagY);
+                    ctx.lineTo(tagX + tagWidth - 4, tagY + tagHeight);
+                    ctx.lineTo(tagX, tagY + tagHeight);
+                    ctx.closePath();
+
+                    ctx.fillStyle = '#414141';
+                    ctx.fill();
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(`-${discount.discountPercent}%`, tagX + tagWidth/2 - 2, tagY + tagHeight/2);
+
+                    ctx.restore();
+                }
+            }
         }
 
         // Back button
@@ -10977,12 +11296,13 @@ class ShopSystem {
                 ctx.shadowBlur = 0;
             }
 
-            // Show total sell price
+            // Show total sell price with formatting
             const totalPrice = this.sellSlot.count * this.sellSlot.pricePerUnit;
+            const formattedTotal = this.formatPrice(totalPrice);
             ctx.font = 'bold 18px Arial';
             ctx.fillStyle = '#ffd700';
             ctx.textAlign = 'center';
-            ctx.fillText(`Price: ⭐${totalPrice}`, circleX + 60, circleY + 140);
+            ctx.fillText(`Price: ⭐${formattedTotal}`, circleX + 60, circleY + 140);
 
             // Sell button hint (click circle to sell)
             ctx.font = '14px Arial';
@@ -20890,7 +21210,7 @@ class Player {
 
                     // === Fang：吸血（如果敌人没死也吸）===
                     if (petal.itemType === "Fang" && !died) {
-                        const lifestealRatio = 0.15 * petal.level;
+                        const lifestealRatio = 0.1 * petal.level;
                         const heal = finalDamage * lifestealRatio;
                         this.health = Math.min(this.maxHealth, this.health + heal);
                         totalHeal += heal;
