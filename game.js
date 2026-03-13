@@ -1067,7 +1067,7 @@ export const ITEM_STATS = {
     "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, use_rarity_multiplier: true, base_reload_time:2000},
     "Lotus": {base_attack:5, base_cooldown:300, poison_resistance:0.8, use_rarity_multiplier: true, base_reload_time:1500},
     "Heavy": {base_attack:6, base_cooldown:400, health_bonus:100, knockback_power:480, use_rarity_multiplier: true, base_reload_time:4500},
-    "Controller": {base_attack:1000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000},
+    "Controller": {base_attack:100000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000},
 
     // ========== 生物蛋类 ==========
     "WhiteBloodCell egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000},
