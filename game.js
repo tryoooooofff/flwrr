@@ -97,7 +97,7 @@ export const REGIONS = [
 
 // Load region settings
 export const LOAD_DISTANCE = 700;  // Strong load region radius
-export const WEAK_LOAD_DISTANCE = 1300;  // Weak load region radius
+export const WEAK_LOAD_DISTANCE = 1100;  // Weak load region radius
 export const MAX_ENEMIES_WORLD = 500;  // Increased max enemies for the entire map
 
 // Friendly unit level → Size multiplier (linked to player level or petal level)
@@ -162,6 +162,8 @@ const ENEMY_XP_TABLE = {
     "Bacteria": { baseXp: 8, typeBonus: 1.0 },
     "Cancer": { baseXp: 30, typeBonus: 2.1 },
     "Parasite":{ baseXp: 10, typeBonus: 1.1 },
+    "Bacteriophage":{ baseXp: 13, typeBonus: 1.1 },
+    "Virus":{baseXp: 5, typeBonus: 1.0},
 
     // 沙漠火蚁系列
     "WorkerFireAnt": { baseXp: 10, typeBonus: 1.1 },
@@ -465,7 +467,9 @@ export const BIOME_SPAWN_RATES = {
         "WhiteBloodCell": { weight: 30, minLevel: 2, maxLevel: 5 },
         "Bacteria": {weight: 90, minLevel: 1, maxLevel: 5 },
         "Cancer":{ weight: 0.008, minLevel: 1, maxLevel: 5 },
-        "Parasite": {weight: 90, minLevel: 1, maxLevel: 5 }
+        "Parasite": {weight: 50, minLevel: 1, maxLevel: 5 },
+        "Bacteriophage": {weight: 40, minLevel: 1, maxLevel: 5 },
+        "Virus": {weight: 80, minLevel: 1, maxLevel: 5 }
     },
 
     "Desert": {
@@ -1024,13 +1028,18 @@ const ITEM_IMAGE_URLS = {
     "Leech Egg":"images/Leech_egg.png",
     "Parasite Egg":"images/Parasite_egg.png",
     "Chromosome":"images/Chromosome.png",
-    "Controller":"images/Controller.png"
+    "Controller":"images/Controller.png",
+    "Bacteriophage egg":"images/Bacteriophage_egg.png",
+    "Virus egg":"images/Virus_egg.png",
+    "Suger":"images/Suger.png"
+
 
 };
 
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000},
+    "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1500},
     "Leaf": {base_attack:15, base_cooldown:180, healing:1, use_rarity_multiplier: true, base_reload_time:2500},
     "Claw": {base_attack:20, base_cooldown:250, crit_chance:0.1, use_rarity_multiplier: true, base_reload_time:3500},
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000},
@@ -1038,11 +1047,11 @@ export const ITEM_STATS = {
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, bleed_damage:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:160, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
-    "Corn": {base_attack:10, base_cooldown:100, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
+    "Corn": {base_attack:20, base_cooldown:100, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Root": {base_attack:19, base_cooldown:220, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
     "Web": {base_attack:10, base_cooldown:180, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
-    "Controller": {base_attack:1000000, base_cooldown:100, durability_bonus:700, use_rarity_multiplier: true, base_reload_time:1000},
+
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000},
     "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -1058,12 +1067,13 @@ export const ITEM_STATS = {
     "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, use_rarity_multiplier: true, base_reload_time:2000},
     "Lotus": {base_attack:5, base_cooldown:300, poison_resistance:0.8, use_rarity_multiplier: true, base_reload_time:1500},
     "Heavy": {base_attack:6, base_cooldown:400, health_bonus:100, knockback_power:480, use_rarity_multiplier: true, base_reload_time:4500},
+    "Controller": {base_attack:1000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000},
 
     // ========== 生物蛋类 ==========
-    "WhiteBloodCell Egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000},
-    "Spider Egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000},
-    "RedBloodCell Egg": {base_attack:1, base_cooldown:8000, spawn_redbloodcell:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000},
-    "StemCell Egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:25000},
+    "WhiteBloodCell egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000},
+    "Spider egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000},
+    "RedBloodCell egg": {base_attack:1, base_cooldown:8000, spawn_redbloodcell:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000},
+    "StemCell egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:25000},
     "queen ant egg": {base_attack:1, base_cooldown:6000, spawn_queenant:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000},
     "WorkerFireAnt egg": {base_attack:1, base_cooldown:10000, spawn_workerfireant:true, spawn_count:4, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000},
     "SoldierFireAnt egg": {base_attack:1, base_cooldown:15000, spawn_soldierfireant:true, spawn_count:5, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:15000},
@@ -1071,9 +1081,17 @@ export const ITEM_STATS = {
     "FireAntOvermind egg": {base_attack:1, base_cooldown:9000, spawn_fireantovermind:true, spawn_count:2, durability_bonus:60, use_rarity_multiplier: true, base_reload_time:15000},
     "FireAntHole egg": {base_attack:1, base_cooldown:18000, spawn_fireanthole:true, spawn_count:10, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:20000},
     "Cancer": {base_attack:25, base_cooldown:300, is_cancer:true, cancer_clone_chance:1.0, use_rarity_multiplier: true, base_reload_time:2000},
-    "Cancer egg": {base_attack:1, base_cooldown:8000, spawn_Cancer:true, spawn_count:2, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:15000},
+    "Cancer egg": {base_attack:1, base_cooldown:8000, spawn_cancer:true, spawn_count:2, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:15000},
+    "Bacteria_egg": {base_attack:1, base_cooldown:8000, spawn_bacteria:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000},
+    "Square Egg": {base_attack:50, base_cooldown:2000, base_reload_time:20000, spawn_square:true, spawn_count:1, health_bonus:5000, durability_bonus:5000, use_rarity_multiplier: true},
+    "Virus egg": {base_attack:1, base_cooldown:8000, spawn_virus:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:5000},
+    // ========== Digger 系列蛋 ==========
+    "TrashDigger egg": {base_attack:1, base_cooldown:6000, spawn_trashdigger:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:6000},
+    "Digger egg": {base_attack:1, base_cooldown:6000, spawn_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000},
+    "MudDigger_egg": {base_attack:1, base_cooldown:8000, spawn_muddigger:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000},
+    "Biologist egg": {base_attack:1, base_cooldown:6000, spawn_biologist:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000},
 
-    // ========== 🌊 海洋物品 ==========
+    // ========== 🌊 海洋生物 ==========
     "Sponge": {base_attack:1, base_cooldown:0, is_sponge:true, damage_absorption:true, absorption_duration:4, use_rarity_multiplier: true, base_reload_time:3000},
     "Salt": {base_attack:5, base_cooldown:100, bonus_vs_soft:3, use_rarity_multiplier: true, base_reload_time:2000},
     "Sand": {base_attack:8, base_cooldown:150, slow_effect:0.3, slow_duration:2.0, use_rarity_multiplier: true, base_reload_time:2500},
@@ -1089,98 +1107,28 @@ export const ITEM_STATS = {
     "Crab egg": {base_attack:1, base_cooldown:8000, spawn_crab:true, spawn_count:3, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000},
     "CrabHole egg": {base_attack:1, base_cooldown:18000, spawn_crabhole:true, spawn_count:10, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:19000},
     "Cotton": {base_attack:0, base_cooldown:0, is_cotton:true, damage_absorption:12.5, absorption_multiplier:3, use_rarity_multiplier: true, base_reload_time:8000},
+    "Bubble egg": {base_attack:1, base_cooldown:5000, spawn_bubble:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:6000},
 
-    // ========== 🆕 下水道物品 ==========
+    // ========== 🆕 下水道生物 ==========
     "ManHole egg": {base_attack:1, base_cooldown:20000, spawn_manhole:true, spawn_count:1, durability_bonus:100, use_rarity_multiplier: true, base_reload_time:22000},
     "Fly_egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:3, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:12000},
     "Rat_egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:21000},
     "Roach_egg": {base_attack:1, base_cooldown:6000, spawn_roach:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000},
     "PooStick": {base_attack:1, base_cooldown:8000, spawn_poostorm:true, spawn_count:3, durability_bonus:10, slow_effect:0.4, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000},
     "Poo": {base_attack:8, base_cooldown:120, slow_effect:0.3, slow_duration:2.0, poison_damage:2, poison_duration:1.0, use_rarity_multiplier: true, base_reload_time:2000},
-    // 在 ITEM_STATS 中修改 Basil 的配置
-    "Basil": {
-        base_attack: 12,
-        base_cooldown: 160,
-        healing: 3,
-        poison_resistance: 0.5,
-        clean_effect: true,
-        // ✅ 添加回血速度加成（百分比）
-        heal_speed_bonus: {
-            "Common": 0.05,    // +5%
-            "Unusual": 0.10,   // +10%
-            "Rare": 0.12,      // +12%
-            "Epic": 0.14,      // +14%
-            "Legendary": 0.16, // +16%
-            "Mythic": 0.20,    // +20%
-            "Ultra": 0.25,     // +25%
-            "Super": 0.30,     // +30%
-            "Omega": 0.40,     // +40%
-            "Eternal": 0.50    // +50%
-        },
-        use_rarity_multiplier: true
-    },
+    "Basil": {base_attack:12, base_cooldown:160, healing:3, poison_resistance:0.5, clean_effect: true, heal_speed_bonus: {"Common":0.05,"Unusual":0.10,"Rare":0.12,"Epic":0.14,"Legendary":0.16,"Mythic":0.20,"Ultra":0.25,"Super":0.30,"Omega":0.40,"Eternal":0.50}, use_rarity_multiplier: true},
 
-    // ========== 🍃 Golden Leaf ==========
+    // ========== 🍃 特殊物品 ==========
     "Golden Leaf": {base_attack:5, base_cooldown:180, healing:1, is_golden_leaf: true, reload_reduction: {"Mythic":0.12,"Ultra":0.16,"Super":0.20,"Omega":0.28,"Eternal":0.40}, use_rarity_multiplier: true, base_reload_time:3000},
+    "Cutter": {base_attack:35, base_cooldown:120, use_rarity_multiplier: true, base_reload_time:1800},
 
-    // ========== Digger 系列蛋 ==========
-    "TrashDigger egg": {base_attack:1, base_cooldown:6000, spawn_trashdigger:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:6000},
-    "Digger egg": {base_attack:1, base_cooldown:6000, spawn_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000},
-    "MudDigger_egg": {base_attack:1, base_cooldown:8000, spawn_muddigger:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000},
-    "Biologist egg": {base_attack:1, base_cooldown:6000, spawn_biologist:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000},
-    "Square Egg": {
-        base_attack: 50,              // 基础攻击力 50
-        base_cooldown: 2000,          // 2秒冷却
-        base_reload_time: 20000,       // 30秒重载
-        spawn_square: true,            // 生成 Square
-        spawn_count: 1,
-        health_bonus: 5000,            // 生命值加成
-        durability_bonus: 5000,
-        use_rarity_multiplier: true
-    },
-    // ========== 🆕 新生物蛋 ==========
-    "Leech Egg": {
-        base_attack: 1,
-        base_cooldown: 8000,
-        spawn_leech: true,
-        spawn_count: 2,
-        durability_bonus: 30,
-        use_rarity_multiplier: true,
-        base_reload_time: 12000
-    },
+    // ========== 🆕 噬菌体蛋 ==========
+    "Bacteriophage egg": {base_attack:1, base_cooldown:8000, spawn_bacteriophage:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000},
 
-    "Parasite Egg": {
-        base_attack: 1,
-        base_cooldown: 7000,
-        spawn_parasite: true,
-        spawn_count: 1,
-        durability_bonus: 25,
-        use_rarity_multiplier: true,
-        base_reload_time: 6000
-    },
-
-    // ========== 🆕 Chromosome（修复耐久度）==========
-    "Chromosome": {
-        base_attack: 0,
-        base_cooldown: 100,
-        is_chromosome: true,
-        repair_rate: 25,  // 基础修复速度 25/s
-        use_rarity_multiplier: true,
-        base_reload_time: 1000,
-        // 根据稀有度增加修复速度
-        repair_rate_multiplier: {
-            "Common": 1.0,
-            "Unusual": 3.0,
-            "Rare": 9.0,
-            "Epic": 27.0,
-            "Legendary": 81.0,
-            "Mythic": 243.0,
-            "Ultra": 730.0,
-            "Super": 2187.0,
-            "Omega": 6961.0,
-            "Eternal": 20000.0
-        }
-    }
+    // ========== 🆕 Leech & Parasite 蛋 ==========
+    "Leech Egg": {base_attack:1, base_cooldown:8000, spawn_leech:true, spawn_count:2, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000},
+    "Parasite Egg": {base_attack:1, base_cooldown:7000, spawn_parasite:true, spawn_count:2, durability_bonus:25, use_rarity_multiplier: true, base_reload_time:7000},
+    "Chromosome": {base_attack:0, base_cooldown:100, is_chromosome:true, repair_rate:25, repair_rate_multiplier: {"Common":1.0,"Unusual":1.5,"Rare":2.0,"Epic":2.5,"Legendary":3.0,"Mythic":4.0,"Ultra":5.0,"Super":6.0,"Omega":8.0,"Eternal":10.0}, use_rarity_multiplier: true, base_reload_time:1000}
 };
 // ========== Cancer 细胞克隆稀有度概率表 ==========
 export const CANCER_MOB_RARITY_TABLE = {
@@ -1225,8 +1173,8 @@ export const ENEMY_DROP_TABLE = {
     "Sandstorm": ["Stick","Rock"],
     "Rock": ["Moon Egg", "Rock", "Heavy"],
     "StemCell": ["Iris", "DNA","StemCell egg", "Chromosome"],
-    "RedBloodCell": ["DNA","Iris", "Fang","RedBloodCell egg"],
-    "WhiteBloodCell": ["Iris", "Lotus","WhiteBloodCell egg"],
+    "RedBloodCell": ["DNA","Iris","Suger","RedBloodCell egg"],
+    "WhiteBloodCell": ["Iris", "Suger","WhiteBloodCell egg","Chromosome"],
     "Bee": ["Stinger","Pollen","Honey"],
     "QueenAnt": ["queen ant egg","Leaf","Corn"],
     "WorkerFireAnt": ["Corn","Yucca","WorkerFireAnt egg"],
@@ -1236,7 +1184,7 @@ export const ENEMY_DROP_TABLE = {
     "FireAntHole": ["FireAntHole egg", "Magnet", "Corn"],
     "Bacteria": ["Iris", "Bacteria_egg", "Chromosome"],
     "Bubble": ["Bubble", "Air", "Bubble egg"],
-    "Cancer": ["Cancer","Cancer egg","DNA","Iris"],
+    "Cancer": ["Cancer","Cancer egg","DNA","Iris","Chromosome"],
     // 在 ENEMY_DROP_TABLE 中，在下水道生物后面添加
     "TrashDigger": ["TrashDigger egg", "Poo", "Iris", "Cutter"],
     "Digger": ["Digger egg", "Cutter", "Heavy", "Bur"],
@@ -1244,7 +1192,9 @@ export const ENEMY_DROP_TABLE = {
     "Biologist": ["Biologist egg", "DNA", "Iris", "Cancer"],
     "Square": ["Square Egg", "Square Egg"],
     "Leech": ["Fang", "Leech Egg", "Salt"],  // Leech 可能掉落 Chromosome
-    "Parasite": ["Fang", "Parasite Egg", "Chromosome", "Iris"],
+    "Parasite": ["Suger", "Parasite Egg", "Chromosome", "Iris"],
+    "Bacteriophage": ["Lotus", "Bacteriophage egg", "Iris"],
+    "Virus":["Iris","Virus egg","Chromosome","Suger"],
     // ========== 🌊 新增海洋生物掉落 ==========
     "Starfish": [
         "Starfish",      // 海星
@@ -1338,13 +1288,13 @@ export const ITEM_ARMOR_VALUES = {
 };
 
 export const ARMOR_ELIGIBLE_ITEMS = new Set([
-    "Wing","Heavy","Corn","Pearl","Rock","Jelly","Controller"
+    "Wing","Heavy","Pearl","Rock","Jelly","Controller"
 ]);
 
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
-    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant"],
+    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage"],
     "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell"],
     "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist"] // E级 - 最难打的Boss级生物
@@ -6065,7 +6015,31 @@ class EnemyDrawer {
         context.lineWidth = lineWidth;
         context.stroke();
     }
+    // ===== 辅助函数：获取正 N 边形顶点 =====
+    getPolygonPoints(cx, cy, radius, sides, offsetDeg = 0) {
+        const points = [];
+        const angleStep = (Math.PI * 2) / sides;
+        const offsetRad = offsetDeg * Math.PI / 180;
 
+        for (let i = 0; i < sides; i++) {
+            const angle = angleStep * i + offsetRad;
+            points.push([
+                cx + radius * Math.cos(angle),  // ✅ 使用相同 radius
+                cy + radius * Math.sin(angle)
+            ]);
+        }
+        return points;
+    }
+
+    // ===== 五边形顶点（平顶朝上）=====
+    getPentagonPoints(cx, cy, radius) {
+        return this.getPolygonPoints(cx, cy, radius, 5, -18 * Math.PI / 180);
+    }
+
+    // ===== 十边形顶点（平顶朝上）=====
+    getDecagonPoints(cx, cy, radius) {
+        return this.getPolygonPoints(cx, cy, radius, 10, -54 * Math.PI / 180);
+    }
     // 在 EnemyDrawer 类中添加
     drawEllipse(context, x, y, width, height, color, stroke = false, strokeColor = null, lineWidth = 1) {
         context.save();
@@ -6084,7 +6058,327 @@ class EnemyDrawer {
         context.restore();
     }
 
-    // 辅助函数：绘制圆形
+    // ==================== 病毒绘制（修复版）====================
+    drawVirus(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+
+        // 确保 x 和 y 是有效数字
+        if (isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
+            console.warn("Invalid coordinates:", { x, y });
+            return;
+        }
+
+        // 获取稀有度缩放
+        const rarity = enemyObj?.rarity || "Common";
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.0, "Rare": 1.0, "Epic": 1.0,
+            "Legendary": 1.0, "Mythic": 1.0, "Ultra": 1.0, "Super": 1.0,
+            "Omega": 1.0, "Eternal": 1.0
+        };
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+
+        // 基础大小 - 这是视觉上的参考大小
+        const baseSize = Math.max(15, size * viewScale * rarityFactor);
+        const isFriendly = enemyObj?.isFriendly === true;
+
+        // 颜色定义
+        let darkColor, midColor, lightColor, accentColor, darkAccentColor;
+
+        if (isFriendly) {
+            // 友方金色系
+            darkColor = '#B8860B';      // 深金色
+            midColor = '#DAA520';        // 金杖色
+            lightColor = '#FFD700';      // 金色
+            accentColor = '#FFD700';      // 金色
+            darkAccentColor = '#8B4513';  // 深棕色
+        } else {
+            // 敌方原色
+            darkColor = '#165194';        // 深蓝色
+            midColor = '#3D77B9';         // 中蓝色
+            lightColor = '#5A9CE0';       // 亮蓝色
+            accentColor = '#BD3031';       // 红色
+            darkAccentColor = '#8B1A1A';   // 深红色
+        }
+
+        // x 和 y 已经是屏幕坐标
+        const centerX = x;
+        const centerY = y;
+
+        // 检查是否在屏幕内
+        if (centerX < -200 || centerX > WIDTH + 200 || centerY < -200 || centerY > HEIGHT + 200) {
+            return;
+        }
+
+        // 保存上下文
+        context.save();
+        // ===== 2. 绘制放射线（修复线宽）=====
+        const rayLength = baseSize * 0.8;
+        const rayCount = 10;
+
+        // 放射线宽度 - 基于身体大小
+        context.strokeStyle = accentColor;
+        context.lineWidth = Math.max(1.5, baseSize * 0.05); // 身体大小的 5%
+        context.lineCap = 'round';
+
+        for (let i = 0; i < rayCount; i++) {
+            const angle = (36 * i - 54) * Math.PI / 180;
+            const endX = centerX + rayLength * Math.cos(angle);
+            const endY = centerY + rayLength * Math.sin(angle);
+
+            context.beginPath();
+            context.moveTo(centerX, centerY);
+            context.lineTo(endX, endY);
+            context.stroke();
+        }
+
+        // ===== 1. 绘制中心圆（已经正确缩放）=====
+        const outerRadius = Math.max(5, baseSize * 0.7);
+        const innerRadius = Math.max(4, baseSize * 0.6);
+
+        // 外圆
+        context.beginPath();
+        context.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
+        context.fillStyle = darkColor;
+        context.fill();
+        // 内圆
+        context.beginPath();
+        context.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        context.fillStyle = lightColor;
+        context.fill();
+
+
+
+        // ===== 3. 绘制端点椭圆（修复线宽）=====
+        const ellipseDist = baseSize * 0.88;
+        const longAxis = Math.max(4, baseSize * 0.28);
+        const shortAxis = Math.max(3, baseSize * 0.16);
+
+        for (let i = 0; i < rayCount; i++) {
+            const angle = (36 * i - 54) * Math.PI / 180;
+            const endX = centerX + ellipseDist * Math.cos(angle);
+            const endY = centerY + ellipseDist * Math.sin(angle);
+
+            // 确保端点坐标有效
+            if (isNaN(endX) || isNaN(endY)) continue;
+
+            context.save();
+            context.translate(endX, endY);
+            context.rotate(angle + Math.PI/2);
+
+            // 外椭圆
+            context.beginPath();
+            context.ellipse(0, 0, longAxis/2, shortAxis/2, 0, 0, Math.PI * 2);
+            context.fillStyle = accentColor;
+            context.fill();
+
+            // 椭圆边框 - 基于身体大小
+            context.strokeStyle = darkAccentColor;
+            context.lineWidth = Math.max(1, baseSize * 0.025); // 身体大小的 2.5%
+            context.stroke();
+
+            // 内椭圆
+            const innerLong = Math.max(1, (longAxis - baseSize * 0.06) / 2); // 减去身体大小的 6%
+            const innerShort = Math.max(1, (shortAxis - baseSize * 0.04) / 2); // 减去身体大小的 4%
+            context.beginPath();
+            context.ellipse(0, 0, innerLong, innerShort, 0, 0, Math.PI * 2);
+            context.fillStyle = accentColor;
+            context.fill();
+
+            context.restore();
+        }
+
+        // ===== 4. 绘制周围的尖刺（修复大小）=====
+        const spikeBaseRadius = Math.max(3, baseSize * 0.3);
+        const spikeLength = Math.max(2, baseSize * 0.16);
+        const spikeWidth = Math.max(3, baseSize * 0.2);
+        // 尖刺边框宽度 - 基于身体大小
+        const spikeStrokeWidth = Math.max(1, baseSize * 0.02); // 身体大小的 2%
+
+        for (let i = 0; i < 6; i++) {
+            const angle = (60 * i - 30) * Math.PI / 180;
+
+            const baseX = centerX + spikeBaseRadius * Math.cos(angle);
+            const baseY = centerY + spikeBaseRadius * Math.sin(angle);
+            const tipX = baseX + spikeLength * Math.cos(angle);
+            const tipY = baseY + spikeLength * Math.sin(angle);
+
+            // 确保坐标有效
+            if (isNaN(baseX) || isNaN(baseY) || isNaN(tipX) || isNaN(tipY)) continue;
+
+            const perpX = -Math.sin(angle);
+            const perpY = Math.cos(angle);
+
+            const trianglePoints = [
+                [tipX, tipY],
+                [baseX - spikeWidth/2 * perpX, baseY - spikeWidth/2 * perpY],
+                [baseX + spikeWidth/2 * perpX, baseY + spikeWidth/2 * perpY]
+            ];
+
+            // 填充三角形
+            context.fillStyle = accentColor;
+            context.beginPath();
+            context.moveTo(trianglePoints[0][0], trianglePoints[0][1]);
+            context.lineTo(trianglePoints[1][0], trianglePoints[1][1]);
+            context.lineTo(trianglePoints[2][0], trianglePoints[2][1]);
+            context.closePath();
+            context.fill();
+
+            // 描边 - 使用基于身体大小的宽度
+            context.strokeStyle = darkAccentColor;
+            context.lineWidth = spikeStrokeWidth;
+            context.stroke();
+        }
+
+        // ===== 5. 绘制中心三角形 =====
+        const triangleSize = Math.max(2, baseSize * 0.1);
+        const centerTriangle = [
+            [centerX, centerY - triangleSize * 1.5],
+            [centerX - triangleSize, centerY + triangleSize * 0.5],
+            [centerX + triangleSize, centerY + triangleSize * 0.5]
+        ];
+
+        context.fillStyle = accentColor;
+        context.beginPath();
+        context.moveTo(centerTriangle[0][0], centerTriangle[0][1]);
+        context.lineTo(centerTriangle[1][0], centerTriangle[1][1]);
+        context.lineTo(centerTriangle[2][0], centerTriangle[2][1]);
+        context.closePath();
+        context.fill();
+
+        // 三角形边框 - 基于身体大小
+        context.strokeStyle = darkAccentColor;
+        context.lineWidth = Math.max(1, baseSize * 0.02); // 身体大小的 2%
+        context.stroke();
+
+        context.restore();
+    }
+    drawBacteriophage(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // 颜色定义
+        let bodyColor, borderColor, legColor;
+        if (isFriendly) {
+            bodyColor = [255, 215, 0];      // 金色
+            borderColor = [200, 160, 0];    // 深金色
+            legColor = [180, 140, 0];       // 暗金色
+        } else {
+            bodyColor = [204, 102, 0];      // 橙色
+            borderColor = [164, 85, 15];    // 深橙色
+            legColor = [0, 0, 0];           // 黑色
+        }
+
+        const centerX = x;
+        const centerY = y;
+        const bodyRadius = scaledSize * 0.35;
+
+        // ✅ 描边宽度 = 身体半径 / 10
+        const strokeWidth = bodyRadius / 10;
+
+        // ✅ 缩放因子：基于原始身体半径（约 70px）计算
+        const scale = bodyRadius / 70;
+
+        context.save();
+        // ✅ 移动到中心并旋转，让头部朝向玩家（+90° 偏移）
+        context.translate(centerX, centerY);
+        context.rotate(angleToPlayer + Math.PI / 2);
+
+        // ===== 1. 绘制腿部（8 条，起点固定 + 上下快速摆动）=====
+        context.strokeStyle = this.colorToCss(legColor);
+        context.lineWidth = Math.max(2, 10 * scale);
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+
+        // ✅ 腿部配置：基于原始 Python 坐标（中心点 400,400 的偏移量）
+        // 格式：[起点 (x,y), 中间点 (x,y), 终点 (x,y), side: 1=右侧/-1=左侧]
+        const legs = [
+            // 右上腿 1: (400,375)→(468,335)→(490,275)
+            { start: {x: 0, y: -25}, mid: {x: 68, y: -65}, end: {x: 90, y: -125}, side: 1 },
+            // 右上腿 2: (400,390)→(484,375)→(530,335)
+            { start: {x: 0, y: -10}, mid: {x: 84, y: -25}, end: {x: 130, y: -65}, side: 1 },
+            // 右下腿 1: (400,420)→(468,465)→(490,525)
+            { start: {x: 0, y: 20}, mid: {x: 68, y: 65}, end: {x: 90, y: 125}, side: 1 },
+            // 右下腿 2: (400,400)→(484,425)→(530,465)
+            { start: {x: 0, y: 0}, mid: {x: 84, y: 25}, end: {x: 130, y: 65}, side: 1 },
+            // 左上腿 1: (400,375)→(332,335)→(320,275)
+            { start: {x: 0, y: -25}, mid: {x: -68, y: -65}, end: {x: -80, y: -125}, side: -1 },
+            // 左上腿 2: (400,390)→(316,375)→(270,335)
+            { start: {x: 0, y: -10}, mid: {x: -84, y: -25}, end: {x: -130, y: -65}, side: -1 },
+            // 左下腿 1: (400,420)→(332,465)→(320,525)
+            { start: {x: 0, y: 20}, mid: {x: -68, y: 65}, end: {x: -80, y: 125}, side: -1 },
+            // 左下腿 2: (400,410)→(316,425)→(270,465)
+            { start: {x: 0, y: 10}, mid: {x: -84, y: 25}, end: {x: -130, y: 65}, side: -1 },
+        ];
+
+        // ✅ 快速上下摆动动画（频率 15Hz，摆动角度 0.15 弧度≈8.6°）
+        const legWaveSpeed = 15;
+        const swingAngleAmplitude = 0.20;
+
+        for (const leg of legs) {
+            const side = leg.side;
+
+            // ✅ 起点固定不动（摆动中心）
+            const startX = leg.start.x * scale;
+            const startY = leg.start.y * scale;
+
+            // ✅ 计算摆动角度（围绕起点旋转）
+            const wavePhase = leg.start.y * 0.1 + side * 0.5;
+            const swingAngle = Math.sin(animationTimer * legWaveSpeed + wavePhase) * swingAngleAmplitude;
+
+            // ✅ 中间点：围绕起点旋转摆动
+            const midRelX = leg.mid.x * scale - startX;
+            const midRelY = leg.mid.y * scale - startY;
+            const midX = startX + midRelX * Math.cos(swingAngle) - midRelY * Math.sin(swingAngle);
+            const midY = startY + midRelX * Math.sin(swingAngle) + midRelY * Math.cos(swingAngle);
+
+            // ✅ 终点：围绕起点旋转摆动（幅度稍大）
+            const endRelX = leg.end.x * scale - startX;
+            const endRelY = leg.end.y * scale - startY;
+            const endSwingAngle = swingAngle * 1.2;
+            const endX = startX + endRelX * Math.cos(endSwingAngle) - endRelY * Math.sin(endSwingAngle);
+            const endY = startY + endRelX * Math.sin(endSwingAngle) + endRelY * Math.cos(endSwingAngle);
+
+            // 绘制第一段（起点→中间点）
+            context.beginPath();
+            context.moveTo(startX, startY);
+            context.lineTo(midX, midY);
+            context.stroke();
+
+            // 绘制第二段（中间点→终点）
+            context.beginPath();
+            context.moveTo(midX, midY);
+            context.lineTo(endX, endY);
+            context.stroke();
+
+            // 绘制关节点（让弯曲更明显）
+            context.fillStyle = this.colorToCss(legColor);
+            context.beginPath();
+            context.arc(midX, midY, strokeWidth * 0.6, 0, Math.PI * 2);
+            context.fill();
+        }
+
+        // ===== 2. 绘制身体：十边形（外层）=====
+        const decagonPoints = this.getDecagonPoints(0, 0, bodyRadius);
+        this.drawPolygon(context, decagonPoints, bodyColor, borderColor, strokeWidth);
+
+        // ===== 3. 绘制身体：五边形（内层）=====
+        const pentagonPoints = this.getPentagonPoints(0, 0, bodyRadius);
+        this.drawPolygon(context, pentagonPoints, bodyColor, borderColor, strokeWidth);
+
+        // ===== 4. 绘制五边形辐射线（从中心到顶点）=====
+        context.strokeStyle = this.colorToCss(borderColor);
+        context.lineWidth = strokeWidth * 0.6;
+        for (const point of pentagonPoints) {
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(point[0], point[1]);
+            context.stroke();
+        }
+
+        context.restore();
+    }
     drawCircle(context, x, y, radius, fillColor = null, strokeColor = null, strokeWidth = 0) {
         if (radius <= 0) return; // 防护性检查
 
@@ -8936,7 +9230,7 @@ class EnemyDrawer {
 
             // 描边（外轮廓）
             context.strokeStyle = outlineColor;
-            context.lineWidth = segmentWidth + 2;
+            context.lineWidth = segmentWidth + segmentWidth * 0.3;
             context.lineCap = 'round';
             context.lineJoin = 'round';
             context.stroke();
@@ -9033,48 +9327,6 @@ class EnemyDrawer {
         }
     }
 
-    // 绘制水蛭口器
-    drawLeechMouth(context, points, segmentWidth, animationTimer, angleToPlayer, mouthColor, viewScale, rarityFactor) {
-        if (!points || points.length < 2) return;
-        const headPoint = points[0];
-        const nextPoint = points[1] || headPoint;
-        const baseAngle = Math.atan2(nextPoint.y - headPoint.y, nextPoint.x - headPoint.x);
-        const rotationAngle = 3.0;
-        const swingAmount = Math.sin(animationTimer * 5) * 0.1;
-
-        context.save();
-        const mouthLength = segmentWidth * 0.9;
-        const forwardOffset = segmentWidth * 0.1;
-        const startSeparation = segmentWidth * 0.3;
-        const endSeparation = segmentWidth * 0.4;
-        const mouthWidth = segmentWidth * 0.15;
-        const bendFactor = 1.2;
-
-        for (let side = -1; side <= 1; side += 2) {
-            const mouthAngle = baseAngle + rotationAngle + swingAmount * side;
-            const perpX = Math.cos(mouthAngle + Math.PI/2);
-            const perpY = Math.sin(mouthAngle + Math.PI/2);
-
-            const startX = headPoint.x + Math.cos(mouthAngle) * forwardOffset + perpX * startSeparation * side;
-            const startY = headPoint.y + Math.sin(mouthAngle) * forwardOffset + perpY * startSeparation * side;
-
-            const cp1X = headPoint.x + Math.cos(mouthAngle) * (forwardOffset + mouthLength * 0.2) + perpX * (startSeparation + (endSeparation - startSeparation) * 0.2) * side * bendFactor;
-            const cp1Y = headPoint.y + Math.sin(mouthAngle) * (forwardOffset + mouthLength * 0.2) + perpY * (startSeparation + (endSeparation - startSeparation) * 0.2) * side * bendFactor;
-            const cp2X = headPoint.x + Math.cos(mouthAngle) * (forwardOffset + mouthLength * 0.5) + perpX * (startSeparation + (endSeparation - startSeparation) * 0.5) * side * bendFactor;
-            const cp2Y = headPoint.y + Math.sin(mouthAngle) * (forwardOffset + mouthLength * 0.5) + perpY * (startSeparation + (endSeparation - startSeparation) * 0.5) * side * bendFactor;
-            const endX = headPoint.x + Math.cos(mouthAngle) * (forwardOffset + mouthLength) + perpX * endSeparation * side;
-            const endY = headPoint.y + Math.sin(mouthAngle) * (forwardOffset + mouthLength) + perpY * endSeparation * side;
-
-            context.beginPath();
-            context.moveTo(startX, startY);
-            context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY);
-            context.strokeStyle = mouthColor;
-            context.lineWidth = mouthWidth;
-            context.stroke();
-        }
-        context.restore();
-    }
-
     // ==================== Parasite 绘制 (强制重新计算点位) ====================
     drawParasite(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const rarity = enemyObj?.rarity || "Common";
@@ -9162,7 +9414,7 @@ class EnemyDrawer {
 
         // 描边
         context.strokeStyle = outlineColor;
-        context.lineWidth = segmentWidth + 2;
+        context.lineWidth = segmentWidth + 0.3 * segmentWidth;
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.stroke();
@@ -10247,6 +10499,11 @@ class EnemyDrawer {
         else if (enemyType === "Parasite") {
         this.drawParasite(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
+        else if (enemyType === "Bacteriophage") {
+        this.drawBacteriophage(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "Virus") {
+        this.drawVirus(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }
         // ========== 未知类型使用默认绘制 ==========
         else {
             const scaledRadius = Math.floor(size / 2 * viewScale);
@@ -10307,17 +10564,20 @@ class ShopSystem {
             "Magnet": 8,
             "Egg": 30,
             "Ant Egg": 12,
-            "Square Egg":100,
-            "Stick": 15,
+            "Square Egg":9000,
+            "Stick": 18,
             "Moon Egg": 10,
             "Rock": 5,
-            "DNA": 50,
+            "DNA": 100,
             "Clover": 5,
+            "Suger":3,
+            "Virus egg":10,
             "Iris": 2,
             "Lotus": 3,
+            "Bacteriophage egg":12,
             "Heavy": 5,
             "Sponge": 4,
-            "Golden Leaf": 35,
+            "Golden Leaf": 55,
             "Salt": 3,
             "Powder":6,
             "Sand": 3,
@@ -10329,14 +10589,13 @@ class ShopSystem {
             "Coral": 5,
             "Cotton": 4,
             "Cancer": 15,
-            "Controller":100000000000000000,
             "Bacteria_egg": 10,
             "Spider egg": 12,
-            "Digger egg": 40,
-            "TrashDigger egg": 42,
-            "MudDigger_egg": 44,
+            "Digger egg": 50,
+            "TrashDigger egg": 52,
+            "MudDigger_egg": 54,
             "Crab egg": 18,
-            "Biologist egg": 42,
+            "Biologist egg": 52,
             "Jellyfish egg": 18,
             "Starfish egg": 15,
             "Shell egg": 22,
@@ -10355,11 +10614,11 @@ class ShopSystem {
             "FireAntOvermind egg": 16,
             "FireAntHole egg": 42,
             "Rat_egg": 35,
-            "Roach_egg": 20,
+            "Roach_egg": 25,
             "Basil":8,
-            "PooStick": 25,
+            "PooStick": 35,
             "Fly_egg": 12,
-            "ManHole egg": 50
+            "ManHole egg": 55
         };
 
         // Shop items list (only Common rarity configured, others calculated via multipliers)
@@ -10591,7 +10850,7 @@ class ShopSystem {
     // Get item sell price (1/10 of buy price)
     getItemSellPrice(itemType, rarity) {
         const buyPrice = this.getItemPrice(itemType, rarity);
-        return Math.max(1, Math.floor(buyPrice / 12));
+        return Math.max(1, Math.floor(buyPrice / 15));
     }
 
     // 获取格式化后的出售价格
@@ -14329,6 +14588,7 @@ class Enemy {
             case "RedBloodCell": return [120, 18, 80, 30, 40];
             case "WhiteBloodCell": return [125, 25, 50, 35, 65];
             case "Bee": return [50, 20, 90, 20, 50];
+            case "Bacteriophage": return [80, 25, 100, 30, 50];
             case "QueenAnt": return [250, 30, 70, 40, 20];
             case "WorkerFireAnt": return [50, 25, 80, 30, 20];
             case "SoldierFireAnt": return [100, 20, 50, 30, 25];
@@ -14352,6 +14612,7 @@ class Enemy {
             case "TrashDigger": return [320, 25, 100, 55, 190];
             case "Digger": return [300, 28, 120, 60, 180];
             case "MudDigger": return [450, 30, 70, 70, 170];
+            case "Virus": return [50, 22, 0, 40, 40];
             case "Biologist": return [300, 25, 100, 70, 180];
             case "Square": return [1000, 25, 10, 600, 500];
             default: return [100, 20, 60, 10, 20];
@@ -14614,7 +14875,7 @@ class Enemy {
                 // 击退中，保持当前速度
             } else {
                 const stationaryCreatures = ["Bush", "Cactus", "Anthill", "Rock", "FireAntHole",
-                                            "Sponge", "Bubble", "CrabHole", "ManHole"];
+                                            "Sponge", "Bubble", "CrabHole", "ManHole","Virus"];
                 if (stationaryCreatures.includes(this.type)) {
                     this.physicsBody.velocity = new Vector2(0, 0);
                     this.facingAngle = 0.0;
@@ -15531,6 +15792,8 @@ class Petal {
         this.squareList = [];
         this.maxSquare = 1;
         this.healSpeedMultiplier = 0;
+        this.virusList = [];
+        this.maxVirus = 1;  // 最多1个 Virus
         // 初始化属性
         // 根据索引计算初始角度，确保均匀分布
         const angleStep = (Math.PI * 2) / totalPetals;
@@ -15576,9 +15839,10 @@ class Petal {
         this.rockList = [];
         this.maxRocks = 1;
         this.goldenAntList = [];
-        this.maxGoldenAnts = 15;
-
-        // 帧伤系统
+        this.maxGoldenAnts = 10;
+        this.bacteriophageList = [];
+        this.maxBacteriophages = 1;  // 最多1个噬菌体
+            // 帧伤系统
         this.frameDamageCooldown = 0;
         this.frameDamageRate = 16.67; // 60FPS
         this.isInsideEnemy = false;
@@ -15811,7 +16075,7 @@ class Petal {
         this.leechList = [];
         this.maxLeeches = 2;
         this.parasiteList = [];
-        this.maxParasites = 2;
+        this.maxParasites = 1;
 
         // Chromosome
         this.isChromosome = false;
@@ -15977,7 +16241,7 @@ class Petal {
                     "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
                     "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
                     "Square Egg",
-                    "Leech Egg", "Parasite Egg"
+                    "Leech Egg", "Parasite Egg", "Bacteriophage egg","Virus egg"
                 ]);
 
                 this.isEggItem = EGG_ITEMS.has(item.type);
@@ -16209,7 +16473,7 @@ class Petal {
                 "Square Egg",
                 // ========== 🆕 新生物蛋 ==========
                 "Leech Egg",
-                "Parasite Egg"
+                "Parasite Egg","Bacteriophage egg","Virus egg"
             ]);
 
             // 触角花瓣固定在头部，不参与花圈旋转
@@ -16796,6 +17060,51 @@ class Petal {
                 }
                 this.updateParasites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
+            // 在 Petal 类的 update 方法中，找到召唤逻辑部分添加
+            // ========== 🆕 噬菌体蛋 ==========
+            else if (currentItem.type === "Bacteriophage egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+
+                        const spawned = this.trySpawnBacteriophageWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                        }
+                    }
+                }
+                this.updateBacteriophages?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
+            // ========== 🆕 Virus Egg ==========
+            else if (currentItem.type === "Virus egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+
+                        const spawned = this.trySpawnVirusWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                        }
+                    }
+                }
+                this.updateVirus?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
         }
 
     }
@@ -16818,6 +17127,7 @@ class Petal {
         this.updateBacteria?.(dt, gameEnemies, playerWorldPos);
         this.updateCancer?.(dt, gameEnemies, playerWorldPos);
         this.updateManHoles?.(dt, gameEnemies, playerWorldPos);
+        this.updateBacteriophages?.(dt, gameEnemies, playerWorldPos);
         this.updateFlies?.(dt, gameEnemies, playerWorldPos);
         this.updateRats?.(dt, gameEnemies, playerWorldPos);
         this.updateRoaches?.(dt, gameEnemies, playerWorldPos);
@@ -19165,7 +19475,87 @@ class Petal {
             }
         }
     }
+    // 尝试召唤噬菌体
+    trySpawnBacteriophageWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
 
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Bacteriophage egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        // 初始化噬菌体列表
+        if (!this.bacteriophageList) this.bacteriophageList = [];
+
+        // 清理死亡的噬菌体
+        this._cleanDeadBacteriophages(gameEnemies);
+
+        // 需要生成的数量（最多1个）
+        const currentCount = this.bacteriophageList.length;
+        if (currentCount >= this.maxBacteriophages) return false;
+
+        // 获取召唤稀有度（DNA升级逻辑）
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 30;
+        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
+            playerWorldPos.x + Math.cos(angle) * distance));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
+            playerWorldPos.y + Math.sin(angle) * distance));
+
+        // 创建噬菌体作为友方单位
+        const phage = new Enemy("Bacteriophage", x, y, summonLevel, finalRarity);
+        phage.isFriendly = true;
+        phage.ownerPetal = this;
+        phage.ownerPlayer = this.player;
+
+        gameEnemies.push(phage);
+        this.bacteriophageList.push(phage);
+
+        this.spawnCooldown = ITEM_STATS["Bacteriophage egg"]?.base_cooldown || 15000;
+        return true;
+    }
+
+    // 清理死亡的噬菌体
+    _cleanDeadBacteriophages(gameEnemies) {
+        if (!this.bacteriophageList) {
+            this.bacteriophageList = [];
+            return;
+        }
+        const newList = [];
+        for (const phage of this.bacteriophageList) {
+            if (phage && gameEnemies.includes(phage) && phage.health > 0 && !phage.isDead) {
+                newList.push(phage);
+            } else {
+                const index = gameEnemies.indexOf(phage);
+                if (index !== -1) gameEnemies.splice(index, 1);
+            }
+        }
+        this.bacteriophageList = newList;
+    }
+
+    // 更新噬菌体状态
+    updateBacteriophages(dt, gameEnemies, playerWorldPos) {
+        if (!this.bacteriophageList) this.bacteriophageList = [];
+        this._cleanDeadBacteriophages(gameEnemies);
+
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Bacteriophage egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.bacteriophageList.length < this.maxBacteriophages &&
+                    this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnBacteriophageWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
     // ========== 🌊 螃蟹蛋 ==========
     trySpawnCrabsWithDna(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
@@ -19514,7 +19904,87 @@ class Petal {
         this.spawnCooldown = 8000; // 8秒
         return true;
     }
+    // 尝试召唤 Virus
+    trySpawnVirusWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
 
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Virus egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        // 初始化 Virus 列表
+        if (!this.virusList) this.virusList = [];
+
+        // 清理死亡的 Virus
+        this._cleanDeadVirus(gameEnemies);
+
+        // 需要生成的数量（最多1个）
+        const currentCount = this.virusList.length;
+        if (currentCount >= this.maxVirus) return false;
+
+        // 获取召唤稀有度（DNA升级逻辑）
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 30;
+        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
+            playerWorldPos.x + Math.cos(angle) * distance));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
+            playerWorldPos.y + Math.sin(angle) * distance));
+
+        // 创建 Virus 作为友方单位
+        const virus = new Enemy("Virus", x, y, summonLevel, finalRarity);
+        virus.isFriendly = true;
+        virus.ownerPetal = this;
+        virus.ownerPlayer = this.player;
+
+        gameEnemies.push(virus);
+        this.virusList.push(virus);
+
+        this.spawnCooldown = ITEM_STATS["Virus egg"]?.base_cooldown || 5000;
+        return true;
+    }
+
+    // 清理死亡的 Virus
+    _cleanDeadVirus(gameEnemies) {
+        if (!this.virusList) {
+            this.virusList = [];
+            return;
+        }
+        const newList = [];
+        for (const virus of this.virusList) {
+            if (virus && gameEnemies.includes(virus) && virus.health > 0 && !virus.isDead) {
+                newList.push(virus);
+            } else {
+                const index = gameEnemies.indexOf(virus);
+                if (index !== -1) gameEnemies.splice(index, 1);
+            }
+        }
+        this.virusList = newList;
+    }
+
+    // 更新 Virus 状态
+    updateVirus(dt, gameEnemies, playerWorldPos) {
+        if (!this.virusList) this.virusList = [];
+        this._cleanDeadVirus(gameEnemies);
+
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Virus egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.virusList.length < this.maxVirus &&
+                    this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnVirusWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
     // 生成兵火蚁（支持DNA升级）
     trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
@@ -23750,6 +24220,55 @@ class WorldMapGame {
 
         // 恢复原始半径
         this.player.physicsBody.radius = originalPlayerRadius;
+    }
+
+    // 在 WorldMapGame 类中添加
+    initMazeDetection() {
+        this.mazeImageData = {};
+    }
+
+    // 加载单个地图的像素数据
+    loadMazePixelData(biome) {
+        return new Promise((resolve) => {
+            const bgConfig = BIOME_BACKGROUNDS[biome];
+            if (!bgConfig || !bgConfig.map || !bgConfig.map.image) {
+                resolve();
+                return;
+            }
+
+            const mapImageKey = bgConfig.map.image;
+            const mapImg = window.imageLoader?.getImage(mapImageKey);
+
+            if (!mapImg) {
+                resolve();
+                return;
+            }
+
+            // 使用 requestAnimationFrame 分批加载
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                canvas.width = mapImg.width;
+                canvas.height = mapImg.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(mapImg, 0, 0);
+
+                try {
+                    const imageData = ctx.getImageData(0, 0, mapImg.width, mapImg.height);
+                    this.mazeImageData[biome] = imageData;
+                    console.log(`✅ 加载 ${biome} 像素数据`);
+                } catch (e) {
+                    console.error(`❌ 加载 ${biome} 像素数据失败`);
+                }
+                resolve();
+            }, 0);
+        });
+    }
+
+    // 只在需要时加载
+    async ensureMazeData(biome) {
+        if (!this.mazeImageData[biome]) {
+            await this.loadMazePixelData(biome);
+        }
     }
 
 
