@@ -1128,7 +1128,16 @@ export const ITEM_STATS = {
     // ========== 🆕 Leech & Parasite 蛋 ==========
     "Leech Egg": {base_attack:1, base_cooldown:8000, spawn_leech:true, spawn_count:2, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000},
     "Parasite Egg": {base_attack:1, base_cooldown:7000, spawn_parasite:true, spawn_count:2, durability_bonus:25, use_rarity_multiplier: true, base_reload_time:7000},
-    "Chromosome": {base_attack:0, base_cooldown:100, is_chromosome:true, repair_rate:25, repair_rate_multiplier: {"Common":1.0,"Unusual":1.5,"Rare":2.0,"Epic":2.5,"Legendary":3.0,"Mythic":4.0,"Ultra":5.0,"Super":6.0,"Omega":8.0,"Eternal":10.0}, use_rarity_multiplier: true, base_reload_time:1000}
+    "Chromosome": {base_attack:0, base_cooldown:100, is_chromosome:true, repair_rate:25, repair_rate_multiplier: {"Common": 1,
+    "Unusual": 3,
+    "Rare": 9,
+    "Epic": 27,
+    "Legendary": 81,
+    "Mythic": 243,
+    "Ultra": 729,
+    "Super": 2187,
+    "Omega": 19683,
+    "Eternal": 31415}, use_rarity_multiplier: true, base_reload_time:1000}
 };
 // ========== Cancer 细胞克隆稀有度概率表 ==========
 export const CANCER_MOB_RARITY_TABLE = {
