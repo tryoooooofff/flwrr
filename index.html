@@ -1247,17 +1247,55 @@ html, body {
         const { x, y } = getCanvasCoordinates(e);
         const event = { type: 'mousemove', x, y };
 
+        // ✅ 更新全局鼠标位置（用于物品提示）
+        window.mouseX = x;
+        window.mouseY = y;
+
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.handleMouseMove) {
             gameInstance.mainMenu.handleMouseMove(event);
+
+            // ✅ 更新商店系统的鼠标位置
+            if (gameInstance.shopSystem) {
+                gameInstance.shopSystem.mouseX = x;
+                gameInstance.shopSystem.mouseY = y;
+            }
         } else if (gameState === 'in_game' && gameInstance?.handleEvents) {
             gameInstance.handleEvents(event);
             if (gameInstance.player?.updateMousePosition) {
                 gameInstance.player.updateMousePosition(x, y);
             }
+
+            // ✅ 更新所有界面的鼠标位置
+            if (gameInstance.player) {
+                if (gameInstance.player.inventory) {
+                    gameInstance.player.inventory.mouseX = x;
+                    gameInstance.player.inventory.mouseY = y;
+                }
+                if (gameInstance.player.quickSlot) {
+                    gameInstance.player.quickSlot.mouseX = x;
+                    gameInstance.player.quickSlot.mouseY = y;
+                }
+                if (gameInstance.player.inventory?.craftingSystem) {
+                    gameInstance.player.inventory.craftingSystem.mouseX = x;
+                    gameInstance.player.inventory.craftingSystem.mouseY = y;
+                }
+            }
+            if (gameInstance.shopSystem) {
+                gameInstance.shopSystem.mouseX = x;
+                gameInstance.shopSystem.mouseY = y;
+            }
         } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
             const crafting = gameInstance.player.inventory.craftingSystem;
             if (crafting.handleMouseMove) crafting.handleMouseMove([x, y]);
+
+            // ✅ 更新鼠标位置
+            crafting.mouseX = x;
+            crafting.mouseY = y;
         } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+            // ✅ 更新背包鼠标位置
+            gameInstance.player.inventory.mouseX = x;
+            gameInstance.player.inventory.mouseY = y;
+
             if (isPointInInventoryArea(x, y)) {
                 if (gameInstance.player.inventory.handleMouseMove) {
                     gameInstance.player.inventory.handleMouseMove([x, y]);
