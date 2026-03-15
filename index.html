@@ -342,7 +342,13 @@ html, body {
     let gameInstance = null;
     let controlsInitialized = false;
     let animationFrameId = null;
-
+// 在 HTML 文件开头，script 标签的最前面添加
+    const GameState = {
+        MAIN_MENU: 'main_menu',
+        IN_GAME: 'in_game',
+        PAUSED: 'paused',
+        GAME_OVER: 'game_over'
+    };
     // 鼠标移动相关变量
     let mouseTargetX = null;
     let mouseTargetY = null;
@@ -1453,22 +1459,83 @@ html, body {
         }
       }
     });
-
-    // ===== 返回主菜单 =====
+    let isProcessingEscape = false;
     function returnToMainMenu() {
-      if (gameInstance?.autoSave) gameInstance.autoSave();
+        if (isProcessingEscape) return;
+        isProcessingEscape = true;
 
-      if (gameInstance?.player?.inventory?.craftingSystem) {
-        gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-      }
+        console.log("returnToMainMenu called, current gameState:", gameState);
 
-      gameState = 'main_menu';
-      editorMode = false;
+        // 关闭合成/背包界面
+        if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+            gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        }
 
-      if (gameInstance) gameInstance.gameState = 'main_menu';
-      resetMouseMove();
+        // 只在游戏界面恢复 Mimic
+        if (gameState === 'in_game' && gameInstance && gameInstance.player && gameInstance.player.quickSlot) {
+            console.log("Checking for transformed items...");
+
+            for (let i = 0; i < gameInstance.player.quickSlot.slots.length; i++) {
+                const item = gameInstance.player.quickSlot.slots[i];
+                const petal = gameInstance.player.petals[i];
+
+                // 检查是否是变形状态：当前不是 Mimic 但有原始数据
+                if (item && item.type !== "Mimic") {
+                    // 查找原始数据
+                    let originalData = null;
+                    if (petal && petal.originalMimicData) {
+                        originalData = petal.originalMimicData;
+                        console.log(`Slot ${i} is transformed from ${originalData.type} to ${item.type}, restoring...`);
+                    } else if (item._originalMimicData) {
+                        originalData = item._originalMimicData;
+                        console.log(`Slot ${i} is transformed from ${originalData.type} to ${item.type}, restoring...`);
+                    }
+
+                    // 只有找到原始数据才恢复
+                    if (originalData) {
+                        item.type = originalData.type;
+                        item.rarity = originalData.rarity;
+                        item.level = originalData.level;
+                        item.durability = originalData.durability;
+                        item.maxDurability = originalData.maxDurability;
+                        item.reloadTime = originalData.reloadTime;
+                        item.baseReloadTime = originalData.baseReloadTime;
+                        item.armor = originalData.armor;
+
+                        if (petal && petal.updateFromQuickSlot) {
+                            petal.updateFromQuickSlot(i);
+                        }
+
+                        console.log(`✅ Restored slot ${i} to ${originalData.type}`);
+                    }
+                } else if (item && item.type === "Mimic") {
+                    console.log(`Slot ${i} is already Mimic, no need to restore`);
+                    // 如果是 Mimic，清除可能残留的原始数据
+                    if (petal) petal.originalMimicData = null;
+                    if (item) item._originalMimicData = null;
+                }
+            }
+        }
+
+        // 保存游戏
+        if (gameInstance?.autoSave) {
+            gameInstance.autoSave();
+        }
+
+        // 切换到主菜单
+        gameState = 'main_menu';
+        editorMode = false;
+
+        if (gameInstance) {
+            gameInstance.gameState = 'main_menu';
+        }
+
+        resetMouseMove();
+
+        setTimeout(() => {
+            isProcessingEscape = false;
+        }, 100);
     }
-
     // ===== 开始游戏 =====
     async function startGame(biome) {
         console.log('🎮 Starting game with biome:', biome);
