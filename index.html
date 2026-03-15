@@ -1116,7 +1116,7 @@ html, body {
       return false;
     }
 
-    // ===== 鼠标事件处理 =====
+// ===== 鼠标事件处理 =====
 function handleMouseDown(e) {
     e.preventDefault();
     const { x, y } = getCanvasCoordinates(e);
@@ -1134,14 +1134,17 @@ function handleMouseDown(e) {
     };
 
     if (gameState === 'main_menu' && gameInstance) {
-        // ✅ 如果商店可见，只让商店处理点击，不处理主菜单按钮
+        // ✅ 如果商店可见，让商店处理点击（包括兑换码按钮）
         if (gameInstance.shopSystem && gameInstance.shopSystem.visible) {
-            console.log("🛒 Shop is visible, letting it handle click (main menu buttons blocked)");
+            console.log("🛒 Shop is visible, letting it handle click");
             const shopHandled = gameInstance.shopSystem.handleClick([x, y]);
             if (shopHandled) {
                 console.log("✅ Shop handled the click");
+                // 不直接return，因为商店可能没处理兑换码按钮
+                // 但这里我们信任 shopSystem.handleClick 会处理所有商店内的点击
             }
-            return; // 无论商店是否处理了点击，都不再处理主菜单按钮
+            // 商店处理完后，不再处理主菜单按钮
+            return;
         }
 
         // 商店不可见时，才处理主菜单点击
@@ -1206,7 +1209,7 @@ function handleMouseDown(e) {
             const quickSlotHandled = gameInstance.player.quickSlot.handleClick([x, y]);
             if (quickSlotHandled) {
                 console.log('✅ 快捷栏点击处理完成');
-                return; // 快捷栏处理了点击，不再往下传递
+                return;
             }
         }
 
@@ -1384,72 +1387,84 @@ function handleMouseDown(e) {
 
     // ===== 键盘事件处理 =====
     function handleKeyDown(e) {
-      const key = e.key;
-
-      // T键打开聊天
-      if (key === 't' || key === 'T') {
-        if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
-          gameInstance.toggleChat();
-          if (gameInstance.chatVisible) {
-            gameInstance.network.chatSystem.inputActive = true;
-          }
+        // ===== 🎁 优先处理兑换码输入 =====
+        if (gameInstance?.shopSystem?.redeemSystem?.inputVisible &&
+            gameInstance.shopSystem.redeemSystem.inputActive) {
+            const handled = gameInstance.shopSystem.redeemSystem.handleKeyDown(e);
+            if (handled) {
+                console.log('🎁 兑换码系统处理键盘输入:', e.key);
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
         }
-        e.preventDefault();
-        return;
-      }
 
-      if (key >= '1' && key <= '8') {
-        const index = parseInt(key) - 1;
-        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          gameInstance.player.quickSlot.selectedIndex = index;
-          gameInstance.player.quickSlot.useItem(index);
+        const key = e.key;
+
+        // T键打开聊天
+        if (key === 't' || key === 'T') {
+            if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
+                gameInstance.toggleChat();
+                if (gameInstance.chatVisible) {
+                    gameInstance.network.chatSystem.inputActive = true;
+                }
+            }
+            e.preventDefault();
+            return;
         }
-        e.preventDefault();
-        return;
-      }
 
-      if (key === ' ') {
-        if (gameState === 'in_game' && gameInstance?.player) {
-          gameInstance.player.toggleSpreadMode();
+        if (key >= '1' && key <= '8') {
+            const index = parseInt(key) - 1;
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                gameInstance.player.quickSlot.selectedIndex = index;
+                gameInstance.player.quickSlot.useItem(index);
+            }
+            e.preventDefault();
+            return;
         }
-        e.preventDefault();
-        return;
-      }
 
-      if (key === 'c' || key === 'C') {
-        if (gameState === 'in_game') {
-          openCrafting();
-        } else if (gameState === 'crafting') {
-          gameState = 'in_game';
-          if (gameInstance.player?.inventory?.craftingSystem) {
-            gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-          }
+        if (key === ' ') {
+            if (gameState === 'in_game' && gameInstance?.player) {
+                gameInstance.player.toggleSpreadMode();
+            }
+            e.preventDefault();
+            return;
         }
-        e.preventDefault();
-        return;
-      }
 
-      if (key === 'i' || key === 'I') {
-        if (gameState === 'in_game') {
-          openInventory();
-        } else if (gameState === 'inventory') {
-          gameState = 'in_game';
+        if (key === 'c' || key === 'C') {
+            if (gameState === 'in_game') {
+                openCrafting();
+            } else if (gameState === 'crafting') {
+                gameState = 'in_game';
+                if (gameInstance.player?.inventory?.craftingSystem) {
+                    gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+                }
+            }
+            e.preventDefault();
+            return;
         }
-        e.preventDefault();
-        return;
-      }
 
-      if (key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        if (gameState !== 'main_menu') {
-          returnToMainMenu();
+        if (key === 'i' || key === 'I') {
+            if (gameState === 'in_game') {
+                openInventory();
+            } else if (gameState === 'inventory') {
+                gameState = 'in_game';
+            }
+            e.preventDefault();
+            return;
         }
-      }
 
-      if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key.toLowerCase())) {
-        resetMouseMove();
-      }
+        if (key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (gameState !== 'main_menu') {
+                returnToMainMenu();
+            }
+        }
+
+        if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key.toLowerCase())) {
+            resetMouseMove();
+        }
     }
 
     function handleKeyUp(e) {}
