@@ -1074,7 +1074,7 @@ export const ITEM_STATS = {
     "WhiteBloodCell egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000},
     "Spider egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000},
     "RedBloodCell egg": {base_attack:1, base_cooldown:8000, spawn_redbloodcell:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000},
-    "StemCell egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:25000},
+    "StemCell egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:20000},
     "queen ant egg": {base_attack:1, base_cooldown:6000, spawn_queenant:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000},
     "WorkerFireAnt egg": {base_attack:1, base_cooldown:10000, spawn_workerfireant:true, spawn_count:4, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000},
     "SoldierFireAnt egg": {base_attack:1, base_cooldown:15000, spawn_soldierfireant:true, spawn_count:5, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:15000},
@@ -1753,7 +1753,6 @@ class AutoSaveSystem {
             };
 
             localStorage.setItem('autosave', JSON.stringify(saveData));
-            console.log("[SAVE] Game saved locally");
             return true;
         } catch (error) {
             console.error("[SAVE ERROR] Failed to save game locally:", error);
@@ -3387,7 +3386,7 @@ class TooltipSystem {
             "Powder": "Increases player movement speed",
             "Suger": "Sweet and quick attacking petal",
             "Cutter": "Fast cutting damage from an old friend",
-
+            "Cancer":"Clone the mob it hit",
             // 特殊功能类
             "Magnet": "Attracts dropped items from a distance",
             "Cactus": "Increases maximum health significantly",
@@ -4949,28 +4948,76 @@ class QuickSlot {
         this.SLOT_SIZE = 60;   // 槽位大小
         this.SLOT_SPACING = 5; // 槽位间距
     }
-
+    // 在 QuickSlot 类中修改 addItem 方法
     addItem(item, slotIndex) {
-        // ✅ 修改：检查范围 0-9
         if (slotIndex >= 0 && slotIndex < this.slots.length) {
+            // 如果要放入的物品不是 Mimic，清除其 Mimic 数据
+            if (item && item.type !== "Mimic") {
+                item._originalMimicData = null;
+                item._isMimic = false;
+                item._isTransformedMimic = false;
+            }
+
             if (this.slots[slotIndex] && this.slots[slotIndex].canStackWith(item)) {
                 this.slots[slotIndex].count += item.count;
             } else {
                 this.slots[slotIndex] = item;
-                // 添加物品后，更新对应的花瓣
                 this.updatePetalFromSlot(slotIndex);
+
+                // ✅ 如果是 Mimic，立即触发复制
+                if (item && item.type === "Mimic" && this.player) {
+                    const petal = this.player.petals[slotIndex];
+                    if (petal && petal.autoCopyWithMimic) {
+                        console.log(`🔄 游戏内放入 Mimic 在槽位 ${slotIndex}，触发复制`);
+                        // 延迟一小段时间执行，确保花瓣状态已更新
+                        setTimeout(() => {
+                            petal.autoCopyWithMimic(slotIndex);
+                        }, 100);
+                    }
+                }
             }
             return true;
         }
         return false;
     }
-
+// 在 QuickSlot 类中修改 removeItem 方法
     removeItem(slotIndex) {
-        // ✅ 修改：检查范围 0-9
         if (slotIndex >= 0 && slotIndex < this.slots.length && this.slots[slotIndex]) {
             const item = this.slots[slotIndex];
+
+            // ✅ 如果是变形的 Mimic（不是 Mimic 但有原始数据），先恢复再移除
+            if (item && item.type !== "Mimic" && item._originalMimicData) {
+
+                // 恢复为原始 Mimic
+                item.type = item._originalMimicData.type;
+                item.rarity = item._originalMimicData.rarity;
+                item.level = item._originalMimicData.level;
+                item.durability = item._originalMimicData.durability;
+                item.maxDurability = item._originalMimicData.maxDurability;
+                item.reloadTime = item._originalMimicData.reloadTime;
+                item.baseReloadTime = item._originalMimicData.baseReloadTime;
+                item.armor = item._originalMimicData.armor;
+
+                // 更新花瓣显示
+                if (this.player && this.player.petals[slotIndex]) {
+                    this.player.petals[slotIndex].updateFromQuickSlot(slotIndex);
+                }
+            }
+
+            // 清除所有 Mimic 相关数据
+            if (item) {
+                item._originalMimicData = null;
+                item._isMimic = null;
+            }
+
+            // 清除花瓣的 Mimic 数据
+            if (this.player && this.player.petals && this.player.petals[slotIndex]) {
+                const petal = this.player.petals[slotIndex];
+                petal.originalMimicData = null;
+                petal._isActiveMimic = null;
+            }
+
             this.slots[slotIndex] = null;
-            // 移除物品后，重置对应的花瓣
             this.resetPetalFromSlot(slotIndex);
             return item;
         }
@@ -4990,17 +5037,27 @@ class QuickSlot {
         const item = this.getItem(slotIndex);
         if (!item) return false;
 
-        // 原有的 Leaf 回血逻辑（可以保留消耗，因为 Leaf 是一次性的）
+        console.log(`🎮 使用物品: ${item.type}`);
+
+        // Leaf 回血
         if (item.type === "Leaf") {
             this.player.health = Math.min(this.player.maxHealth, this.player.health + 5);
-            // Leaf 可以消耗，也可以不消耗，看你设计
-            // this.consumeItem(slotIndex);
+            this.consumeItem(slotIndex);
             return true;
         }
 
-        // Mimic 复制功能 - 不消耗物品
+        // Mimic 复制
         if (item.type === "Mimic") {
             return this.useMimic(slotIndex);
+        }
+
+        // Golden Leaf 提示
+        if (item.type === "Golden Leaf") {
+            console.log("🍃 Golden Leaf 是被动物品");
+            if (this.player?.inventory?.craftingSystem) {
+                this.player.inventory.craftingSystem.showMessage("🍃 Golden Leaf: 减少所有花瓣重载时间");
+            }
+            return true;
         }
 
         return false;
@@ -5121,11 +5178,16 @@ class QuickSlot {
         }
     }
 
+// 在 QuickSlot 类中修改 resetPetalFromSlot 方法
     resetPetalFromSlot(slotIndex) {
-        // ✅ 修改：检查花瓣数组长度
-        if (this.player && this.player.petals &&
-            slotIndex >= 0 && slotIndex < this.player.petals.length) {
-            this.player.petals[slotIndex].resetToDefault();
+        if (this.player && this.player.petals && slotIndex >= 0 && slotIndex < this.player.petals.length) {
+            const petal = this.player.petals[slotIndex];
+
+            // ✅ 清除所有 Mimic 相关标记
+            petal._isTransformedMimic = false;
+            petal._originalMimicData = null;
+
+            petal.resetToDefault();
         }
     }
 
@@ -5257,42 +5319,45 @@ class QuickSlot {
         overlay.height = size;
         const overlayCtx = overlay.getContext('2d');
 
-        // 半透明黑色背景
-        overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        overlayCtx.fillRect(0, 0, size, size);
-
         const progress = petal.getReloadProgress();
+
         if (progress < 1.0) {
             const centerX = size / 2;
             const centerY = size / 2;
-            const radius = size / 2 - 8;
-            const completedAngle = 360 * progress;
+            const radius = size; // 足够大的半径覆盖整个正方形
 
-            if (completedAngle > 0) {
-                // 绘制进度弧线
-                overlayCtx.beginPath();
-                overlayCtx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (completedAngle * Math.PI / 180));
-                overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-                overlayCtx.lineWidth = 3;
-                overlayCtx.stroke();
+            // 先绘制半透明黑色背景
+            overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            overlayCtx.fillRect(0, 0, size, size);
 
-                // 绘制进度扇形（半透明）
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(centerX, centerY);
-                for (let angle = 0; angle <= completedAngle; angle += 5) {
-                    const rad = (angle - 90) * Math.PI / 180;
-                    const px = centerX + radius * Math.cos(rad);
-                    const py = centerY + radius * Math.sin(rad);
-                    if (angle === 0) {
-                        overlayCtx.lineTo(px, py);
-                    } else {
-                        overlayCtx.lineTo(px, py);
-                    }
-                }
-                overlayCtx.closePath();
-                overlayCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                overlayCtx.fill();
-            }
+            // 保存状态
+            overlayCtx.save();
+
+            // 创建扇形裁剪区域
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(centerX, centerY);
+
+            const startAngle = -Math.PI / 2; // 从顶部开始
+            const endAngle = startAngle + (progress * Math.PI * 2);
+
+            // 添加扇形弧线
+            overlayCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+            overlayCtx.closePath();
+
+            // 裁剪出扇形区域
+            overlayCtx.clip();
+
+            // 在裁剪区域内绘制白色半透明（表示已完成的部分）
+            overlayCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            overlayCtx.fillRect(0, 0, size, size);
+
+            // 恢复状态
+            overlayCtx.restore();
+
+            // 绘制边框
+            overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            overlayCtx.lineWidth = 2;
+            overlayCtx.strokeRect(0, 0, size, size);
 
             // 剩余时间
             overlayCtx.font = 'bold 18px Arial';
@@ -5301,56 +5366,93 @@ class QuickSlot {
             overlayCtx.textBaseline = 'middle';
             const remainingTime = (petal.reloadCooldown / 1000).toFixed(1);
             overlayCtx.fillText(`${remainingTime}s`, centerX, centerY);
-
-            // 状态文字
-            overlayCtx.font = '12px Arial';
-            overlayCtx.fillStyle = 'rgb(255, 200, 100)';
-            overlayCtx.fillText('REPAIRING', centerX, centerY + 15);
         } else {
-            // 准备就绪
-            overlayCtx.font = 'bold 16px Arial';
-            overlayCtx.fillStyle = 'rgb(100, 255, 100)';
-            overlayCtx.textAlign = 'center';
-            overlayCtx.textBaseline = 'middle';
-            overlayCtx.fillText('READY', size / 2, size / 2);
+            // 重载完成，只显示半透明黑色背景（或者什么都不显示）
+            overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            overlayCtx.fillRect(0, 0, size, size);
         }
 
         ctx.drawImage(overlay, x, y);
     }
-
     handleClick(pos) {
         const [clickX, clickY] = pos;
+        console.log(`🖱️ 快捷栏点击: (${clickX}, ${clickY})`);
 
-        // ✅ 修改：10个槽位
         const totalWidth = 10 * this.SLOT_SIZE + 9 * this.SLOT_SPACING;
         const startX = Math.floor(WIDTH / 2 - totalWidth / 2);
         const startY = HEIGHT - 80;
 
-        // ✅ 修改：循环10次
         for (let i = 0; i < 10; i++) {
             const slotX = startX + i * (this.SLOT_SIZE + this.SLOT_SPACING);
             const slotY = startY;
-            const slotRect = [slotX, slotY, this.SLOT_SIZE, this.SLOT_SIZE];
 
-            if (this.isPointInRect(clickX, clickY, slotRect)) {
+            if (clickX >= slotX && clickX <= slotX + this.SLOT_SIZE &&
+                clickY >= slotY && clickY <= slotY + this.SLOT_SIZE) {
+
+                console.log(`🎯 点击槽位 ${i}`);
                 const item = this.slots[i];
+                const petal = this.player?.petals[i];
+
                 if (item) {
-                    // 将物品返回背包
+                    // 检查是否是变形的 Mimic
+                    const isTransformedMimic =
+                        (petal && petal._isTransformedMimic) ||
+                        (item._isTransformedMimic) ||
+                        (item.type !== "Mimic" && (petal?._originalMimicData || item._originalMimicData));
+
+                    if (isTransformedMimic) {
+                        console.log(`⚠️ 槽位 ${i} 是变形的 Mimic (当前: ${item.type})，先恢复再移走`);
+
+                        // 查找原始数据
+                        let originalData = petal?._originalMimicData || item._originalMimicData;
+
+                        if (originalData) {
+                            // 恢复为原始 Mimic
+                            item.type = originalData.type;
+                            item.rarity = originalData.rarity;
+                            item.level = originalData.level;
+                            item.durability = originalData.durability;
+                            item.maxDurability = originalData.maxDurability;
+                            item.reloadTime = originalData.reloadTime;
+                            item.baseReloadTime = originalData.baseReloadTime;
+                            item.armor = originalData.armor;
+
+                            console.log(`✅ 恢复为: ${item.type}`);
+                        }
+                    }
+
+
+                    // 创建新物品实例放回背包
                     const newItem = new Item(item.type, item.level, item.rarity);
                     newItem.count = item.count;
+                    newItem.durability = item.durability;
+                    newItem.maxDurability = item.maxDurability;
+                    newItem.isBroken = item.isBroken;
+                    newItem.reloadTime = item.reloadTime;
+                    newItem.baseReloadTime = item.baseReloadTime;
+                    newItem.armor = item.armor;
+
                     if (this.player?.inventory) {
                         this.player.inventory.addItem(newItem);
                     }
+
+                    // 清除所有标记
+                    if (petal) {
+                        petal._isTransformedMimic = false;
+                        petal._originalMimicData = null;
+                    }
+                    item._isTransformedMimic = false;
+                    item._originalMimicData = null;
+
                     // 清空槽位
                     this.slots[i] = null;
                     this.resetPetalFromSlot(i);
-                    return true;
-                } else {
-                    // 点击空槽也视为处理（防止穿透到地图）
-                    return true;
                 }
+
+                return true;
             }
         }
+
         return false;
     }
 
@@ -11233,7 +11335,7 @@ class ShopSystem {
         if (highRarityItems.length === 0) return;
 
         // 随机选择5个物品（如果少于5个就全选）
-        const discountCount = Math.min(5, highRarityItems.length);
+        const discountCount = Math.min(6, highRarityItems.length);
         const selectedIndices = [];
 
         while (selectedIndices.length < discountCount) {
@@ -16744,7 +16846,7 @@ class Petal {
         console.log("🔄 restoreMimic END ==================");
         return true;
     }
-    // 在 Petal 类中修改 getCurrentItem 方法
+    // 在 Petal 类的 getCurrentItem 方法中
     getCurrentItem() {
         if (!this.player || !this.player.quickSlot) {
             return null;
@@ -16754,13 +16856,22 @@ class Petal {
         if (petalIndex >= 0 && petalIndex < this.player.quickSlot.slots.length) {
             const item = this.player.quickSlot.slots[petalIndex];
 
-            // 如果是 Cancer 或 Web，保持原有逻辑（破碎就无效）
-            if (item && (item.type === "Cancer" || item.type === "Web")) {
+            // Cancer：永远返回物品（用于感染）
+            if (item && item.type === "Cancer") {
+                return item;
+            }
+
+            // Golden Leaf：永远返回物品（即使破碎也要生效）
+            if (item && item.type === "Golden Leaf") {
+                return item;  // 不检查任何状态，始终返回
+            }
+
+            // Web：保持原样
+            if (item && item.type === "Web") {
                 if (this.isBroken || this.isReloading) return null;
                 return item;
             }
 
-            // 其他物品即使破碎也返回物品对象
             return item;
         }
         return null;
@@ -16783,8 +16894,45 @@ class Petal {
             console.log(`Petal ${this._petalIndex} 退出静止模式`);
         }
     }
+    // 在 Petal 类中添加
+    updateSpawnCooldownWithGoldenLeaf() {
+    if (!this.player) return;
 
-    // 在 Petal 类中修改 updateReloadTimeWithGoldenLeaf 方法
+    // 查找玩家所有花瓣中的 Golden Leaf，计算总减少效果
+    let totalReduction = 0;
+    let goldenLeafCount = 0;
+
+    for (const petal of this.player.petals) {
+        const item = petal.getCurrentItem();
+        if (item && item.type === "Golden Leaf") {
+            const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
+            totalReduction += reduction;
+            goldenLeafCount++;
+        }
+    }
+
+    totalReduction = Math.min(totalReduction, 0.95);
+
+    // 获取当前物品的基础冷却
+    const currentItem = this.getCurrentItem();
+    if (currentItem) {
+        const itemStats = ITEM_STATS[currentItem.type];
+        if (itemStats && itemStats.base_cooldown) {
+            this.baseSpawnCooldown = itemStats.base_cooldown;
+        }
+    }
+
+    // 计算减少后的冷却值（但不立即应用）
+    if (totalReduction > 0) {
+        this.nextSpawnCooldown = Math.max(100, this.baseSpawnCooldown * (1 - totalReduction));
+    } else {
+        this.nextSpawnCooldown = this.baseSpawnCooldown;
+    }
+
+    // 🔴 关键：不要在这里设置 spawnCooldown，只在生成成功后设置
+    // 移除 this.spawnCooldown = newCooldown 的代码
+}
+    // 在 Petal 类的 updateReloadTimeWithGoldenLeaf 方法中
     updateReloadTimeWithGoldenLeaf() {
         if (!this.player) return;
 
@@ -16794,35 +16942,41 @@ class Petal {
 
         for (const petal of this.player.petals) {
             const item = petal.getCurrentItem();
-            if (item && item.type === "Golden Leaf" && !petal.isBroken && !petal.isReloading) {
+            if (item && item.type === "Golden Leaf") {
                 const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
                 totalReduction += reduction;
                 goldenLeafCount++;
             }
         }
 
-        // 限制最大减少效果，避免变成负数
-        totalReduction = Math.min(totalReduction, 0.95); // 最多减少95%
+        // 限制最大减少效果
+        totalReduction = Math.min(totalReduction, 0.95);
 
-        // 应用总减少效果到所有花瓣
-        if (totalReduction > 0) {
-            // 保存原始值（如果没有保存过）
-            if (this.baseReloadTime === undefined) {
+        // ===== 关键：保存原始值 =====
+        if (this.baseReloadTime === undefined) {
+            // 从物品获取原始重载时间
+            const currentItem = this.getCurrentItem();
+            if (currentItem && currentItem.baseReloadTime) {
+                this.baseReloadTime = currentItem.baseReloadTime;
+            } else {
+                // 默认值
                 this.baseReloadTime = this.reloadTime;
             }
+        }
 
+        // 应用总减少效果
+        if (totalReduction > 0) {
             const newReloadTime = Math.max(100, this.baseReloadTime * (1 - totalReduction));
             if (this.reloadTime !== newReloadTime) {
                 this.reloadTime = newReloadTime;
             }
         } else {
             // 没有 Golden Leaf 效果，恢复原始值
-            if (this.baseReloadTime !== undefined) {
+            if (this.baseReloadTime !== undefined && this.reloadTime !== this.baseReloadTime) {
                 this.reloadTime = this.baseReloadTime;
             }
         }
     }
-
     updateFromQuickSlot(petalIndex) {
         this._petalIndex = petalIndex;
         this.petalIndex = petalIndex;
@@ -17024,8 +17178,9 @@ class Petal {
 
     }
     update(dt, spreadMode = false, playerWorldPos = null) {
-        // 🍃 每次更新都检查 Golden Leaf 效果
+        // 🍃 每次更新都检查 Golden Leaf 效果（同时影响重载和生成冷却）
         this.updateReloadTimeWithGoldenLeaf();
+        this.updateSpawnCooldownWithGoldenLeaf();
 
         // 始终获取当前物品
         const currentItem = this.getCurrentItem();
@@ -17255,7 +17410,7 @@ class Petal {
             const item = petal.getCurrentItem();
             return item && item.type === "DNA" && !petal.isBroken;
         });
-    
+
         // ===== ✅ 新增：Mimic 自动复制（只在游戏中）=====
         if (this.player?.gameInstance?.gameState === GameState.IN_GAME &&
             currentItem && currentItem.type === "Mimic" && !this.mimicProcessed) {
@@ -17269,353 +17424,127 @@ class Petal {
             if ((currentItem.type === "Cancer" || currentItem.type === "Web") && this.isBroken) {
                 return;
             }
+        const handleEggSpawn = (spawnFunction, defaultCooldown) => {
+            const eggItem = this.getCurrentItem();
+            const eggType = eggItem?.type || 'unknown';
+
+            // 检查生成条件
+            if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                if (this.player && this.player.gameInstance) {
+
+                    const spawned = spawnFunction.call(
+                        this,
+                        this.player.gameInstance.enemies,
+                        this.player.getWorldPosition(),
+                        hasDNA
+                    );
+
+                    if (spawned) {
+                        this.eggSpawned = true;
+                        this.breakPetal();
+
+                        const reducedCooldown = this.nextSpawnCooldown || defaultCooldown;
+                        this.spawnCooldown = reducedCooldown;
+
+                    }
+                }
+            }
+        };
 
             // 白细胞蛋
             if (currentItem.type === "WhiteBloodCell egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnWhiteBloodCellsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnWhiteBloodCellsWithDna, 5000);
                 this.updateWhiteBloodCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 蜘蛛蛋
             else if (currentItem.type === "Spider egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnSpidersWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnSpidersWithDna, 6000);
                 this.updateSpiders?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 红细胞蛋
             else if (currentItem.type === "RedBloodCell egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnRedBloodCellsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnRedBloodCellsWithDna, 8000);
                 this.updateRedBloodCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 干细胞蛋
             else if (currentItem.type === "StemCell egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnStemCellsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnStemCellsWithDna, 15000);
                 this.updateStemCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 普通蛋
             else if (currentItem.type === "Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnGoldenAntsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnGoldenAntsWithDna, 15000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 蚂蚁蛋
             else if (currentItem.type === "Ant Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnBeetleWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnBeetleWithDna, 5000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 沙尘暴
             else if (currentItem.type === "Stick") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnSandstormsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnSandstormsWithDna, 8000);
                 this.updateSandstorms?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 岩石
             else if (currentItem.type === "Moon Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnRockWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnRockWithDna, 15000);
                 this.updateRocks?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 细菌蛋
             else if (currentItem.type === "Bacteria_egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnBacteriaWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnBacteriaWithDna, 10000);
                 this.updateBacteria?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 海洋生物蛋
             else if (currentItem.type === "Shell egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnScallopsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnScallopsWithDna, 7000);
                 this.updateScallops?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Starfish egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnStarfishWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnStarfishWithDna, 8000);
                 this.updateStarfish?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Bubble egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnBubblesWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnBubblesWithDna, 5000);
                 this.updateBubbles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Crab egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnCrabsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnCrabsWithDna, 6000);
                 this.updateCrabs?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Jellyfish egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnJellyfishWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnJellyfishWithDna, 10000);
                 this.updateJellyfish?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "CrabHole egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnCrabHoleWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnCrabHoleWithDna, 15000);
                 this.updateCrabHoles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 癌症蛋
             else if (currentItem.type === "Cancer egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnCancerWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnCancerWithDNA, 12000);
                 this.updateCancer?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // 下水道生物蛋
             else if (currentItem.type === "ManHole egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnManHoleWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnManHoleWithDna, 20000);
                 this.updateManHoles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Fly_egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnFlyWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnFlyWithDna, 10000);
                 this.updateFlies?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Rat_egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnRatWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnRatWithDna, 20000);
                 this.updateRats?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "Roach_egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnRoachWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnRoachWithDna, 6000);
                 this.updateRoaches?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             else if (currentItem.type === "PooStick") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnPooStormWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnPooStormWithDna, 8000);
                 this.updatePooStorms?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🆕 Digger 系列蛋 ==========
@@ -17644,6 +17573,9 @@ class Petal {
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
+                            // 使用减少后的冷却
+                            const reducedCooldown = this.nextSpawnCooldown || 15000;
+                            this.spawnCooldown = reducedCooldown;
                         }
                     }
                 }
@@ -17655,20 +17587,31 @@ class Petal {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         let spawned = false;
+                        let defaultCooldown = 8000;
+
                         if (currentItem.type === "WorkerFireAnt egg") {
                             spawned = this.trySpawnWorkerFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
+                            defaultCooldown = 8000;
                         } else if (currentItem.type === "SoldierFireAnt egg") {
                             spawned = this.trySpawnSoldierFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
+                            defaultCooldown = 10000;
                         } else if (currentItem.type === "BabyFireAnt egg") {
                             spawned = this.trySpawnBabyFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
+                            defaultCooldown = 3000;
                         } else if (currentItem.type === "FireAntOvermind egg") {
                             spawned = this.trySpawnFireAntOverminds?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
+                            defaultCooldown = 5000;
                         } else if (currentItem.type === "FireAntHole egg") {
                             spawned = this.trySpawnFireAntHole?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
+                            defaultCooldown = 15000;
                         }
+
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
+                            // 使用减少后的冷却
+                            const reducedCooldown = this.nextSpawnCooldown || defaultCooldown;
+                            this.spawnCooldown = reducedCooldown;
                         }
                     }
                 }
@@ -17676,125 +17619,37 @@ class Petal {
             }
             // 女王蚁蛋
             else if (currentItem.type === "queen ant egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnQueenAntsWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnQueenAntsWithDna, 20000);
                 this.updateQueenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 🟦 Square 蛋（支持 DNA 升级）
+            // 🟦 Square 蛋
             else if (currentItem.type === "Square Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnSquareWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnSquareWithDNA, 15000);
                 this.updateSquare?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🆕 Leech 蛋 ==========
             else if (currentItem.type === "Leech Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnLeechWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnLeechWithDNA, 10000);
                 this.updateLeeches?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🆕 Parasite 蛋 ==========
             else if (currentItem.type === "Parasite Egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnParasiteWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnParasiteWithDNA, 9000);
                 this.updateParasites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🆕 噬菌体蛋 ==========
             else if (currentItem.type === "Bacteriophage egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnBacteriophageWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnBacteriophageWithDNA, 15000);
                 this.updateBacteriophages?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🆕 Virus Egg ==========
             else if (currentItem.type === "Virus egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnVirusWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                        }
-                    }
-                }
+                handleEggSpawn(this.trySpawnVirusWithDNA, 5000);
                 this.updateVirus?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
         }
 
     }
-
     // ===== 辅助方法：更新已存在的召唤物 =====
     _updateExistingSummonedCreatures(dt) {
         const gameEnemies = this.player?.gameInstance?.enemies;
@@ -18211,7 +18066,6 @@ class Petal {
         return this.attackCooldown / this.attackCooldownMax;
     }
     // 在 Petal 类的 autoCopyWithMimic 方法中
-
     autoCopyWithMimic(mimicSlotIndex) {
         if (!this.player || !this.player.quickSlot) return;
 
@@ -18235,14 +18089,15 @@ class Petal {
             armor: mimicItem.armor
         };
 
-        // 标记这是一个活跃的 Mimic
-        this._isActiveMimic = true;
+        // ✅ 标记这是一个活跃的变形 Mimic
+        this._isTransformedMimic = true;
+        this._originalMimicData = originalData;
+
+        // 在物品上也标记
+        mimicItem._isTransformedMimic = true;
+        mimicItem._originalMimicData = originalData;
 
         // 多重备份
-        this.originalMimicData = originalData;
-        mimicItem._originalMimicData = originalData;
-        mimicItem._isMimic = true;  // 在物品上也标记
-
         if (!this.player._mimicBackups) {
             this.player._mimicBackups = {};
         }
@@ -18263,6 +18118,8 @@ class Petal {
         mimicItem.reloadTime = targetItem.reloadTime;
         mimicItem.baseReloadTime = targetItem.baseReloadTime;
         mimicItem.armor = targetItem.armor;
+
+        console.log(`✨ Mimic 变形成功: ${mimicItem.rarity} ${mimicItem.type} (原始: ${originalData.type})`);
 
         // 更新花瓣显示
         this.updateFromQuickSlot(mimicSlotIndex);
@@ -25311,9 +25168,6 @@ class WorldMapGame {
         // 如果已登录，保存到账号
         if (this.accountSystem && this.accountSystem.isLoggedIn()) {
             const saved = this.accountSystem.saveGameData(this.player, gameData);
-            if (saved) {
-                console.log('💾 已保存到账号:', this.accountSystem.getCurrentUser());
-            }
         }
     }
     updateCollisionPositions() {
@@ -25664,13 +25518,10 @@ class WorldMapGame {
 
         // 如果已登录，加载账号数据
         if (this.accountSystem && this.accountSystem.isLoggedIn()) {
-            console.log('👤 已登录，加载账号数据:', this.accountSystem.getCurrentUser());
             const gameData = this.accountSystem.loadGameData();
             if (gameData) {
-                console.log('📥 找到账号数据，开始应用');
                 this.accountSystem.applyGameData(this.player, gameData);
             } else {
-                console.log('📭 账号无存档数据，使用默认配置');
                 // 确保玩家有默认物品
                 this.initializeDefaultItems();
             }
@@ -25692,9 +25543,7 @@ class WorldMapGame {
         if (this.player && this.player.inventory) {
             // 检查是否有 Cancer 物品
             const hasCancer = this.player.inventory.items.some(item => item.type === "Cancer");
-            if (hasCancer) {
-                console.log(`🦠 检测到 Cancer 物品，感染系统已准备就绪`);
-            }
+
         }
         // 设置初始位置
         if (!this.accountSystem || !this.accountSystem.isLoggedIn()) {
@@ -25716,7 +25565,6 @@ class WorldMapGame {
     initializeDefaultItems() {
         if (!this.player || !this.player.inventory) return;
 
-        console.log('📦 初始化默认物品');
 
         // 添加一些基础物品，确保玩家有东西可玩
         const defaultItems = [
