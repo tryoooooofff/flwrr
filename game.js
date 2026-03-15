@@ -578,8 +578,8 @@ export const SPECIAL_ZONES = {
         {
             name: "Bush Zone",
             bounds: {
-                x1: 4000, y1: 1000,      // 左上角 (2400, 0)
-                x2: 5000, y2: 0     // 右下角 (5000, 1000)
+                x1: 8000, y1: 0,      // 左上角 (2400, 0)
+                x2: 10000, y2: 1000     // 右下角 (5000, 1000)
             },
             spawnRules: [
                 ["Fly", 10, 1, 5, ["Super","Omega"]],
@@ -1334,14 +1334,14 @@ const applyArmorReduction = (damage, defenderArmor, attackerArmor = 0) => {
         // 原来的公式: reduction = absDiff / (absDiff + 1.5)
         // 新公式: 让分母变得非常大，使减伤几乎为0
         const reduction = absDiff / (absDiff + 1000);  // 分母从1.5改为1000
-        const reductionPercent = Math.min(0.05, reduction);  // 最大减伤5%
+        const reductionPercent = Math.min(0.10, reduction);  // 最大减伤5%
         return damage * (1 - reductionPercent);
     } else {
         // 攻击者护甲更高：极轻微减伤（攻击者护甲穿透）
         // 原来的公式: reduction = absDiff / (absDiff + 50)
         // 新公式: 让分母变得非常大，使减伤几乎为0
         const reduction = absDiff / (absDiff + 2000);  // 分母从50改为2000
-        const reductionPercent = Math.min(0.05, reduction);  // 最大减伤3%
+        const reductionPercent = Math.min(0.10, reduction);  // 最大减伤3%
         return damage * (1 - reductionPercent);
     }
 };
@@ -5312,68 +5312,116 @@ class QuickSlot {
 
         ctx.drawImage(overlay, x, y);
     }
-
     drawReloadOverlay(ctx, x, y, size, petal) {
-        const overlay = document.createElement('canvas');
-        overlay.width = size;
-        overlay.height = size;
-        const overlayCtx = overlay.getContext('2d');
+    const overlay = document.createElement('canvas');
+    overlay.width = size;
+    overlay.height = size;
+    const overlayCtx = overlay.getContext('2d');
 
-        const progress = petal.getReloadProgress();
+    const progress = petal.getReloadProgress();
+    const totalReloadTime = petal.reloadTime / 1000; // 总重载时间（秒）
 
-        if (progress < 1.0) {
-            const centerX = size / 2;
-            const centerY = size / 2;
-            const radius = size; // 足够大的半径覆盖整个正方形
+    if (progress < 1.0) {
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = size; // 足够大的半径覆盖整个正方形
 
-            // 先绘制半透明黑色背景
+        // 计算当前时间（秒）
+        const currentTime = petal.reloadCooldown / 1000;
+        const elapsedTime = totalReloadTime - currentTime; // 已经过去的时间
+
+        // 第一阶段：黑色覆盖层旋转出现（前0.5秒）
+        if (elapsedTime < 0.5) {
+            // 计算第一阶段的进度（0到1）
+            const firstPhaseProgress = elapsedTime / 0.5;
+
+            // ===== 黑色覆盖层旋转出现 =====
+            overlayCtx.save();
+
+            // 创建扇形裁剪区域（要绘制的部分）
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(centerX, centerY);
+
+            // 从顶部开始，顺时针旋转出现
+            const startAngle = -Math.PI / 2; // 从顶部开始
+            const endAngle = startAngle + (firstPhaseProgress * Math.PI * 2);
+
+            overlayCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+            overlayCtx.closePath();
+            overlayCtx.clip();
+
+            // 在裁剪区域内绘制黑色覆盖层
             overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             overlayCtx.fillRect(0, 0, size, size);
 
-            // 保存状态
+            overlayCtx.restore();
+
+            // 绘制一个旋转的白色圆圈表示方向
+            overlayCtx.save();
+            overlayCtx.translate(centerX, centerY);
+
+            // 计算旋转角度
+            const rotateAngle = firstPhaseProgress * Math.PI * 2;
+            overlayCtx.rotate(rotateAngle);
+
+            // 绘制一个白色小点表示旋转方向
+            overlayCtx.beginPath();
+            overlayCtx.arc(radius - 15, 0, 5, 0, Math.PI * 2);
+            overlayCtx.fillStyle = 'white';
+            overlayCtx.fill();
+
+            overlayCtx.restore();
+        }
+        // 第二阶段：黑色覆盖层旋转消失（0.5秒后）
+        else {
+            // 计算第二阶段的进度（从0到1）
+            const secondPhaseProgress = Math.min(1, (elapsedTime - 0.5) / (totalReloadTime - 0.5));
+
+            // ===== 第1步：先绘制整个黑色覆盖层 =====
+            overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            overlayCtx.fillRect(0, 0, size, size);
+
+            // ===== 第2步：在已完成的部分擦除黑色 =====
             overlayCtx.save();
 
-            // 创建扇形裁剪区域
+            // 创建扇形裁剪区域（已完成的部分）
             overlayCtx.beginPath();
             overlayCtx.moveTo(centerX, centerY);
 
             const startAngle = -Math.PI / 2; // 从顶部开始
-            const endAngle = startAngle + (progress * Math.PI * 2);
+            const endAngle = startAngle + (secondPhaseProgress * Math.PI * 2);
 
             // 添加扇形弧线
             overlayCtx.arc(centerX, centerY, radius, startAngle, endAngle);
             overlayCtx.closePath();
 
-            // 裁剪出扇形区域
-            overlayCtx.clip();
+            // 使用 destination-out 在扇形区域内擦除黑色
+            overlayCtx.globalCompositeOperation = 'destination-out';
+            overlayCtx.fill();
 
-            // 在裁剪区域内绘制白色半透明（表示已完成的部分）
-            overlayCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            overlayCtx.fillRect(0, 0, size, size);
-
-            // 恢复状态
             overlayCtx.restore();
-
-            // 绘制边框
-            overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            overlayCtx.lineWidth = 2;
-            overlayCtx.strokeRect(0, 0, size, size);
-
-            // 剩余时间
-            overlayCtx.font = 'bold 18px Arial';
-            overlayCtx.fillStyle = 'white';
-            overlayCtx.textAlign = 'center';
-            overlayCtx.textBaseline = 'middle';
-            const remainingTime = (petal.reloadCooldown / 1000).toFixed(1);
-            overlayCtx.fillText(`${remainingTime}s`, centerX, centerY);
-        } else {
-            // 重载完成，只显示半透明黑色背景（或者什么都不显示）
-            overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            overlayCtx.fillRect(0, 0, size, size);
         }
 
-        ctx.drawImage(overlay, x, y);
+        // 绘制边框（始终显示）
+        overlayCtx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+        overlayCtx.lineWidth = 2;
+        overlayCtx.strokeRect(0, 0, size, size);
+
+        // 剩余时间
+        overlayCtx.font = 'bold 18px Arial';
+        overlayCtx.fillStyle = 'white';
+        overlayCtx.textAlign = 'center';
+        overlayCtx.textBaseline = 'middle';
+        overlayCtx.shadowColor = 'black';
+        overlayCtx.shadowBlur = 4;
+        const remainingTime = (petal.reloadCooldown / 1000).toFixed(1);
+        overlayCtx.fillText(`${remainingTime}s`, centerX, centerY);
+    } else {
+        // 重载完成，不绘制任何覆盖层
     }
+
+    ctx.drawImage(overlay, x, y);
+}
     handleClick(pos) {
         const [clickX, clickY] = pos;
         console.log(`🖱️ 快捷栏点击: (${clickX}, ${clickY})`);
@@ -11152,6 +11200,391 @@ class EnemyDrawer {
         }
     }
 }
+    // ===== 兑换码系统 =====
+class RedeemSystem {
+    constructor(shopSystem) {
+        this.shop = shopSystem;
+        this.codes = new Map();
+        this.inputVisible = false;
+        this.inputText = '';
+        this.message = '';
+        this.messageTimer = 0;
+        this.inputActive = false;
+
+        // 从 localStorage 加载已使用的记录
+        this.loadUsedRecords();
+
+        // 预设一些兑换码
+        this.addCode("FRIEND2025", [
+            { type: "Stick", rarity: "Super", count: 1 },
+            { type: "Golden Leaf", rarity: "Mythic", count: 1 }
+        ], 10); // 7天有效
+
+        this.addCode("12378900", [
+            { type: "DNA", rarity: "Mythic", count: 1 },
+            { type: "Leaf", rarity: "Super", count: 1 }
+        ], 30); // 30天有效
+
+        this.addCode("7891", [
+            { type: "Poo", rarity: "Super", count: 1 }
+        ], 1); // 1天有效
+    }
+
+    // 从 localStorage 加载已使用的记录
+    loadUsedRecords() {
+        try {
+            const saved = localStorage.getItem('redeem_used_records');
+            if (saved) {
+                const data = JSON.parse(saved);
+                // 将普通对象转回 Map
+                this.usedRecords = new Map(Object.entries(data));
+                console.log('📦 加载兑换码使用记录:', this.usedRecords);
+            } else {
+                this.usedRecords = new Map();
+            }
+        } catch (e) {
+            console.error('加载兑换码记录失败:', e);
+            this.usedRecords = new Map();
+        }
+    }
+
+    // 保存已使用的记录到 localStorage
+    saveUsedRecords() {
+        try {
+            // 将 Map 转为普通对象存储
+            const data = Object.fromEntries(this.usedRecords);
+            localStorage.setItem('redeem_used_records', JSON.stringify(data));
+        } catch (e) {
+            console.error('保存兑换码记录失败:', e);
+        }
+    }
+
+    // 获取稳定的玩家标识符
+    getPlayerIdentifier() {
+        // 尝试使用账号系统的用户名（最稳定）
+        if (window.gameInstance?.accountSystem?.isLoggedIn()) {
+            const username = window.gameInstance.accountSystem.getCurrentUser();
+            if (username) {
+                return `account_${username}`;
+            }
+        }
+
+        // 如果没有登录，使用存储在 localStorage 的设备 ID
+        let deviceId = localStorage.getItem('device_id');
+        if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            localStorage.setItem('device_id', deviceId);
+        }
+        return `device_${deviceId}`;
+    }
+
+    // 添加兑换码
+    addCode(code, items, expireDays = 30) {
+        this.codes.set(code.toUpperCase(), {
+            items: items,
+            expires: Date.now() + expireDays * 24 * 60 * 60 * 1000,
+            maxUses: 1 // 总共能用几次
+        });
+        console.log(`✅ add code: ${code}, last ${expireDays} day`);
+    }
+
+    // 设置最大使用次数
+    setMaxUses(code, maxUses) {
+        const upperCode = code.toUpperCase();
+        if (this.codes.has(upperCode)) {
+            this.codes.get(upperCode).maxUses = maxUses;
+        }
+    }
+
+    // 检查玩家是否可以用这个码
+    canPlayerUse(code, playerId) {
+        const upperCode = code.toUpperCase();
+        const key = `${upperCode}_${playerId}`;
+        const used = this.usedRecords.get(key) || false;
+
+        if (used) {
+            return { allowed: false, reason: "you already used it" };
+        }
+
+        return { allowed: true };
+    }
+
+    // 记录玩家使用
+    recordUse(code, playerId) {
+        const upperCode = code.toUpperCase();
+        const key = `${upperCode}_${playerId}`;
+        this.usedRecords.set(key, true);
+        this.saveUsedRecords();
+    }
+
+    // 使用兑换码
+    redeem(code, player) {
+        const upperCode = code.toUpperCase().trim();
+        const redeemData = this.codes.get(upperCode);
+
+        // 检查是否存在
+        if (!redeemData) {
+            this.showMessage("❌ unexpected code", 3000);
+            return false;
+        }
+
+        // 检查是否过期
+        if (Date.now() > redeemData.expires) {
+            this.codes.delete(upperCode);
+            this.showMessage("❌ out of date", 3000);
+            return false;
+        }
+
+        // 获取稳定的玩家标识符
+        const playerId = this.getPlayerIdentifier();
+
+        // 检查玩家是否已经用过
+        const canUse = this.canPlayerUse(upperCode, playerId);
+        if (!canUse.allowed) {
+            this.showMessage(`❌ ${canUse.reason}`, 3000);
+            return false;
+        }
+
+        // 检查兑换码总使用次数
+        let totalUsed = 0;
+        for (const [key] of this.usedRecords) {
+            if (key.startsWith(upperCode + '_')) {
+                totalUsed++;
+            }
+        }
+
+        if (totalUsed >= redeemData.maxUses) {
+            this.showMessage("❌ code has been used up", 3000);
+            return false;
+        }
+
+        // 发放物品
+        let itemList = [];
+        for (const itemData of redeemData.items) {
+            const item = new Item(itemData.type, 1, itemData.rarity);
+            item.count = itemData.count;
+            player.inventory.addItem(item);
+            itemList.push(`${itemData.count} ${itemData.rarity} ${itemData.type}`);
+        }
+
+        // 记录已使用
+        this.recordUse(upperCode, playerId);
+
+        // 显示成功消息
+        this.showMessage(`✅ get: ${itemList.join(', ')}`, 5000);
+        return true;
+    }
+
+    // 显示消息
+    showMessage(msg, duration = 3000) {
+        this.message = msg;
+        this.messageTimer = duration;
+    }
+
+    // 更新
+    update(dt) {
+        if (this.messageTimer > 0) {
+            this.messageTimer -= dt * 1000;
+            if (this.messageTimer <= 0) {
+                this.message = '';
+            }
+        }
+    }
+
+    // 绘制兑换码输入界面
+    draw(ctx) {
+        if (!this.inputVisible) return;
+
+        const centerX = ctx.canvas.width / 2;
+        const centerY = ctx.canvas.height / 2;
+        const width = 400;
+        const height = 200;
+        const x = centerX - width/2;
+        const y = centerY - height/2;
+
+        ctx.save();
+
+        // 半透明背景
+        ctx.fillStyle = 'rgba(20, 30, 40, 0.95)';
+        ctx.fillRect(x, y, width, height);
+
+        // 边框
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+
+        // 标题
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'center';
+        ctx.fillText('Redemption code', centerX, y + 40);
+
+        // 输入框
+        ctx.fillStyle = this.inputActive ? '#34495e' : '#2c3e50';
+        ctx.fillRect(x + 50, y + 80, width - 100, 40);
+        ctx.strokeStyle = this.inputActive ? '#ffd700' : '#7f8c8d';
+        ctx.lineWidth = this.inputActive ? 2 : 1;
+        ctx.strokeRect(x + 50, y + 80, width - 100, 40);
+
+        // 输入文字
+        ctx.font = '20px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'left';
+        let displayText = this.inputText;
+        if (displayText.length === 0 && !this.inputActive) {
+            ctx.fillStyle = '#7f8c8d';
+            displayText = 'enter code';
+        }
+        ctx.fillText(displayText, x + 60, y + 100);
+
+        // 光标闪烁
+        if (this.inputActive && Date.now() % 1000 < 500) {
+            const textWidth = ctx.measureText(this.inputText).width;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + 60 + textWidth, y + 85, 2, 30);
+        }
+
+        // 兑换按钮
+        const btnX = x + width/2 - 60;
+        const btnY = y + 140;
+        ctx.fillStyle = '#27ae60';
+        ctx.fillRect(btnX, btnY, 120, 35);
+        ctx.strokeStyle = 'white';
+        ctx.strokeRect(btnX, btnY, 120, 35);
+
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText('convert', btnX + 60, btnY + 15);
+
+        // 关闭按钮
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(x + width - 25, y + 25, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('×', x + width - 25, y + 25);
+
+        // 提示消息
+        if (this.message) {
+            ctx.font = '16px Arial';
+            ctx.fillStyle = this.message.includes('✅') ? '#2ecc71' : '#e74c3c';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.message, centerX, y + height - 20);
+        }
+
+        ctx.restore();
+    }
+
+    // handleClick 方法（保持不变）
+    handleClick(x, y, gameInstance) {
+        if (!this.inputVisible) return false;
+
+        const canvas = document.querySelector('canvas');
+        if (!canvas) return false;
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const width = 400;
+        const height = 200;
+        const dialogX = centerX - width/2;
+        const dialogY = centerY - height/2;
+
+        if (x >= dialogX && x <= dialogX + width && y >= dialogY && y <= dialogY + height) {
+
+            // 检查关闭按钮
+            const closeX = dialogX + width - 25;
+            const closeY = dialogY + 25;
+            const distance = Math.sqrt((x - closeX) ** 2 + (y - closeY) ** 2);
+            if (distance <= 15) {
+                this.inputVisible = false;
+                this.inputActive = false;
+                this.inputText = '';
+                return true;
+            }
+
+            // 检查兑换按钮
+            const btnX = dialogX + width/2 - 60;
+            const btnY = dialogY + 140;
+            const btnW = 120;
+            const btnH = 35;
+
+            if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+                if (this.inputText.length > 0) {
+                    this.redeem(this.inputText, gameInstance?.player);
+                    this.inputText = '';
+                    this.inputActive = false;
+                    this.inputVisible = false;
+                }
+                return true;
+            }
+
+            // 检查输入框区域
+            const inputX = dialogX + 50;
+            const inputY = dialogY + 80;
+            const inputW = width - 100;
+            const inputH = 40;
+
+            if (x >= inputX && x <= inputX + inputW && y >= inputY && y <= inputY + inputH) {
+                this.inputActive = true;
+                return true;
+            }
+
+            this.inputActive = false;
+            return true;
+        }
+
+        this.inputVisible = false;
+        this.inputActive = false;
+        this.inputText = '';
+        return true;
+    }
+
+    // 处理键盘输入
+    handleKeyDown(e) {
+        if (!this.inputVisible || !this.inputActive) return false;
+
+        if (e.key === 'Escape') {
+            this.inputVisible = false;
+            this.inputActive = false;
+            this.inputText = '';
+            return true;
+        }
+
+        if (e.key === 'Enter') {
+            if (this.inputText.length > 0) {
+                this.redeem(this.inputText, window.gameInstance?.player);
+                this.inputText = '';
+                this.inputActive = false;
+                this.inputVisible = false;
+            }
+            return true;
+        }
+
+        if (e.key === 'Backspace') {
+            this.inputText = this.inputText.slice(0, -1);
+            return true;
+        }
+
+        if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+            this.inputText += e.key.toUpperCase();
+            return true;
+        }
+
+        return false;
+    }
+
+    // 打开兑换码界面
+    open() {
+        this.inputVisible = true;
+        this.inputText = '';
+        this.inputActive = false;
+    }
+}
 // ==================== Shop System ====================
 class ShopSystem {
     constructor(inventory, quickSlot) {
@@ -11162,7 +11595,10 @@ class ShopSystem {
         // Shop panel position - larger than inventory
         this.shopArea = [WIDTH/2 - 400, HEIGHT/2 - 300, 800, 600];
         this.closeButton = [this.shopArea[0] + this.shopArea[2] - 40, this.shopArea[1] + 10, 30, 30];
+        this.redeemSystem = new RedeemSystem(this);
 
+        // 添加兑换码按钮
+        this.redeemButton = [this.shopArea[0] + 50, this.shopArea[1] + 500, 120, 40];
         // Tab buttons
         this.buyButton = [this.shopArea[0] + 200, this.shopArea[1] + 60, 150, 40];
         this.sellButton = [this.shopArea[0] + 450, this.shopArea[1] + 60, 150, 40];
@@ -11205,7 +11641,7 @@ class ShopSystem {
             "Stick": 18,
             "Moon Egg": 10,
             "Rock": 5,
-            "DNA": 100,
+            "DNA": 190,
             "Clover": 5,
             "Suger":3,
             "Virus egg":10,
@@ -11229,10 +11665,10 @@ class ShopSystem {
             "Bacteria_egg": 10,
             "Spider egg": 12,
             "Digger egg": 50,
-            "TrashDigger egg": 52,
-            "MudDigger_egg": 54,
+            "TrashDigger egg": 102,
+            "MudDigger_egg": 104,
             "Crab egg": 18,
-            "Biologist egg": 52,
+            "Biologist egg": 102,
             "Jellyfish egg": 18,
             "Starfish egg": 15,
             "Shell egg": 22,
@@ -11243,7 +11679,7 @@ class ShopSystem {
             "Leech Egg": 12,
             "Parasite Egg": 12,
             "Chromosome":18,
-            "Mimic":110,
+            "Mimic":240,
             "StemCell egg": 45,
             "queen ant egg": 20,
             "WorkerFireAnt egg": 12,
@@ -11645,9 +12081,8 @@ class ShopSystem {
         this.checkDiscountUpdate();
     }
 
+    // 在 ShopSystem 类中
     handleClick(pos) {
-        if (!this.visible) return false;
-
         // 检查是否是滚轮事件
         if (pos.type === 'wheel') {
             const deltaY = pos.deltaY;
@@ -11655,7 +12090,6 @@ class ShopSystem {
             if (this.currentTab === "buy") {
                 const totalRows = Math.ceil(this.shopItems.length / this.cols);
                 const maxOffset = Math.max(0, totalRows - this.maxVisibleRows);
-                const oldOffset = this.scrollOffset;
 
                 if (deltaY < 0) {
                     this.scrollOffset = Math.max(0, this.scrollOffset - 1);
@@ -11663,7 +12097,6 @@ class ShopSystem {
                 else if (deltaY > 0) {
                     this.scrollOffset = Math.min(maxOffset, this.scrollOffset + 1);
                 }
-
             }
             else if (this.currentTab === "sell") {
                 if (this.inventory) {
@@ -11684,9 +12117,33 @@ class ShopSystem {
 
         const [x, y] = pos;
 
+        // ===== 🎁 优先检查兑换码系统（即使点击在商店区域外也要检查）=====
+        if (this.redeemSystem && this.redeemSystem.inputVisible) {
+            // 如果兑换码界面可见，让兑换码系统处理点击
+            const redeemHandled = this.redeemSystem.handleClick(x, y, window.gameInstance);
+            if (redeemHandled) {
+                return true;
+            }
+        }
+
         // 检查点击是否在商店区域外
         if (x < this.shopArea[0] || x > this.shopArea[0] + this.shopArea[2] ||
             y < this.shopArea[1] || y > this.shopArea[1] + this.shopArea[3]) {
+            return true;
+        }
+
+        // ===== 🎁 检查兑换码按钮 =====
+        const redeemBtnX = this.shopArea[0] + this.shopArea[2] - 150;
+        const redeemBtnY = this.shopArea[1] + this.shopArea[3] - 50;
+        const redeemBtnW = 120;
+        const redeemBtnH = 35;
+
+        if (x >= redeemBtnX && x <= redeemBtnX + redeemBtnW &&
+            y >= redeemBtnY && y <= redeemBtnY + redeemBtnH) {
+            console.log('🎁 兑换码按钮被点击');
+            if (this.redeemSystem) {
+                this.redeemSystem.open();
+            }
             return true;
         }
 
@@ -11744,7 +12201,7 @@ class ShopSystem {
                 return true;
             }
 
-            // ✅ 修复：商店物品列表点击（考虑滚动偏移）
+            // 商店物品列表点击（考虑滚动偏移）
             const startX = this.shopArea[0] + 50;
             const startY = this.shopArea[1] + 120;
 
@@ -11793,7 +12250,7 @@ class ShopSystem {
                 return true;
             }
 
-            // ✅ 修复：背包物品点击（考虑背包的滚动偏移）
+            // 背包物品点击（考虑背包的滚动偏移）
             // 转换坐标到背包的相对坐标
             const inventoryX = x - (this.shopArea[0] + 50);
             const inventoryY = y - (this.shopArea[1] + 250);
@@ -11809,7 +12266,7 @@ class ShopSystem {
 
         return true;
     }
-
+    // 在 ShopSystem 类中
     draw(ctx) {
         if (!this.visible) return;
 
@@ -11883,10 +12340,29 @@ class ShopSystem {
         ctx.fillStyle = this.currentTab === "sell" ? 'black' : 'white';
         ctx.fillText('SELL', this.sellButton[0] + 75, this.sellButton[1] + 20);
 
+        // ===== 🎁 兑换码按钮 =====
+        const redeemBtnX = this.shopArea[0] + this.shopArea[2] - 150;
+        const redeemBtnY = this.shopArea[1] + this.shopArea[3] - 50;
+        ctx.fillStyle = '#9b59b6';
+        ctx.fillRect(redeemBtnX, redeemBtnY, 120, 35);
+        ctx.strokeStyle = 'white';
+        ctx.strokeRect(redeemBtnX, redeemBtnY, 120, 35);
+
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Redemption code', redeemBtnX + 60, redeemBtnY + 17);
+
         if (this.currentTab === "buy") {
             this.drawBuyTab(ctx);
         } else {
             this.drawSellTab(ctx);
+        }
+
+        // ===== 绘制兑换码系统 =====
+        if (this.redeemSystem) {
+            this.redeemSystem.draw(ctx);
         }
 
         // Message提示
@@ -14882,10 +15358,11 @@ class Enemy {
             "Legendary": 405,
             "Mythic": 2430,
             "Ultra": 12645,
-            "Super": 28574,
-            "Omega": 105510,
-            "Eternal": 784830
+            "Super": 32574,
+            "Omega": 121510,
+            "Eternal": 789830
         };
+        //原来的数值变化---1,3.75,13.5,54,405,2430,36450,437400,6561000,734832000
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
         const levelHealthMultiplier = 1 + (this.level - 1) * 0.1;
 
