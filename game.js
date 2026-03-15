@@ -3843,11 +3843,28 @@ class CollisionSystem {
         }
     }
 
+    // 在 CollisionSystem 类的 _handlePetalEnemyCollision 方法中
     _handlePetalEnemyCollision(petal, enemy) {
-        if (enemy.isFriendly === true) {
-            return;
+        if (enemy.isFriendly === true) return;
+
+        // ===== 在造成伤害之前先感染 =====
+        const currentItem = petal.getCurrentItem();
+        if (currentItem && currentItem.type === "Cancer") {
+            // 不管生物伤害多高，先感染再说
+            enemy.isCancerInfected = true;
+            enemy.infectedByCancer = {
+                type: "Cancer",
+                rarity: currentItem.rarity,
+                level: currentItem.level,
+                gameInstance: petal.player?.gameInstance,
+                sourcePetal: petal,
+                sourcePlayer: petal.player
+            };
+            enemy.cancerInfectionTime = Date.now();
+
         }
 
+        // 然后再处理伤害（可能打碎花瓣）
         const enemyDamage = enemy.attackDamage || 10;
         const petalDied = petal.takeDamage(enemyDamage);
 
@@ -15287,8 +15304,26 @@ class Enemy {
         this.physicsBody.velocity = vel;
     }
 
-        // ===== 更新方法 =====
-// ===== 更新方法 =====
+    // 在 Enemy 类中添加这个方法（如果还没有）
+    forceInfectByCancer(cancerSource) {
+        if (!cancerSource) {
+            console.log(`❌ forceInfectByCancer: cancerSource 为空`);
+            return false;
+        }
+
+        if (this.isDead) {
+            console.log(`❌ forceInfectByCancer: 生物已死亡`);
+            return false;
+        }
+
+        // 无视所有条件，强制感染
+        this.isCancerInfected = true;
+        this.infectedByCancer = cancerSource;
+        this.cancerInfectionTime = Date.now();
+
+        console.log(`✅ forceInfectByCancer 成功: ${this.type} 被 Cancer (${cancerSource.rarity}) 感染`);
+        return true;
+    }
     // 在 Enemy 类中添加这个方法
     getAllCollisionBodies() {
         const bodies = [{
@@ -16178,13 +16213,12 @@ class Enemy {
         gameInstance.enemies.push(biologist);
     }
 
-    // ===== 癌症相关方法 =====
     markAsCancerInfected(cancerSource) {
-        if (!this.isCancerInfected && !this.hasBeenCloned) {
-            this.isCancerInfected = true;
-            this.infectedByCancer = cancerSource;
-            this.cancerInfectionTime = Date.now();
-        }
+        // 总是允许最新的 Cancer 覆盖
+        this.isCancerInfected = true;
+        this.infectedByCancer = cancerSource;
+        this.cancerInfectionTime = Date.now();
+
     }
 
     canBeClonedByCancer(cancerRarity) {
@@ -25654,7 +25688,14 @@ class WorldMapGame {
 
         // ✅ 确保所有花瓣从快捷栏同步属性
         this.syncAllPetalsFromQuickSlot();
-
+    // ✅ 确保玩家有 Cancer 物品（如果有的话）
+        if (this.player && this.player.inventory) {
+            // 检查是否有 Cancer 物品
+            const hasCancer = this.player.inventory.items.some(item => item.type === "Cancer");
+            if (hasCancer) {
+                console.log(`🦠 检测到 Cancer 物品，感染系统已准备就绪`);
+            }
+        }
         // 设置初始位置
         if (!this.accountSystem || !this.accountSystem.isLoggedIn()) {
             this.player.physicsBody.position.x = WORLD_WIDTH / 2;
