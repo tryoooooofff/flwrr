@@ -1862,7 +1862,89 @@ html, body {
         gameInstance.screen = ctx;
       }
     });
+    // ===== 页面加载时检查未恢复的 Mimic =====
+    window.addEventListener('load', function() {
+        // 延迟执行，确保游戏实例已创建
+        setTimeout(function checkMimicOnLoad() {
+            if (!window.gameInstance) {
+                console.log('⏳ gameInstance 未就绪，1秒后重试...');
+                setTimeout(checkMimicOnLoad, 1000);
+                return;
+            }
 
+            const game = window.gameInstance;
+            if (!game.player || !game.player.quickSlot) {
+                console.log('⏳ 玩家或快捷栏未就绪，1秒后重试...');
+                setTimeout(checkMimicOnLoad, 1000);
+                return;
+            }
+
+            console.log('🔍 页面加载检查：扫描未恢复的 Mimic...');
+            const quickSlot = game.player.quickSlot;
+            let restoredCount = 0;
+
+            for (let i = 0; i < quickSlot.slots.length; i++) {
+                const item = quickSlot.slots[i];
+                const petal = game.player.petals[i];
+
+                // 如果当前不是 Mimic 但有原始数据
+                if (item && item.type !== "Mimic") {
+                    // 从各个来源查找原始数据
+                    let originalData = null;
+                    if (petal && petal.originalMimicData) {
+                        originalData = petal.originalMimicData;
+                        console.log(`📦 槽位 ${i} 从花瓣找到原始数据:`, originalData);
+                    } else if (item._originalMimicData) {
+                        originalData = item._originalMimicData;
+                        console.log(`📦 槽位 ${i} 从物品找到原始数据:`, originalData);
+                    } else if (game.player._mimicBackups && game.player._mimicBackups[i]) {
+                        originalData = game.player._mimicBackups[i];
+                        console.log(`📦 槽位 ${i} 从玩家备份找到原始数据:`, originalData);
+                    } else if (game._mimicBackups && game._mimicBackups[i]) {
+                        originalData = game._mimicBackups[i];
+                        console.log(`📦 槽位 ${i} 从游戏实例备份找到原始数据:`, originalData);
+                    }
+
+                    // 如果找到原始数据且是 Mimic，就恢复
+                    if (originalData && originalData.type === "Mimic") {
+                        console.log(`🔄 页面加载恢复槽位 ${i}: ${item.type} -> Mimic`);
+
+                        item.type = originalData.type;
+                        item.rarity = originalData.rarity;
+                        item.level = originalData.level;
+                        item.durability = originalData.durability;
+                        item.maxDurability = originalData.maxDurability;
+                        item.reloadTime = originalData.reloadTime;
+                        item.baseReloadTime = originalData.baseReloadTime;
+                        item.armor = originalData.armor;
+
+                        // 清除所有备份数据
+                        if (petal) {
+                            petal.originalMimicData = null;
+                            petal._isActiveMimic = false;
+                        }
+                        item._originalMimicData = null;
+                        item._isMimic = false;
+                        if (game.player._mimicBackups) {
+                            delete game.player._mimicBackups[i];
+                        }
+                        if (game._mimicBackups) {
+                            delete game._mimicBackups[i];
+                        }
+
+                        restoredCount++;
+
+                        // 更新花瓣显示
+                        if (petal && petal.updateFromQuickSlot) {
+                            petal.updateFromQuickSlot(i);
+                        }
+                    }
+                }
+            }
+
+            console.log(`✅ 页面加载检查完成，恢复了 ${restoredCount} 个 Mimic`);
+        }, 1500);  // 延迟1.5秒执行
+    });
     // ===== 键盘事件监听 =====
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
