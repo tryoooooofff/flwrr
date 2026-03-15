@@ -1031,7 +1031,8 @@ const ITEM_IMAGE_URLS = {
     "Controller":"images/Controller.png",
     "Bacteriophage egg":"images/Bacteriophage_egg.png",
     "Virus egg":"images/Virus_egg.png",
-    "Suger":"images/Suger.png"
+    "Suger":"images/Suger.png",
+    "Mimic":"images/Mimic.png"
 
 
 };
@@ -1051,7 +1052,7 @@ export const ITEM_STATS = {
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Root": {base_attack:19, base_cooldown:220, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
     "Web": {base_attack:10, base_cooldown:180, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
-
+    "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000},
     "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -3494,15 +3495,15 @@ class TooltipSystem {
 
         // 根据物品稀有度决定召唤物稀有度
         const rarityMap = {
-            "Common": "Unusual",
-            "Unusual": "Rare",
-            "Rare": "Epic",
-            "Epic": "Legendary",
-            "Legendary": "Mythic",
-            "Mythic": "Ultra",
-            "Ultra": "Super",
-            "Super": "Omega",
-            "Omega": "Eternal"
+            "Common": "Common",
+            "Unusual": "Unusual",
+            "Rare": "Unusual",
+            "Epic": "Rare",
+            "Legendary": "Epic",
+            "Mythic": "Legendary",
+            "Ultra": "Mythic",
+            "Super": "Ultra",
+            "Omega": "Super"
         };
         return rarityMap[itemRarity] || itemRarity;
     }
@@ -4967,18 +4968,83 @@ class QuickSlot {
         return null;
     }
 
+    // 在 QuickSlot 类中修改 useItem 方法
     useItem(slotIndex) {
         const item = this.getItem(slotIndex);
-        if (item) {
-            // 这里可以定义物品的使用逻辑
-            // 例如，如果是 Leaf 类型，恢复生命值
-            if (item.type === "Leaf") {
-                this.player.health = Math.min(this.player.maxHealth, this.player.health + 5);
-            }
-            // 添加更多物品类型的使用逻辑...
+        if (!item) return false;
+
+        // 原有的 Leaf 回血逻辑（可以保留消耗，因为 Leaf 是一次性的）
+        if (item.type === "Leaf") {
+            this.player.health = Math.min(this.player.maxHealth, this.player.health + 5);
+            // Leaf 可以消耗，也可以不消耗，看你设计
+            // this.consumeItem(slotIndex);
             return true;
         }
+
+        // Mimic 复制功能 - 不消耗物品
+        if (item.type === "Mimic") {
+            return this.useMimic(slotIndex);
+        }
+
         return false;
+    }
+
+    // 在 QuickSlot 类中修改 useMimic 方法
+    useMimic(mimicSlotIndex) {
+        // 检查右边是否有相邻槽位
+        const targetSlotIndex = mimicSlotIndex + 1;
+
+        if (targetSlotIndex >= this.slots.length) {
+            this.player.inventory.craftingSystem?.showError("No slot to the right");
+            return false;
+        }
+
+        const targetItem = this.slots[targetSlotIndex];
+        if (!targetItem) {
+            this.player.inventory.craftingSystem?.showError("No item to copy");
+            return false;
+        }
+
+        const mimicItem = this.slots[mimicSlotIndex];
+
+        console.log(`Mimic: Copying ${targetItem.type} with rarity ${mimicItem.rarity}`);
+
+        // 创建新物品：右边物品的类型 + Mimic 的稀有度
+        const newItem = new Item(targetItem.type, targetItem.level, mimicItem.rarity);
+        newItem.count = 1;
+
+        // 复制耐久度和重载时间等属性（可选）
+        newItem.durability = targetItem.durability;
+        newItem.maxDurability = targetItem.maxDurability;
+        newItem.reloadTime = targetItem.reloadTime;
+        newItem.baseReloadTime = targetItem.baseReloadTime;
+        newItem.armor = targetItem.armor;
+
+        // 添加到背包
+        this.player.inventory.addItem(newItem);
+
+        // ===== 重要：不消耗任何物品 =====
+        // Mimic 和右边的物品都保持不变
+
+        this.player.inventory.craftingSystem?.showMessage(`✨ Created ${mimicItem.rarity} ${targetItem.type}`);
+
+        return true;
+    }
+
+    // 辅助方法：消耗物品
+    consumeItem(slotIndex) {
+        const item = this.slots[slotIndex];
+        if (!item) return;
+
+        if (item.count > 1) {
+            item.count -= 1;
+            // 更新花瓣显示
+            this.updatePetalFromSlot(slotIndex);
+        } else {
+            // 移除物品
+            this.slots[slotIndex] = null;
+            this.resetPetalFromSlot(slotIndex);
+        }
     }
 
     updatePetalFromSlot(slotIndex) {
@@ -11058,6 +11124,7 @@ class ShopSystem {
             "Leech Egg": 12,
             "Parasite Egg": 12,
             "Chromosome":18,
+            "Mimic":110,
             "StemCell egg": 45,
             "queen ant egg": 20,
             "WorkerFireAnt egg": 12,
@@ -11085,9 +11152,8 @@ class ShopSystem {
             });
         }
 
-        // Sort items for better display
-        this.shopItems.sort((a, b) => a.type.localeCompare(b.type));
-
+        // Sort items by price (cheapest first)
+        this.shopItems.sort((a, b) => a.basePrice - b.basePrice);
         // ===== 🆕 打折系统 =====
         this.discountItems = []; // 打折商品列表
         this.discountEndTime = 0; // 折扣结束时间
@@ -16296,6 +16362,7 @@ class Petal {
         this.attackPower = 15;
         this.itemType = null;
         this.level = 1;
+        this.mimicProcessed = false; // 标记是否已经处理过复制
         this.wingRotationAngle = 0;
         this.rarity = "Common";
         this.spawnCooldown = 0;
@@ -16309,7 +16376,8 @@ class Petal {
         this.hasAntennae = false;
         this.currentViewScale = 1.0;
         this.armor = 0.0;
-
+        this.originalMimicData = null; // 保存原始 Mimic 数据
+        this.isTransformedMimic = false; // 是否已变形
         // ===== Still Mode 相关属性 =====
         this.stillMode = false;           // 是否处于静止模式
         this.stillAngle = 0;              // 静止时的角度
@@ -16406,7 +16474,10 @@ class Petal {
         this.resetToDefault();
     }
 
-    resetToDefault() {
+    resetToDefault(preserveAngle = false) {
+        // 保存当前角度（如果需要保留）
+        const currentAngle = preserveAngle ? this.angle : null;
+
         // 基础属性
         this.color = WHITE;
         this.attackPower = 15;
@@ -16415,6 +16486,8 @@ class Petal {
         this.itemType = null;
         this.level = 1;
         this.rarity = "Common";
+        this.originalMimicData = null;
+        this.isTransformedMimic = false;
 
         // ===== 耐久度和血量统一使用相同的值 =====
         // 基础值 100
@@ -16439,10 +16512,8 @@ class Petal {
         // 耐久度和血量使用相同的计算方式
         this.maxDurability = Math.floor(baseValue * multiplier);
         this.durability = this.maxDurability;
-
         this.maxHealth = Math.floor(baseValue * multiplier);
         this.health = this.maxHealth;
-
         this.isBroken = false;
 
         // 重载时间系统
@@ -16462,7 +16533,13 @@ class Petal {
         this.targetRadius = 35;
         this.rotationSpeed = 0.09;
         this.baseRotationSpeed = 0.09;
-        this.angle = this.petalIndex * (Math.PI * 2 / this.totalPetals);
+
+        // ✅ 关键修改：根据参数决定是否重置角度
+        if (preserveAngle && currentAngle !== null) {
+            this.angle = currentAngle;  // 保持原有角度
+        } else {
+            this.angle = this.petalIndex * (Math.PI * 2 / this.totalPetals);  // 重置为初始角度
+        }
 
         this.screenX = 0;
         this.screenY = 0;
@@ -16563,7 +16640,76 @@ class Petal {
         // Chromosome
         this.isChromosome = false;
     }
+    // 在 Petal 类中，完全重写 restoreMimic 方法
+    restoreMimic() {
+        console.log("🔄 restoreMimic START ==================");
+        console.log("Petal index:", this._petalIndex);
+        console.log("Has original data:", !!this.originalMimicData);
 
+        if (!this.originalMimicData) {
+            console.log("❌ No original data to restore");
+            return false;
+        }
+
+        if (!this.player) {
+            console.log("❌ No player reference");
+            return false;
+        }
+
+        if (!this.player.quickSlot) {
+            console.log("❌ No quickSlot");
+            return false;
+        }
+
+        const slotIndex = this._petalIndex;
+        console.log("Slot index:", slotIndex);
+
+        // 检查索引是否有效
+        if (slotIndex < 0 || slotIndex >= this.player.quickSlot.slots.length) {
+            console.log("❌ Invalid slot index:", slotIndex);
+            return false;
+        }
+
+        const mimicItem = this.player.quickSlot.slots[slotIndex];
+        console.log("Current item in slot:", mimicItem ? mimicItem.type : 'null');
+        console.log("Original data:", this.originalMimicData);
+
+        if (!mimicItem) {
+            console.log("❌ No item in slot, creating new Mimic");
+            // 如果槽位空了，创建一个新的 Mimic
+            const newMimic = new Item(
+                this.originalMimicData.type,
+                this.originalMimicData.level,
+                this.originalMimicData.rarity
+            );
+            newMimic.durability = this.originalMimicData.durability;
+            newMimic.maxDurability = this.originalMimicData.maxDurability;
+            newMimic.reloadTime = this.originalMimicData.reloadTime;
+            newMimic.baseReloadTime = this.originalMimicData.baseReloadTime;
+            newMimic.armor = this.originalMimicData.armor;
+
+            this.player.quickSlot.slots[slotIndex] = newMimic;
+            console.log("✅ Created new Mimic in empty slot");
+        } else {
+            // 强制恢复为原始 Mimic
+            mimicItem.type = this.originalMimicData.type;
+            mimicItem.rarity = this.originalMimicData.rarity;
+            mimicItem.level = this.originalMimicData.level;
+            mimicItem.durability = this.originalMimicData.durability;
+            mimicItem.maxDurability = this.originalMimicData.maxDurability;
+            mimicItem.reloadTime = this.originalMimicData.reloadTime;
+            mimicItem.baseReloadTime = this.originalMimicData.baseReloadTime;
+            mimicItem.armor = this.originalMimicData.armor;
+
+            console.log(`✅ Restored to: ${mimicItem.type} (${mimicItem.rarity})`);
+        }
+
+        // 更新花瓣显示
+        this.updateFromQuickSlot(slotIndex);
+
+        console.log("🔄 restoreMimic END ==================");
+        return true;
+    }
     // 在 Petal 类中修改 getCurrentItem 方法
     getCurrentItem() {
         if (!this.player || !this.player.quickSlot) {
@@ -16843,7 +16989,6 @@ class Petal {
         }
 
     }
-    // 在 Petal 类中的完整 update 方法
     update(dt, spreadMode = false, playerWorldPos = null) {
         // 🍃 每次更新都检查 Golden Leaf 效果
         this.updateReloadTimeWithGoldenLeaf();
@@ -16908,7 +17053,11 @@ class Petal {
 
         // 处理破碎状态
         if (this.isBroken) {
-            // 即使破碎，也要更新已存在的召唤物
+            // ✅ Cancer 和 Web：破碎时完全无效，不更新召唤物
+            if (currentItem && (currentItem.type === "Cancer" || currentItem.type === "Web")) {
+                return;
+            }
+            // ✅ 其他物品：即使破碎，也要更新已存在的召唤物
             this._updateExistingSummonedCreatures(dt);
             return;
         }
@@ -17072,9 +17221,21 @@ class Petal {
             const item = petal.getCurrentItem();
             return item && item.type === "DNA" && !petal.isBroken;
         });
+    
+        // ===== ✅ 新增：Mimic 自动复制（只在游戏中）=====
+        if (this.player?.gameInstance?.gameState === GameState.IN_GAME &&
+            currentItem && currentItem.type === "Mimic" && !this.mimicProcessed) {
+            this.autoCopyWithMimic(this._petalIndex);
+            this.mimicProcessed = true;
+        }
 
         // === 召唤逻辑 ===
         if (currentItem) {
+            // ✅ Cancer 和 Web：破碎时不执行召唤逻辑
+            if ((currentItem.type === "Cancer" || currentItem.type === "Web") && this.isBroken) {
+                return;
+            }
+
             // 白细胞蛋
             if (currentItem.type === "WhiteBloodCell egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
@@ -17552,7 +17713,6 @@ class Petal {
                 }
                 this.updateParasites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 在 Petal 类的 update 方法中，找到召唤逻辑部分添加
             // ========== 🆕 噬菌体蛋 ==========
             else if (currentItem.type === "Bacteriophage egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
@@ -18016,7 +18176,63 @@ class Petal {
     getCooldownRatio() {
         return this.attackCooldown / this.attackCooldownMax;
     }
+    // 在 Petal 类的 autoCopyWithMimic 方法中
 
+    autoCopyWithMimic(mimicSlotIndex) {
+        if (!this.player || !this.player.quickSlot) return;
+
+        const targetSlotIndex = mimicSlotIndex + 1;
+        if (targetSlotIndex >= this.player.quickSlot.slots.length) return;
+
+        const targetItem = this.player.quickSlot.slots[targetSlotIndex];
+        if (!targetItem) return;
+
+        const mimicItem = this.player.quickSlot.slots[mimicSlotIndex];
+
+        // 保存原始 Mimic 信息
+        const originalData = {
+            type: mimicItem.type,
+            rarity: mimicItem.rarity,
+            level: mimicItem.level,
+            durability: mimicItem.durability,
+            maxDurability: mimicItem.maxDurability,
+            reloadTime: mimicItem.reloadTime,
+            baseReloadTime: mimicItem.baseReloadTime,
+            armor: mimicItem.armor
+        };
+
+        // 标记这是一个活跃的 Mimic
+        this._isActiveMimic = true;
+
+        // 多重备份
+        this.originalMimicData = originalData;
+        mimicItem._originalMimicData = originalData;
+        mimicItem._isMimic = true;  // 在物品上也标记
+
+        if (!this.player._mimicBackups) {
+            this.player._mimicBackups = {};
+        }
+        this.player._mimicBackups[mimicSlotIndex] = originalData;
+
+        if (this.player.gameInstance) {
+            if (!this.player.gameInstance._mimicBackups) {
+                this.player.gameInstance._mimicBackups = {};
+            }
+            this.player.gameInstance._mimicBackups[mimicSlotIndex] = originalData;
+        }
+
+        // 变形为目标物品
+        mimicItem.type = targetItem.type;
+        mimicItem.level = targetItem.level;
+        mimicItem.durability = targetItem.durability;
+        mimicItem.maxDurability = targetItem.maxDurability;
+        mimicItem.reloadTime = targetItem.reloadTime;
+        mimicItem.baseReloadTime = targetItem.baseReloadTime;
+        mimicItem.armor = targetItem.armor;
+
+        // 更新花瓣显示
+        this.updateFromQuickSlot(mimicSlotIndex);
+    }
     applyFrameDamageToEnemy(enemy) {
         if (this.isReloading || this.isBroken || !this.isInsideEnemy) {
             return 0.0;
@@ -21257,7 +21473,33 @@ class Player {
             }
         }
     }
+    // 在 Player 类中
+    syncPetalAngles() {
+        // 检查花瓣角度是否混乱
+        let needsSync = false;
+        const expectedAngles = [];
+        const angleStep = (Math.PI * 2) / this.petals.length;
 
+        for (let i = 0; i < this.petals.length; i++) {
+            expectedAngles.push(i * angleStep);
+        }
+
+        // 检查实际角度与期望角度的偏差
+        for (let i = 0; i < this.petals.length; i++) {
+            const petal = this.petals[i];
+            if (!petal.stillMode && !petal.hasAntennae) {
+                const diff = Math.abs(petal.angle - expectedAngles[i]);
+                if (diff > 0.1) {  // 如果偏差超过0.1弧度
+                    needsSync = true;
+                    break;
+                }
+            }
+        }
+
+        if (needsSync) {
+            this.recalculatePetalAngles();
+        }
+    }
     // 在 Player 类中修改 updateStatsFromPetals 方法
     updateStatsFromPetals() {
         /** 根据花瓣和快捷栏更新玩家属性 */
@@ -25692,23 +25934,23 @@ class WorldMapGame {
 
 
 
+    // 在 WorldMapGame 类中 - 正确的版本
     handleEvents(event) {
-        if (event.type === 'quit') {
-            this.gameRunning = false;
-            return;
-        }
-
+        // 先检查合成系统
         if (this.player?.inventory?.craftingSystem?.craftingVisible) {
             const result = this.player.inventory.craftingSystem.handleEvents(event);
             if (result) return;
         }
 
         if (this.gameState === GameState.MAIN_MENU) {
-            this.handleMainMenuEvents(event);
+            // 主菜单事件由 HTML 处理，这里不需要做任何事
+            return;
         } else if (this.gameState === GameState.IN_GAME) {
             this.handleGameEvents(event);
         } else if (this.gameState === GameState.GAME_OVER) {
             this.handleGameOverEvents(event);
+        } else if (this.gameState === GameState.PAUSED) {
+            // 暂停事件处理
         }
     }
 
@@ -25746,10 +25988,55 @@ class WorldMapGame {
                 this.paused = !this.paused;
                 event.preventDefault();
             }
-            // ESC键：返回主菜单
+            // 在 WorldMapGame 类的 handleGameEvents 方法中
             else if (event.key === 'Escape') {
-                this.gameState = GameState.MAIN_MENU;
+                console.log("🚪 ESC pressed - force restoring all Mimics");
+
+                // ===== 强制恢复所有 Mimic =====
+                if (this.player && this.player.quickSlot) {
+                    for (let i = 0; i < this.player.quickSlot.slots.length; i++) {
+                        const item = this.player.quickSlot.slots[i];
+                        const petal = this.player.petals[i];
+
+                        // 检查这个槽位是否有原始数据
+                        if (petal && petal.originalMimicData) {
+                            console.log(`Restoring slot ${i} from petal data`);
+
+                            // 直接从 petal.originalMimicData 恢复
+                            if (item) {
+                                item.type = petal.originalMimicData.type;
+                                item.rarity = petal.originalMimicData.rarity;
+                                item.level = petal.originalMimicData.level;
+                                item.durability = petal.originalMimicData.durability;
+                                item.maxDurability = petal.originalMimicData.maxDurability;
+                                item.reloadTime = petal.originalMimicData.reloadTime;
+                                item.baseReloadTime = petal.originalMimicData.baseReloadTime;
+                                item.armor = petal.originalMimicData.armor;
+                            }
+                        }
+                        else if (item && item._originalMimicData) {
+                            console.log(`Restoring slot ${i} from item data`);
+
+                            // 从 item._originalMimicData 恢复
+                            item.type = item._originalMimicData.type;
+                            item.rarity = item._originalMimicData.rarity;
+                            item.level = item._originalMimicData.level;
+                            item.durability = item._originalMimicData.durability;
+                            item.maxDurability = item._originalMimicData.maxDurability;
+                            item.reloadTime = item._originalMimicData.reloadTime;
+                            item.baseReloadTime = item._originalMimicData.baseReloadTime;
+                            item.armor = item._originalMimicData.armor;
+                        }
+
+                        // 更新花瓣
+                        if (petal && petal.updateFromQuickSlot) {
+                            petal.updateFromQuickSlot(i);
+                        }
+                    }
+                }
+
                 this.autoSave();
+                this.gameState = GameState.MAIN_MENU;
                 event.preventDefault();
             }
             // S键：切换静止模式（Heavy物品专用）
