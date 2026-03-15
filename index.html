@@ -1116,110 +1116,126 @@ html, body {
       return false;
     }
 
-        // ===== 鼠标事件处理 =====
-    function handleMouseDown(e) {
-        e.preventDefault();
-        const { x, y } = getCanvasCoordinates(e);
+    // ===== 鼠标事件处理 =====
+function handleMouseDown(e) {
+    e.preventDefault();
+    const { x, y } = getCanvasCoordinates(e);
 
-        // 如果是游戏内且是右键，设置鼠标移动目标
-        if (gameState === 'in_game' && e.button === 2) {
-            setMouseTarget(x, y);
+    // 如果是游戏内且是右键，设置鼠标移动目标
+    if (gameState === 'in_game' && e.button === 2) {
+        setMouseTarget(x, y);
+    }
+
+    const event = {
+        type: 'mousedown',
+        button: e.button,
+        x,
+        y
+    };
+
+    if (gameState === 'main_menu' && gameInstance) {
+        // ✅ 如果商店可见，只让商店处理点击，不处理主菜单按钮
+        if (gameInstance.shopSystem && gameInstance.shopSystem.visible) {
+            console.log("🛒 Shop is visible, letting it handle click (main menu buttons blocked)");
+            const shopHandled = gameInstance.shopSystem.handleClick([x, y]);
+            if (shopHandled) {
+                console.log("✅ Shop handled the click");
+            }
+            return; // 无论商店是否处理了点击，都不再处理主菜单按钮
         }
 
-        const event = {
-            type: 'mousedown',
-            button: e.button,
-            x,
-            y
-        };
+        // 商店不可见时，才处理主菜单点击
+        const result = gameInstance.mainMenu.handleClick(event);
+        console.log('📋 Main menu click result:', result);
 
-        if (gameState === 'main_menu' && gameInstance) {
-            // ✅ 如果商店可见，只让商店处理点击，不处理主菜单按钮
-            if (gameInstance.shopSystem && gameInstance.shopSystem.visible) {
-                console.log("🛒 Shop is visible, letting it handle click (main menu buttons blocked)");
-                const shopHandled = gameInstance.shopSystem.handleClick([x, y]);
-                if (shopHandled) {
-                    console.log("✅ Shop handled the click");
-                }
-                return; // 无论商店是否处理了点击，都不再处理主菜单按钮
-            }
+        if (result) {
+            switch(result) {
+                case "shop":
+                    console.log("🛒 Opening shop from click handler...");
+                    if (gameInstance.shopSystem) {
+                        gameInstance.shopSystem.visible = true;
+                        console.log("✅ Shop visibility set to:", gameInstance.shopSystem.visible);
+                    }
+                    break;
 
-            // 商店不可见时，才处理主菜单点击
-            const result = gameInstance.mainMenu.handleClick(event);
-            console.log('📋 Main menu click result:', result);
+                case "crafting":
+                    if (gameInstance.player?.inventory?.craftingSystem) {
+                        gameInstance.player.inventory.craftingSystem.craftingVisible = true;
+                        gameState = 'crafting';
+                    }
+                    break;
 
-            if (result) {
-                switch(result) {
-                    case "shop":
-                        console.log("🛒 Opening shop from click handler...");
-                        if (gameInstance.shopSystem) {
-                            gameInstance.shopSystem.visible = true;
-                            console.log("✅ Shop visibility set to:", gameInstance.shopSystem.visible);
-                        }
-                        break;
+                case "inventory":
+                    openInventory();
+                    break;
 
-                    case "crafting":
-                        if (gameInstance.player?.inventory?.craftingSystem) {
-                            gameInstance.player.inventory.craftingSystem.craftingVisible = true;
-                            gameState = 'crafting';
-                        }
-                        break;
+                case "multiplayer":
+                    showMultiplayerPanel();
+                    break;
 
-                    case "inventory":
-                        openInventory();
-                        break;
+                case "account":
+                    showAccountPanel();
+                    break;
 
-                    case "multiplayer":
-                        showMultiplayerPanel();
-                        break;
+                case "bonus":
+                    if (gameInstance.bonusSystem?.claimBonus) {
+                        gameInstance.bonusSystem.claimBonus();
+                    }
+                    break;
 
-                    case "account":
-                        showAccountPanel();
-                        break;
+                case "quit":
+                    // 处理退出
+                    break;
 
-                    case "bonus":
-                        if (gameInstance.bonusSystem?.claimBonus) {
-                            gameInstance.bonusSystem.claimBonus();
-                        }
-                        break;
-
-                    case "quit":
-                        // 处理退出
-                        break;
-
-                    default:
-                        if (result && result.startsWith('start_') && result.endsWith('_map')) {
-                            let biome = result.replace('start_', '').replace('_map', '');
-                            biome = biome.charAt(0).toUpperCase() + biome.slice(1);
-                            startGame(biome);
-                        } else if (result === 'start_maze') {
-                            startMazeMode();
-                        }
-                        break;
-                }
-            }
-        } else if (gameState === 'in_game' && gameInstance?.handleEvents) {
-            gameInstance.handleEvents(event);
-        } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-            const crafting = gameInstance.player.inventory.craftingSystem;
-            if (crafting.handleMouseDown) {
-                crafting.handleMouseDown([x, y]);
-            }
-        } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
-            // 检查是否点击了关闭按钮
-            if (isPointInCloseButton(x, y)) {
-                closeInventory();
-                return;
-            }
-
-            // 检查是否点击了背包区域内的物品
-            if (isPointInInventoryArea(x, y)) {
-                if (gameInstance.player.inventory.handleMouseDown) {
-                    gameInstance.player.inventory.handleMouseDown([x, y]);
-                }
+                default:
+                    if (result && result.startsWith('start_') && result.endsWith('_map')) {
+                        let biome = result.replace('start_', '').replace('_map', '');
+                        biome = biome.charAt(0).toUpperCase() + biome.slice(1);
+                        startGame(biome);
+                    } else if (result === 'start_maze') {
+                        startMazeMode();
+                    }
+                    break;
             }
         }
     }
+    // ===== 游戏内状态 =====
+    else if (gameState === 'in_game' && gameInstance) {
+        // ✅ 先检查快捷栏点击
+        if (gameInstance.player?.quickSlot) {
+            const quickSlotHandled = gameInstance.player.quickSlot.handleClick([x, y]);
+            if (quickSlotHandled) {
+                console.log('✅ 快捷栏点击处理完成');
+                return; // 快捷栏处理了点击，不再往下传递
+            }
+        }
+
+        // 然后才处理其他游戏事件
+        if (gameInstance?.handleEvents) {
+            gameInstance.handleEvents(event);
+        }
+    }
+    else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+        const crafting = gameInstance.player.inventory.craftingSystem;
+        if (crafting.handleMouseDown) {
+            crafting.handleMouseDown([x, y]);
+        }
+    }
+    else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+        // 检查是否点击了关闭按钮
+        if (isPointInCloseButton(x, y)) {
+            closeInventory();
+            return;
+        }
+
+        // 检查是否点击了背包区域内的物品
+        if (isPointInInventoryArea(x, y)) {
+            if (gameInstance.player.inventory.handleMouseDown) {
+                gameInstance.player.inventory.handleMouseDown([x, y]);
+            }
+        }
+    }
+}
     function handleMouseUp(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
