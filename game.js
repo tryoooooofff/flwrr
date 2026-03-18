@@ -9594,209 +9594,214 @@ class EnemyDrawer {
 
         ctx.restore();
     }
-    // ==================== 螃蟹 (最终图片还原版：圆角身体 + 完美双钳) ====================
+    // ==================== 螃蟹 ====================
     drawCrab(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
 
-        // 颜色定义 (匹配图片：橙红身体，黑色钳子和腿)
-        const bodyColor = isFriendly ? [255, 215, 0] : [230, 120, 80];      // 橙红色
-        const bodyStrokeColor = isFriendly ? [200, 160, 0] : [180, 80, 50]; // 深橙红描边
-        const textureColor = isFriendly ? [200, 160, 0] : [160, 70, 40];    // 纹理颜色
-        const limbColor = isFriendly ? [180, 140, 0] : [40, 40, 40];        // 黑色/深灰 钳子和腿
+        // 颜色定义
+        const bodyColor       = isFriendly ? [255, 215,   0] : [230, 120,  80];
+        const bodyStrokeColor = isFriendly ? [200, 160,   0] : [180,  80,  50];
+        const limbColor       = isFriendly ? [180, 140,   0] : [ 40,  40,  40];
 
-        // 身体尺寸
-        const bodyWidth = scaledSize * 0.9;
-        const bodyHeight = scaledSize * 0.65;
-        const cornerRadius = bodyHeight / 2; // 大圆角，使左右两端呈半圆形
+        // ========== 稀有度缩放 ==========
+        const rarity = enemyObj?.rarity || "Common";
+        const RARITY_LIST = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        const rarityIndex = RARITY_LIST.indexOf(rarity);
+        const rarityLevel = rarityIndex >= 0 ? rarityIndex : 0;
+
+        const rarityMult    = 1 + rarityLevel * 0.15;
+        const legLengthMult = 0.65 + rarityLevel * 0.18;
+        const legWidthMult  = 0.65 + rarityLevel * 0.15;
+        const legStartMult  = 0.45 + rarityLevel * 0.1;
+        const clawSizeMult  = 0.65 + rarityLevel * 0.16;
+
+        const scale = scaledSize / 100;
+
+        // ========== 随机腿弯曲偏移（只生成一次，挂在 enemyObj 上）==========
+        if (enemyObj && !enemyObj._legOffsets) {
+            enemyObj._legOffsets = Array.from({ length: 4 }, () => ({
+                dx1: Math.random() * 4,
+                dy1: Math.random() * 4,
+            }));
+        }
+        const offsets = (enemyObj && enemyObj._legOffsets) || [
+            { dx1: 2, dy1: 2 },
+            { dx1: 2, dy1: 2 },
+            { dx1: 2, dy1: 2 },
+            { dx1: 2, dy1: 2 },
+        ];
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer + Math.PI / 2); // 旋转使头部朝上/朝向玩家
+        context.rotate(angleToPlayer + Math.PI / 2);
 
-        // ==========================================
-        // 1. 绘制腿部 (在身体下方)
-        // ==========================================
-        const legCount = 4;
-        const legLength = bodyWidth * 0.25;
-        const legSpacing = bodyHeight * 0.22;
-        const legWidth = Math.max(2, scaledSize * 0.04);
+        const t = animationTimer * 3;
+        const cx = 0, cy = 0;
 
-        context.strokeStyle = this.colorToCss(limbColor);
-        context.lineWidth = legWidth;
-        context.lineCap = 'round';
+        // ========== 绘制腿 ==========
+        const drawLeg = (p0, p1, p2, flip, phase) => {
+            const angle = Math.sin(t * 2.5 + phase) * 0.21 * (flip === 1 ? 1 : -1);
+            const cos = Math.cos(angle), sin = Math.sin(angle);
 
-        // 左侧腿
-        for (let i = 0; i < legCount; i++) {
-            const startY = -bodyHeight * 0.4 + i * legSpacing;
-            const startX = -bodyWidth * 0.45;
-            // 简单的弯曲腿
-            const endX = startX - legLength * 0.5;
-            const endY = startY + legLength * 0.8;
+            const rot = (p) => {
+                const dx = flip * p.x - flip * p0.x;
+                const dy = p.y - p0.y;
+                return {
+                    x: flip * p0.x + dx * cos - dy * sin,
+                    y: p0.y        + dx * sin + dy * cos,
+                };
+            };
 
-            context.beginPath();
-            context.moveTo(startX, startY);
-            context.quadraticCurveTo(startX - legLength * 0.2, startY + legLength * 0.4, endX, endY);
-            context.stroke();
-        }
+            const r0 = { x: flip * p0.x, y: p0.y };
+            const r1 = rot(p1);
+            const r2 = rot(p2);
 
-        // 右侧腿
-        for (let i = 0; i < legCount; i++) {
-            const startY = -bodyHeight * 0.4 + i * legSpacing;
-            const startX = bodyWidth * 0.45;
-            const endX = startX + legLength * 0.5;
-            const endY = startY + legLength * 0.8;
-
-            context.beginPath();
-            context.moveTo(startX, startY);
-            context.quadraticCurveTo(startX + legLength * 0.2, startY + legLength * 0.4, endX, endY);
-            context.stroke();
-        }
-
-        // ==========================================
-        // 2. 绘制身体 (圆角五边形/胶囊形)
-        // ==========================================
-        context.save();
-        // 使用 roundRect 绘制身体
-        // x, y 是左上角，所以要用 -width/2, -height/2
-        context.beginPath();
-        context.roundRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight, cornerRadius);
-        context.fillStyle = this.colorToCss(bodyColor);
-        context.fill();
-        context.strokeStyle = this.colorToCss(bodyStrokeColor);
-        context.lineWidth = Math.max(2, scaledSize * 0.05);
-        context.stroke();
-
-        // 绘制身体纹理 (两条垂直弧线)
-        context.strokeStyle = this.colorToCss(textureColor);
-        context.lineWidth = Math.max(1, scaledSize * 0.03);
-        context.lineCap = 'round';
-
-        // 左纹理
-        context.beginPath();
-        context.arc(-bodyWidth * 0.25, 0, bodyHeight * 0.35, -Math.PI/4, Math.PI/4);
-        context.stroke();
-
-        // 右纹理
-        context.beginPath();
-        context.arc(bodyWidth * 0.25, 0, bodyHeight * 0.35, -Math.PI/4, Math.PI/4);
-        context.stroke();
-
-        context.restore();
-
-        // ==========================================
-        // 3. 绘制钳子 (2个大钳子，每只含上下颚)
-        // ==========================================
-
-        // 钳子参数
-        const clawLength = bodyWidth * 0.45;
-        const clawWidth = bodyWidth * 0.12;      // 等宽
-        const clawGap = bodyWidth * 0.08;        // 上下颚根部间距
-        const baseAngleRad = 35 * Math.PI / 180; // 基础张开
-        const bendAngleRad = 65 * Math.PI / 180; // 强力内弯
-        const swingRangeRad = 25 * Math.PI / 180;// 大幅度摆动
-
-        const time = animationTimer * 6;
-        const swingLeft = Math.sin(time) * swingRangeRad;
-        const swingRight = Math.cos(time) * swingRangeRad;
-
-        // 内部辅助函数：绘制单个钳子的上下颚
-        const drawSingleClaw = (side, swing) => {
-            context.save();
-
-            // 定位钳子根部 (身体两侧上方)
-            const clawBaseX = side * bodyWidth * 0.55;
-            const clawBaseY = -bodyHeight * 0.35;
-
-            context.translate(clawBaseX, clawBaseY);
-            // 整体旋转 + 开合动画
-            context.rotate(side * 0.5 + swing);
-
-            // 如果是左钳，镜像坐标系
-            if (side === -1) {
-                context.scale(-1, 1);
-            }
-
-            context.fillStyle = this.colorToCss(limbColor);
-            context.lineCap = 'round';
-            context.lineJoin = 'round';
-
-            // 绘制上下颚
-            [-1, 1].forEach(mandibleSide => {
-                context.save();
-
-                const startX = 0;
-                const startY = mandibleSide * (clawGap / 2);
-
-                // 主轴角度
-                const mainAngle = -mandibleSide * baseAngleRad;
-                // 尖端角度 (向内弯)
-                const tipAngle = mainAngle - mandibleSide * bendAngleRad;
-
-                // 关键点计算
-                const tipX = Math.cos(mainAngle) * clawLength;
-                const tipY = Math.sin(mainAngle) * clawLength;
-
-                const rootPerpAngle = mainAngle + Math.PI / 2;
-                const tipPerpAngle = tipAngle + Math.PI / 2;
-
-                // 根部外侧
-                const rootOuterX = Math.cos(rootPerpAngle) * mandibleSide * (clawWidth / 2);
-                const rootOuterY = startY + Math.sin(rootPerpAngle) * mandibleSide * (clawWidth / 2);
-
-                // 尖端外侧
-                const tipOuterX = tipX + Math.cos(tipPerpAngle) * mandibleSide * (clawWidth / 2);
-                const tipOuterY = tipY + Math.sin(tipPerpAngle) * mandibleSide * (clawWidth / 2);
-                // 尖端内侧
-                const tipInnerX = tipX - Math.cos(tipPerpAngle) * mandibleSide * (clawWidth / 2);
-                const tipInnerY = tipY - Math.sin(tipPerpAngle) * mandibleSide * (clawWidth / 2);
-
-                // 绘制路径 (无根角水滴状)
+            [[r0, r1, 5], [r1, r2, 5]].forEach(([a, b, w]) => {
                 context.beginPath();
-                context.moveTo(startX, startY); // 根部中心
-
-                // 外侧曲线
-                const midAngle = (mainAngle + tipAngle) / 2;
-                const midDist = clawLength * 0.5;
-                const ctrlX = Math.cos(midAngle) * midDist;
-                const ctrlY = Math.sin(midAngle) * midDist;
-                const midPerpAngle = midAngle + Math.PI / 2;
-
-                const ctrlOuterX = ctrlX + Math.cos(midPerpAngle) * mandibleSide * (clawWidth / 2);
-                const ctrlOuterY = ctrlY + Math.sin(midPerpAngle) * mandibleSide * (clawWidth / 2);
-
-                context.quadraticCurveTo(ctrlOuterX, ctrlOuterY, tipOuterX, tipOuterY);
-
-                // 尖端圆头
-                const outerAngle = Math.atan2(tipOuterY - tipY, tipOuterX - tipX);
-                const innerAngle = Math.atan2(tipInnerY - tipY, tipInnerX - tipX);
-                context.arc(tipX, tipY, clawWidth / 2, outerAngle, innerAngle, mandibleSide === -1);
-
-                // 内侧曲线回根部
-                const ctrlInnerX = ctrlX + Math.cos(midPerpAngle) * mandibleSide * (-clawWidth / 2);
-                const ctrlInnerY = ctrlY + Math.sin(midPerpAngle) * mandibleSide * (-clawWidth / 2);
-                context.quadraticCurveTo(ctrlInnerX, ctrlInnerY, startX, startY);
-
-                context.closePath();
-                context.fill();
-
-                // 钳子描边 (可选，增加立体感)
-                context.strokeStyle = 'rgba(0,0,0,0.2)';
-                context.lineWidth = 1;
+                context.moveTo(a.x * scale * rarityMult, a.y * scale * rarityMult);
+                context.lineTo(b.x * scale * rarityMult, b.y * scale * rarityMult);
+                context.strokeStyle = this.colorToCss(limbColor);
+                context.lineWidth   = w * scale * legWidthMult;
+                context.lineCap     = 'round';
                 context.stroke();
-
-                context.restore();
             });
+        };
+
+        // 腿定义（随机偏移只取一次，不修改原数组）
+        const legsRightRaw = [
+            [{ x: 22, y: -2 }, { x: 30 + offsets[0].dx1, y: -7 + offsets[0].dy1 }, { x: 27 * legLengthMult, y:  2 }],
+            [{ x: 23, y:  5 }, { x: 31 + offsets[1].dx1, y:  0 + offsets[1].dy1 }, { x: 28 * legLengthMult, y: 10 }],
+            [{ x: 22, y: 12 }, { x: 30 + offsets[2].dx1, y:  7 + offsets[2].dy1 }, { x: 27 * legLengthMult, y: 18 }],
+            [{ x: 20, y: 16 }, { x: 30 + offsets[3].dx1, y: 20 + offsets[3].dy1 }, { x: 28 * legLengthMult, y: 30 }],
+        ];
+
+        legsRightRaw.forEach(([p0raw, p1raw, p2], i) => {
+            // 复制一份，不污染原数组
+            const p0 = { x: p0raw.x * legStartMult * 0.9, y: p0raw.y };
+            const p1 = { x: p1raw.x * legStartMult,       y: p1raw.y };
+
+            drawLeg(p0, p1, p2,  1, i * 0.7);
+            drawLeg(p0, p1, p2, -1, i * 0.7);
+        });
+
+        // ========== 钳子 ==========
+        const drawClaw = (ox, oy, flip, clawAngle) => {
+            context.save();
+            context.translate(ox * scale * rarityMult * 0.6, oy * scale * rarityMult);
+            context.scale(flip, 1);
+            context.rotate(-0.35 + clawAngle * flip);
+
+            context.fillStyle   = '#1a1a1a';
+            context.strokeStyle = '#000000';
+            context.lineWidth   = 1.5 * scale * clawSizeMult;
+
+            const cL = clawSizeMult;
+            const cW = clawSizeMult;
+
+            // 下钳片
+            context.beginPath();
+            context.moveTo(0, 2 * scale * cW);
+            context.bezierCurveTo(
+                10 * scale * cL,  9 * scale * cW,
+                22 * scale * cL,  9 * scale * cW,
+                30 * scale * cL,  4 * scale * cW
+            );
+            context.bezierCurveTo(
+                34 * scale * cL,  1 * scale * cW,
+                38 * scale * cL,  0,
+                41 * scale * cL, -1 * scale * cW
+            );
+            context.bezierCurveTo(
+                32 * scale * cL, -1 * scale * cW,
+                15 * scale * cL,  1 * scale * cW,
+                0,                2 * scale * cW
+            );
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            // 上钳片
+            context.beginPath();
+            context.moveTo(0, -2 * scale * cW);
+            context.bezierCurveTo(
+                10 * scale * cL, -11 * scale * cW,
+                22 * scale * cL, -13 * scale * cW,
+                30 * scale * cL,  -9 * scale * cW
+            );
+            context.bezierCurveTo(
+                34 * scale * cL,  -7 * scale * cW,
+                38 * scale * cL,  -4 * scale * cW,
+                41 * scale * cL,  -4 * scale * cW
+            );
+            context.bezierCurveTo(
+                32 * scale * cL,  -5 * scale * cW,
+                15 * scale * cL,  -4 * scale * cW,
+                0,                -2 * scale * cW
+            );
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            // 基节关节
+            context.beginPath();
+            context.ellipse(0, 0, 6 * scale * cW, 5 * scale * cW, 0, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
 
             context.restore();
         };
 
-        // 绘制左钳
-        drawSingleClaw(-1, swingLeft);
-        // 绘制右钳
-        drawSingleClaw(1, swingRight);
+        const clawAngle = Math.sin(t * 1.8) * 0.08;
+        drawClaw(-30, -18, -1, clawAngle);
+        drawClaw( 30, -18,  1, clawAngle);
+
+        // ========== 身体 ==========
+        const wFront = 160 * scale * rarityMult / 3;
+        const wBack  = 132 * scale * rarityMult / 3;
+        const H      =  95 * scale * rarityMult / 3;
+
+        const xFL = cx - wFront / 2,  xFR = cx + wFront / 2;
+        const xBL = cx - wBack  / 2,  xBR = cx + wBack  / 2;
+        const yF  = cy - H / 2,       yB  = cy + H / 2;
+        const r   = 30 * scale * rarityMult / 3;
+        const arc = 24 * scale * rarityMult / 3;
+
+        context.fillStyle   = this.colorToCss(bodyColor);
+        context.strokeStyle = this.colorToCss(bodyStrokeColor);
+        context.lineWidth   = 5 * scale * rarityMult / 2;
+
+        context.beginPath();
+        context.moveTo(xBL, yB - r);
+        context.arcTo(xBL, yB, xBL + r, yB, r);           // 后左圆角
+        context.lineTo(xBR - r, yB);
+        context.arcTo(xBR, yB, xBR, yB - r, r);            // 后右圆角
+        context.lineTo(xFR, yF + r);
+        context.arcTo(xFR, yF, xFR - r, yF, r);            // 前右圆角
+        context.quadraticCurveTo(cx, yF - arc, xFL + r, yF); // 前边凸弧
+        context.arcTo(xFL, yF, xFL, yF + r, r);            // 前左圆角
+        context.lineTo(xBL, yB - r);
+        context.closePath();
+        context.fill();
+        context.stroke();
+
+        // ========== 身体纹路（最上层）==========
+        context.strokeStyle = 'rgba(0,0,0,0.2)';
+        context.lineWidth   = 4 * scale * rarityMult / 3;
+        context.lineCap     = 'round';
+        [[-15,-20,-11,8,-13,22],[15,-20,11,8,13,22]].forEach(([ax,ay,bx,by,ex,ey]) => {
+            const s = scale * rarityMult / 3;
+            context.beginPath();
+            context.moveTo(cx + ax * s, cy + ay * s);
+            context.bezierCurveTo(
+                cx + bx * s, cy + (by / 2) * s,
+                cx + bx * s, cy + by * s,
+                cx + ex * s, cy + ey * s
+            );
+            context.stroke();
+        });
 
         context.restore();
     }
