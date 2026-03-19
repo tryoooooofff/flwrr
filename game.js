@@ -1045,8 +1045,10 @@ const ITEM_IMAGE_URLS = {
     "Bomb":"images/Bomb.png",
     "Rose": "images/rose.png",
     "Hive egg":"images/Hive_egg.png",
-    "Beekeeper egg": "images/Beekeeper_egg.png"
-
+    "Beekeeper egg": "images/Beekeeper_egg.png",
+    "Soldier Ant egg":"images/Soldier ant_egg.png",
+    "Worker Ant egg":"images/Worker ant_egg.png",
+    "Centipede egg":"images/Centipede_egg.png"
 
 };
 
@@ -1076,6 +1078,9 @@ export const ITEM_STATS = {
     "Ant Egg": {base_attack:1, base_cooldown:10000, spawn_golden_ants:true, use_rarity_multiplier: true, base_reload_time:15000},
     "Stick": {base_attack:1, base_cooldown:6000, summon_sandstorm:true, use_rarity_multiplier: true, base_reload_time:8000},
     "Moon Egg": {base_attack:1, base_cooldown:250, summon_rock:true, use_rarity_multiplier: true, base_reload_time:5000},
+    "Centipede egg": {base_attack:1, base_cooldown:250,spawn_centipede:true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:6000},
+    "Worker Ant egg": {base_attack:1, base_cooldown:250, spawn_worker_ant: true, use_rarity_multiplier: true,spawn_count: 4, base_reload_time:12000},
+    "Soldier Ant egg": {base_attack:1, base_cooldown:250,  spawn_soldier_ant: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time:12000},
     "Hive egg": {base_attack:1, base_cooldown:250, spawn_hive_bees: true,spawn_count: 10, use_rarity_multiplier: true, base_reload_time:20000},
     "Rock": {base_attack:15, base_cooldown:300, health_bonus:0, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:2000},
     "DNA": {base_attack:0, base_cooldown:10, is_dna:true, use_rarity_multiplier: true, base_reload_time:1000},
@@ -1191,10 +1196,10 @@ export function getCancerCloneRarity(originalRarity) {
 export const ENEMY_DROP_TABLE = {
     "Spider": ["Web", "Fang", "ThirdEye","Spider egg"],
     "Crab": ["Claw", "Powder"],
-    "Soldier Ant": ["Wing", "Clover"],
-    "Worker Ant": ["Leaf", "Corn"],
+    "Soldier Ant": ["Wing", "Clover","Soldier Ant egg"],
+    "Worker Ant": ["Leaf", "Corn","Worker Ant egg"],
     "Bush": ["Leaf", "Root","Golden Leaf"],
-    "Centipede": ["Leaf", "Antennae"],
+    "Centipede": ["Leaf", "Antennae","Centipede egg"],
     "Cactus": ["Cactus", "Lotus"],
     "Anthill": ["Magnet", "Egg"],
     "Sandstorm": ["Stick","Rock"],
@@ -16217,9 +16222,9 @@ class Enemy {
             "Epic": 54,
             "Legendary": 405,
             "Mythic": 2430,
-            "Ultra": 12645,
-            "Super": 35574,
-            "Omega": 221510,
+            "Ultra": 10645,
+            "Super": 32574,
+            "Omega": 165510,
             "Eternal": 789830
         };
         //原来的数值变化---1,3.75,13.5,54,405,2430,36450,437400,6561000,734832000
@@ -18218,6 +18223,12 @@ class Petal {
         this.beekeeperList = [];
         this.maxBeekeepers = 1;
         // Chromosome
+        this.soldierAntList = [];
+        this.workerAntList = [];
+        this.centipedeList = [];
+        this.maxSoldierAnts = 3;
+        this.maxWorkerAnts = 4;
+        this.maxCentipedes = 1;
         this.isChromosome = false;
     }
     // 在 Petal 类中，完全重写 restoreMimic 方法
@@ -19196,6 +19207,81 @@ class Petal {
             else if (currentItem.type === "Virus egg") {
                 handleEggSpawn(this.trySpawnVirusWithDNA, 5000);
                 this.updateVirus?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
+            // ========== 兵蚁蛋 ==========
+            else if (currentItem.type === "Soldier Ant egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+
+                        const spawned = this.trySpawnSoldierAntsWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                            const reducedCooldown = this.nextSpawnCooldown || 10000;
+                            this.spawnCooldown = reducedCooldown;
+                        }
+                    }
+                }
+                this.updateSoldierAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
+            // ========== 工蚁蛋 ==========
+            else if (currentItem.type === "Worker Ant egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+
+                        const spawned = this.trySpawnWorkerAntsWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                            const reducedCooldown = this.nextSpawnCooldown || 8000;
+                            this.spawnCooldown = reducedCooldown;
+                        }
+                    }
+                }
+                this.updateWorkerAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
+            // ========== 蜈蚣蛋 ==========
+            else if (currentItem.type === "Centipede egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+
+                        const spawned = this.trySpawnCentipedeWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                            const reducedCooldown = this.nextSpawnCooldown || 15000;
+                            this.spawnCooldown = reducedCooldown;
+                        }
+                    }
+                }
+                this.updateCentipedes?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
             // ========== 🐝 蜜蜂蛋 ==========
             else if (currentItem.type === "Bee egg") {
@@ -21077,7 +21163,62 @@ class Petal {
             }
         }
     }
+    // ========== 兵蚁更新 ==========
+    updateSoldierAnts(dt, gameEnemies, playerWorldPos) {
+        if (!this.soldierAntList) this.soldierAntList = [];
+        this._cleanDeadSoldierAnts(gameEnemies);
 
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Soldier Ant egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.soldierAntList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnSoldierAntsWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
+
+    // ========== 工蚁更新 ==========
+    updateWorkerAnts(dt, gameEnemies, playerWorldPos) {
+        if (!this.workerAntList) this.workerAntList = [];
+        this._cleanDeadWorkerAnts(gameEnemies);
+
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Worker Ant egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.workerAntList.length < 4 && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnWorkerAntsWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
+
+    // ========== 蜈蚣更新 ==========
+    updateCentipedes(dt, gameEnemies, playerWorldPos) {
+        if (!this.centipedeList) this.centipedeList = [];
+        this._cleanDeadCentipedes(gameEnemies);
+
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Centipede egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.centipedeList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnCentipedeWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
     trySpawnRockWithDna(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) {
             return false;
@@ -21915,7 +22056,170 @@ class Petal {
         }
         this.scallopList = newList;
     }
+    // ========== 兵蚁蛋召唤 ==========
+    trySpawnSoldierAntsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
 
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Soldier Ant egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        if (!this.soldierAntList) this.soldierAntList = [];
+        this._cleanDeadSoldierAnts(gameEnemies);
+
+        const currentCount = this.soldierAntList.length;
+        const maxCount = 3;
+        const toSpawn = Math.max(0, maxCount - currentCount);
+        if (toSpawn <= 0) return false;
+
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
+                playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
+                playerWorldPos.y + Math.sin(angle) * distance));
+
+            const ant = new Enemy("Soldier Ant", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true;
+            ant.ownerPetal = this;
+            ant.ownerPlayer = this.player;
+
+            gameEnemies.push(ant);
+            this.soldierAntList.push(ant);
+        }
+
+        this.spawnCooldown = ITEM_STATS["Soldier Ant egg"]?.base_cooldown || 10000;
+        return true;
+    }
+
+    // ========== 工蚁蛋召唤 ==========
+    trySpawnWorkerAntsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Worker Ant egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        if (!this.workerAntList) this.workerAntList = [];
+        this._cleanDeadWorkerAnts(gameEnemies);
+
+        const currentCount = this.workerAntList.length;
+        const maxCount = 4;
+        const toSpawn = Math.max(0, maxCount - currentCount);
+        if (toSpawn <= 0) return false;
+
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
+                playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
+                playerWorldPos.y + Math.sin(angle) * distance));
+
+            const ant = new Enemy("Worker Ant", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true;
+            ant.ownerPetal = this;
+            ant.ownerPlayer = this.player;
+
+            gameEnemies.push(ant);
+            this.workerAntList.push(ant);
+        }
+
+        this.spawnCooldown = ITEM_STATS["Worker Ant egg"]?.base_cooldown || 8000;
+        return true;
+    }
+
+    // ========== 蜈蚣蛋召唤 ==========
+    trySpawnCentipedeWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Centipede egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        if (!this.centipedeList) this.centipedeList = [];
+        this._cleanDeadCentipedes(gameEnemies);
+
+        const currentCount = this.centipedeList.length;
+        const maxCount = 1;
+        if (currentCount >= maxCount) return false;
+
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 40;
+        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
+            playerWorldPos.x + Math.cos(angle) * distance));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
+            playerWorldPos.y + Math.sin(angle) * distance));
+
+        const centipede = new Enemy("Centipede", x, y, summonLevel, finalRarity);
+        centipede.isFriendly = true;
+        centipede.ownerPetal = this;
+        centipede.ownerPlayer = this.player;
+
+        gameEnemies.push(centipede);
+        this.centipedeList.push(centipede);
+
+        this.spawnCooldown = ITEM_STATS["Centipede egg"]?.base_cooldown || 15000;
+        return true;
+    }
+
+    _cleanDeadSoldierAnts(gameEnemies) {
+        if (!this.soldierAntList) {
+            this.soldierAntList = [];
+            return;
+        }
+        const newList = [];
+        for (const ant of this.soldierAntList) {
+            if (ant && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
+                newList.push(ant);
+            }
+        }
+        this.soldierAntList = newList;
+    }
+
+    _cleanDeadWorkerAnts(gameEnemies) {
+        if (!this.workerAntList) {
+            this.workerAntList = [];
+            return;
+        }
+        const newList = [];
+        for (const ant of this.workerAntList) {
+            if (ant && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
+                newList.push(ant);
+            }
+        }
+        this.workerAntList = newList;
+    }
+
+    _cleanDeadCentipedes(gameEnemies) {
+        if (!this.centipedeList) {
+            this.centipedeList = [];
+            return;
+        }
+        const newList = [];
+        for (const centipede of this.centipedeList) {
+            if (centipede && gameEnemies.includes(centipede) && centipede.health > 0 && !centipede.isDead) {
+                newList.push(centipede);
+            }
+        }
+        this.centipedeList = newList;
+    }
     // 更新扇贝
     updateScallops(dt, gameEnemies, playerWorldPos) {
         if (!this.scallopList) this.scallopList = [];
