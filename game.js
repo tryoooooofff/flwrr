@@ -60,19 +60,7 @@ function drawPolygon(points, color) {
     ctx.fill();
     ctx.restore();
 }
-// 在配置文件中添加（例如在 RARITY_MULTIPLIERS 旁边）
-export const ENEMY_HEALTH_MULTIPLIERS = {
-    "Common": 1,
-    "Unusual": 3.75,
-    "Rare": 13.5,
-    "Epic": 54,
-    "Legendary": 405,
-    "Mythic": 2430,
-    "Ultra": 36450,
-    "Super": 437400,
-    "Omega": 6561000,
-    "Eternal": 734832000  // 6561000 × 15（假设继续用15倍）
-};
+
 // ============================================================
 // World Map Configuration - Increase Map Size
 // ============================================================
@@ -1048,8 +1036,10 @@ const ITEM_IMAGE_URLS = {
     "Beekeeper egg": "images/Beekeeper_egg.png",
     "Soldier Ant egg":"images/Soldier ant_egg.png",
     "Worker Ant egg":"images/Worker ant_egg.png",
-    "Centipede egg":"images/Centipede_egg.png"
-
+    "Centipede egg":"images/Centipede_egg.png",
+    "Bubble Bomb": "images/Bubble_Bomb.png",
+    "Fission": "images/Fission.png", // 如果没有图片，会使用占位符
+    "Fusion": "images/Fussion.png",
 };
 
 export const ITEM_STATS = {
@@ -1065,10 +1055,12 @@ export const ITEM_STATS = {
     "Powder": {base_attack:17, base_cooldown:160, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
     "Corn": {base_attack:8, base_cooldown:100, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
+    "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:220, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
     "Web": {base_attack:5, base_cooldown:180, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000},
+    "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000},
     "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -4200,7 +4192,7 @@ class Item {
         this.count = 1;
         this.color = RARITY_COLORS[rarity] || [255, 255, 255];
         this.isDNA = (itemType === "DNA");
-
+        this.statMultiplier = 1.0
         // ===== 🛡️ 耐久度系统 =====
         this.maxDurability = this.calculateMaxDurability();
         this.durability = this.maxDurability;
@@ -4266,7 +4258,9 @@ class Item {
             "Wing": 1.0,       // 翅膀耐久1.2倍
             "Leaf": 1.1,       // 叶子耐久1.1倍
             "Claw": 1.3,       // 爪子耐久1.3倍
-            "Fang": 1.2,       // 尖牙耐久1.2倍
+            "Fang": 1.2,
+            "Bomb":0.7,
+            "Bubble Bomb":0.5,
             "Stinger": 0.8,    // 刺耐久较低（高伤害代价）
             "Lightning": 0.7,  // 闪电耐久较低
             "Jelly": 0.9,      // 果冻耐久较低
@@ -4527,20 +4521,6 @@ class Item {
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, finalSize, finalSize);
 
-        // 如果已损坏，绘制红色叉叉
-        if (this.isBroken) {
-            ctx.save();
-            ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(x + 5, y + 5);
-            ctx.lineTo(x + finalSize - 5, y + finalSize - 5);
-            ctx.moveTo(x + finalSize - 5, y + 5);
-            ctx.lineTo(x + 5, y + finalSize - 5);
-            ctx.stroke();
-            ctx.restore();
-        }
-
         // 绘制物品图像
         const itemImage = imageLoader.getImage(
             this.type,
@@ -4606,19 +4586,6 @@ class Item {
         ctx.lineWidth = 4;
         ctx.strokeRect(x, y, size, size);
 
-        // 如果已损坏，绘制红色叉叉
-        if (this.isBroken) {
-            ctx.save();
-            ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(x + 5, y + 5);
-            ctx.lineTo(x + size - 5, y + size - 5);
-            ctx.moveTo(x + size - 5, y + 5);
-            ctx.lineTo(x + 5, y + size - 5);
-            ctx.stroke();
-            ctx.restore();
-        }
 
         // 绘制物品图像
         const itemImage = imageLoader.getImage(
@@ -4736,20 +4703,6 @@ class DNA extends Item {
         ctx.strokeStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
         ctx.lineWidth = 4;
         ctx.strokeRect(x, y, size, size);
-
-        // 如果已损坏，绘制红色叉叉
-        if (this.isBroken) {
-            ctx.save();
-            ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(x + 5, y + 5);
-            ctx.lineTo(x + size - 5, y + size - 5);
-            ctx.moveTo(x + size - 5, y + 5);
-            ctx.lineTo(x + 5, y + size - 5);
-            ctx.stroke();
-            ctx.restore();
-        }
 
         // DNA图片
         const dnaImg = window.imageLoader?.getImage("DNA", this.rarity, [size - 10, size - 10]);
@@ -4889,20 +4842,6 @@ class Coin extends Item {
         ctx.strokeStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
         ctx.lineWidth = 4;
         ctx.strokeRect(x, y, size, size);
-
-        // 如果已损坏，绘制红色叉叉
-        if (this.isBroken) {
-            ctx.save();
-            ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(x + 5, y + 5);
-            ctx.lineTo(x + size - 5, y + size - 5);
-            ctx.moveTo(x + size - 5, y + 5);
-            ctx.lineTo(x + 5, y + size - 5);
-            ctx.stroke();
-            ctx.restore();
-        }
 
         // Coin图片
         const coinImg = imageLoader.getImage("Coin", this.rarity, [size - 10, size - 10]);
@@ -9447,7 +9386,7 @@ class EnemyDrawer {
 
         // 稀有度缩放因子
         const rarityScale = 1 + rarityIndex * 0.15;
-        const totalScale = viewScale * rarityScale * (1 + (level - 1) * 0.1);
+        const totalScale = viewScale * rarityScale * (1 + (level - 1) * 0.3);
 
         // 稀有度描边乘数
         const STROKE_MULTIPLIERS = {
@@ -12493,7 +12432,9 @@ class ShopSystem {
             "Ant Egg": 12,
             "Stick": 18,
             "Moon Egg": 10,
+            "Bubble Bomb":18,
             "Rock": 5,
+            "Bomb":12,
             "DNA": 190,
             "Clover": 5,
             "Rose":8,
@@ -16222,9 +16163,9 @@ class Enemy {
             "Epic": 54,
             "Legendary": 405,
             "Mythic": 2430,
-            "Ultra": 10645,
-            "Super": 32574,
-            "Omega": 165510,
+            "Ultra": 9645,
+            "Super": 30574,
+            "Omega": 105510,
             "Eternal": 789830
         };
         //原来的数值变化---1,3.75,13.5,54,405,2430,36450,437400,6561000,734832000
@@ -18331,7 +18272,45 @@ class Petal {
         }
         return null;
     }
+    _triggerBombExplosion(item) {
+        if (!this.player?.gameInstance) return;
+        const game = this.player.gameInstance;
+        const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
 
+        const isBubbleBomb = item.type === "Bubble Bomb";
+        const radius = isBubbleBomb ? 60 + mult * 0.3 : 60 + mult * 0.2;
+        const damage = isBubbleBomb ? 1.1 * mult : 10 * mult;
+        const knockback = isBubbleBomb ? 300 + mult * 0.2 : 200 + mult * 0.2;
+
+        const cx = this.worldX, cy = this.worldY;
+
+        for (const enemy of game.enemies) {
+            if (enemy.isDead || enemy.isFriendly) continue;
+            const dx = enemy.physicsBody.position.x - cx;
+            const dy = enemy.physicsBody.position.y - cy;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < radius && dist > 0) {
+                const falloff = 1 - dist / radius;
+                enemy.health -= damage * falloff;
+                const nx = dx/dist, ny = dy/dist;
+                enemy.physicsBody.velocity.x += nx * knockback * falloff;
+                enemy.physicsBody.velocity.y += ny * knockback * falloff;
+                enemy.knockbackTimer = 0.4;
+                if (enemy.health <= 0 && !enemy.isDead) {
+                    enemy.markAsDead();
+                    game.dropCard(enemy);
+                    game.player.gainXpFromKill(enemy.rarity || 'Common', enemy.type);
+                    game.score += 20;
+                    game.enemiesKilled++;
+                }
+            }
+        }
+
+        this.health = 0;
+        this.durability = 0;
+        this.isBroken = true;
+        this.startReload();
+    }
     // ===== 切换静止模式 =====
     toggleStillMode() {
         this.stillMode = !this.stillMode;
@@ -18405,7 +18384,7 @@ class Petal {
         }
 
         // 限制最大减少效果
-        totalReduction = Math.min(totalReduction, 0.95);
+        totalReduction = Math.min(totalReduction, 0.99);
 
         // ===== 关键：保存原始值 =====
         if (this.baseReloadTime === undefined) {
@@ -18421,7 +18400,7 @@ class Petal {
 
         // 应用总减少效果
         if (totalReduction > 0) {
-            const newReloadTime = Math.max(100, this.baseReloadTime * (1 - totalReduction));
+            const newReloadTime = Math.max(10, this.baseReloadTime * (1 - totalReduction));
             if (this.reloadTime !== newReloadTime) {
                 this.reloadTime = newReloadTime;
             }
@@ -18522,7 +18501,7 @@ class Petal {
                     "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
                     "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
                     "Square Egg",
-                    "Leech Egg", "Parasite Egg", "Bacteriophage egg","Virus egg"
+                    "Leech Egg", "Parasite Egg", "Bacteriophage egg","Virus egg","Soldier Ant egg","Worker ant egg","Centipede egg","Ladybug egg","Bee egg","Hive egg"
                 ]);
 
                 this.isEggItem = EGG_ITEMS.has(item.type);
@@ -19488,6 +19467,10 @@ class Petal {
 
         const currentItem = this.getCurrentItem();
 
+        if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb")) {
+            this._triggerBombExplosion(currentItem);
+            return true; // 返回true表示花瓣破碎
+        }
         // ===== 检查是否为海绵 =====
         if (currentItem && currentItem.type === "Sponge") {
             if (!this.player || this.player.isDead) {
@@ -25002,7 +24985,13 @@ class Player {
 
         // ✅ 确保所有花瓣从快捷栏同步属性
         this.quickSlot.updateAllPetals();
-
+        for (const petal of this.petals) {
+            petal.isBroken = false;
+            petal.isReloading = false;
+            petal.reloadTimer = 0;
+            petal.health = petal.maxHealth;
+            petal.durability = petal.maxDurability;
+        }
     }
 }
 
