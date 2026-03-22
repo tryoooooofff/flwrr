@@ -8899,7 +8899,7 @@ class EnemyDrawer {
         };
         const legendaryFactor = raritySizeFactors["Legendary"];
         const rarityFactor    = raritySizeFactors[rarity] || 1.0;
-        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size)*0.8;
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size)*0.7;
 
         const circleR  = 128 * scale;
         const spokeR   = 148 * scale;
@@ -28881,7 +28881,6 @@ class DroppedCard {
         }
     }
 }
-
 class MainMenu {
     constructor(player, autoSaveSystem, bonusSystem) {
         this.player = player;
@@ -28978,9 +28977,12 @@ class MainMenu {
         this.titleY = this.HEIGHT / 2 - 200;
         this.hintY  = this.HEIGHT / 2 - 150;
 
-        this.hoveredButton    = null;
-        this.lastClickTime    = 0;
-        this.doubleClickDelay = 300;
+        this.hoveredButton      = null;
+        this.lastClickTime      = 0;
+        this.doubleClickDelay   = 300;
+        this.showBonusTooltip   = false;
+        this._bonusBtn5d        = null;
+        this._bonusBtnPerm      = null;
 
         this.loadoutPanelOpen   = false;
         this._loadoutScrollIdx  = 0;
@@ -29422,7 +29424,32 @@ class MainMenu {
             for (const [name, rect] of Object.entries(this.otherButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = name; break; }
         }
-        if (!foundHover && this.isPointInRect(pos, this.extraBonusButton)) foundHover = 'extra_bonus';
+        if (!foundHover && this.isPointInRect(pos, this.extraBonusButton)) {
+            foundHover = 'extra_bonus';
+            this.showBonusTooltip = !this.extraBonusActive && !this.extraBonusPermanent;
+        } else if (this.showBonusTooltip) {
+            // 检查是否在 tooltip 整体区域内（包含按钮之间的空隙）
+            const [ex, ey, ew] = this.extraBonusButton;
+            const tw = 180, th = 90;
+            let tx = ex - tw - 8;
+            if (tx < 8) tx = ex + ew + 8;
+            const tooltipRect = [tx, ey, tw, th];
+
+            if (this.isPointInRect(pos, tooltipRect)) {
+                // 在 tooltip 框内，检测具体按钮
+                if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
+                    foundHover = 'bonus_buy_5d';
+                } else if (this._bonusBtnPerm && this.isPointInRect(pos, this._bonusBtnPerm)) {
+                    foundHover = 'bonus_buy_perm';
+                } else {
+                    foundHover = 'bonus_tooltip_area';
+                }
+                // 保持显示
+            } else {
+                // 鼠标离开 extra bonus 和 tooltip 两个区域才隐藏
+                this.showBonusTooltip = false;
+            }
+        }
         this.hoveredButton = foundHover;
     }
 
@@ -29440,18 +29467,29 @@ class MainMenu {
         if (this.isPointInRect(pos, this.accountButton)) return "account";
         if (this.isPointInRect(pos, this.shopButton))    return "shop";
 
+        // Tooltip 内购买按钮
+        if (this.showBonusTooltip) {
+            const shopSystem = window.gameInstance?.shopSystem;
+            if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
+                const ok = this.buyWeeklyExtraBonus(shopSystem);
+                if (ok) this.showBonusTooltip = false;
+                return ok ? "extra_bonus_activated" : "extra_bonus_insufficient_stars";
+            }
+            if (this._bonusBtnPerm && this.isPointInRect(pos, this._bonusBtnPerm)) {
+                const ok = this.buyPermanentExtraBonus(shopSystem);
+                if (ok) this.showBonusTooltip = false;
+                return ok ? "extra_bonus_permanent" : "extra_bonus_insufficient_stars";
+            }
+        }
+
         if (this.isPointInRect(pos, this.extraBonusButton)) {
             const shopSystem = window.gameInstance?.shopSystem;
             if (this.extraBonusPermanent) return "extra_bonus_permanent";
             if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime)
                 return this.reactivateWeeklyBonus() ? "extra_bonus_reactivated" : "extra_bonus_unavailable";
-            if (!shopSystem) {
-                if (this.bonusSystem?.activateExtraBonus) this.bonusSystem.activateExtraBonus();
-                return "extra_bonus_activated";
-            }
-            if (isDoubleClick)
-                return this.buyPermanentExtraBonus(shopSystem) ? "extra_bonus_permanent" : "extra_bonus_insufficient_stars";
-            return this.buyWeeklyExtraBonus(shopSystem) ? "extra_bonus_activated" : "extra_bonus_insufficient_stars";
+            // 已激活但未购买时：点击 extra bonus 主按钮直接显示 tooltip
+            this.showBonusTooltip = true;
+            return "extra_bonus_tooltip";
         }
 
         for (const [biome, rect] of Object.entries(this.biomeButtons))
@@ -29593,7 +29631,7 @@ class MainMenu {
             ctx.fillText('BONUS', ex+ew/2, ey+eh/2);
             ctx.font = '9px Arial';
             ctx.fillText('10K⭐/7d', ex+ew/2, ey+eh/2+18);
-            ctx.fillText('1T⭐/永久', ex+ew/2, ey+eh/2+31);
+            ctx.fillText('1T⭐/forever', ex+ew/2, ey+eh/2+31);
         }
 
         // Biome 按钮
@@ -29649,9 +29687,56 @@ class MainMenu {
 
         if (this.player?.quickSlot) this.player.quickSlot.draw(ctx);
 
+        this.drawBonusTooltip(ctx);
         this.drawLoadout(ctx);
 
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    }
+
+    drawBonusTooltip(ctx) {
+        // 只在未购买且悬停时显示
+        if (!this.showBonusTooltip || this.extraBonusActive || this.extraBonusPermanent) return;
+
+        const [ex, ey, ew, eh] = this.extraBonusButton;
+        const tw = 180, th = 90;
+        let tx = ex - tw - 8;
+        let ty = ey;
+        // 防止超出左边界
+        if (tx < 8) tx = ex + ew + 8;
+
+        // 背景
+        ctx.fillStyle = 'rgba(20,20,40,0.95)';
+        ctx.beginPath(); ctx.roundRect(tx, ty, tw, th, 10); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,215,0,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+        // 标题
+        ctx.font = 'bold 12px Arial'; ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Extra Bonus', tx + tw/2, ty + 16);
+
+        // 分割线
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tx+8, ty+28); ctx.lineTo(tx+tw-8, ty+28); ctx.stroke();
+
+        // 5天按钮
+        const btn5W = tw - 16, btn5H = 22;
+        const btn5X = tx + 8, btn5Y = ty + 35;
+        this._bonusBtn5d = [btn5X, btn5Y, btn5W, btn5H];
+        ctx.fillStyle = this.hoveredButton === 'bonus_buy_5d' ? '#c8a000' : '#a07800';
+        ctx.beginPath(); ctx.roundRect(btn5X, btn5Y, btn5W, btn5H, 6); ctx.fill();
+        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('5 Days  —  100K ⭐', btn5X + btn5W/2, btn5Y + btn5H/2);
+
+        // 永久按钮
+        const btnPW = tw - 16, btnPH = 22;
+        const btnPX = tx + 8, btnPY = ty + 62;
+        this._bonusBtnPerm = [btnPX, btnPY, btnPW, btnPH];
+        ctx.fillStyle = this.hoveredButton === 'bonus_buy_perm' ? '#8040c0' : '#603090';
+        ctx.beginPath(); ctx.roundRect(btnPX, btnPY, btnPW, btnPH, 6); ctx.fill();
+        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Permanent  —  1T ⭐', btnPX + btnPW/2, btnPY + btnPH/2);
     }
 
     drawFlowerPattern(ctx) {
