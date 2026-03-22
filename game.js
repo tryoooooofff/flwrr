@@ -14253,7 +14253,12 @@ class RedeemSystem {
             { type: "Stick", rarity: "Super", count: 1 },
             { type: "Golden Leaf", rarity: "Ultra", count: 1 }
         ], 10); // 7天有效
-
+        // 预设一些兑换码
+        this.addCode("wages", [
+            { type: "Igloo egg", rarity: "Super", count: 1 },
+            { type: "Ice Cube egg", rarity: "Super", count: 1 },
+            { type: "Trashcan egg", rarity: "Ultra", count: 91 },
+        ], 10); // 7天有效
         this.addCode("12378900", [
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
@@ -29840,97 +29845,103 @@ class WorldMapGame {
 
         loadNext();
     }
+    // 在 WorldMapGame 类中添加
+    showMessage(message) {
+        console.log(message);
+        // 可选：在界面上显示消息
+        if (this.player?.inventory?.craftingSystem) {
+            this.player.inventory.craftingSystem.showError(message);
+        }
+    }
+    async initMultiplayer(roomCode = null, playerName = 'Player') {
+        return new Promise((resolve, reject) => {
+            console.log('🎮 初始化多人模式...');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const code = roomCode || 'lobby';
+            const url = `${protocol}//${window.location.host}?room=${code}&name=${encodeURIComponent(playerName)}`;
+            this.ws = new WebSocket(url);
 
-    // 初始化多人游戏
-    async initMultiplayer() {
-        console.log('🎮 初始化多人模式（服务器权威）...');
+            this.ws.onopen = () => {
+                console.log('✅ 已连接到游戏服务器');
+                this.multiplayerMode = true;
+                this.isHost = false;
+                resolve();
+            };
 
-        // 不再使用 PeerJS，直接连接 WebSocket 服务器
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                this.handleMultiplayerMessage(data);
+            };
 
-        this.ws.onopen = () => {
-            console.log('✅ 已连接到游戏服务器');
-            this.multiplayerMode = true;
-            this.isHost = false; // 客户端模式，服务器是主机
+            this.ws.onerror = (err) => {
+                console.error('WebSocket 错误:', err);
+                reject(err);
+            };
 
-            // 发送房间加入请求
-            if (this.currentRoomCode) {
-                this.ws.send(JSON.stringify({
-                    type: 'join_room',
-                    roomCode: this.currentRoomCode,
-                    playerId: this.player.playerId
-                }));
-            }
-        };
+            this.ws.onclose = () => {
+                console.log('❌ 与服务器断开连接');
+                this.multiplayerMode = false;
+                if (this.player?.inventory?.craftingSystem?.showMessage) {
+                    this.player.inventory.craftingSystem.showMessage('与服务器断开连接');
+                }
+            };
 
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            this.handleMultiplayerMessage(data);
-        };
-
-        this.ws.onclose = () => {
-            console.log('❌ 与服务器断开连接');
-            this.multiplayerMode = false;
-            this.showMessage('与服务器断开连接，返回单人模式');
-        };
+            setTimeout(() => reject(new Error('连接超时')), 8000);
+        });
     }
 
     // 处理服务器消息
     handleMultiplayerMessage(data) {
-        switch(data.type) {
-            case 'init':
-                // 服务器发送初始化数据
-                this.player.playerId = data.playerId;
-                this.otherPlayers.clear();
-                for (const p of data.players) {
-                    if (p.id !== this.player.playerId) {
-                        const other = new Player(p.id);
-                        other.isLocalPlayer = false;
-                        other.physicsBody.position.x = p.x;
-                        other.physicsBody.position.y = p.y;
-                        other.health = p.health;
-                        this.otherPlayers.set(p.id, other);
+            switch(data.type) {
+                case 'init':
+                    // 用服务端分配的 playerId
+                    this.player.playerId = data.playerId;
+                    this.network.localPlayerId = data.playerId; // ← 新增
+
+                    this.otherPlayers.clear();
+                    for (const p of data.players) {
+                        if (p.id !== this.player.playerId) {
+                            const other = new Player(p.id);
+                            other.isLocalPlayer = false;
+                            other.physicsBody.position.x = p.x;
+                            other.physicsBody.position.y = p.y;
+                            other.health = p.health;
+                            this.otherPlayers.set(p.id, other);
+                        }
                     }
-                }
-                // 服务器发送的敌人（已包含区块生成的敌人）
-                this.enemies = data.enemies.map(e => {
-                    const enemy = new Enemy(e.type, e.x, e.y, e.level, e.rarity);
-                    enemy.health = e.health;
-                    enemy.maxHealth = e.maxHealth;
-                    enemy.id = e.id;
-                    return enemy;
-                });
-                console.log(`✅ 加入房间，玩家数: ${this.otherPlayers.size + 1}, 敌人数: ${this.enemies.length}`);
-                break;
+                    this.enemies = data.enemies.map(e => {
+                        const enemy = new Enemy(e.type, e.x, e.y, e.level || 1, e.rarity || 'Common');
+                        enemy.health = e.health;
+                        enemy.maxHealth = e.maxHealth;
+                        enemy.id = e.id;
+                        return enemy;
+                    });
+                    console.log(`✅ 加入房间，玩家数: ${this.otherPlayers.size + 1}, 敌人数: ${this.enemies.length}`);
+                    break;
 
-            case 'game_state':
-                // 更新游戏状态（服务器权威）
-                this.applyServerState(data);
-                break;
+                case 'game_state':
+                    this.applyServerState(data);
+                    break;
 
-            case 'player_joined':
-                // 新玩家加入
-                const newPlayer = new Player(data.playerId);
-                newPlayer.isLocalPlayer = false;
-                newPlayer.physicsBody.position.x = data.x;
-                newPlayer.physicsBody.position.y = data.y;
-                this.otherPlayers.set(data.playerId, newPlayer);
-                console.log(`👤 新玩家加入: ${data.playerId.substring(0, 6)}`);
-                break;
+                case 'player_joined':
+                    const newPlayer = new Player(data.playerId);
+                    newPlayer.isLocalPlayer = false;
+                    newPlayer.physicsBody.position.x = data.x;
+                    newPlayer.physicsBody.position.y = data.y;
+                    this.otherPlayers.set(data.playerId, newPlayer);
+                    console.log(`👤 新玩家加入: ${data.playerId.substring(0, 6)}`);
+                    break;
 
-            case 'player_left':
-                // 玩家离开
-                this.otherPlayers.delete(data.playerId);
-                console.log(`👋 玩家离开: ${data.playerId.substring(0, 6)}`);
-                break;
+                case 'player_left':
+                    this.otherPlayers.delete(data.playerId);
+                    console.log(`👋 玩家离开: ${data.playerId.substring(0, 6)}`);
+                    break;
 
-            case 'chat':
-                // 聊天消息
-                this.showChatMessage(data.sender, data.text);
-                break;
+                case 'chat':
+                    this.showChatMessage(data.sender, data.text);
+                    break;
+            }
         }
-    }
 
     // 应用服务器状态（替换本地状态）
     applyServerState(state) {
@@ -29989,18 +30000,46 @@ class WorldMapGame {
     }
 
     // 创建多人房间
+
     async createMultiplayerRoom() {
-        await this.initMultiplayer();
-        const roomCode = this.network.createRoom();
-        this.network.localPlayerId = this.player.playerId;
+        try {
+            // 生成6位房间码
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let roomCode = '';
+            for (let i = 0; i < 6; i++) {
+                roomCode += chars[Math.floor(Math.random() * chars.length)];
+            }
+            this.currentRoomCode = roomCode;
 
-        // ⭐⭐⭐ 确保设置 isHost ⭐⭐⭐
-        this.isHost = true;
-        this.network.isHost = true;
+            const playerName = window.gameInstance?.accountSystem?.getCurrentUser?.() || 'Host';
+            await this.initMultiplayer(roomCode, playerName);
 
-        console.log('🎮 创建房间:', roomCode, '主机:', this.isHost);
-        return roomCode;
+            this.isHost = true;
+            this.network.isHost = true;
+            this.network.localPlayerId = this.player.playerId;
+
+            console.log('🎮 创建房间成功，房间码:', roomCode, '主机:', this.isHost);
+            return roomCode;
+        } catch (err) {
+            console.error('❌ 创建房间失败:', err);
+            return null;
+        }
     }
+
+    async joinMultiplayerRoom(roomCode) {
+        try {
+            this.currentRoomCode = roomCode;
+            const playerName = window.gameInstance?.accountSystem?.getCurrentUser?.() || 'Player';
+            await this.initMultiplayer(roomCode, playerName);
+            this.network.localPlayerId = this.player.playerId;
+            console.log('🎮 加入房间成功:', roomCode);
+            return true;
+        } catch (err) {
+            console.error('❌ 加入房间失败:', err);
+            return false;
+        }
+    }
+
     // 本地收集卡片（先收集，服务器会同步确认）
     collectCardsLocal() {
         const cardsToRemove = [];
@@ -30021,14 +30060,7 @@ class WorldMapGame {
 
         this.droppedCards = this.droppedCards.filter(card => !cardsToRemove.includes(card));
     }
-    // 加入多人房间
-    async joinMultiplayerRoom(roomCode) {
-        await this.initMultiplayer();
-        await this.network.joinRoom(roomCode);
-        this.network.localPlayerId = this.player.playerId;
-        console.log('🎮 join:', roomCode);
-        return true;
-    }
+
 
     // 处理网络消息
     handleNetworkMessage(data, fromId) {
