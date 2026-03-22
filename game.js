@@ -2,7 +2,7 @@
 // 墙壁颜色
 export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
-
+//后期会增加地图，每个地图都有1/10000概率生成一个时空隧道，进入会先到微观世界十分钟（微观世界有原子，电子，质子，电子云，光子），然后再到void 1h（宇宙有黑洞，白洞，中子星，外星人，UFO，恒星，小行星）。如果中途退出游戏则返回进入时空隧道之前的地图）
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -140,6 +140,7 @@ const ENEMY_XP_TABLE = {
     "Bush": { baseXp: 8, typeBonus: 1.0 },
     "Centipede": { baseXp: 8, typeBonus: 1.4 },
     "Cactus": { baseXp: 15, typeBonus: 1.5 },
+    "QueenBee": { baseXp: 30, typeBonus: 1.5 },
     "Bee": { baseXp: 13, typeBonus: 1.2 },
     "QueenAnt": { baseXp: 20, typeBonus: 2.0 },
     "Ladybug":{ baseXp: 11, typeBonus: 1.3 },
@@ -1150,6 +1151,7 @@ const ITEM_IMAGE_URLS = {
     "map_arctic":"images/map_arctic.png",
     "Frost Digger egg": "images/FrostDigger_egg.png",
     "Trashcan egg":"images/Trashcan_egg.png",
+    "Queen Bee egg": "images/QueenBee_egg.png",
 };
 
 export const ITEM_STATS = {
@@ -1193,6 +1195,7 @@ export const ITEM_STATS = {
     "Heavy": {base_attack:6, base_cooldown:400, health_bonus:100, knockback_power:480, use_rarity_multiplier: true, base_reload_time:4500},
     "Controller": {base_attack:100000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000},
     "Trashcan egg": {base_attack:1, base_cooldown:250, spawn_fly: true,spawn_count: 12, use_rarity_multiplier: true, base_reload_time:22000},
+    "Queen Bee egg": {base_attack:1, base_cooldown:250, spawn_queen_bee: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:11000},
     // ========== 生物蛋类 ==========
     "WhiteBloodCell egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000},
     "Spider egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000},
@@ -1339,6 +1342,7 @@ export const ENEMY_DROP_TABLE = {
     "FireAntHole": ["FireAntHole egg", "Magnet", "Corn"],
     "Bacteria": ["Iris", "Bacteria_egg", "Chromosome"],
     "Bubble": ["Bubble", "Air", "Bubble egg"],
+    "QueenBee": ["Queen Bee egg", "Bee egg", "Honey","Pollen"],
     "Cancer": ["Cancer","Cancer egg","DNA","Iris","Chromosome"],
     // 在 ENEMY_DROP_TABLE 中，在下水道生物后面添加
     "TrashDigger": ["TrashDigger egg", "Poo", "Iris", "Cutter"],
@@ -1464,8 +1468,8 @@ export const ARMOR_ELIGIBLE_ITEMS = new Set([
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider"],
     "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight"],
-    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee"],
+    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube"] // E级 - 最难打的Boss级生物
 };
 // E级护甲的倍率（比D级更高）
@@ -12231,7 +12235,134 @@ class EnemyDrawer {
 
         ctx.restore();
     }
+    drawQueenBee(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
 
+        const isFriendly = enemyObj?.isFriendly;
+        const rarity = enemyObj?.rarity || "Common";
+        const rarityIndex = RARITY_LIST.indexOf(rarity);
+        const rarityScale = 1 + rarityIndex * 0.15;
+        const totalScale = viewScale * rarityScale * (1 + (level - 1) * 0.1);
+
+        const TIP_MULT = {common:0.6,unusual:0.65,rare:0.7,epic:0.74,legendary:0.79,mythic:0.83,ultra:0.9,super:1.1,omega:1.6,eternal:1.9};
+        const STROKE_MULT = {common:1,unusual:1.1,rare:1.2,epic:1.5,legendary:1.8,mythic:2.2,ultra:2.6,super:3.2,omega:4.4,eternal:5};
+
+        const tipMult = TIP_MULT[rarity?.toLowerCase()] || 1;
+        const strokeMult = STROKE_MULT[rarity?.toLowerCase()] || 1;
+
+        const bodyColor = isFriendly ? [255,235,120] : [204,153,0];
+        const darkBodyColor = isFriendly ? [230,200,80] : [153,115,0];
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angleToPlayer);
+
+        const bw = scaledSize, bh = scaledSize * 0.65;
+        const bx = -bw/2, by = -bh/2;
+
+        const lineWidth = Math.max(2, 2 * totalScale * strokeMult);
+
+        const antennaLen = bw * 0.35;
+        const antennaBase = Math.max(1.5, 2.2 * totalScale);
+        const antennaTip = Math.max(1.5, 3.5 * tipMult * totalScale);
+
+        const cx = 0;
+        const cy = Math.sin(animationTimer * 8) * 3 * viewScale;
+
+        const a = bw/2;
+        const b = bh/2* 1.1;
+
+        // 摆动
+        const swing = Math.sin(animationTimer * 5) * 0.52;
+        ctx.rotate(swing);
+        const ANTENNA_LENGTH_SCALE = 1.4; // 👈 调这个就行（1.2~2.0都可以）
+        const drawAntenna = (side) => {
+            const sx = bx + bw * 0.75;
+            const sy = cy;
+
+            const len = antennaLen * ANTENNA_LENGTH_SCALE;
+
+            const CURVE_STRENGTH = 1.4; // 👈 控制弯曲程度（1.0 ~ 2.0）
+
+            const ctrlX = sx + len * 1.2; // 稍微往回收一点（更自然弧线）
+            const ctrlY = sy + side * len * 0.4 * CURVE_STRENGTH;
+
+            // 终点（决定长度）
+            const ex = sx + len * 1.2;
+            const ey = sy + side * len * 1.3;
+
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.quadraticCurveTo(ctrlX, ctrlY, ex, ey);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = antennaBase;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // 顶端球稍微再放大一点（配合长度更协调）
+            ctx.beginPath();
+            ctx.arc(ex, ey, antennaTip * 1.3, 0, Math.PI * 2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+        };
+
+        drawAntenna(-0.55);
+        drawAntenna(0.55);
+
+        // 2. 尾刺
+        const sl = 5 * strokeMult * totalScale;
+        const sw = 3 * strokeMult * totalScale;
+
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.moveTo(bx + sw*0.3, by + bh/2 - sw);
+        ctx.lineTo(bx + sw*0.3, by + bh/2 + sw);
+        ctx.lineTo(bx - sl, by + bh/2);
+        ctx.closePath();
+        ctx.fill();
+
+        // 3. 身体填充
+        ctx.fillStyle = this.colorToCss(bodyColor);
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, a, b, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ✅ 4. 条纹（关键修改：clip）
+        ctx.save();
+
+        // 用身体裁剪
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, a, b, 0, 0, Math.PI * 2);
+        ctx.clip();
+
+        ctx.fillStyle = '#000';
+
+        const stripePositions = [-0.6, -0.2, 0.2, 0.6];
+        const stripeWidth = Math.max(3, b * 0.25);
+
+        stripePositions.forEach(pos => {
+            const stripeX = cx + a * pos;
+
+            ctx.fillRect(
+                stripeX - stripeWidth / 2,
+                cy - b,
+                stripeWidth,
+                b * 2
+            );
+        });
+
+        ctx.restore();
+
+        // 5. 身体描边（盖住条纹）
+        ctx.strokeStyle = this.colorToCss(darkBodyColor);
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, a, b, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+    }
     // ==================== 蚁丘 ====================
     drawAnthill(context, x, y, size, viewScale = 1.0, enemyObj = null) {
         const scaledRadius = (size / 2) * viewScale;
@@ -13658,6 +13789,372 @@ class EnemyDrawer {
             this.drawCircle(context, x, y, scaledSize * 0.1, [81, 55, 20]);
         }
     }
+        // 在 EnemyDrawer 类中添加这个方法
+    drawFirefly(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        // 稀有度缩放因子
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
+        };
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        // 缩小整体尺寸（乘以 0.7）
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size) * 0.7;
+
+        // ========== 颜色定义 ==========
+        let bodyColor, bodyStroke, wingColor, headColor, headStroke;
+
+        if (isFriendly) {
+            // 友方：金色系
+            bodyColor = '#FFD700';
+            bodyStroke = '#B8860B';
+            wingColor = 'rgba(255, 215, 0, 0.4)';
+            headColor = '#DAA520';
+            headStroke = '#8B691B';
+        } else {
+            // 敌方：完全按照 SVG 配色
+            bodyColor = '#d4b800';
+            bodyStroke = '#a08800';
+            wingColor = 'rgba(208, 208, 208, 0.5)';
+            headColor = '#3a3a3a';
+            headStroke = '#1a1a1a';
+        }
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI);
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+
+        // ========== 1. 身体（椭圆形）==========
+        const bodyRx = 78 * scale;
+        const bodyRy = 108 * scale;
+
+        context.beginPath();
+        context.ellipse(0, -45 * scale, bodyRx, bodyRy, 0, 0, Math.PI * 2);
+        context.fillStyle = bodyColor;
+        context.fill();
+        context.strokeStyle = bodyStroke;
+        context.lineWidth = 10 * scale;
+        context.stroke();
+
+        // ========== 2. 身体条纹（使用 clip）==========
+        context.save();
+        context.beginPath();
+        context.ellipse(0, -45 * scale, bodyRx, bodyRy, 0, 0, Math.PI * 2);
+        context.clip();
+
+        context.strokeStyle = bodyStroke;
+        context.lineWidth = 7 * scale;
+        context.globalAlpha = 0.5;
+
+        // 绘制4条横线（按照 SVG 的位置调整）
+        const lineYOffsets = [-80, -60, -40, -20];
+        for (const offset of lineYOffsets) {
+            context.beginPath();
+            context.moveTo(-120 * scale, offset * scale);
+            context.lineTo(120 * scale, offset * scale);
+            context.stroke();
+        }
+
+        context.restore();
+
+        // ========== 3. 翅膀（带扑动动画，按照 SVG 样式）==========
+        const wingFlap = Math.sin(animationTimer * 25) * 20;
+
+        // 左翅膀 - 按照 SVG 的 transform: rotate(85, 270, 340)
+        context.save();
+        context.translate(-145 * scale, -35 * scale);
+        context.rotate((85 + wingFlap * 0.3) * Math.PI / 180);
+        context.beginPath();
+        context.ellipse(0, 0, 68 * scale, 43 * scale, 0, 0, Math.PI * 2);
+        context.fillStyle = wingColor;
+        context.fill();
+        context.restore();
+
+        // 右翅膀 - 按照 SVG 的 transform: rotate(-85, 410, 340)
+        context.save();
+        context.translate(145 * scale, -35 * scale);
+        context.rotate((-85 - wingFlap * 0.3) * Math.PI / 180);
+        context.beginPath();
+        context.ellipse(0, 0, 68 * scale, 43 * scale, 0, 0, Math.PI * 2);
+        context.fillStyle = wingColor;
+        context.fill();
+        context.restore();
+
+        // ========== 4. 头部（圆形，按照 SVG）==========
+        const headRadius = 80 * scale;
+        const headY = 70 * scale;
+
+        context.beginPath();
+        context.arc(0, headY, headRadius, 0, Math.PI * 2);
+        context.fillStyle = headColor;
+        context.fill();
+        context.strokeStyle = headStroke;
+        context.lineWidth = 14 * scale;
+        context.stroke();
+
+        // ========== 5. 尾部发光效果（萤火虫特色，动态闪烁）==========
+        const glowIntensity = 0.4 + Math.sin(animationTimer * 10) * 0.3;
+
+        // 尾部发光 - 椭圆形光晕
+        context.shadowColor = `rgba(255, 200, 50, ${0.6 + glowIntensity * 0.3})`;
+        context.shadowBlur = 25 * scale;
+
+        // 尾部发光区域（身体末端）
+        context.beginPath();
+        context.ellipse(0, -125 * scale, 30 * scale, 20 * scale, 0, 0, Math.PI * 2);
+        context.fillStyle = `rgba(255, 200, 100, ${0.5 + glowIntensity * 0.3})`;
+        context.fill();
+
+        // 恢复阴影
+        context.shadowBlur = 0;
+
+        context.restore();
+    }
+    // 在 EnemyDrawer 类中添加这个方法
+    drawStickBug(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        // 稀有度缩放因子
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
+        };
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size);
+
+        // ========== 颜色定义 ==========
+        let bodyColor, bodyStroke, legColor;
+
+        if (isFriendly) {
+            // 友方：金色系
+            bodyColor = '#FFD700';
+            bodyStroke = '#B8860B';
+            legColor = '#B8860B';
+        } else {
+            // 敌方：竹节虫配色
+            bodyColor = '#b8864e';
+            bodyStroke = '#7a5230';
+            legColor = '#7a5230';
+        }
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI);
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+
+        // ========== 动画时间偏移（让不同腿的相位不同）==========
+        const t = animationTimer;
+
+        // ========== 1. 身体（主体矩形）==========
+        const bodyX = -40 * scale;
+        const bodyY = -185 * scale;
+        const bodyW = 80 * scale;
+        const bodyH = 370 * scale;
+
+        context.fillStyle = bodyColor;
+        context.strokeStyle = bodyStroke;
+        context.lineWidth = 6 * scale;
+
+        // 主身体矩形
+        context.beginPath();
+        context.roundRect(bodyX, bodyY, bodyW, bodyH, 40 * scale);
+        context.fill();
+        context.stroke();
+
+        // ========== 2. 背部隆起（旋转矩形）==========
+        context.save();
+        context.translate(0, -25 * scale);
+        context.rotate(-20 * Math.PI / 180);
+
+        const backX = -145 * scale;
+        const backY = -25 * scale;
+        const backW = 290 * scale;
+        const backH = 80 * scale;
+
+        // 填充
+        context.fillStyle = bodyColor;
+        context.beginPath();
+        context.roundRect(backX, backY, backW, backH, 40 * scale);
+        context.fill();
+
+        // 描边
+        context.strokeStyle = bodyStroke;
+        context.beginPath();
+        context.roundRect(backX, backY, backW, backH, 40 * scale);
+        context.stroke();
+        context.restore();
+
+        // ========== 3. 中间小矩形 ==========
+        context.save();
+        context.translate(0, -25 * scale);
+        context.rotate(-20 * Math.PI / 180);
+
+        const midX = -38 * scale;
+        const midY = -23 * scale;
+        const midW = 76 * scale;
+        const midH = 76 * scale;
+
+        context.fillStyle = bodyColor;
+        context.beginPath();
+        context.roundRect(midX, midY, midW, midH, 20 * scale);
+        context.fill();
+        context.restore();
+
+        // ========== 4. 左腿（带动画）==========
+        const legPhase1 = t * 3.9;
+        const legPhase2 = t * 3.9 - 0.15;
+        const legPhase3 = t * 3.9 - 0.3;
+        const legPhase4 = t * 3.9 - 0.45;
+
+        context.strokeStyle = legColor;
+        context.lineWidth = 22 * scale;
+
+        // 左腿1（最上面）
+        this._drawStickbugLeg(context,
+            [-35 * scale, -150 * scale],   // 起点
+            [-147 * scale, -192 * scale],   // 中间点
+            [-240 * scale, -213 * scale],   // 终点
+            legPhase1, 12, scale);
+
+        // 左腿2
+        this._drawStickbugLeg(context,
+            [-50 * scale, -110 * scale],
+            [-167 * scale, -103 * scale],
+            [-270 * scale, -70 * scale],
+            legPhase2, 12, scale);
+
+        // 左腿3
+        this._drawStickbugLeg(context,
+            [-52 * scale, -60 * scale],
+            [-172 * scale, -12 * scale],
+            [-275 * scale, 50 * scale],
+            legPhase3, 12, scale);
+
+        // 左腿4
+        this._drawStickbugLeg(context,
+            [-40 * scale, -10 * scale],
+            [-147 * scale, 78 * scale],
+            [-230 * scale, 180 * scale],
+            legPhase4, 12, scale);
+
+        // ========== 5. 右腿（带动画，相位相反）==========
+        const rLegPhase1 = t * 3.9 - 0.4;
+        const rLegPhase2 = t * 3.9 - 0.55;
+        const rLegPhase3 = t * 3.9 - 0.7;
+        const rLegPhase4 = t * 3.9 - 0.85;
+
+        // 右腿1
+        this._drawStickbugLeg(context,
+            [35 * scale, -150 * scale],
+            [147 * scale, -192 * scale],
+            [240 * scale, -213 * scale],
+            rLegPhase1, -12, scale);
+
+        // 右腿2
+        this._drawStickbugLeg(context,
+            [50 * scale, -110 * scale],
+            [167 * scale, -103 * scale],
+            [270 * scale, -70 * scale],
+            rLegPhase2, -12, scale);
+
+        // 右腿3
+        this._drawStickbugLeg(context,
+            [52 * scale, -60 * scale],
+            [172 * scale, -12 * scale],
+            [275 * scale, 50 * scale],
+            rLegPhase3, -12, scale);
+
+        // 右腿4
+        this._drawStickbugLeg(context,
+            [40 * scale, -10 * scale],
+            [147 * scale, 78 * scale],
+            [230 * scale, 180 * scale],
+            rLegPhase4, -12, scale);
+
+        context.restore();
+    }
+    // 辅助方法：绘制竹节虫的单条腿（带关节动画）
+    _drawStickbugLeg(context, start, mid, end, phase, swingDir, scale) {
+        // 计算摆动角度（正弦波）
+        const swingAngle = Math.sin(phase) * (swingDir * 12) * Math.PI / 180;
+
+        // 第一段：从起点到中间点（整体摆动）
+        const startX = start[0];
+        const startY = start[1];
+        const midX = mid[0];
+        const midY = mid[1];
+        const endX = end[0];
+        const endY = end[1];
+
+        // 计算从起点到中间点的方向向量
+        const dx1 = midX - startX;
+        const dy1 = midY - startY;
+        const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+
+        if (len1 > 0) {
+            const nx1 = dx1 / len1;
+            const ny1 = dy1 / len1;
+
+            // 旋转后的中间点
+            const cosA = Math.cos(swingAngle);
+            const sinA = Math.sin(swingAngle);
+            const rotatedMidX = startX + (dx1 * cosA - dy1 * sinA);
+            const rotatedMidY = startY + (dx1 * sinA + dy1 * cosA);
+
+            // 绘制第一段
+            context.beginPath();
+            context.moveTo(startX, startY);
+            context.lineTo(rotatedMidX, rotatedMidY);
+            context.stroke();
+
+            // 第二段：从中间点到终点（独立摆动）
+            const dx2 = endX - midX;
+            const dy2 = endY - midY;
+            const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+            if (len2 > 0) {
+                const nx2 = dx2 / len2;
+                const ny2 = dy2 / len2;
+
+                // 第二段的摆动角度（更大一些）
+                const segment2Swing = Math.sin(phase * 1.5) * (swingDir * 18) * Math.PI / 180;
+
+                // 从中间点旋转后的终点
+                const cosB = Math.cos(segment2Swing);
+                const sinB = Math.sin(segment2Swing);
+                const rotatedEndX = rotatedMidX + (dx2 * cosB - dy2 * sinB);
+                const rotatedEndY = rotatedMidY + (dx2 * sinB + dy2 * cosB);
+
+                // 绘制第二段
+                context.beginPath();
+                context.moveTo(rotatedMidX, rotatedMidY);
+                context.lineTo(rotatedEndX, rotatedEndY);
+                context.stroke();
+
+                // 关节球
+                context.fillStyle = '#7a5230';
+                context.beginPath();
+                context.arc(rotatedMidX, rotatedMidY, 8 * scale, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+    }
     drawRoach(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         // 应用视野缩放
         const scaledSize = size * viewScale;
@@ -14116,7 +14613,7 @@ class EnemyDrawer {
             this.drawWhiteBloodCell(context, x, y, size, rarity, viewScale, enemyObj);
         } else if (enemyType === "Anthill" || enemyType === "AntHill") {
             this.drawAnthill(context, x, y, size, viewScale, enemyObj);
-        } else if (enemyType === "Bee" || enemyType === "HoneyBee") {
+        } else if (enemyType === "Bee") {
             this.drawBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "QueenAnt") {
             this.drawQueenAnt(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
@@ -14126,6 +14623,8 @@ class EnemyDrawer {
         this.drawSquare(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Ladybug") {
             this.drawLadybug(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "QueenBee") {
+            this.drawQueenBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         // ========== 沙漠火蚁系列 ==========
         else if (enemyType === "WorkerFireAnt") {
@@ -14167,6 +14666,8 @@ class EnemyDrawer {
             this.drawBarnacle(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Mantis") {
             this.drawMantis(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "StickBug") {
+            this.drawStickBug(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         // ========== 🆕 下水道生物 ==========
         else if (enemyType === "ManHole") {
@@ -14223,6 +14724,8 @@ class EnemyDrawer {
             this.drawTick(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }else if (enemyType === "ArcticSpider") {
             this.drawArcticSpider(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "Firefly") {
+            this.drawFirefly(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         // ========== 未知类型使用默认绘制 ==========
         else {
@@ -14234,7 +14737,7 @@ class EnemyDrawer {
         }
     }
 }
-    // ===== 兑换码系统 =====
+// ===== 兑换码系统 =====
 class RedeemSystem {
     constructor(shopSystem) {
         this.shop = shopSystem;
@@ -14248,25 +14751,35 @@ class RedeemSystem {
         // 从 localStorage 加载已使用的记录
         this.loadUsedRecords();
 
-        // 预设一些兑换码
-        this.addCode("FRIEND2025", [
-            { type: "Stick", rarity: "Super", count: 1 },
-            { type: "Golden Leaf", rarity: "Ultra", count: 1 }
-        ], 10); // 7天有效
-        // 预设一些兑换码
-        this.addCode("wages", [
+        this.addCode("WAGES", [
             { type: "Igloo egg", rarity: "Super", count: 1 },
             { type: "Ice Cube egg", rarity: "Super", count: 1 },
             { type: "Trashcan egg", rarity: "Ultra", count: 91 },
-        ], 10); // 7天有效
-        this.addCode("12378900", [
+        ], 10);
+
+        this.addCode("123TRY", [
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
-        ], 30); // 30天有效
+        ], 30);
+
 
         this.addCode("7891", [
             { type: "Poo", rarity: "Super", count: 1 }
-        ], 1); // 1天有效
+        ], 2);
+
+        // ===== 星星兑换码 =====
+        this.addCode("ADDITIONAL", [
+            { stars: 100000 }
+        ], 30);
+
+        // 混合奖励：物品 + 星星
+        this.addCode("WELCOME", [
+            { type: "Wing", rarity: "Epic", count: 5 },
+            { type: "Leaf", rarity: "Epic", count: 3 },
+            { stars: 50 }
+        ], 30);
+
+
     }
 
     // 从 localStorage 加载已使用的记录
@@ -14324,7 +14837,7 @@ class RedeemSystem {
             expires: Date.now() + expireDays * 24 * 60 * 60 * 1000,
             maxUses: 1 // 总共能用几次
         });
-        console.log(`✅ add code: ${code}, last ${expireDays} day`);
+        console.log(`✅ 添加兑换码: ${code}, 有效期: ${expireDays}天`);
     }
 
     // 设置最大使用次数
@@ -14342,7 +14855,7 @@ class RedeemSystem {
         const used = this.usedRecords.get(key) || false;
 
         if (used) {
-            return { allowed: false, reason: "you already used it" };
+            return { allowed: false, reason: "你已经使用过这个兑换码" };
         }
 
         return { allowed: true };
@@ -14363,14 +14876,14 @@ class RedeemSystem {
 
         // 检查是否存在
         if (!redeemData) {
-            this.showMessage("❌ unexpected code", 3000);
+            this.showMessage("❌ 无效的兑换码", 3000);
             return false;
         }
 
         // 检查是否过期
         if (Date.now() > redeemData.expires) {
             this.codes.delete(upperCode);
-            this.showMessage("❌ out of date", 3000);
+            this.showMessage("❌ 兑换码已过期", 3000);
             return false;
         }
 
@@ -14393,24 +14906,38 @@ class RedeemSystem {
         }
 
         if (totalUsed >= redeemData.maxUses) {
-            this.showMessage("❌ code has been used up", 3000);
+            this.showMessage("❌ 兑换码已被用完", 3000);
             return false;
         }
 
-        // 发放物品
-        let itemList = [];
-        for (const itemData of redeemData.items) {
-            const item = new Item(itemData.type, 1, itemData.rarity);
-            item.count = itemData.count;
-            player.inventory.addItem(item);
-            itemList.push(`${itemData.count} ${itemData.rarity} ${itemData.type}`);
+        // 发放奖励
+        let rewardList = [];
+        let totalStars = 0;
+
+        for (const reward of redeemData.items) {
+            if (reward.stars !== undefined) {
+                // 星星奖励
+                totalStars += reward.stars;
+                rewardList.push(`${reward.stars} ⭐`);
+            } else if (reward.type) {
+                // 物品奖励
+                const item = new Item(reward.type, 1, reward.rarity);
+                item.count = reward.count;
+                player.inventory.addItem(item);
+                rewardList.push(`${reward.count} ${reward.rarity} ${reward.type}`);
+            }
+        }
+
+        // 发放星星
+        if (totalStars > 0 && this.shop) {
+            this.shop.addStars(totalStars);
         }
 
         // 记录已使用
         this.recordUse(upperCode, playerId);
 
         // 显示成功消息
-        this.showMessage(`✅ get: ${itemList.join(', ')}`, 5000);
+        this.showMessage(`✅ 获得: ${rewardList.join(', ')}`, 5000);
         return true;
     }
 
@@ -14456,7 +14983,7 @@ class RedeemSystem {
         ctx.font = 'bold 24px Arial';
         ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'center';
-        ctx.fillText('Redemption code', centerX, y + 40);
+        ctx.fillText('Code', centerX, y + 40);
 
         // 输入框
         ctx.fillStyle = this.inputActive ? '#34495e' : '#2c3e50';
@@ -14472,7 +14999,7 @@ class RedeemSystem {
         let displayText = this.inputText;
         if (displayText.length === 0 && !this.inputActive) {
             ctx.fillStyle = '#7f8c8d';
-            displayText = 'enter code';
+            displayText = 'enter the code';
         }
         ctx.fillText(displayText, x + 60, y + 100);
 
@@ -14494,7 +15021,7 @@ class RedeemSystem {
         ctx.font = 'bold 18px Arial';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
-        ctx.fillText('convert', btnX + 60, btnY + 15);
+        ctx.fillText('兑换', btnX + 60, btnY + 15);
 
         // 关闭按钮
         ctx.fillStyle = '#e74c3c';
@@ -14519,7 +15046,7 @@ class RedeemSystem {
         ctx.restore();
     }
 
-    // handleClick 方法（保持不变）
+    // handleClick 方法
     handleClick(x, y, gameInstance) {
         if (!this.inputVisible) return false;
 
@@ -14688,6 +15215,7 @@ class ShopSystem {
             "Clover": 5,
             "Rose":8,
             "Hive egg":45,
+            "Queen Bee egg":40,
             "Ladybug egg":12,
             "Bee egg":12,
             "Suger":3,
@@ -18404,6 +18932,7 @@ class Enemy {
             this.triggered30 = false;
             this.triggered10 = false;
             this.spawnedBees = [];
+            this.triggeredDeath = false;
         }
         if (enemyType === "FireAntHole") {
             this.triggered80 = false;
@@ -18442,6 +18971,13 @@ class Enemy {
             this.triggered40 = false;
             this.triggered20 = false;
             this.triggeredDeath = false;
+        }
+        // 在 Enemy 构造函数中，设置完 rarity 后添加
+        if (enemyType === "QueenBee") {
+            this.healRadius = 300;        // 治疗范围
+            this.healAmount = 10;          // 每秒治疗量
+            this.healCooldown = 0;        // 治疗冷却
+            this.healInterval = 300;     // 1秒治疗一次
         }
         const diggerTypes = ["TrashDigger", "MudDigger", "Digger", "Biologist"];
         if (diggerTypes.includes(enemyType)) {
@@ -18763,6 +19299,60 @@ class Enemy {
             enemies.push(fly);
         }
     }
+    // 在 Enemy 类中
+    // 在 Enemy 类中
+    healAllies(enemies, dt) {
+        // 只有 QueenBee 才有治疗光环
+        if (this.type !== "QueenBee") return;
+        if (this.isDead || this.isSpawning) return;
+
+        // 计算稀有度乘数（每高一个稀有度乘3倍）
+        const rarityMultiplier = this.getRarityHealMultiplier();
+        const actualHealAmount = this.healAmount * rarityMultiplier;
+
+        // 更新冷却
+        if (this.healCooldown > 0) {
+            this.healCooldown -= dt * 1000;
+            return;
+        }
+
+        // 重置冷却
+        this.healCooldown = this.healInterval;
+
+        // 遍历所有敌人/友军
+        for (const other of enemies) {
+            if (other === this) continue;
+            if (other.isDead) continue;
+            if (other.health <= 0) continue;
+            if (other.health >= other.maxHealth) continue;
+
+            // 检查阵营是否相同（敌方只治疗敌方，友方只治疗友方）
+            if (other.isFriendly !== this.isFriendly) continue;
+
+            // 检查距离（600像素范围内）
+            const dx = other.physicsBody.position.x - this.physicsBody.position.x;
+            const dy = other.physicsBody.position.y - this.physicsBody.position.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= this.healRadius) {
+                // 治疗（基础10 × 稀有度乘数，范围内所有生物同等速度）
+                const newHealth = Math.min(other.maxHealth, other.health + actualHealAmount);
+                if (newHealth > other.health) {
+                    other.health = newHealth;
+                }
+            }
+        }
+    }
+
+    // 添加辅助方法：获取稀有度治疗乘数
+    getRarityHealMultiplier() {
+        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                             "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        const index = rarityOrder.indexOf(this.rarity);
+        if (index === -1) return 1;
+
+        return Math.pow(3, index);
+    }
 // ===== 保留原乘数但确保顺序正确 =====
     initMultiSegmentCollision() {
         this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede");
@@ -18911,8 +19501,9 @@ class Enemy {
             case "CrabHole": return [540, 50, 0, 10000, 30];
             case "ManHole": return [900, 50, 0, 10000, 50];
             case "Fly": return [25, 25, 60, 20, 10];
-            case "Rat": return [500, 30, 100, 90, 225];
-            case "Roach": return [350, 28, 110, 50, 120];
+            case "Rat": return [500, 30, 100, 90, 220];
+            case "Roach": return [350, 28, 130, 50, 120];
+            case "QueenBee": return [350, 26, 100, 50, 100];
             case "PooStorm": return [600, 22, 40 + Math.random() * 10, 30, 100];
             case "TrashDigger": return [230, 25, 100, 55, 190];
             case "FrostDigger": return [250, 26, 80, 55, 170];
@@ -19413,6 +20004,12 @@ class Enemy {
                 this.triggered10 = true;
                 this.spawnFlies(enemies, 2);
             }
+        }
+
+        // ==================== 🐝 QueenBee 治疗光环 ====================
+        // 在这里添加治疗光环，确保 QueenBee 能治疗同阵营生物
+        if (this.type === "QueenBee" && !this.isDead && !this.isSpawning) {
+            this.healAllies(enemies, dt);
         }
 
         // === 行为决策：追踪 or 游走 ===
@@ -20239,7 +20836,31 @@ class Enemy {
         }
         return false;
     }
+// Hive 死亡生成 QueenBee（相同稀有度）
+    spawnQueenBeeFromDeath(gameInstance) {
+        if (!gameInstance) return;
 
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        // 在 Hive 周围生成 QueenBee
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 60 + Math.random() * 50;
+        const queenX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+        const queenY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+
+        // 使用和 Hive 相同的稀有度
+        const queenRarity = this.rarity;
+
+        const queenBee = new Enemy("QueenBee", queenX, queenY, this.level, queenRarity);
+        queenBee.isFriendly = false;
+        queenBee.healRadius = 600;
+        queenBee.healAmount = 10;
+        queenBee.gameInstance = gameInstance;
+
+        gameInstance.enemies.push(queenBee);
+
+    }
     markAsDead() {
         if (!this.isDead) {
             this.isDead = true;
@@ -20272,9 +20893,15 @@ class Enemy {
                 setTimeout(() => this.trySpawnBiologistFromDeath(this.gameInstance), 50);
             }
 
-            // ===== 🐝 Hive 死亡有10%概率生成 Beekeeper =====
+            // ===== 🐝 Hive 死亡：100%生成 QueenBee，10%额外生成 Beekeeper =====
             if (this.type === "Hive" && !this.isFriendly) {
-                setTimeout(() => this.trySpawnBeekeeperFromDeath(this.gameInstance), 50);
+                // 100% 生成 QueenBee
+                setTimeout(() => this.spawnQueenBeeFromDeath(this.gameInstance), 50);
+
+                // 10% 额外生成 Beekeeper
+                if (Math.random() < 0.1) {
+                    setTimeout(() => this.trySpawnBeekeeperFromDeath(this.gameInstance), 50);
+                }
             }
 
             // ===== 🧊 Igloo 死亡生成 Ice Dragon + 雪人 + 冰块 + 10%概率 Frost Digger =====
@@ -22330,6 +22957,28 @@ class Petal {
                 }
                 this.updateFrostDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
+            // 在 Petal.update 方法中，找到处理蛋类物品的地方，添加：
+            else if (currentItem.type === "Queen Bee egg") {
+                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    if (this.player && this.player.gameInstance) {
+                        const hasDNA = this.player && this.player.petals.some(p => {
+                            const item = p.getCurrentItem();
+                            return item && item.type === "DNA" && !p.isBroken;
+                        });
+                        const spawned = this.trySpawnQueenBeeWithDNA?.(
+                            this.player.gameInstance.enemies,
+                            this.player.getWorldPosition(),
+                            hasDNA
+                        );
+                        if (spawned) {
+                            this.eggSpawned = true;
+                            this.breakPetal();
+                            this.spawnCooldown = 15000;
+                        }
+                    }
+                }
+                this.updateQueenBees?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            }
             // ========== 🐝 蜜蜂蛋 ==========
             else if (currentItem.type === "Bee egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
@@ -22400,6 +23049,7 @@ class Petal {
         this.updateFireAnts?.(dt, gameEnemies, playerWorldPos);
         this.updateQueenAnts?.(dt, gameEnemies, playerWorldPos);
         this.updateScallops?.(dt, gameEnemies, playerWorldPos);
+        this.updateQueenBees?.(dt, gameEnemies, playerWorldPos);
         this.updateStarfish?.(dt, gameEnemies, playerWorldPos);
         this.updateBubbles?.(dt, gameEnemies, playerWorldPos);
     this.updateBeekeepers?.(dt, gameEnemies, playerWorldPos);
@@ -22833,7 +23483,74 @@ class Petal {
         }
         this.goldenAntList = newList;
     }
+    // 在 Petal 类的 trySpawnQueenBeeWithDNA 方法中
+    trySpawnQueenBeeWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
 
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Queen Bee egg") return false;
+
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+
+        if (!this.queenBeeList) this.queenBeeList = [];
+        this._cleanDeadQueenBees(gameEnemies);
+
+        if (this.queenBeeList.length >= 1) return false;
+
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 40;
+        const x = Math.max(100, Math.min(WORLD_WIDTH - 100, playerWorldPos.x + Math.cos(angle) * distance));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+
+        const queenBee = new Enemy("QueenBee", x, y, summonLevel, finalRarity);
+        queenBee.isFriendly = true;
+        queenBee.ownerPetal = this;
+        queenBee.ownerPlayer = this.player;
+        queenBee.healRadius = 600;     // 治疗范围 600
+        queenBee.healAmount = 30;      // 基础治疗量 10
+
+        gameEnemies.push(queenBee);
+        this.queenBeeList.push(queenBee);
+
+        this.spawnCooldown = 15000;
+        return true;
+    }
+
+    _cleanDeadQueenBees(gameEnemies) {
+        if (!this.queenBeeList) {
+            this.queenBeeList = [];
+            return;
+        }
+        const newList = [];
+        for (const qb of this.queenBeeList) {
+            if (qb && gameEnemies.includes(qb) && qb.health > 0 && !qb.isDead) {
+                newList.push(qb);
+            }
+        }
+        this.queenBeeList = newList;
+    }
+
+    updateQueenBees(dt, gameEnemies, playerWorldPos) {
+        if (!this.queenBeeList) this.queenBeeList = [];
+        this._cleanDeadQueenBees(gameEnemies);
+
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type === "Queen Bee egg") {
+            if (!this.isBroken && !this.isReloading) {
+                if (this.queenBeeList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    this.trySpawnQueenBeeWithDNA(gameEnemies, playerWorldPos, hasDNA);
+                }
+            }
+        }
+    }
     updateGoldenAnts(dt, gameEnemies, playerWorldPos) {
         const currentItem = this.getCurrentItem();
         if (this.isBroken || this.isReloading || !currentItem || (currentItem.type !== "Egg" && currentItem.type !== "Ant Egg")) {
@@ -32363,16 +33080,16 @@ class WorldMapGame {
         // 或者直接添加一个自定义物品
 
         // 添加 5 个白色圆形物品到快捷栏
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 9; i++) {
             const orb = new Item("Wing", 1, "Common");
             orb.count = 1;
             this.player.quickSlot.addItem(orb, i);
         }
-
+        const Heal = new Item("Leaf", 1, "Common");
+        this.player.quickSlot.addItem(Heal, 2);
         // 可选：也给背包加一些物品
         const defaultItems = [
-            { type: "Wing", rarity: "Common", count: 5 },
-            { type: "Leaf", rarity: "Common", count: 3 }
+            { type: "Magnet", rarity: "Common", count: 1 }
         ];
 
         for (const itemData of defaultItems) {
