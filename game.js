@@ -1482,7 +1482,7 @@ export const ARMOR_ELIGIBLE_ITEMS = new Set([
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider"],
     "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid"],
     "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube"] // E级 - 最难打的Boss级生物
 };
@@ -19594,17 +19594,35 @@ class Projectile {
         this.lastCollisionTime = 0;
 
         const sourceRarity = source?.rarity || "Common";
+
+        // 稀有度攻击倍率
         const rarityMultiplier = {
             "Common": 1, "Unusual": 1.2, "Rare": 1.4, "Epic": 1.6,
             "Legendary": 1.8, "Mythic": 2.0, "Ultra": 2.2,
             "Super": 2.5, "Omega": 3.0, "Eternal": 4.0
         };
+
+        // ✅ 稀有度尺寸因子
+        const raritySizeFactors = {
+            "Common": 1.0,
+            "Unusual": 1.1,
+            "Rare": 1.2,
+            "Epic": 1.6,
+            "Legendary": 1.8,
+            "Mythic": 2.8,
+            "Ultra": 4.0,
+            "Super": 8.4,
+            "Omega": 12.0,
+            "Eternal": 15.0
+        };
+
         const mult = rarityMultiplier[sourceRarity] || 1;
+        const sizeMult = raritySizeFactors[sourceRarity] || 1;
 
         switch(type) {
             case "ink":
                 const baseSpeed = 250 + Math.random() * 50;
-                // ✅ 初始化速度向量
+                // 初始化速度向量
                 this.velocity = new Vector2(
                     Math.cos(angle) * baseSpeed,
                     Math.sin(angle) * baseSpeed
@@ -19615,7 +19633,8 @@ class Projectile {
 
                 this.life = 6.0;
                 this.maxLife = 6.0;
-                this.size = 30;
+                // ✅ 修复：size 使用稀有度尺寸因子
+                this.size = 30 * sizeMult;
                 this.damage = Math.max(5, Math.floor(15 * mult));
                 this.slowAmount = 0.6 + (mult * 0.05);
                 this.slowDuration = 4000;
@@ -19633,7 +19652,8 @@ class Projectile {
                 this.vx = this.velocity.x;
                 this.vy = this.velocity.y;
                 this.life = 2.0;
-                this.size = 12;
+                // ✅ 修复：size 使用稀有度尺寸因子
+                this.size = 12 * sizeMult;
                 this.mass = 1.0;
                 this.health = 10;
                 this.isPhysical = false;
@@ -19692,53 +19712,71 @@ class Projectile {
 
     draw(ctx, cameraOffset) {
         if (!ctx || !cameraOffset) return;
+
+        // ✅ 考虑视野缩放
+        const viewScale = window.gameInstance?.viewScale || 1.0;
         const screenX = this.x - cameraOffset.x;
         const screenY = this.y - cameraOffset.y;
-        if (screenX < -this.size * 2 || screenX > ctx.canvas.width + this.size * 2 ||
-            screenY < -this.size * 2 || screenY > ctx.canvas.height + this.size * 2) {
+        const drawSize = this.size * viewScale;
+
+        if (screenX < -drawSize * 2 || screenX > ctx.canvas.width + drawSize * 2 ||
+            screenY < -drawSize * 2 || screenY > ctx.canvas.height + drawSize * 2) {
             return;
         }
+
         ctx.save();
         ctx.translate(screenX, screenY);
         ctx.rotate(this.rotation);
+
         if (this.type === "ink") {
             const lifeRatio = Math.max(0, Math.min(1, this.life / this.maxLife));
             const alpha = Math.min(0.8, lifeRatio * 0.6 + 0.2);
+
             ctx.beginPath();
             for (let i = 0; i <= 30; i++) {
                 const angle = (i / 30) * Math.PI * 2;
                 const variation = 0.7 + Math.sin(angle * 4) * 0.2 + Math.sin(angle * 7) * 0.1;
-                const radius = this.size * variation * (0.6 + lifeRatio * 0.4);
+                const radius = drawSize * variation * (0.6 + lifeRatio * 0.4);
                 const px = Math.cos(angle) * radius;
                 const py = Math.sin(angle) * radius;
                 if (i === 0) ctx.moveTo(px, py);
                 else ctx.lineTo(px, py);
             }
             ctx.closePath();
-            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, drawSize);
             gradient.addColorStop(0, `rgba(20, 20, 35, ${alpha})`);
             gradient.addColorStop(0.4, `rgba(15, 15, 28, ${alpha * 0.9})`);
             gradient.addColorStop(0.7, `rgba(10, 10, 20, ${alpha * 0.7})`);
             gradient.addColorStop(1, `rgba(5, 5, 12, ${alpha * 0.4})`);
             ctx.fillStyle = gradient;
             ctx.fill();
+
             ctx.strokeStyle = `rgba(40, 40, 55, ${alpha * 0.5})`;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2 * viewScale;
             ctx.stroke();
+
             if (lifeRatio > 0.5) {
                 for (let i = 0; i < 8; i++) {
                     const splashAngle = Math.random() * Math.PI * 2;
-                    const splashDist = this.size * (0.8 + Math.random() * 0.5);
+                    const splashDist = drawSize * (0.8 + Math.random() * 0.5);
                     const splashX = Math.cos(splashAngle) * splashDist;
                     const splashY = Math.sin(splashAngle) * splashDist;
-                    const splashSize = 3 + Math.random() * 5;
+                    const splashSize = (3 + Math.random() * 5) * viewScale;
                     ctx.beginPath();
                     ctx.arc(splashX, splashY, splashSize, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(10, 10, 20, ${alpha * 0.6})`;
                     ctx.fill();
                 }
             }
+        } else {
+            // 其他投射物的简单绘制
+            ctx.beginPath();
+            ctx.arc(0, 0, drawSize / 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 100, 50, 0.8)`;
+            ctx.fill();
         }
+
         ctx.restore();
     }
 
@@ -20444,7 +20482,7 @@ class Enemy {
             case "ArcticSpider": return [150, 25,120, 3000, 30];
             case "ArcticSpiderCave": return [750, 55 ,0, 12000, 30];
             case "ArcticSpiderCave": return [800, 50 ,0, 8000, 40];
-            case "Shipwreck": return [100, 48 ,0, 15000, 40];
+            case "Shipwreck": return [1000, 48 ,0, 150000, 40];
             case "PirateDigger": return [250, 28, 90, 100, 200];
             default: return [100, 20, 60, 10, 20];
         }
@@ -22746,24 +22784,43 @@ class Petal {
         const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
 
         const isBubbleBomb = item.type === "Bubble Bomb";
-        const radius = isBubbleBomb ? 60 + mult * 0.3 : 60 + mult * 0.2;
-        const damage = isBubbleBomb ? 1.1 * mult*0.1 : 10 * mult*0.2;
-        const knockback = isBubbleBomb ? 300 + mult * 0.2 : 200 + mult * 0.2;
+        // 爆炸半径
+        const radius = isBubbleBomb ? 120 + mult * 0.5 : 100 + mult * 0.4;
+        // 基础伤害
+        const damage = isBubbleBomb ? 15 * mult : 25 * mult;
+        // 基础击退
+        const knockback = isBubbleBomb ? 500 + mult * 0.3 : 400 + mult * 0.3;
 
         const cx = this.worldX, cy = this.worldY;
 
         for (const enemy of game.enemies) {
             if (enemy.isDead || enemy.isFriendly) continue;
+
             const dx = enemy.physicsBody.position.x - cx;
             const dy = enemy.physicsBody.position.y - cy;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < radius && dist > 0) {
-                const falloff = 1 - dist / radius;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < radius) {
+                // ✅ 完全无衰减，整个范围内伤害和击退相同
+                const falloff = 1.0;  // 固定为 1，没有衰减
+
+                // 伤害
                 enemy.health -= damage * falloff;
-                const nx = dx/dist, ny = dy/dist;
-                enemy.physicsBody.velocity.x += nx * knockback * falloff;
-                enemy.physicsBody.velocity.y += ny * knockback * falloff;
+
+                // 击退方向（距离越近击退越强？这里选择统一力度）
+                if (dist > 0.1) {
+                    const nx = dx / dist, ny = dy / dist;
+                    enemy.physicsBody.velocity.x += nx * knockback;
+                    enemy.physicsBody.velocity.y += ny * knockback;
+                } else {
+                    // 如果距离为0（理论上不会发生），随机方向
+                    const angle = Math.random() * Math.PI * 2;
+                    enemy.physicsBody.velocity.x += Math.cos(angle) * knockback;
+                    enemy.physicsBody.velocity.y += Math.sin(angle) * knockback;
+                }
                 enemy.knockbackTimer = 0.4;
+
+                // 检查死亡
                 if (enemy.health <= 0 && !enemy.isDead) {
                     enemy.markAsDead();
                     game.dropCard(enemy);
