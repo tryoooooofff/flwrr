@@ -1657,14 +1657,14 @@ const applyArmorReduction = (damage, defenderArmor, attackerArmor = 0) => {
         // 原来的公式: reduction = absDiff / (absDiff + 1.5)
         // 新公式: 让分母变得非常大，使减伤几乎为0
         const reduction = absDiff / (absDiff + 1000);  // 分母从1.5改为1000
-        const reductionPercent = Math.min(0.10, reduction);  // 最大减伤5%
+        const reductionPercent = Math.min(0.8, reduction);  // 最大减伤5%
         return damage * (1 - reductionPercent);
     } else {
         // 攻击者护甲更高：极轻微减伤（攻击者护甲穿透）
         // 原来的公式: reduction = absDiff / (absDiff + 50)
         // 新公式: 让分母变得非常大，使减伤几乎为0
         const reduction = absDiff / (absDiff + 2000);  // 分母从50改为2000
-        const reductionPercent = Math.min(0.12, reduction);  // 最大减伤3%
+        const reductionPercent = Math.min(0.10, reduction);  // 最大减伤3%
         return damage * (1 - reductionPercent);
     }
 };
@@ -20684,11 +20684,11 @@ class Enemy {
         };
 
         const ARMOR_CLASS_MULTIPLIERS = {
-            "A": 0.5,
+            "A": 0.3,
             "B": 1.0,
-            "C": 2.0,
-            "D": 4.0,
-            "E": 7.0
+            "C": 1.8,
+            "D": 3.5,
+            "E": 6.0
         };
 
         const BASE_B_ARMOR = {
@@ -20699,9 +20699,9 @@ class Enemy {
             "Legendary": 15.0,
             "Mythic": 80.0,
             "Ultra": 228.0,
-            "Super": 644.0,
-            "Omega": 1600.0,
-            "Eternal": 4800.0
+            "Super": 640.0,
+            "Omega": 1550.0,
+            "Eternal": 4600.0
         };
 
         let armorClass = "A";
@@ -21395,12 +21395,12 @@ class Enemy {
 
                 let maxReductionPercent;
                 switch(defenderArmorClass) {
-                    case "A": maxReductionPercent = 0.95; break;
-                    case "B": maxReductionPercent = 0.8; break;
-                    case "C": maxReductionPercent = 0.75; break;
-                    case "D": maxReductionPercent = 0.7; break;
-                    case "E": maxReductionPercent = 0.8; break;
-                    default: maxReductionPercent = 0.5;
+                    case "A": maxReductionPercent = 0.55; break;
+                    case "B": maxReductionPercent = 0.3; break;
+                    case "C": maxReductionPercent = 0.35; break;
+                    case "D": maxReductionPercent = 0.3; break;
+                    case "E": maxReductionPercent = 0.4; break;
+                    default: maxReductionPercent = 0.3;
                 }
 
                 const noArmorDamage = applyArmorReduction.call(this, this.attackDamage, 0, attackerArmor, target);
