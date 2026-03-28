@@ -775,14 +775,15 @@ export const SPECIAL_ZONES = {
             maxEnemies: 50
         },
         {
-            name: "RockZone",
+            name: "BeetleZone",
             bounds: {
                 x1: 6069, y1: 6063,
                 x2: 7031, y2: 6863
             },
             spawnRules: [
                 ["Beetle", 90, 1, 8, ["Super","Ultra"]],
-                ["Beetle", 70, 5, 15, ["Omega"]]
+                ["Beetle", 1, 5, 15, ["Omega"]],
+                ["SoldierFireAnt", 5, 5, 15, ["Super"]]
             ],
             spawnRate: 2.8,
             maxEnemies: 15
@@ -818,7 +819,7 @@ export const SPECIAL_ZONES = {
             spawnRules: [
                 ["CrabHole", 1, 1, 5, ["Ultra", "Super", "Omega"]],     // 蟹洞
                 ["Crab", 100, 1, 5, ["Super", "Omega"]],        // 螃蟹
-                ["Bubble", 40, 1, 6, ["Super", "Omega"]]                 // 气泡
+                ["Starfish", 40, 1, 6, ["Super", "Omega"]]                 // 气泡
             ],
             spawnRate: 10.1,
             maxEnemies: 55
@@ -831,7 +832,7 @@ export const SPECIAL_ZONES = {
             },
             spawnRules: [
                 ["Jellyfish", 10, 1, 5, ["Ultra", "Mythic"]],     // 蟹洞
-                ["Bubble", 100, 1, 5, ["Super", "Ultra","Mythic"]],        // 螃蟹
+                ["Bubble", 100, 1, 5, ["Ultra","Mythic"]],        // 螃蟹
                 ["Starfish", 40, 1, 6, ["Ultra", "Mythic"]],
                 ["Jellyfish", 8, 1, 6, ["Super"]]
             ],
@@ -2260,7 +2261,464 @@ class AutoSaveSystem {
         }
     }
 }
+// ============================================================
+// TalentSystem.js - 天赋系统
+// 接入方式：
+//   1. 在 game.js 中实例化：this.talentSystem = new TalentSystem(this.player);
+//   2. 在主菜单 draw 中调用：if (this.talentSystem?.panelOpen) this.talentSystem.draw(ctx);
+//   3. 在主菜单 handleClick 中调用：this.talentSystem?.handleClick(pos);
+//   4. 在主菜单 handleMouseMove 中调用：this.talentSystem?.handleMouseMove(pos);
+//   5. 在 MainMenu 的 otherButtons 或独立按钮区域添加打开按钮
+//   6. 每次进入游戏时调用：this.talentSystem.applyToPlayer(this.player);
+// ============================================================
 
+class TalentSystem {
+    constructor(player) {
+        this.player = player;
+        this.panelOpen = false;
+        this.talentPoints = 0;
+        this.hoveredNode = null;
+
+        // 天赋树定义
+        this.trees = {
+            reload:       { label: 'Reload',        color: '#5b8fb9', maxLevel: 10, level: 0, desc: 'Reduces petal reload time',      effect: 0.05 },
+            petalDamage:  { label: 'Petal Dmg',     color: '#74bf74', maxLevel: 10, level: 0, desc: 'Increases petal attack power',   effect: 0.05 },
+            summonDamage: { label: 'Summon Dmg',    color: '#9b8ab4', maxLevel: 10, level: 0, desc: 'Increases summon attack damage',  effect: 0.05 },
+            summonHealth: { label: 'Summon HP',     color: '#7aaa8a', maxLevel: 10, level: 0, desc: 'Increases summon max health',     effect: 0.05 },
+            health:       { label: 'Health',        color: '#b47a7a', maxLevel: 10, level: 0, desc: 'Increases player max health',     effect: 0.05 },
+            speed:        { label: 'Speed',         color: '#b4a07a', maxLevel: 10, level: 0, desc: 'Increases player move speed',     effect: 0.05 },
+        };
+
+        this._nodeRects = {};
+        this._btnRects = {};
+
+        this.load();
+    }
+
+    // ========== 成本计算 ==========
+    getCostToLevel(targetLevel) {
+        let total = 0;
+        for (let i = 1; i <= targetLevel; i++) {
+            total += (2 * i - 1);
+        }
+        return total;
+    }
+
+    getNextLevelCost(currentLevel) {
+        if (currentLevel >= 10) return 0;
+        return 2 * (currentLevel + 1) - 1;
+    }
+
+    // ========== 获取玩家等级对应的总天赋点上限 ==========
+    getMaxTalentPointsForLevel() {
+        if (!this.player || !this.player.levelSystem) return 0;
+        const level = this.player.levelSystem.level;
+        return level;
+    }
+
+    // ========== 同步天赋点与等级 ==========
+    syncWithLevel() {
+        if (!this.player || !this.player.levelSystem) return;
+
+        const playerLevel = this.player.levelSystem.level;
+        const maxPoints = this.getMaxTalentPointsForLevel();
+        const totalSpent = this.getTotalSpent();
+
+        if (totalSpent > maxPoints) {
+            this.rollbackToPoints(maxPoints);
+        }
+
+        const expectedPoints = maxPoints;
+        const actualPoints = this.talentPoints + totalSpent;
+
+        if (actualPoints !== expectedPoints) {
+            this.talentPoints = expectedPoints - totalSpent;
+            if (this.talentPoints < 0) this.talentPoints = 0;
+            this.save();
+        }
+    }
+
+    rollbackToPoints(targetTotalSpent) {
+        let currentSpent = this.getTotalSpent();
+        if (currentSpent <= targetTotalSpent) return;
+
+        let toRefund = currentSpent - targetTotalSpent;
+        const treeEntries = Object.entries(this.trees).sort((a, b) => b[1].level - a[1].level);
+
+        for (const [key, tree] of treeEntries) {
+            while (tree.level > 0 && toRefund > 0) {
+                const costThisLevel = this.getCostToLevel(tree.level) - this.getCostToLevel(tree.level - 1);
+                if (toRefund >= costThisLevel) {
+                    tree.level--;
+                    toRefund -= costThisLevel;
+                    currentSpent -= costThisLevel;
+                } else {
+                    break;
+                }
+            }
+            if (toRefund <= 0) break;
+        }
+
+        this.save();
+        if (this.player) this.applyToPlayer(this.player);
+    }
+
+    levelUp(treeKey) {
+        const tree = this.trees[treeKey];
+        if (!tree || tree.level >= tree.maxLevel) return false;
+
+        const nextLevel = tree.level + 1;
+        const cost = this.getNextLevelCost(tree.level);
+
+        if (this.talentPoints < cost) return false;
+
+        const newTotalSpent = this.getTotalSpent() + cost;
+        const maxPoints = this.getMaxTalentPointsForLevel();
+
+        if (newTotalSpent > maxPoints) {
+            if (this.player?.inventory?.craftingSystem) {
+                this.player.inventory.craftingSystem.showMessage(`Need level ${maxPoints + 1} to upgrade further`);
+            }
+            return false;
+        }
+
+        this.talentPoints -= cost;
+        tree.level = nextLevel;
+        this.save();
+        if (this.player) this.applyToPlayer(this.player);
+        return true;
+    }
+
+    getTotalSpent() {
+        let total = 0;
+        for (const tree of Object.values(this.trees)) {
+            total += this.getCostToLevel(tree.level);
+        }
+        return total;
+    }
+
+    resetAll() {
+        const maxPoints = this.getMaxTalentPointsForLevel();
+
+        for (const tree of Object.values(this.trees)) {
+            tree.level = 0;
+        }
+
+        this.talentPoints = maxPoints;
+
+        this.save();
+        if (this.player) this.applyToPlayer(this.player);
+
+        console.log(`Talent reset, level ${this.player?.levelSystem?.level || 1}, TP: ${this.talentPoints}`);
+        return true;
+    }
+
+    addPoints(n = 1) {
+        this.talentPoints += n;
+        this.save();
+    }
+
+    onLevelUp() {
+        this.addPoints(1);
+        this.syncWithLevel();
+    }
+
+    save() {
+        const data = {
+            talentPoints: this.talentPoints,
+            trees: {},
+            version: 1
+        };
+        for (const [k, t] of Object.entries(this.trees)) {
+            data.trees[k] = t.level;
+        }
+        try {
+            localStorage.setItem('talent_system', JSON.stringify(data));
+        } catch (e) {}
+    }
+
+    load() {
+        try {
+            const raw = localStorage.getItem('talent_system');
+            if (!raw) {
+                this.talentPoints = 0;
+                return;
+            }
+            const data = JSON.parse(raw);
+            this.talentPoints = data.talentPoints || 0;
+            for (const [k, v] of Object.entries(data.trees || {})) {
+                if (this.trees[k]) this.trees[k].level = Math.min(v, this.trees[k].maxLevel);
+            }
+            setTimeout(() => this.syncWithLevel(), 0);
+        } catch (e) {}
+    }
+
+    applyToPlayer(player) {
+        if (!player) return;
+        this.player = player;
+
+        // ✅ 关键修复：正确计算天赋加成
+        // Reload 减少（注意：这是减少重载时间，不是伤害加成）
+        player._talentReloadReduction = this.trees.reload.level * this.trees.reload.effect;
+
+        // 花瓣伤害加成（基础倍率，不是增加百分比）
+        player._talentPetalDmgMult = 1 + (this.trees.petalDamage.level * this.trees.petalDamage.effect);
+
+        // 召唤物伤害加成
+        player._talentSummonDmgMult = 1 + (this.trees.summonDamage.level * this.trees.summonDamage.effect);
+
+        // 召唤物生命加成
+        player._talentSummonHpMult = 1 + (this.trees.summonHealth.level * this.trees.summonHealth.effect);
+
+        // 宠物属性加成（兼容旧属性）
+        player.bonusPetStats = player._talentSummonHpMult;
+
+        // 生命加成
+        const healthBonus = 1 + (this.trees.health.level * this.trees.health.effect);
+        player.baseMaxHealth = player.levelSystem
+            ? player.levelSystem.getHpForLevel(player.levelSystem.level) * healthBonus
+            : (player.baseMaxHealth || 100) * healthBonus;
+        player.maxHealth = player.baseMaxHealth;
+        if (player._health > player.maxHealth) player._health = player.maxHealth;
+
+        // 速度加成
+        player.speed = 80 * (1 + (this.trees.speed.level * this.trees.speed.effect));
+
+        // ✅ 更新所有花瓣的属性
+        if (player.petals) {
+            for (const petal of player.petals) {
+                // 保存原始攻击力（如果还没保存）
+                if (petal._basePetalAttack === undefined && petal.attackPower) {
+                    petal._basePetalAttack = petal.attackPower;
+                }
+                // 应用花瓣伤害加成
+                if (petal._basePetalAttack !== undefined) {
+                    petal.attackPower = petal._basePetalAttack * player._talentPetalDmgMult;
+                }
+
+                // 应用重载时间减少
+                if (petal.baseReloadTime) {
+                    const totalRed = Math.min(0.99, (player.totalReloadReduction || 0) + player._talentReloadReduction);
+                    petal.reloadTime = Math.max(10, petal.baseReloadTime * (1 - totalRed));
+                }
+            }
+        }
+
+        console.log("✅ 天赋已应用:");
+        console.log(`   花瓣伤害: ${player._talentPetalDmgMult}x`);
+        console.log(`   召唤物伤害: ${player._talentSummonDmgMult}x`);
+        console.log(`   召唤物生命: ${player._talentSummonHpMult}x`);
+        console.log(`   重载减少: ${player._talentReloadReduction * 100}%`);
+        console.log(`   速度加成: ${player.speed / 80}x`);
+    }
+
+    getTalentInfo() {
+        const playerLevel = this.player?.levelSystem?.level || 1;
+        const maxPoints = this.getMaxTalentPointsForLevel();
+        const totalSpent = this.getTotalSpent();
+
+        return {
+            playerLevel,
+            talentPoints: this.talentPoints,
+            totalSpent,
+            remaining: maxPoints - totalSpent,
+            canSpend: this.talentPoints > 0,
+            maxPoints
+        };
+    }
+
+    // ========== UI 绘制 ==========
+    draw(ctx) {
+        if (!this.panelOpen) return;
+
+        const W = window.WIDTH || window.innerWidth;
+        const H = window.HEIGHT || window.innerHeight;
+        const pw = Math.min(760, W - 40);
+        const ph = 560;
+        const px = (W - pw) / 2;
+        const py = (H - ph) / 2;
+
+        ctx.fillStyle = '#2c3e50';
+        ctx.beginPath();
+        ctx.roundRect(px, py, pw, ph, 18);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.font = 'bold 32px Arial';
+        ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'center';
+        ctx.fillText('Talents', px + pw / 2, py + 42);
+
+        const info = this.getTalentInfo();
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${this.talentPoints} TP (Lv.${info.playerLevel})`, px + 20, py + 42);
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#aaa';
+        ctx.fillText(`Spent: ${info.totalSpent} / ${info.maxPoints}`, px + 20, py + 65);
+
+        const closeSize = 36;
+        const closeX = px + pw - closeSize - 12;
+        const closeY = py + 12;
+        this._btnRects['close'] = [closeX, closeY, closeSize, closeSize];
+        ctx.fillStyle = this.hoveredNode === 'close' ? '#e74c3c' : '#c0392b';
+        ctx.beginPath();
+        ctx.roundRect(closeX, closeY, closeSize, closeSize, 8);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText('×', closeX + closeSize / 2 - 6, closeY + closeSize / 2 + 6);
+
+        const resetW = 80, resetH = 32;
+        const resetX = px + pw - resetW - closeSize - 20;
+        const resetY = py + 16;
+        this._btnRects['reset'] = [resetX, resetY, resetW, resetH];
+        ctx.fillStyle = this.hoveredNode === 'reset' ? '#e67e22' : '#c0392b';
+        ctx.beginPath();
+        ctx.roundRect(resetX, resetY, resetW, resetH, 7);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText('Reset', resetX + resetW / 2, resetY + resetH / 2 + 2);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(px + 20, py + 80);
+        ctx.lineTo(px + pw - 20, py + 80);
+        ctx.stroke();
+
+        this._nodeRects = {};
+        const treeKeys = Object.keys(this.trees);
+        const cols = 3;
+        const rows = 2;
+        const treeW = (pw - 40) / cols;
+        const treeH = (ph - 110) / rows;
+        const startX = px + 20;
+        const startY = py + 95;
+
+        for (let i = 0; i < treeKeys.length; i++) {
+            const key = treeKeys[i];
+            const tree = this.trees[key];
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const treeX = startX + col * treeW;
+            const treeY = startY + row * treeH;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.roundRect(treeX, treeY, treeW - 10, treeH - 15, 10);
+            ctx.fill();
+
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = tree.color;
+            ctx.textAlign = 'center';
+            ctx.fillText(tree.label, treeX + (treeW - 10) / 2, treeY + 25);
+
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#ccc';
+            ctx.fillText(`Lv.${tree.level}/${tree.maxLevel}`, treeX + (treeW - 10) / 2, treeY + 50);
+
+            const nextCost = this.getNextLevelCost(tree.level);
+            if (tree.level < tree.maxLevel) {
+                ctx.font = '12px Arial';
+                ctx.fillStyle = this.talentPoints >= nextCost ? '#2ecc71' : '#e74c3c';
+                ctx.fillText(`Cost: ${nextCost} TP`, treeX + (treeW - 10) / 2, treeY + 75);
+            } else {
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillText('MAX', treeX + (treeW - 10) / 2, treeY + 75);
+            }
+
+            const btnW = 70, btnH = 28;
+            const btnX = treeX + (treeW - 10 - btnW) / 2;
+            const btnY = treeY + treeH - 45;
+            const btnKey = `${key}_upgrade`;
+            this._btnRects[btnKey] = [btnX, btnY, btnW, btnH];
+
+            const canUpgrade = tree.level < tree.maxLevel && this.talentPoints >= nextCost;
+            ctx.fillStyle = canUpgrade ? (this.hoveredNode === btnKey ? '#27ae60' : '#2ecc71') : '#7f8c8d';
+            ctx.beginPath();
+            ctx.roundRect(btnX, btnY, btnW, btnH, 6);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('Upgrade', btnX + btnW / 2, btnY + btnH / 2 + 2);
+
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#aaa';
+            ctx.fillText(tree.desc, treeX + (treeW - 10) / 2, treeY + treeH - 18);
+        }
+
+        if (this.hoveredNode && this.hoveredNode !== 'close' && this.hoveredNode !== 'reset') {
+            const btn = this._btnRects[this.hoveredNode];
+            if (btn) {
+                const [bx, by, bw, bh] = btn;
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.beginPath();
+                ctx.roundRect(bx + bw + 8, by - 10, 140, 36, 6);
+                ctx.fill();
+                ctx.fillStyle = '#ffd700';
+                ctx.font = '11px Arial';
+                ctx.fillText('Click to upgrade', bx + bw + 16, by + 8);
+                ctx.fillStyle = '#ccc';
+                ctx.fillText('Cost increases per level', bx + bw + 16, by + 22);
+            }
+        }
+    }
+
+    handleClick(pos) {
+        if (!this.panelOpen) return null;
+
+        const [mx, my] = pos;
+
+        const close = this._btnRects['close'];
+        if (close && mx >= close[0] && mx <= close[0] + close[2] && my >= close[1] && my <= close[1] + close[3]) {
+            this.panelOpen = false;
+            return 'talent_close';
+        }
+
+        const reset = this._btnRects['reset'];
+        if (reset && mx >= reset[0] && mx <= reset[0] + reset[2] && my >= reset[1] && my <= reset[1] + reset[3]) {
+            this.resetAll();
+            return 'talent_reset';
+        }
+
+        for (const [key, rect] of Object.entries(this._btnRects)) {
+            if (key === 'close' || key === 'reset') continue;
+            if (mx >= rect[0] && mx <= rect[0] + rect[2] && my >= rect[1] && my <= rect[1] + rect[3]) {
+                const treeKey = key.replace('_upgrade', '');
+                const tree = this.trees[treeKey];
+                if (tree && tree.level < tree.maxLevel) {
+                    const ok = this.levelUp(treeKey);
+                    return ok ? 'talent_levelup' : 'talent_no_points';
+                }
+            }
+        }
+
+        return 'talent_panel_click';
+    }
+
+    handleMouseMove(pos) {
+        if (!this.panelOpen) return;
+        const [mx, my] = pos;
+
+        for (const [key, rect] of Object.entries(this._btnRects)) {
+            if (mx >= rect[0] && mx <= rect[0] + rect[2] && my >= rect[1] && my <= rect[1] + rect[3]) {
+                this.hoveredNode = key;
+                return;
+            }
+        }
+        this.hoveredNode = null;
+    }
+
+    open() { this.panelOpen = true; }
+    close() { this.panelOpen = false; }
+    toggle() { this.panelOpen = !this.panelOpen; }
+}
 // ==================== 账号系统 ====================
 class AccountSystem {
     constructor() {
@@ -4297,7 +4755,7 @@ class CollisionSystem {
             const dirY = (body1.position.y - body2.position.y) / distance;
 
             const totalMass = (body1.mass || 1) + (body2.mass || 1);
-            const pushStrength = overlap * 0.4;
+            const pushStrength = overlap * 0.9;
 
             const isPlayer1 = obj1.constructor && obj1.constructor.name === 'Player';
             const isPlayer2 = obj2.constructor && obj2.constructor.name === 'Player';
@@ -4321,7 +4779,7 @@ class CollisionSystem {
                 if (!player.isBouncing) {
                     const bounceDir = new Vector2(dirX, dirY);
                     if (typeof player.applyBounce === 'function') {
-                        player.applyBounce(bounceDir, 15);
+                        player.applyBounce(bounceDir, 25);
                     }
                 }
 
@@ -4358,7 +4816,7 @@ class CollisionSystem {
             }
             else if (isProjectile2 && (isPlayer1 || isEnemy1)) {
                 this._handleProjectileHit(obj2, obj1, -dirX, -dirY);
-                obj2.health -= obj2.maxHealth / 3;
+                obj2.health -= 20 ;
                 if (obj2.health <= 0) shouldRemoveProjectile2 = true;
             }
             // ===== 玩家与敌人的碰撞 =====
@@ -4366,7 +4824,7 @@ class CollisionSystem {
                 if (!obj1.isBouncing) {
                     const bounceDir = new Vector2(dirX, dirY);
                     if (typeof obj1.applyBounce === 'function') {
-                        obj1.applyBounce(bounceDir, 15);
+                        obj1.applyBounce(bounceDir, 25);
                     }
                 }
                 push1X = dirX * (pushStrength * (body2.mass / totalMass));
@@ -4378,7 +4836,7 @@ class CollisionSystem {
                 if (!obj2.isBouncing) {
                     const bounceDir = new Vector2(-dirX, -dirY);
                     if (typeof obj2.applyBounce === 'function') {
-                        obj2.applyBounce(bounceDir, 15);
+                        obj2.applyBounce(bounceDir, 25);
                     }
                 }
                 push1X = dirX * (pushStrength * (body2.mass / totalMass));
@@ -12107,7 +12565,7 @@ class EnemyDrawer {
         const rarityIndex = RARITY_LIST.indexOf(rarity);
 
         // 稀有度缩放因子
-        const rarityScale = 1 + rarityIndex * 0.2;
+        const rarityScale = 1 + rarityIndex * 0.8;
         const totalScale = viewScale * rarityScale * 0.4;
 
         // 稀有度描边乘数
@@ -20535,7 +20993,7 @@ class ScorpionStinger extends Projectile {
         );
         this.vx = this.velocity.x;
         this.vy = this.velocity.y;
-        this.pushForce = 800 * mult;
+        this.pushForce = 80 * mult;
         this.life = 4.0;
         this.maxLife = 4.0;
         this.size = 18 * sizeMult;
@@ -23091,6 +23549,7 @@ class Enemy {
         return !this.isDead && this.health > 0;
     }
 }
+
 class Petal {
     constructor(player, petalIndex = 0, totalPetals = 10) {
         // 属性定义（对应 Python 的 __slots__）
@@ -23491,6 +23950,37 @@ class Petal {
         this.spiderCaveSpiders = [];  // 蜘蛛洞穴生成的蜘蛛列表
         this.maxSpiderCaveSpiders = 10;
     }
+
+    _applyTalentToPet(pet) {
+        if (!pet || !this.player) return;
+
+        // 获取天赋加成（兼容旧属性）
+        const hpMult = this.player._talentSummonHpMult || this.player.bonusPetStats || 1;
+        const dmgMult = this.player._talentSummonDmgMult || 1;
+
+        // 保存原始基础值（用于调试）
+        if (pet._originalMaxHealth === undefined) {
+            pet._originalMaxHealth = pet.maxHealth;
+            pet._originalAttackDamage = pet.attackDamage;
+        }
+
+        // 应用生命加成
+        if (hpMult !== 1) {
+            pet.maxHealth = Math.floor(pet._originalMaxHealth * hpMult);
+            pet.health = pet.maxHealth;  // ✅ 重要：血量设为满血
+        }
+
+        // 应用伤害加成
+        if (dmgMult !== 1) {
+            pet.attackDamage = Math.floor(pet._originalAttackDamage * dmgMult);
+        }
+
+        // 调试输出
+        if (this.player.gameInstance?.debugMode) {
+            console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
+        }
+    }
+
     // 在 Petal 类中，完全重写 restoreMimic 方法
     restoreMimic() {
         console.log("🔄 restoreMimic START ==================");
@@ -25503,7 +25993,8 @@ class Petal {
         };
         return rarityMapping[petalRarity] || "Common";
     }
-// 在 Petal 类中添加
+
+    // 在 Petal 类中添加
     trySpawnSquidWithDNA(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
 
@@ -25533,12 +26024,8 @@ class Petal {
         squid.ownerPetal = this;
         squid.ownerPlayer = this.player;
 
-        // 应用宠物加成
-        if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-            squid.maxHealth = Math.floor(squid.maxHealth * this.player.bonusPetStats);
-            squid.health = squid.maxHealth;
-            squid.attackDamage = Math.floor(squid.attackDamage * this.player.bonusPetStats);
-        }
+        // 应用天赋加成
+        this._applyTalentToPet(squid);
 
         gameEnemies.push(squid);
         this.squidList.push(squid);
@@ -25620,6 +26107,9 @@ class Petal {
             goldenAnt.ownerPetal = this;
             goldenAnt.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(goldenAnt);
+
             gameEnemies.push(goldenAnt);
             this.goldenAntList.push(goldenAnt);
         }
@@ -25631,8 +26121,6 @@ class Petal {
         this.spawnCooldown = rarityToCooldown[currentItem.rarity] || 10000;
         return true;
     }
-// 在 Petal 类中
-
 
     // 尝试生成藤壶
     trySpawnBarnaclesWithDNA(gameEnemies, playerWorldPos, hasDNA) {
@@ -25673,6 +26161,9 @@ class Petal {
             barnacle.ownerPetal = this;
             barnacle.ownerPlayer = this.player;
             barnacle.speed = 0;  // 藤壶是静止的
+
+            // 应用天赋加成
+            this._applyTalentToPet(barnacle);
 
             gameEnemies.push(barnacle);
             this.barnacleList.push(barnacle);
@@ -25769,12 +26260,8 @@ class Petal {
         beetle.ownerPetal = this;
         beetle.ownerPlayer = this.player;
 
-        // 应用宠物加成（如果有技能树）
-        if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-            beetle.maxHealth = Math.floor(beetle.maxHealth * this.player.bonusPetStats);
-            beetle.health = beetle.maxHealth;
-            beetle.attackDamage = Math.floor(beetle.attackDamage * this.player.bonusPetStats);
-        }
+        // 应用天赋加成
+        this._applyTalentToPet(beetle);
 
         gameEnemies.push(beetle);
         this.beetleList.push(beetle);
@@ -25859,12 +26346,8 @@ class Petal {
             scorpion.ownerPetal = this;
             scorpion.ownerPlayer = this.player;
 
-            // 应用宠物加成（如果有技能树）
-            if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-                scorpion.maxHealth = Math.floor(scorpion.maxHealth * this.player.bonusPetStats);
-                scorpion.health = scorpion.maxHealth;
-                scorpion.attackDamage = Math.floor(scorpion.attackDamage * this.player.bonusPetStats);
-            }
+            // 应用天赋加成
+            this._applyTalentToPet(scorpion);
 
             gameEnemies.push(scorpion);
             this.scorpionList.push(scorpion);
@@ -25940,6 +26423,9 @@ class Petal {
         queenBee.ownerPlayer = this.player;
         queenBee.healRadius = 600;     // 治疗范围 600
         queenBee.healAmount = 30;      // 基础治疗量 10
+
+        // 应用天赋加成
+        this._applyTalentToPet(queenBee);
 
         gameEnemies.push(queenBee);
         this.queenBeeList.push(queenBee);
@@ -26038,12 +26524,8 @@ class Petal {
             jellyfish.ownerPetal = this;
             jellyfish.ownerPlayer = this.player;
 
-            // 应用宠物加成（如果技能树有）
-            if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-                jellyfish.maxHealth = Math.floor(jellyfish.maxHealth * this.player.bonusPetStats);
-                jellyfish.health = jellyfish.maxHealth;
-                jellyfish.attackDamage = Math.floor(jellyfish.attackDamage * this.player.bonusPetStats);
-            }
+            // 应用天赋加成
+            this._applyTalentToPet(jellyfish);
 
             gameEnemies.push(jellyfish);
             this.shipwreckJellyfishList.push(jellyfish);
@@ -26597,6 +27079,9 @@ class Petal {
         slagMight.ownerPetal = this;
         slagMight.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(slagMight);
+
         gameEnemies.push(slagMight);
         this.slagMightList.push(slagMight);
 
@@ -26664,12 +27149,8 @@ class Petal {
         pirateDigger.ownerPlayer = this.player;
         pirateDigger.isAngry = false;  // 初始不愤怒（微笑）
 
-        // 应用宠物加成（如果有技能树）
-        if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-            pirateDigger.maxHealth = Math.floor(pirateDigger.maxHealth * this.player.bonusPetStats);
-            pirateDigger.health = pirateDigger.maxHealth;
-            pirateDigger.attackDamage = Math.floor(pirateDigger.attackDamage * this.player.bonusPetStats);
-        }
+        // 应用天赋加成
+        this._applyTalentToPet(pirateDigger);
 
         gameEnemies.push(pirateDigger);
         this.pirateDiggerList.push(pirateDigger);
@@ -26750,6 +27231,9 @@ class Petal {
         iceCube.ownerPetal = this;
         iceCube.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(iceCube);
+
         gameEnemies.push(iceCube);
         this.iceCubeList.push(iceCube);
 
@@ -26810,6 +27294,9 @@ class Petal {
         iceDragon.ownerPetal = this;
         iceDragon.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(iceDragon);
+
         gameEnemies.push(iceDragon);
         this.iceDragonList.push(iceDragon);
 
@@ -26869,6 +27356,9 @@ class Petal {
         frostDigger.isFriendly = true;
         frostDigger.ownerPetal = this;
         frostDigger.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(frostDigger);
 
         gameEnemies.push(frostDigger);
         this.frostDiggerList.push(frostDigger);
@@ -26946,6 +27436,9 @@ class Petal {
             termite.ownerPetal = this;
             termite.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(termite);
+
             gameEnemies.push(termite);
             this.workerTermiteList.push(termite);
         }
@@ -27010,6 +27503,9 @@ class Petal {
             termite.ownerPetal = this;
             termite.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(termite);
+
             gameEnemies.push(termite);
             this.soldierTermiteList.push(termite);
         }
@@ -27071,6 +27567,9 @@ class Petal {
         stickBug.ownerPetal = this;
         stickBug.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(stickBug);
+
         gameEnemies.push(stickBug);
         this.stickBugList.push(stickBug);
 
@@ -27130,6 +27629,9 @@ class Petal {
         mantis.isFriendly = true;
         mantis.ownerPetal = this;
         mantis.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(mantis);
 
         gameEnemies.push(mantis);
         this.mantisList.push(mantis);
@@ -27193,6 +27695,9 @@ class Petal {
             firefly.isFriendly = true;
             firefly.ownerPetal = this;
             firefly.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(firefly);
 
             gameEnemies.push(firefly);
             this.fireflyList.push(firefly);
@@ -27266,12 +27771,8 @@ class Petal {
             termite.ownerPetal = this;
             termite.ownerPlayer = this.player;
 
-            // 应用宠物加成（如果有技能树）
-            if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-                termite.maxHealth = Math.floor(termite.maxHealth * this.player.bonusPetStats);
-                termite.health = termite.maxHealth;
-                termite.attackDamage = Math.floor(termite.attackDamage * this.player.bonusPetStats);
-            }
+            // 应用天赋加成
+            this._applyTalentToPet(termite);
 
             gameEnemies.push(termite);
             this.termiteSoldierList.push(termite);
@@ -27347,6 +27848,9 @@ class Petal {
         overmind.ownerPetal = this;
         overmind.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(overmind);
+
         gameEnemies.push(overmind);
         this.termiteOvermindList.push(overmind);
 
@@ -27416,12 +27920,8 @@ class Petal {
             spider.ownerPetal = this;
             spider.ownerPlayer = this.player;
 
-            // 应用宠物加成（如果有技能树）
-            if (this.player.bonusPetStats && this.player.bonusPetStats !== 1) {
-                spider.maxHealth = Math.floor(spider.maxHealth * this.player.bonusPetStats);
-                spider.health = spider.maxHealth;
-                spider.attackDamage = Math.floor(spider.attackDamage * this.player.bonusPetStats);
-            }
+            // 应用天赋加成
+            this._applyTalentToPet(spider);
 
             gameEnemies.push(spider);
             this.spiderCaveSpiders.push(spider);
@@ -27498,6 +27998,9 @@ class Petal {
         wasp.ownerPetal = this;
         wasp.ownerPlayer = this.player;
 
+        // 应用天赋加成
+        this._applyTalentToPet(wasp);
+
         gameEnemies.push(wasp);
         this.waspList.push(wasp);
 
@@ -27563,6 +28066,9 @@ class Petal {
             snowman.ownerPetal = this;
             snowman.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(snowman);
+
             gameEnemies.push(snowman);
             this.iglooSnowmenList.push(snowman);
         }
@@ -27623,6 +28129,9 @@ class Petal {
         tick.isFriendly = true;
         tick.ownerPetal = this;
         tick.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(tick);
 
         gameEnemies.push(tick);
         this.tickList.push(tick);
@@ -27686,6 +28195,9 @@ class Petal {
             spider.isFriendly = true;
             spider.ownerPetal = this;
             spider.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(spider);
 
             gameEnemies.push(spider);
             this.arcticSpiderList.push(spider);
@@ -27751,6 +28263,9 @@ class Petal {
             spider.ownerPetal = this;
             spider.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(spider);
+
             gameEnemies.push(spider);
             this.arcticCaveSpiderList.push(spider);
         }
@@ -27811,6 +28326,9 @@ class Petal {
         snowman.isFriendly = true;
         snowman.ownerPetal = this;
         snowman.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(snowman);
 
         gameEnemies.push(snowman);
         this.snowmanList.push(snowman);
@@ -27874,6 +28392,9 @@ class Petal {
             snowstorm.isFriendly = true;
             snowstorm.ownerPetal = this;
             snowstorm.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(snowstorm);
 
             gameEnemies.push(snowstorm);
             this.snowstormList.push(snowstorm);
@@ -27956,6 +28477,10 @@ class Petal {
             queenAnt.isFriendly = true;
             queenAnt.ownerPetal = this;
             queenAnt.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(queenAnt);
+
             gameEnemies.push(queenAnt);
             this.queenAntList.push(queenAnt);
         }
@@ -28029,6 +28554,9 @@ class Petal {
         beekeeper.isFriendly = true;
         beekeeper.ownerPetal = this;
         beekeeper.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(beekeeper);
 
         gameEnemies.push(beekeeper);
         this.beekeeperList.push(beekeeper);
@@ -28125,6 +28653,9 @@ class Petal {
             bee.isFriendly = true;
             bee.ownerPetal = this;
             bee.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(bee);
 
             // 如果是友方蜜蜂，可以设置速度慢一点（可选）
             if (bee.isFriendly) {
@@ -28317,6 +28848,9 @@ class Petal {
             leech.ownerPetal = this;
             leech.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(leech);
+
             gameEnemies.push(leech);
             this.leechList.push(leech);
         }
@@ -28399,6 +28933,9 @@ class Petal {
             parasite.isFriendly = true;
             parasite.ownerPetal = this;
             parasite.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(parasite);
 
             gameEnemies.push(parasite);
             this.parasiteList.push(parasite);
@@ -28498,6 +29035,9 @@ class Petal {
             square.ownerPetal = this;
             square.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(square);
+
             // Square 特殊属性
             square.canUseDNA = true;             // 可以使用 DNA
 
@@ -28592,6 +29132,9 @@ class Petal {
             bee.ownerPetal = this;
             bee.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(bee);
+
             gameEnemies.push(bee);
             this.beeList.push(bee);
         }
@@ -28675,6 +29218,9 @@ class Petal {
             ladybug.isFriendly = true;
             ladybug.ownerPetal = this;
             ladybug.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ladybug);
 
             // 随机生成斑点（由Enemy类的构造函数处理）
 
@@ -28760,6 +29306,10 @@ class Petal {
             sandstorm.isFriendly = true;
             sandstorm.ownerPetal = this;
             sandstorm.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(sandstorm);
+
             gameEnemies.push(sandstorm);
             this.sandstormList.push(sandstorm);
             spawnedCount++;
@@ -28826,6 +29376,9 @@ class Petal {
             cancer.isFriendly = true;           // 设置为友方
             cancer.ownerPetal = this;
             cancer.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(cancer);
 
             // Cancer 特殊属性
             cancer.isCancerInfected = true;      // 癌症细胞自带感染能力
@@ -28978,6 +29531,10 @@ class Petal {
         rock.maxHealth *= 10;
         rock.health = rock.maxHealth;
         rock.attackDamage /= 3;
+
+        // 应用天赋加成
+        this._applyTalentToPet(rock);
+
         gameEnemies.push(rock);
         this.rockList.push(rock);
         this.spawnCooldown = 15000;
@@ -29034,6 +29591,9 @@ class Petal {
             goldenAnt.isFriendly = true;
             goldenAnt.ownerPetal = this;
             goldenAnt.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(goldenAnt);
 
             gameEnemies.push(goldenAnt);
             this.goldenAntList.push(goldenAnt);
@@ -29098,6 +29658,9 @@ class Petal {
             digger.ownerPetal = this;
             digger.ownerPlayer = this.player;
             digger.gameInstance = this.player.gameInstance;
+
+            // 应用天赋加成
+            this._applyTalentToPet(digger);
 
             gameEnemies.push(digger);
             this.diggerList.push(digger);
@@ -29203,6 +29766,9 @@ class Petal {
                 whiteBloodCell.ownerPetal = this;
                 whiteBloodCell.ownerPlayer = this.player;
 
+                // 应用天赋加成
+                this._applyTalentToPet(whiteBloodCell);
+
                 if (gameEnemies) {
                     gameEnemies.push(whiteBloodCell);
                     this.whiteBloodCellList.push(whiteBloodCell);
@@ -29248,6 +29814,10 @@ class Petal {
             spider.isFriendly = true;
             spider.ownerPetal = this;
             spider.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(spider);
+
             gameEnemies.push(spider);
             this.spiderList.push(spider);
         }
@@ -29284,6 +29854,10 @@ class Petal {
             redBloodCell.isFriendly = true;
             redBloodCell.ownerPetal = this;
             redBloodCell.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(redBloodCell);
+
             gameEnemies.push(redBloodCell);
             this.redBloodCellList.push(redBloodCell);
         }
@@ -29332,6 +29906,9 @@ class Petal {
             manHole.isFriendly = true;
             manHole.ownerPetal = this;
             manHole.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(manHole);
 
             gameEnemies.push(manHole);
             this.manHoleList.push(manHole);
@@ -29405,6 +29982,9 @@ class Petal {
             fly.ownerPetal = this;
             fly.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(fly);
+
             gameEnemies.push(fly);
         }
 
@@ -29449,6 +30029,9 @@ class Petal {
             fly.isFriendly = true;
             fly.ownerPetal = this;
             fly.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(fly);
 
             gameEnemies.push(fly);
             this.flyList.push(fly);
@@ -29552,6 +30135,9 @@ class Petal {
             rat.ownerPetal = this;
             rat.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(rat);
+
             gameEnemies.push(rat);
             this.ratList.push(rat);
         }
@@ -29635,6 +30221,9 @@ class Petal {
             roach.isFriendly = true;
             roach.ownerPetal = this;
             roach.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(roach);
 
             gameEnemies.push(roach);
             this.roachList.push(roach);
@@ -29720,6 +30309,9 @@ class Petal {
             pooStorm.ownerPetal = this;
             pooStorm.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(pooStorm);
+
             gameEnemies.push(pooStorm);
             this.pooStormList.push(pooStorm);
         }
@@ -29802,6 +30394,10 @@ class Petal {
             scallop.isFriendly = true;
             scallop.ownerPetal = this;
             scallop.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(scallop);
+
             gameEnemies.push(scallop);
             this.scallopList.push(scallop);
         }
@@ -29861,6 +30457,9 @@ class Petal {
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.soldierAntList.push(ant);
         }
@@ -29903,6 +30502,9 @@ class Petal {
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
 
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.workerAntList.push(ant);
         }
@@ -29942,6 +30544,9 @@ class Petal {
         centipede.isFriendly = true;
         centipede.ownerPetal = this;
         centipede.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(centipede);
 
         gameEnemies.push(centipede);
         this.centipedeList.push(centipede);
@@ -30039,6 +30644,10 @@ class Petal {
             starfish.isFriendly = true;
             starfish.ownerPetal = this;
             starfish.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(starfish);
+
             gameEnemies.push(starfish);
             this.starfishList.push(starfish);
         }
@@ -30111,6 +30720,10 @@ class Petal {
             bubble.isFriendly = true;
             bubble.ownerPetal = this;
             bubble.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(bubble);
+
             gameEnemies.push(bubble);
             this.bubbleList.push(bubble);
         }
@@ -30185,6 +30798,9 @@ class Petal {
         phage.isFriendly = true;
         phage.ownerPetal = this;
         phage.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(phage);
 
         gameEnemies.push(phage);
         this.bacteriophageList.push(phage);
@@ -30263,6 +30879,10 @@ class Petal {
             crab.isFriendly = true;
             crab.ownerPetal = this;
             crab.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(crab);
+
             gameEnemies.push(crab);
             this.crabList.push(crab);
         }
@@ -30335,6 +30955,10 @@ class Petal {
             jellyfish.isFriendly = true;
             jellyfish.ownerPetal = this;
             jellyfish.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(jellyfish);
+
             gameEnemies.push(jellyfish);
             this.jellyfishList.push(jellyfish);
         }
@@ -30411,6 +31035,9 @@ class Petal {
             crab.isFriendly = true;
             crab.ownerPetal = this;
             crab.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(crab);
 
             gameEnemies.push(crab);
             this.crabHoleCrabs.push(crab);
@@ -30489,6 +31116,10 @@ class Petal {
             whiteBloodCell.isFriendly = true;
             whiteBloodCell.ownerPetal = this;
             whiteBloodCell.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(whiteBloodCell);
+
             gameEnemies.push(whiteBloodCell);
             this.stemCellList.push(whiteBloodCell);
         }
@@ -30571,6 +31202,10 @@ class Petal {
             ant.isFriendly = true;
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.workerFireAntList.push(ant);
         }
@@ -30614,6 +31249,9 @@ class Petal {
         virus.isFriendly = true;
         virus.ownerPetal = this;
         virus.ownerPlayer = this.player;
+
+        // 应用天赋加成
+        this._applyTalentToPet(virus);
 
         gameEnemies.push(virus);
         this.virusList.push(virus);
@@ -30689,6 +31327,10 @@ class Petal {
             ant.isFriendly = true;
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.soldierFireAntList.push(ant);
         }
@@ -30727,6 +31369,10 @@ class Petal {
             ant.isFriendly = true;
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.babyFireAntList.push(ant);
         }
@@ -30765,6 +31411,10 @@ class Petal {
             ant.isFriendly = true;
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.fireAntOvermindList.push(ant);
         }
@@ -30808,6 +31458,9 @@ class Petal {
             bacteria.isFriendly = true;          // 设置为友方
             bacteria.ownerPetal = this;
             bacteria.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(bacteria);
 
             gameEnemies.push(bacteria);
             this.bacteriaList.push(bacteria);
@@ -30884,6 +31537,10 @@ class Petal {
             ant.isFriendly = true;
             ant.ownerPetal = this;
             ant.ownerPlayer = this.player;
+
+            // 应用天赋加成
+            this._applyTalentToPet(ant);
+
             gameEnemies.push(ant);
             this.fireAntHoleList.push(ant);
         }
@@ -31307,7 +31964,8 @@ class Player {
             this._health = this.maxHealth;
             this.petalCount = 10;
             this.isAngry = false;
-            this.speed = 80;
+            this.baseSpeed = 80;
+            this.speed = this.baseSpeed;
             this.spreadMode = false;
             this.mousePosition = new Vector2(WIDTH / 2, HEIGHT / 2);
             this.quickSlot = new QuickSlot(this);
@@ -31340,8 +31998,6 @@ class Player {
                 this.petals.push(new Petal(this, i, this.petalCount));  // 这里传入 this.petalCount
             }
         }
-
-
     getRandomSummonLevel(itemRarity = "Common") {
         // 根据物品稀有度返回不同的等级范围
         if (itemRarity === "Omega") {
@@ -31378,11 +32034,9 @@ class Player {
         }
     }
 
-    applyBounce(bounceDirection, bounceSpeed = 15) {
-        /** 应用反弹效果 */
-        if (this.isDead || this.isBouncing) {
-            return;
-        }
+    // 修改 applyBounce
+    applyBounce(bounceDirection, bounceSpeed = 25) {
+        if (this.isDead || this.isBouncing) return;
 
         this.isBouncing = true;
         this.bounceCooldown = 200;
@@ -31715,7 +32369,7 @@ class Player {
             this.bounceCooldown -= dt * 1000;
             if (this.bounceCooldown <= 0) {
                 this.isBouncing = false;
-                this.speed = 150; // 恢复移动速度
+                this.speed = this.baseSpeed; // 恢复移动速度
             }
         }
 
@@ -32151,7 +32805,7 @@ class Player {
         if (leveledUp) {
             const oldMaxHp = this.baseMaxHealth;
             this.baseMaxHealth = this.levelSystem.getHpForLevel(this.levelSystem.level);
-
+            this.gameInstance.talentSystem.addPoints(1);
             let totalHealthBonus = 0;
             for (const petal of this.petals) {
                 if (!petal.isBroken && !petal.isReloading) {
@@ -32852,17 +33506,406 @@ class DroppedCard {
         }
     }
 }
+// ==================== 完整狩猎任务系统（含粒子效果）====================
+class HuntingQuestSystem {
+    constructor(gameInstance) {
+        this.game = gameInstance;
+        this.quests = [];
+        this.completedToday = new Map();
+        this.lastResetDate = null;
+        this.pendingCompletion = null;
+
+        // 粒子效果
+        this.particles = [];
+
+        this.loadQuests();
+        this.checkDailyReset();
+    }
+
+    // ==================== 粒子效果方法 ====================
+
+    createParticleEffect(x, y, rarity) {
+        const rarityColors = {
+            "Mythic": [0, 204, 204],
+            "Ultra": [204, 84, 144],
+            "Super": [116, 191, 116],
+            "Omega": [179, 31, 163]
+        };
+        const color = rarityColors[rarity] || [255, 215, 0];
+
+        const particleCount = 60;
+        for (let i = 0; i < particleCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2 + Math.random() * 6;
+            const lifetime = 0.6 + Math.random() * 0.8;
+
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: lifetime,
+                maxLife: lifetime,
+                size: 3 + Math.random() * 6,
+                color: color,
+                alpha: 1.0
+            });
+        }
+    }
+
+    updateParticles(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.15; // 重力
+            p.life -= dt;
+            p.alpha = p.life / p.maxLife;
+
+            if (p.life <= 0) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    drawParticles(ctx) {
+        for (const p of this.particles) {
+            const alpha = Math.min(1, p.alpha * 1.2);
+            ctx.fillStyle = `rgba(${p.color[0]}, ${p.color[1]}, ${p.color[2]}, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * (p.life / p.maxLife), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    hasActiveParticles() {
+        return this.particles.length > 0;
+    }
+
+    // ==================== 任务核心方法 ====================
+
+    getAvailableMobsByRarity() {
+        const allMobs = [
+            "Spider", "Crab", "Beetle", "Soldier Ant", "Worker Ant", "Bush",
+            "Ladybug", "Centipede", "Cactus", "Anthill", "Sandstorm", "Rock",
+            "StemCell", "Bacteria", "RedBloodCell", "WhiteBloodCell", "Bee",
+            "QueenAnt", "WorkerFireAnt", "SoldierFireAnt", "BabyFireAnt",
+            "FireAntOvermind", "FireAntHole", "Cancer", "Parasite", "Leech",
+            "Sponge", "Scallop", "Bubble", "Hive", "Starfish", "Jellyfish",
+            "CrabHole", "ManHole", "Fly", "Rat", "Roach", "QueenBee",
+            "PooStorm", "TrashDigger", "Digger", "MudDigger", "Virus",
+            "Biologist", "Beekeeper", "Square", "Barnacle", "Ice Dragon",
+            "Ice Cube", "Snowman", "SnowStorm", "Tick", "Igloo", "SlagMight",
+            "ArcticSpider", "ArcticSpiderCave", "Shipwreck", "PirateDigger",
+            "StickBug", "Soldier Termite", "Worker Termite", "TermiteHole",
+            "TermiteOvermind", "Wasp", "Firefly", "Mantis", "Scorpion"
+        ];
+
+        const mobsByRarity = {
+            "Ultra": [],
+            "Super": [],
+            "Omega": [],
+            "Mythic": []
+        };
+
+        for (const mob of allMobs) {
+            const completedUltra = this.completedToday.get("Ultra") || new Set();
+            const completedSuper = this.completedToday.get("Super") || new Set();
+            const completedOmega = this.completedToday.get("Omega") || new Set();
+            const completedMythic = this.completedToday.get("Mythic") || new Set();
+
+            if (!completedUltra.has(mob)) mobsByRarity["Ultra"].push(mob);
+            if (!completedSuper.has(mob)) mobsByRarity["Super"].push(mob);
+            if (!completedOmega.has(mob)) mobsByRarity["Omega"].push(mob);
+            if (!completedMythic.has(mob)) mobsByRarity["Mythic"].push(mob);
+        }
+
+        return mobsByRarity;
+    }
+
+    getRandomMob(rarity, excludeMob = null) {
+        const mobsByRarity = this.getAvailableMobsByRarity();
+        let available = mobsByRarity[rarity];
+
+        if (excludeMob) {
+            available = available.filter(m => m !== excludeMob);
+        }
+
+        if (available.length === 0) return null;
+
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    initDailyQuests() {
+        const mobsByRarity = this.getAvailableMobsByRarity();
+
+        this.quests = [];
+
+        const ultraMob = this.getRandomMob("Ultra");
+        if (ultraMob) {
+            this.quests.push({
+                id: "ultra",
+                rarity: "Ultra",
+                targetMob: ultraMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: 30,
+                completed: false
+            });
+        }
+
+        const superMob = this.getRandomMob("Super");
+        if (superMob) {
+            this.quests.push({
+                id: "super",
+                rarity: "Super",
+                targetMob: superMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: 100,
+                completed: false
+            });
+        }
+
+        const omegaMob = this.getRandomMob("Omega");
+        if (omegaMob) {
+            this.quests.push({
+                id: "omega",
+                rarity: "Omega",
+                targetMob: omegaMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: 200,
+                completed: false
+            });
+        }
+
+        const mythicMob = this.getRandomMob("Mythic");
+        if (mythicMob) {
+            this.quests.push({
+                id: "mythic",
+                rarity: "Mythic",
+                targetMob: mythicMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: 10,
+                completed: false
+            });
+        }
+
+        this.saveQuests();
+    }
+
+    checkDailyReset() {
+        const today = new Date().toDateString();
+
+        if (this.lastResetDate !== today) {
+            this.completedToday.clear();
+            this.lastResetDate = today;
+            this.initDailyQuests();
+            this.saveQuests();
+            console.log(`📅 Daily quests reset!`);
+        }
+    }
+
+    updateProgress(killedMob, killedRarity) {
+        if (!killedMob || !killedRarity) return false;
+
+        for (const quest of this.quests) {
+            if (quest.completed) continue;
+
+            if (quest.rarity === killedRarity && quest.targetMob === killedMob) {
+                quest.currentCount++;
+
+                console.log(`🎯 Quest progress: ${killedRarity} ${killedMob} (${quest.currentCount}/${quest.targetCount})`);
+
+                if (quest.currentCount >= quest.targetCount && !quest.completed) {
+                    quest.completed = true;
+                    this.pendingCompletion = quest;
+                }
+
+                this.saveQuests();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    claimQuest(questId, x, y) {
+        const questIndex = this.quests.findIndex(q => q.id === questId);
+        if (questIndex === -1) return false;
+
+        const quest = this.quests[questIndex];
+        if (!quest.completed || quest._claimed) return false;
+
+        // 原子标记，防止重复领取
+        quest._claimed = true;
+
+        // 发放奖励
+        if (this.game.shopSystem) {
+            this.game.shopSystem.addStars(quest.reward);
+        }
+
+        // 记录今日已完成
+        if (!this.completedToday.has(quest.rarity)) {
+            this.completedToday.set(quest.rarity, new Set());
+        }
+        this.completedToday.get(quest.rarity).add(quest.targetMob);
+
+        // 粒子效果
+        if (x !== undefined && y !== undefined) {
+            this.createParticleEffect(x, y, quest.rarity);
+        }
+
+        // 提示消息
+        const msg = `🎉 Quest Complete! +${quest.reward} Stars`;
+        // 改后
+        try {
+            const cs = this.game.player?.inventory?.craftingSystem;
+            if (cs) {
+                if (typeof cs.showMessage === 'function') cs.showMessage(msg);
+                else if (typeof cs.addMessage === 'function') cs.addMessage(msg);
+                else if (typeof cs.notify === 'function') cs.notify(msg);
+                else if (typeof cs.showNotification === 'function') cs.showNotification(msg);
+                else console.log(msg);
+            }
+        } catch(e) {
+            console.log(msg);
+        }
+
+        const oldRarity = quest.rarity;
+        const oldMob   = quest.targetMob;
+        const oldReward = quest.reward;
+        const oldId    = quest.id;
+
+        // ★ 立即用新任务替换数组中的对象
+        const newMob = this.getRandomMob(quest.rarity, quest.targetMob);
+        if (newMob) {
+            this.quests[questIndex] = {
+                id: oldId,
+                rarity: oldRarity,
+                targetMob: newMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: oldReward,
+                completed: false
+                // 注意：无 _claimed 属性
+            };
+        } else {
+            this.quests.splice(questIndex, 1);
+        }
+
+        // 清除待完成标记
+        this.pendingCompletion = null;
+
+        this.saveQuests();
+        return true;
+    }
+
+
+    // ──────────────────────────────────────────────────────────────
+    // 【MainMenu】新增辅助方法 _getQuestPanelRect()
+    // ──────────────────────────────────────────────────────────────
+    _getQuestPanelRect() {
+        const W  = this.WIDTH  || window.innerWidth;
+        const H  = this.HEIGHT || window.innerHeight;
+        const pw = Math.min(700, W - 40);
+        const ph = 500;
+        const px = (W - pw) / 2;
+        const py = (H - ph) / 2;
+        return [px, py, pw, ph];
+    }
+
+    replaceQuest(completedQuest) {
+    console.log(`🔄 Replacing quest: ${completedQuest.rarity} ${completedQuest.targetMob}`);
+
+    const newMob = this.getRandomMob(completedQuest.rarity, completedQuest.targetMob);
+    console.log(`   New mob: ${newMob || 'none'}`);
+
+    if (newMob) {
+        const index = this.quests.findIndex(q => q.id === completedQuest.id);
+        if (index !== -1) {
+            // 创建全新任务对象，不复制任何旧属性
+            this.quests[index] = {
+                id: completedQuest.id,
+                rarity: completedQuest.rarity,
+                targetMob: newMob,
+                targetCount: 1,
+                currentCount: 0,
+                reward: completedQuest.reward,
+                completed: false
+                // 注意：不包含 _claimed 属性
+            };
+            console.log(`✅ Quest replaced: ${completedQuest.rarity} ${completedQuest.targetMob} → ${newMob}`);
+        }
+    } else {
+        const index = this.quests.findIndex(q => q.id === completedQuest.id);
+        if (index !== -1) {
+            this.quests.splice(index, 1);
+            console.log(`⚠️ No available mobs for ${completedQuest.rarity}, quest removed`);
+        }
+    }
+
+    // 保存更改
+    this.saveQuests();
+}
+
+    getCurrentQuests() {
+        return this.quests;
+    }
+
+    getPendingQuest() {
+        return this.pendingCompletion;
+    }
+
+    saveQuests() {
+        try {
+            const data = {
+                quests: this.quests,
+                completedToday: Array.from(this.completedToday.entries()).map(([k, v]) => [k, Array.from(v)]),
+                lastResetDate: this.lastResetDate
+            };
+            localStorage.setItem('hunting_quests', JSON.stringify(data));
+        } catch(e) {
+            console.error('Failed to save quests:', e);
+        }
+    }
+
+    loadQuests() {
+        try {
+            const saved = localStorage.getItem('hunting_quests');
+            if (saved) {
+                const data = JSON.parse(saved);
+                this.quests = data.quests || [];
+                this.completedToday = new Map();
+                if (data.completedToday) {
+                    for (const [rarity, mobs] of data.completedToday) {
+                        this.completedToday.set(rarity, new Set(mobs));
+                    }
+                }
+                this.lastResetDate = data.lastResetDate || null;
+                this.checkDailyReset();
+            } else {
+                this.initDailyQuests();
+            }
+        } catch(e) {
+            console.error('Failed to load quests:', e);
+            this.initDailyQuests();
+        }
+    }
+}
 class MainMenu {
     constructor(player, autoSaveSystem, bonusSystem) {
         this.player = player;
         this.autoSaveSystem = autoSaveSystem;
         this.bonusSystem = bonusSystem;
-
+        this._questCardRects = []; // ← 加这一行
         this.MENU_BG = [26, 26, 46];
         this.LIGHT_GRAY = [200, 200, 200];
         this.GRAY = [150, 150, 150];
         this.BUTTON_COLOR = [70, 70, 100];
         this.BUTTON_HOVER_COLOR = [100, 100, 150];
+        this.talentButton = [20, 155, 100, 35];  // 位置在 HUNT 按钮下方
 
         this.BIOME_COLORS = {
             "Plain": [102, 187, 106], "Bio": [38, 166, 154],
@@ -32898,6 +33941,9 @@ class MainMenu {
         this.LOADOUT_BUTTON_COLOR = [155, 89, 182];
         this.LOADOUT_BUTTON_HOVER_COLOR = [142, 68, 173];
 
+        this.HUNTING_QUEST_BUTTON_COLOR = [46, 204, 113];
+        this.HUNTING_QUEST_BUTTON_HOVER_COLOR = [39, 174, 96];
+
         this.RARITY_COLOR_MAP = {
             "Common": "#00cc00", "Unusual": "#cccc00", "Rare": "#0066cc",
             "Epic": "#9932cc", "Legendary": "#cc0000", "Mythic": "#00cccc",
@@ -32914,6 +33960,7 @@ class MainMenu {
 
         this.accountButton = [20, 20, 100, 35];
         this.shopButton = [20, 65, 100, 35];
+        this.huntingQuestButton = [20, 110, 100, 35];
 
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
         const cols = 4;
@@ -32962,9 +34009,20 @@ class MainMenu {
         this._pendingLoadout = null;
         this.loadLoadouts();
         this._recalcLoadoutButtonRect();
+
+        this.huntingQuestPanelOpen = false;
+        this.huntingQuestPanelRect = null; // 动态计算，见 _getQuestPanelRect()
     }
 
-    // ==================== Extra Bonus ====================
+    _getQuestPanelRect() {
+        const W = this.WIDTH;
+        const H = this.HEIGHT;
+        const pw = Math.min(680, W - 40);
+        const ph = 480;
+        const px = (W - pw) / 2;
+        const py = (H - ph) / 2;
+        return [px, py, pw, ph];
+    }
 
     loadExtraBonusStatus() {
         try {
@@ -33005,7 +34063,6 @@ class MainMenu {
 
     canBuy() { return !this.extraBonusPermanent; }
 
-    // 刷新倍率（不刷新时间）
     refreshBonus() {
         if (this.extraBonusPermanent) {
             if (this.bonusSystem?.activateExtraBonus) {
@@ -33030,13 +34087,11 @@ class MainMenu {
             const now = Date.now();
 
             if (this.extraBonusActive && now < this.extraBonusExpireTime) {
-                // 已有有效时间：不累加，保持原过期时间，只激活倍率
                 this.extraBonusActive = true;
                 if (this.bonusSystem?.activateExtraBonus) {
                     this.bonusSystem.activateExtraBonus();
                 }
             } else {
-                // 没有有效时间或已过期：购买5天
                 this.extraBonusActive = true;
                 this.extraBonusExpireTime = now + 5 * 24 * 60 * 60 * 1000;
                 this.extraBonusPermanent = false;
@@ -33097,7 +34152,7 @@ class MainMenu {
 
     saveLoadouts() {
         try { localStorage.setItem('player_loadouts', JSON.stringify(this.loadouts)); }
-        catch (e) { console.error('Loadout 保存失败:', e); }
+        catch (e) { console.error('Loadout save failed:', e); }
     }
 
     _snapshotCurrentSlots() {
@@ -33358,8 +34413,299 @@ class MainMenu {
         }
         return null;
     }
+    // ──────────────────────────────────────────────────────────────
+    // 【MainMenu】完整替换 drawHuntingQuestPanel 方法
+    // ──────────────────────────────────────────────────────────────
+    drawHuntingQuestPanel(ctx) {
+        const questSystem = this.player?.gameInstance?.huntingQuestSystem;
+        if (!questSystem) return;
 
-    // ==================== 通用工具 ====================
+        questSystem.updateParticles(0.016);
+
+        const [px, py, pw, ph] = this._getQuestPanelRect();
+
+        // ── 面板背景（橙色渐变）──
+        const bgGrad = ctx.createLinearGradient(px, py, px, py + ph);
+        bgGrad.addColorStop(0, '#f5974e');
+        bgGrad.addColorStop(1, '#d96820');
+        ctx.fillStyle = bgGrad;
+        ctx.beginPath();
+        ctx.roundRect(px, py, pw, ph, 20);
+        ctx.fill();
+
+        // 外描边
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 顶部高光
+        const shine = ctx.createLinearGradient(px, py, px, py + 55);
+        shine.addColorStop(0, 'rgba(255,255,255,0.22)');
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.beginPath();
+        ctx.roundRect(px + 3, py + 3, pw - 6, 55, [17, 17, 0, 0]);
+        ctx.fill();
+
+        // ── 标题 ──
+        ctx.font = 'bold 38px "Comic Sans MS", "Chalkboard SE", cursive';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 7;
+        ctx.shadowOffsetY = 3;
+        ctx.fillText('Hunting Quests', px + pw / 2, py + 40);
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // ── 关闭按钮（右上角红色方块）──
+        const closeSize = 46;
+        const closeX = px + pw - closeSize - 8;
+        const closeY = py + 8;
+        const closeHovered = this.hoveredButton === 'hq_close';
+        ctx.fillStyle = closeHovered ? '#ff3333' : '#cc2222';
+        ctx.beginPath();
+        ctx.roundRect(closeX, closeY, closeSize, closeSize, 10);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = 'bold 26px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✕', closeX + closeSize / 2, closeY + closeSize / 2);
+
+        // ── 分隔线 ──
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px + 20, py + 76);
+        ctx.lineTo(px + pw - 20, py + 76);
+        ctx.stroke();
+
+        // ── 任务卡片 ──
+        const quests = questSystem.getCurrentQuests();
+
+        const RARITY_COLORS = {
+            "Mythic": "#00cccc",
+            "Ultra":  "#cc5490",
+            "Super":  "#44dd77",
+            "Omega":  "#cc44dd"
+        };
+        const ICON_BG = {
+            "Mythic": "#18b0b0",
+            "Ultra":  "#c03070",
+            "Super":  "#28aa50",
+            "Omega":  "#9922bb"
+        };
+
+        // 初始化卡片碰撞数据（每次 draw 重建）
+        this._questCardRects = [];
+
+        const GRID_TOP    = py + 84;
+        const GRID_BOTTOM = py + ph - 50;
+        const GRID_H      = GRID_BOTTOM - GRID_TOP;
+        const CARD_PAD    = 14;
+        const CARD_GAP    = 12;
+
+        if (quests.length === 0) {
+            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('All quests completed!', px + pw / 2, py + ph / 2 - 16);
+            ctx.font = '15px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText('New quests tomorrow', px + pw / 2, py + ph / 2 + 16);
+        } else {
+            const cols  = 2;
+            const rows  = Math.ceil(quests.length / cols);
+            const cardW = (pw - CARD_PAD * 2 - CARD_GAP * (cols - 1)) / cols;
+            const cardH = Math.min(160, (GRID_H - CARD_GAP * (rows - 1)) / rows);
+
+            quests.forEach((quest, i) => {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const cx  = px + CARD_PAD + col * (cardW + CARD_GAP);
+                const cy  = GRID_TOP + row * (cardH + CARD_GAP);
+
+                // 卡片背景
+                const cardBg = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
+                cardBg.addColorStop(0, 'rgba(255,255,255,0.2)');
+                cardBg.addColorStop(1, 'rgba(180,100,30,0.2)');
+                ctx.fillStyle = cardBg;
+                ctx.beginPath();
+                ctx.roundRect(cx, cy, cardW, cardH, 14);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 图标方块
+                const iconSize = Math.min(cardH - 20, 80);
+                const iconX    = cx + 14;
+                const iconY    = cy + (cardH - iconSize) / 2;
+
+                ctx.fillStyle = ICON_BG[quest.rarity] || '#666';
+                ctx.beginPath();
+                ctx.roundRect(iconX, iconY, iconSize, iconSize, 10);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                // 图标文字（取大写字母缩写，最多3个）
+                const raw  = quest.targetMob.replace(/[^A-Za-z]/g, '');
+                const caps = raw.replace(/[a-z]/g, '');
+                const abbr = (caps.length >= 2 ? caps : raw.slice(0,2)).slice(0, 3).toUpperCase();
+                ctx.font = `bold ${Math.floor(iconSize * 0.3)}px "Comic Sans MS", cursive`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(abbr, iconX + iconSize / 2, iconY + iconSize / 2);
+                ctx.shadowBlur = 0;
+
+                // 文字区域
+                const textX  = cx + iconSize + 26;
+                const textW  = cardW - iconSize - 38;
+                const nameFS = Math.min(20, Math.floor(cardH * 0.2));
+
+                // 怪物名
+                ctx.font = `bold ${nameFS}px "Comic Sans MS", "Chalkboard SE", cursive`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 3;
+                let mobName = quest.targetMob;
+                while (ctx.measureText(mobName).width > textW && mobName.length > 3) {
+                    mobName = mobName.slice(0, -1);
+                }
+                if (mobName !== quest.targetMob) mobName += '…';
+                ctx.fillText(mobName, textX, cy + 14);
+                ctx.shadowBlur = 0;
+
+                // 稀有度
+                const rarityFS = Math.min(17, Math.floor(cardH * 0.17));
+                ctx.font = `bold ${rarityFS}px "Comic Sans MS", cursive`;
+                ctx.fillStyle = RARITY_COLORS[quest.rarity] || '#fff';
+                ctx.fillText(quest.rarity, textX, cy + 14 + nameFS + 4);
+
+                // 进度（未完成）
+                const progressAreaY = cy + cardH - 50;
+                if (!quest.completed) {
+                    const barW = textW;
+                    const barH = 8;
+                    const barY = progressAreaY + 2;
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.beginPath();
+                    ctx.roundRect(textX, barY, barW, barH, 4);
+                    ctx.fill();
+                    const fill = Math.min(1, quest.currentCount / quest.targetCount);
+                    if (fill > 0) {
+                        const fg = ctx.createLinearGradient(textX, 0, textX + barW, 0);
+                        fg.addColorStop(0, RARITY_COLORS[quest.rarity] || '#fff');
+                        fg.addColorStop(1, 'white');
+                        ctx.fillStyle = fg;
+                        ctx.beginPath();
+                        ctx.roundRect(textX, barY, barW * fill, barH, 4);
+                        ctx.fill();
+                    }
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`${quest.currentCount} / ${quest.targetCount}`, textX, barY + barH + 3);
+                } else {
+                    // 完成闪烁提示
+                    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 280);
+                    ctx.font = 'bold 13px Arial';
+                    ctx.fillStyle = `rgba(255,230,0,${pulse})`;
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('✓ COMPLETE!', textX, progressAreaY + 2);
+                }
+
+                // ── 星星奖励 / CLAIM 按钮 ──
+                const btnW = Math.min(textW, 120);
+                const btnH = 30;
+                const btnX = textX;
+                const btnY = cy + cardH - btnH - 8;
+                const isClaimable = quest.completed && !quest._claimed;
+                const hKey = `hq_claim_${quest.id}`;
+                const isHov = this.hoveredButton === hKey;
+
+                if (isClaimable) {
+                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+                    g.addColorStop(0, isHov ? '#55ee99' : '#2ecc71');
+                    g.addColorStop(1, isHov ? '#22bb66' : '#1a9e52');
+                    ctx.fillStyle = g;
+                } else {
+                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+                    g.addColorStop(0, '#c8c0b0');
+                    g.addColorStop(1, '#a09080');
+                    ctx.fillStyle = g;
+                }
+                ctx.beginPath();
+                ctx.roundRect(btnX, btnY, btnW, btnH, 9);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.font = `bold ${isClaimable ? 13 : 16}px Arial`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 2;
+                if (isClaimable) {
+                    ctx.fillText(`CLAIM  +${quest.reward} ⭐`, btnX + btnW / 2, btnY + btnH / 2);
+                } else {
+                    ctx.fillText(`⭐  ${quest.reward}`, btnX + btnW / 2, btnY + btnH / 2);
+                }
+                ctx.shadowBlur = 0;
+
+                // 记录碰撞数据
+                this._questCardRects.push({
+                    id:        quest.id,
+                    claimable: isClaimable,
+                    btnRect:   [btnX, btnY, btnW, btnH],
+                    effectX:   btnX + btnW / 2,
+                    effectY:   btnY + btnH / 2
+                });
+            });
+        }
+
+        // ── 底部倒计时 ──
+        const now      = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(24, 0, 0, 0);
+        const msLeft  = Math.max(0, tomorrow - now);
+        const hh      = Math.floor(msLeft / 3600000);
+        const mm      = Math.floor((msLeft % 3600000) / 60000);
+        const ss      = Math.floor((msLeft % 60000) / 1000);
+        const cs      = Math.floor((msLeft % 1000) / 10).toString().padStart(2, '0');
+        const timerStr = `Resets in ${hh}h ${mm}m ${ss}.${cs}s...`;
+
+        ctx.font = 'bold 15px "Comic Sans MS", cursive';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 3;
+        ctx.fillText(timerStr, px + pw / 2, py + ph - 24);
+        ctx.shadowBlur = 0;
+
+        // 粒子
+        questSystem.drawParticles(ctx);
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+    }
+    // ==================== Utility ====================
 
     isPointInRect(point, rect) {
         if (!point || !rect) return false;
@@ -33372,7 +34718,7 @@ class MainMenu {
         return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
     }
 
-    // ==================== 事件处理 ====================
+    // ==================== Event Handling ====================
 
     handleLoadoutScroll(deltaY) {
         if (!this.loadoutPanelOpen) return;
@@ -33385,16 +34731,54 @@ class MainMenu {
         }
     }
 
+
+    // ============================================================
+    // 4. 完整替换 handleMouseMove() 方法
+    // ============================================================
     handleMouseMove(event) {
         if (event.type !== 'mousemove') return;
         const pos = [event.x, event.y];
 
+        // ── 天赋面板 hover ──
+        const game = window.gameInstance;
+        if (game?.talentSystem?.panelOpen) {
+            game.talentSystem.handleMouseMove(pos);
+            // 同时更新 hoveredButton（让天赋面板内按钮有 hover 效果，外部无需再处理）
+            this.hoveredButton = null;
+            return;
+        }
+
+        // ── 配装系统 hover ──
         const loadoutHover = this.handleLoadoutHover(pos);
         if (loadoutHover) { this.hoveredButton = loadoutHover; return; }
+
+        // ── 狩猎任务面板 hover ──
+        if (this.huntingQuestPanelOpen) {
+            const [px, py, pw, ph] = this._getQuestPanelRect();
+            const closeSize = 46;
+            const closeX = px + pw - closeSize - 8;
+            const closeY = py + 8;
+            if (pos[0] >= closeX && pos[0] <= closeX + closeSize &&
+                pos[1] >= closeY && pos[1] <= closeY + closeSize) {
+                this.hoveredButton = 'hq_close';
+                return;
+            }
+            for (const card of (this._questCardRects || [])) {
+                const [bx, by, bw, bh] = card.btnRect;
+                if (card.claimable &&
+                    pos[0] >= bx && pos[0] <= bx + bw &&
+                    pos[1] >= by && pos[1] <= by + bh) {
+                    this.hoveredButton = `hq_claim_${card.id}`;
+                    return;
+                }
+            }
+        }
 
         let foundHover = null;
         if (this.isPointInRect(pos, this.accountButton)) foundHover = 'account';
         if (!foundHover && this.isPointInRect(pos, this.shopButton)) foundHover = 'shop';
+        if (!foundHover && this.isPointInRect(pos, this.huntingQuestButton)) foundHover = 'hunting_quest';
+        if (!foundHover && this.talentButton && this.isPointInRect(pos, this.talentButton)) foundHover = 'talent';
         if (!foundHover) {
             for (const [biome, rect] of Object.entries(this.biomeButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = biome; break; }
@@ -33413,7 +34797,6 @@ class MainMenu {
             let tx = ex - tw - 8;
             if (tx < 8) tx = ex + ew + 8;
             const tooltipRect = [tx, ey, tw, th];
-
             if (this.isPointInRect(pos, tooltipRect)) {
                 if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
                     foundHover = 'bonus_buy_5d';
@@ -33429,19 +34812,74 @@ class MainMenu {
         this.hoveredButton = foundHover;
     }
 
+
+    // ============================================================
+    // 3. 完整替换 handleClick() 方法
+    // ============================================================
     handleClick(event) {
         if (event.type !== 'mousedown' || event.button !== 0) return null;
         const pos = [event.x, event.y];
 
+        // ── 天赋面板优先 ──
+        const game = window.gameInstance;
+        if (game?.talentSystem?.panelOpen) {
+            const result = game.talentSystem.handleClick(pos);
+            if (result) return result;
+        }
+
+        // ── 狩猎任务面板 ──
+        if (this.huntingQuestPanelOpen && this.player?.gameInstance?.huntingQuestSystem) {
+            const questSystem = this.player.gameInstance.huntingQuestSystem;
+            const [px, py, pw, ph] = this._getQuestPanelRect();
+
+            const closeSize = 46;
+            const closeX = px + pw - closeSize - 8;
+            const closeY = py + 8;
+            if (pos[0] >= closeX && pos[0] <= closeX + closeSize &&
+                pos[1] >= closeY && pos[1] <= closeY + closeSize) {
+                this.huntingQuestPanelOpen = false;
+                return "hunting_quest_close";
+            }
+
+            if (pos[0] >= px && pos[0] <= px + pw && pos[1] >= py && pos[1] <= py + ph) {
+                for (const card of (this._questCardRects || [])) {
+                    const [bx, by, bw, bh] = card.btnRect;
+                    if (card.claimable &&
+                        pos[0] >= bx && pos[0] <= bx + bw &&
+                        pos[1] >= by && pos[1] <= by + bh) {
+                        const claimed = questSystem.claimQuest(card.id, card.effectX, card.effectY);
+                        if (claimed) {
+                            this._questCardRects = [];
+                            return "quest_claimed";
+                        }
+                    }
+                }
+                return "hunting_quest_panel_click";
+            }
+        }
+
+        // ── 配装系统 ──
         const loadoutResult = this.handleLoadoutClick(pos);
         if (loadoutResult) return loadoutResult;
 
         const currentTime = Date.now();
         this.lastClickTime = currentTime;
 
+        // ── 主要按钮 ──
         if (this.isPointInRect(pos, this.accountButton)) return "account";
         if (this.isPointInRect(pos, this.shopButton)) return "shop";
+        if (this.isPointInRect(pos, this.huntingQuestButton)) {
+            this.huntingQuestPanelOpen = !this.huntingQuestPanelOpen;
+            return "hunting_quest_toggle";
+        }
 
+        // ── 新增：Talent 按钮 ──
+        if (this.isPointInRect(pos, this.talentButton)) {
+            window.gameInstance?.talentSystem?.toggle();
+            return "talent_toggle";
+        }
+
+        // ── Extra Bonus Tooltip 按钮 ──
         if (this.showBonusTooltip) {
             const shopSystem = window.gameInstance?.shopSystem;
             if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
@@ -33456,41 +34894,42 @@ class MainMenu {
             }
         }
 
+        // ── Extra Bonus 按钮 ──
         if (this.isPointInRect(pos, this.extraBonusButton)) {
             const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
+            if (this.extraBonusPermanent) { this.refreshBonus(); return "extra_bonus_refreshed"; }
+            if (isActive) { this.refreshBonus(); return "extra_bonus_refreshed"; }
+            else { this.showBonusTooltip = true; return "extra_bonus_expired_show_tooltip"; }
+        }
 
-            if (this.extraBonusPermanent) {
-                this.refreshBonus();
-                return "extra_bonus_refreshed";
-            }
-
-            if (isActive) {
-                this.refreshBonus();
-                return "extra_bonus_refreshed";
-            } else {
-                this.showBonusTooltip = true;
-                return "extra_bonus_expired_show_tooltip";
+        // ── Biome 按钮 ──
+        for (const [biome, rect] of Object.entries(this.biomeButtons)) {
+            if (this.isPointInRect(pos, rect)) {
+                return `start_${biome.toLowerCase()}_map`;
             }
         }
 
-        for (const [biome, rect] of Object.entries(this.biomeButtons))
-            if (this.isPointInRect(pos, rect)) return `start_${biome.toLowerCase()}_map`;
-
+        // ── Other 按钮 ──
         for (const [name, rect] of Object.entries(this.otherButtons)) {
             if (this.isPointInRect(pos, rect)) {
-                if (name === "bonus")
+                if (name === "bonus") {
                     return (this.bonusSystem?.claimBonus?.()) ? "bonus_claimed" : "bonus_unavailable";
+                }
                 return name;
             }
         }
 
-        if (this.player?.quickSlot?.handleClick)
-            if (this.player.quickSlot.handleClick(pos)) return "quick_slot_click";
+        // ── 快捷栏 ──
+        if (this.player?.quickSlot?.handleClick) {
+            if (this.player.quickSlot.handleClick(pos)) {
+                return "quick_slot_click";
+            }
+        }
 
         return null;
     }
 
-    // ==================== 布局重算 ====================
+    // ==================== Layout Recalculation ====================
 
     recalculatePositions() {
         this.WIDTH = window.WIDTH || window.innerWidth;
@@ -33503,6 +34942,7 @@ class MainMenu {
 
         this.accountButton = [20, 20, 100, 35];
         this.shopButton = [20, 65, 100, 35];
+        this.huntingQuestButton = [20, 110, 100, 35];
 
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
         const cols = 4;
@@ -33537,8 +34977,9 @@ class MainMenu {
         this._recalcLoadoutButtonRect();
     }
 
-    // ==================== 绘制 ====================
-
+    // ============================================================
+    // 2. 完整替换 draw() 方法
+    // ============================================================
     draw(ctx) {
         if (!ctx) { console.error('MainMenu: No drawing context!'); return; }
 
@@ -33556,6 +34997,7 @@ class MainMenu {
         ctx.fillText('Flwrr.pro', this.WIDTH / 2 - tw / 2, this.titleY);
         ctx.shadowBlur = 0;
 
+        // Account 按钮
         const [ax, ay, aw, ah] = this.accountButton;
         const ac = this.hoveredButton === 'account' ? this.OTHER_BUTTON_HOVER_COLORS.account : this.OTHER_BUTTON_COLORS.account;
         const ag = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
@@ -33568,6 +35010,7 @@ class MainMenu {
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('Account', ax + aw / 2, ay + ah / 2); ctx.shadowBlur = 0;
 
+        // Shop 按钮
         const [sx, sy, sw, sh] = this.shopButton;
         const sc = this.hoveredButton === 'shop' ? this.SHOP_BUTTON_HOVER_COLOR : this.SHOP_BUTTON_COLOR;
         const sg = ctx.createLinearGradient(sx, sy, sx + sw, sy + sh);
@@ -33580,6 +35023,35 @@ class MainMenu {
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('Shop', sx + sw / 2, sy + sh / 2); ctx.shadowBlur = 0;
 
+        // Hunt 按钮
+        const [hx, hy, hw, hh] = this.huntingQuestButton;
+        const hc = this.hoveredButton === 'hunting_quest' ? this.HUNTING_QUEST_BUTTON_HOVER_COLOR : this.HUNTING_QUEST_BUTTON_COLOR;
+        const hg = ctx.createLinearGradient(hx, hy, hx + hw, hy + hh);
+        hg.addColorStop(0, `rgb(${hc[0]},${hc[1]},${hc[2]})`);
+        hg.addColorStop(1, `rgb(${Math.floor(hc[0] * 0.8)},${Math.floor(hc[1] * 0.8)},${Math.floor(hc[2] * 0.8)})`);
+        ctx.fillStyle = hg; ctx.beginPath(); ctx.roundRect(hx, hy, hw, hh, 8); ctx.fill();
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
+        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('HUNT', hx + hw / 2, hy + hh / 2);
+        ctx.shadowBlur = 0;
+
+        // ── 新增 Talent 按钮 ──
+        const [tbx, tby, tbw, tbh] = this.talentButton;
+        const tc = this.hoveredButton === 'talent' ? [142, 68, 173] : [155, 89, 182];
+        const tg = ctx.createLinearGradient(tbx, tby, tbx + tbw, tby + tbh);
+        tg.addColorStop(0, `rgb(${tc[0]},${tc[1]},${tc[2]})`);
+        tg.addColorStop(1, `rgb(${Math.floor(tc[0]*0.8)},${Math.floor(tc[1]*0.8)},${Math.floor(tc[2]*0.8)})`);
+        ctx.fillStyle = tg; ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
+        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('TALENTS', tbx + tbw / 2, tby + tbh / 2);
+        ctx.shadowBlur = 0;
+
+        // Extra Bonus 按钮
         const [ex, ey, ew, eh] = this.extraBonusButton;
         let bc;
         if (this.extraBonusPermanent) {
@@ -33607,13 +35079,11 @@ class MainMenu {
             const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
             const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
             const mins = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-
             let timeStr;
             if (days > 0) timeStr = `${days}d ${hours}h left`;
             else if (hours > 0) timeStr = `${hours}h ${mins}m left`;
             else if (mins > 0) timeStr = `${mins}m left`;
             else timeStr = 'Expiring soon';
-
             ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
             ctx.fillText('ACTIVE', ex + ew / 2, ey + eh / 2);
             ctx.font = '10px Arial';
@@ -33623,10 +35093,11 @@ class MainMenu {
             ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
             ctx.fillText('BONUS', ex + ew / 2, ey + eh / 2);
             ctx.font = '9px Arial';
-            ctx.fillText('10K⭐/5d', ex + ew / 2, ey + eh / 2 + 18);
-            ctx.fillText('1T⭐/forever', ex + ew / 2, ey + eh / 2 + 31);
+            ctx.fillText('10K STAR / 5d', ex + ew / 2, ey + eh / 2 + 18);
+            ctx.fillText('1T STAR / forever', ex + ew / 2, ey + eh / 2 + 31);
         }
 
+        // Biome 按钮
         for (const [biome, rect] of Object.entries(this.biomeButtons)) {
             const [x, y, w, h] = rect;
             const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
@@ -33641,6 +35112,7 @@ class MainMenu {
             ctx.fillText(biome, x + w / 2, y + h / 2); ctx.shadowBlur = 0;
         }
 
+        // Other 按钮
         const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus', quit: 'Quit' };
         for (const [name, rect] of Object.entries(this.otherButtons)) {
             const [x, y, w, h] = rect;
@@ -33672,7 +35144,7 @@ class MainMenu {
 
         if (window.gameInstance?.accountSystem?.isLoggedIn()) {
             ctx.font = '12px Arial'; ctx.fillStyle = '#27ae60'; ctx.textAlign = 'left';
-            ctx.fillText(`👤 ${window.gameInstance.accountSystem.getCurrentUser()}`, 10, 45);
+            ctx.fillText(`User: ${window.gameInstance.accountSystem.getCurrentUser()}`, 10, 45);
         }
 
         if (this.player?.quickSlot) this.player.quickSlot.draw(ctx);
@@ -33680,8 +35152,19 @@ class MainMenu {
         this.drawBonusTooltip(ctx);
         this.drawLoadout(ctx);
 
+        if (this.huntingQuestPanelOpen) {
+            this.drawHuntingQuestPanel(ctx);
+        }
+
+        // ── 新增：天赋面板绘制 ──
+        const talentGame = window.gameInstance;
+        if (talentGame?.talentSystem?.panelOpen) {
+            talentGame.talentSystem.draw(ctx);
+        }
+
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     }
+
 
     drawBonusTooltip(ctx) {
         const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
@@ -33711,7 +35194,7 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(btn5X, btn5Y, btn5W, btn5H, 6); ctx.fill();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('5 Days  —  100K ⭐', btn5X + btn5W / 2, btn5Y + btn5H / 2);
+        ctx.fillText('5 Days - 100K Star', btn5X + btn5W / 2, btn5Y + btn5H / 2);
 
         const btnPW = tw - 16, btnPH = 22;
         const btnPX = tx + 8, btnPY = ty + 62;
@@ -33720,7 +35203,7 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(btnPX, btnPY, btnPW, btnPH, 6); ctx.fill();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Permanent  —  1T ⭐', btnPX + btnPW / 2, btnPY + btnPH / 2);
+        ctx.fillText('Permanent - 1T Star', btnPX + btnPW / 2, btnPY + btnPH / 2);
     }
 
     drawFlowerPattern(ctx) {
@@ -33751,17 +35234,6 @@ class WorldMapGame {
         this.chatW = 300;
         this.chatH = 200;
 
-        // 墙壁缓存 - 改为按需加载
-        this.wallCache = new Map();
-        this.wallsPrecomputed = false;
-
-        // 主机权威模式
-        this.isHost = false;
-        this.lastFullSync = 0;
-        this.fullSyncInterval = 100;
-        this.serverTime = 0;
-        this.timeOffset = 0;
-
         // 游戏核心
         this.player = new Player();
         this.autoSaveSystem = new AutoSaveSystem();
@@ -33773,6 +35245,22 @@ class WorldMapGame {
         this.accountSystem = new AccountSystem();
         this.blockManager = new BlockManager();
         this.mainMenu = new MainMenu(this.player, this.autoSaveSystem, this.bonusSystem);
+
+        // ✅ 创建天赋系统（先不应用）
+        this.talentSystem = new TalentSystem(this.player);
+
+        this.huntingQuestSystem = new HuntingQuestSystem(this);
+        // 墙壁缓存 - 改为按需加载
+        this.wallCache = new Map();
+        this.wallsPrecomputed = false;
+
+        // 主机权威模式
+        this.isHost = false;
+        this.lastFullSync = 0;
+        this.fullSyncInterval = 100;
+        this.serverTime = 0;
+        this.timeOffset = 0;
+
         // ✅ 相机平滑缩放
         this.targetViewScale = 1.0;
         this.currentViewScale = 1.0;
@@ -33834,6 +35322,9 @@ class WorldMapGame {
         // 玩家引用
         this.player.gameInstance = this;
 
+        // ✅ 在玩家 gameInstance 设置后再应用天赋
+        this.talentSystem.applyToPlayer(this.player);
+
         // 自动加载游戏
         this.autoLoadGame();
 
@@ -33854,7 +35345,8 @@ class WorldMapGame {
         this.framesThisSecond = 0;
         this.enemyUpdateSkip = 0;
         this.projectiles = [];
-        // ✅ 后台加载图片和墙壁（不阻塞）
+
+        // 后台加载图片和墙壁（不阻塞）
         this.loadAssetsInBackground();
     }
 
@@ -33886,7 +35378,15 @@ class WorldMapGame {
             }
         }, 100);
     }
-
+    requestRedraw() {
+        // 强制重绘
+        if (this.screen && this.screen.getContext) {
+            const ctx = this.screen.getContext('2d');
+            if (ctx) {
+                this.draw(ctx);
+            }
+        }
+    }
     // ✅ 新增：后台加载其他 biome
     loadOtherBiomesInBackground() {
         const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer","Arctic","Jungle"]
@@ -36347,6 +37847,11 @@ class WorldMapGame {
         this.gameRunning = true;
         this.paused = false;
 
+        if (this.talentSystem) {
+            this.talentSystem.player = this.player;
+            this.talentSystem.applyToPlayer(this.player);
+        }
+
         this.enemies = [];
         this.droppedCards = [];
         this.score = 0;
@@ -37377,9 +38882,6 @@ class WorldMapGame {
 
             this.enemies.push(enemy);
 
-            // 🗑️ 删除这行
-            // this.regionEnemyCounts[currentRegion.name]++;
-
             this.clampEnemyPosition(enemy);
 
             if (forcedRarity === "Eternal") {
@@ -37466,7 +38968,10 @@ class WorldMapGame {
                 enemy.type
             );
         }
-
+        // ===== 更新狩猎任务进度 =====
+        if (this.huntingQuestSystem && enemy && enemy.type && enemy.rarity) {
+            this.huntingQuestSystem.updateProgress(enemy.type, enemy.rarity);
+        }
         // 获取普通掉落表
         const dropItems = ENEMY_DROP_TABLE[enemy.type] || ["Leaf"];
         const enemyRarity = enemy.rarity || 'Common';
@@ -39000,6 +40505,11 @@ class WorldMapGame {
         }
         if (this.player.playerRarity) {
             oldPlayerRarity = this.player.playerRarity;
+        }
+            // 重置后重新应用天赋
+        if (this.talentSystem) {
+            this.talentSystem.player = this.player;
+            this.talentSystem.applyToPlayer(this.player);
         }
         if (this.player.levelSystem) {
             oldLevelSystem = {
