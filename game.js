@@ -1649,25 +1649,23 @@ export const BASE_B_ARMOR = {
     "Common": 0.4, "Unusual": 1.2, "Rare": 2.0, "Epic": 6.0, "Legendary": 15.0,
     "Mythic": 80.0, "Ultra": 228.0, "Super": 644.0, "Omega": 1600.0, "Eternal": 4800.0
 };
-// ========== 🛡️ 护甲计算辅助函数（几乎不减伤版本）==========
+// ========== 🛡️ 护甲计算辅助函数（最高减伤10%版本）==========
 const applyArmorReduction = (damage, defenderArmor, attackerArmor = 0) => {
     // 护甲差
     const armorDiff = defenderArmor - attackerArmor;
     const absDiff = Math.abs(armorDiff);
 
     if (armorDiff >= 0) {
-        // 防御者护甲更高：极轻微减伤
-        // 原来的公式: reduction = absDiff / (absDiff + 1.5)
-        // 新公式: 让分母变得非常大，使减伤几乎为0
-        const reduction = absDiff / (absDiff + 1000);  // 分母从1.5改为1000
-        const reductionPercent = Math.min(0.8, reduction);  // 最大减伤5%
+        // 防御者护甲更高：轻微减伤，最高10%
+        // 使用对数函数让减伤增长非常缓慢
+        // 护甲差1000时，减伤约5%；护甲差10000时，减伤约9%
+        const reduction = Math.log10(1 + absDiff / 100) / 10;
+        const reductionPercent = Math.min(0.03, reduction);  // 最大减伤10%
         return damage * (1 - reductionPercent);
     } else {
-        // 攻击者护甲更高：极轻微减伤（攻击者护甲穿透）
-        // 原来的公式: reduction = absDiff / (absDiff + 50)
-        // 新公式: 让分母变得非常大，使减伤几乎为0
-        const reduction = absDiff / (absDiff + 2000);  // 分母从50改为2000
-        const reductionPercent = Math.min(0.10, reduction);  // 最大减伤3%
+        // 攻击者护甲更高：攻击者护甲穿透，最高5%
+        const reduction = Math.log10(1 + absDiff / 200) / 15;
+        const reductionPercent = Math.min(0.02, reduction);  // 最大减伤5%
         return damage * (1 - reductionPercent);
     }
 };
@@ -20857,13 +20855,13 @@ class Enemy {
             "Epic": 54,
             "Legendary": 405,
             "Mythic": 2430,
-            "Ultra": 9645,
-            "Super": 30574,
-            "Omega": 105510,
-            "Eternal": 789830
+            "Ultra": 8645,
+            "Super": 25574,
+            "Omega": 80510,
+            "Eternal": 129830
         };
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
-        const levelHealthMultiplier = 1 + (this.level - 1) * 0.1;
+        const levelHealthMultiplier = 1 + (this.level - 1) * 0.01;
 
         // 攻击力倍率
         const PROGRESSIVE_RARITY_MULTIPLIERS = {
@@ -21360,9 +21358,9 @@ class Enemy {
     _getBaseStats(enemyType) {
         switch (enemyType) {
             case "Spider": return [90, 22, 70 + Math.random() * 50, 200, 15];
-            case "Scorpion": return [120, 22, 70, 200, 23];
-            case "Crab": return [150, 26, 50 + Math.random() * 20, 300, 25];
-            case "Beetle": return [180, 22, 110, 1000, 30];
+            case "Scorpion": return [100, 22, 70, 200, 23];
+            case "Crab": return [140, 26, 50 + Math.random() * 20, 300, 25];
+            case "Beetle": return [110, 22, 110, 1000, 30];
             case "Soldier Ant": return [100, 24, 70 + Math.random() * 5, 200, 10];
             case "Worker Ant": return [50, 20, 60 + Math.random() * 10, 200, 12];
             case "Bush": return [80, 30, 0, 500, 20];
@@ -21909,14 +21907,12 @@ class Enemy {
 
         let meleeDamage = 0;
 
-        // ===== 🦂 蝎子远程攻击（应该在近战检查之前）=====
+        // ===== 🦂 蝎子远程攻击（优先执行，在近战之前）=====
         if (this.type === "Scorpion") {
-            // 检查远程攻击冷却
             if (this.shootCooldown <= 0) {
                 const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
-                // 在攻击范围内就发射，不需要碰到
                 if (distance <= this.attackRange) {
-                    this.shootCooldown = this.shootCooldownMax;
+                    this.shootCooldown = this.shootCooldownMax || 2000;
 
                     const dx = target.physicsBody.position.x - this.physicsBody.position.x;
                     const dy = target.physicsBody.position.y - this.physicsBody.position.y;
@@ -22020,29 +22016,33 @@ class Enemy {
             }
         }
 
-        // ===== 近战攻击（只有碰到才触发）=====
+        // ===== 近战攻击 =====
         const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
         const selfRadius = this.getScaledRadius?.() || this.radius * this.currentViewScale;
         const targetRadius = target.getScaledRadius?.() || target.physicsBody.radius * this.currentViewScale;
         const contactRange = selfRadius + targetRadius;
 
-        // 检查近战冷却
+        // 检查近战冷却（黄蜂和鱿鱼使用 meleeCooldown，蝎子使用 attackCooldown，其他生物使用 attackCooldown）
         let canMelee = false;
-        if (this.type === "Wasp" || this.type === "Squid"|| this.type === "Scorpion") {
+        if (this.type === "Wasp" || this.type === "Squid") {
             canMelee = this.meleeCooldown <= 0;
+        } else if (this.type === "Scorpion") {
+            // 蝎子近战冷却独立
+            canMelee = this.attackCooldown <= 0;
         } else {
             canMelee = this.attackCooldown <= 0;
         }
 
         if (distance <= contactRange && canMelee) {
             // 设置近战冷却
-            if (this.type === "Wasp" || this.type === "Squid"|| this.type === "Scorpion") {
-                this.meleeCooldown = this.meleeCooldownMax || 300;
+            if (this.type === "Wasp" || this.type === "Squid") {
+                this.meleeCooldown = this.meleeCooldownMax || 200;
+            } else if (this.type === "Scorpion") {
+                this.attackCooldown = 200; // 蝎子近战冷却
             } else {
                 this.attackCooldown = 200;
             }
 
-            // ... 近战伤害计算保持不变 ...
             const selfIsFriendly = this.isFriendly;
             const targetIsFriendly = target.isFriendly;
 
@@ -22064,12 +22064,12 @@ class Enemy {
 
                 let maxReductionPercent;
                 switch(defenderArmorClass) {
-                    case "A": maxReductionPercent = 0.55; break;
-                    case "B": maxReductionPercent = 0.3; break;
-                    case "C": maxReductionPercent = 0.35; break;
-                    case "D": maxReductionPercent = 0.3; break;
-                    case "E": maxReductionPercent = 0.4; break;
-                    default: maxReductionPercent = 0.3;
+                    case "A": maxReductionPercent = 0.15; break;
+                    case "B": maxReductionPercent = 0.10; break;
+                    case "C": maxReductionPercent = 0.10; break;
+                    case "D": maxReductionPercent = 0.15; break;
+                    case "E": maxReductionPercent = 0.15; break;
+                    default: maxReductionPercent = 0.1;
                 }
 
                 const noArmorDamage = applyArmorReduction.call(this, this.attackDamage, 0, attackerArmor, target);
@@ -22216,14 +22216,18 @@ class Enemy {
                 setTimeout(() => this.spawnTrashDiggerFromDeath(this.gameInstance), 50);
             }
 
-            // ===== TermiteHole 死亡生成 MudDigger =====
+            // ===== TermiteHole 死亡生成 MudDigger 和 TermiteOvermind =====
             if (this.type === "TermiteHole" && !this.isFriendly && !this.triggeredDeath) {
                 this.triggeredDeath = true;
+
+                // 100% 生成 TermiteOvermind
+                setTimeout(() => this.spawnTermiteOvermindFromDeath(this.gameInstance), 50);
+
+                // 10% 概率额外生成 MudDigger
                 if (Math.random() < 0.1) {
                     setTimeout(() => this.spawnMudDiggerFromDeath(this.gameInstance), 50);
                 }
             }
-
             // ===== SpiderCave 死亡生成 Digger =====
             if (this.type === "SpiderCave" && !this.isFriendly && !this.triggeredDeath) {
                 this.triggeredDeath = true;
@@ -22237,7 +22241,23 @@ class Enemy {
             }
         }
     }
+    spawnTermiteOvermindFromDeath(gameInstance) {
+        if (!gameInstance) return;
 
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 60 + Math.random() * 50;
+        const overmindX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+        const overmindY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+
+        const termiteOvermind = new Enemy("TermiteOvermind", overmindX, overmindY, this.level, this.rarity);
+        termiteOvermind.isFriendly = false;
+        termiteOvermind.gameInstance = gameInstance;
+
+        gameInstance.enemies.push(termiteOvermind);
+    }
     spawnDeathFireAnts(enemies) {
         if (this.isDead || !enemies) return;
 
@@ -32875,49 +32895,49 @@ class MainMenu {
         this.EXTRA_BONUS_PERMANENT_COLOR = [156, 39, 176];
         this.EXTRA_BONUS_DISABLED_COLOR = [100, 100, 100];
 
-        this.LOADOUT_BUTTON_COLOR       = [155, 89, 182];
+        this.LOADOUT_BUTTON_COLOR = [155, 89, 182];
         this.LOADOUT_BUTTON_HOVER_COLOR = [142, 68, 173];
 
         this.RARITY_COLOR_MAP = {
-            "Common":"#00cc00","Unusual":"#cccc00","Rare":"#0066cc",
-            "Epic":"#9932cc","Legendary":"#cc0000","Mythic":"#00cccc",
-            "Ultra":"#cc5490","Super":"#74bf74","Omega":"#b31fa3","Eternal":"#ffd700"
+            "Common": "#00cc00", "Unusual": "#cccc00", "Rare": "#0066cc",
+            "Epic": "#9932cc", "Legendary": "#cc0000", "Mythic": "#00cccc",
+            "Ultra": "#cc5490", "Super": "#74bf74", "Omega": "#b31fa3", "Eternal": "#ffd700"
         };
 
-        this.WIDTH  = window.WIDTH  || window.innerWidth;
+        this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
 
-        const BUTTON_WIDTH   = 180;
-        const BUTTON_HEIGHT  = 45;
+        const BUTTON_WIDTH = 180;
+        const BUTTON_HEIGHT = 45;
         const BUTTON_SPACING = 15;
         const START_Y_OFFSET = -120;
 
         this.accountButton = [20, 20, 100, 35];
-        this.shopButton    = [20, 65, 100, 35];
+        this.shopButton = [20, 65, 100, 35];
 
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
-        const cols        = 4;
-        const totalWidth  = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
-        const startX      = this.WIDTH / 2 - totalWidth / 2;
+        const cols = 4;
+        const totalWidth = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
+        const startX = this.WIDTH / 2 - totalWidth / 2;
 
         this.biomeButtons = {
-            "Plain":  [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Bio":    [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Desert": [startX + 2*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Random": [startX + 3*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Ocean":  [startX, biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Sewer":  [startX + BUTTON_WIDTH+BUTTON_SPACING, biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Arctic": [startX + 2*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Jungle": [startX + 3*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
+            "Plain": [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Bio": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Desert": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Random": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Ocean": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Sewer": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Arctic": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Jungle": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const otherStartY = biomeStartY + 2*(BUTTON_HEIGHT+BUTTON_SPACING) + 60;
+        const otherStartY = biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
         this.otherButtons = {
-            "inventory":   [this.WIDTH/2 - BUTTON_WIDTH/2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "bonus":       [this.WIDTH/2 - BUTTON_WIDTH/2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "crafting":    [this.WIDTH/2 - BUTTON_WIDTH/2, otherStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "multiplayer": [this.WIDTH/2 - BUTTON_WIDTH/2, otherStartY+2*(BUTTON_HEIGHT+BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
-            "quit":        [this.WIDTH/2 - BUTTON_WIDTH/2, otherStartY+3*(BUTTON_HEIGHT+BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
+            "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "crafting": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "multiplayer": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "quit": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 3 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
         const EXTRA_BONUS_SIZE = 110;
@@ -32926,20 +32946,20 @@ class MainMenu {
         this.loadExtraBonusStatus();
 
         this.titleY = this.HEIGHT / 2 - 200;
-        this.hintY  = this.HEIGHT / 2 - 150;
+        this.hintY = this.HEIGHT / 2 - 150;
 
-        this.hoveredButton      = null;
-        this.lastClickTime      = 0;
-        this.doubleClickDelay   = 300;
-        this.showBonusTooltip   = false;
-        this._bonusBtn5d        = null;
-        this._bonusBtnPerm      = null;
+        this.hoveredButton = null;
+        this.lastClickTime = 0;
+        this.doubleClickDelay = 300;
+        this.showBonusTooltip = false;
+        this._bonusBtn5d = null;
+        this._bonusBtnPerm = null;
 
-        this.loadoutPanelOpen   = false;
-        this._loadoutScrollIdx  = 0;
+        this.loadoutPanelOpen = false;
+        this._loadoutScrollIdx = 0;
         this._loadoutItemRects = [];
-        this._saveBtnRect      = null;
-        this._pendingLoadout   = null;
+        this._saveBtnRect = null;
+        this._pendingLoadout = null;
         this.loadLoadouts();
         this._recalcLoadoutButtonRect();
     }
@@ -32951,24 +32971,24 @@ class MainMenu {
             const saved = localStorage.getItem('extra_bonus_status');
             if (saved) {
                 const data = JSON.parse(saved);
-                this.extraBonusPermanent  = data.permanent  || false;
-                this.extraBonusActive     = data.active     || false;
+                this.extraBonusPermanent = data.permanent || false;
+                this.extraBonusActive = data.active || false;
                 this.extraBonusExpireTime = data.expireTime || 0;
                 this.extraBonusBoughtTime = data.boughtTime || 0;
                 if (!this.extraBonusPermanent && this.extraBonusActive && Date.now() > this.extraBonusExpireTime) {
-                    this.extraBonusActive     = false;
+                    this.extraBonusActive = false;
                     this.extraBonusExpireTime = 0;
                     this.saveExtraBonusStatus();
                 }
             } else {
-                this.extraBonusPermanent  = false;
-                this.extraBonusActive     = false;
+                this.extraBonusPermanent = false;
+                this.extraBonusActive = false;
                 this.extraBonusExpireTime = 0;
                 this.extraBonusBoughtTime = 0;
             }
         } catch (e) {
-            this.extraBonusPermanent  = false;
-            this.extraBonusActive     = false;
+            this.extraBonusPermanent = false;
+            this.extraBonusActive = false;
             this.extraBonusExpireTime = 0;
             this.extraBonusBoughtTime = 0;
         }
@@ -32976,8 +32996,8 @@ class MainMenu {
 
     saveExtraBonusStatus() {
         localStorage.setItem('extra_bonus_status', JSON.stringify({
-            permanent:  this.extraBonusPermanent,
-            active:     this.extraBonusActive,
+            permanent: this.extraBonusPermanent,
+            active: this.extraBonusActive,
             expireTime: this.extraBonusExpireTime,
             boughtTime: this.extraBonusBoughtTime
         }));
@@ -32985,25 +33005,48 @@ class MainMenu {
 
     canBuy() { return !this.extraBonusPermanent; }
 
-    reactivateWeeklyBonus() {
-        if (this.extraBonusPermanent) return false;
-        // 只有已过期才能重新激活，未过期不续期
-        if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) return false;
-        this.extraBonusActive     = true;
-        this.extraBonusExpireTime = Date.now() + 5*24*60*60*1000;
-        this.saveExtraBonusStatus();
-        if (this.bonusSystem?.activateExtraBonus) this.bonusSystem.activateExtraBonus();
-        return true;
+    // 刷新倍率（不刷新时间）
+    refreshBonus() {
+        if (this.extraBonusPermanent) {
+            if (this.bonusSystem?.activateExtraBonus) {
+                this.bonusSystem.activateExtraBonus();
+            }
+            return true;
+        }
+
+        if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) {
+            if (this.bonusSystem?.activateExtraBonus) {
+                this.bonusSystem.activateExtraBonus();
+            }
+            return true;
+        }
+
+        return false;
     }
+
     buyWeeklyExtraBonus(shopSystem) {
         const price = 100000;
         if ((shopSystem?.getStarCount() || 0) >= price && shopSystem.removeStars(price)) {
-            this.extraBonusActive     = true;
-            this.extraBonusPermanent  = false;
-            this.extraBonusExpireTime = Date.now() + 5*24*60*60*1000;
-            this.extraBonusBoughtTime = Date.now();
+            const now = Date.now();
+
+            if (this.extraBonusActive && now < this.extraBonusExpireTime) {
+                // 已有有效时间：不累加，保持原过期时间，只激活倍率
+                this.extraBonusActive = true;
+                if (this.bonusSystem?.activateExtraBonus) {
+                    this.bonusSystem.activateExtraBonus();
+                }
+            } else {
+                // 没有有效时间或已过期：购买5天
+                this.extraBonusActive = true;
+                this.extraBonusExpireTime = now + 5 * 24 * 60 * 60 * 1000;
+                this.extraBonusPermanent = false;
+                this.extraBonusBoughtTime = now;
+                if (this.bonusSystem?.activateExtraBonus) {
+                    this.bonusSystem.activateExtraBonus();
+                }
+            }
+
             this.saveExtraBonusStatus();
-            if (this.bonusSystem?.activateExtraBonus) this.bonusSystem.activateExtraBonus();
             return true;
         }
         return false;
@@ -33013,12 +33056,14 @@ class MainMenu {
         if (this.extraBonusPermanent) return false;
         const price = 1000000000000;
         if ((shopSystem?.getStarCount() || 0) >= price && shopSystem.removeStars(price)) {
-            this.extraBonusPermanent  = true;
-            this.extraBonusActive     = true;
+            this.extraBonusPermanent = true;
+            this.extraBonusActive = true;
             this.extraBonusExpireTime = Infinity;
             this.extraBonusBoughtTime = Date.now();
             this.saveExtraBonusStatus();
-            if (this.bonusSystem?.activateExtraBonus) this.bonusSystem.activateExtraBonus();
+            if (this.bonusSystem?.activateExtraBonus) {
+                this.bonusSystem.activateExtraBonus();
+            }
             return true;
         }
         return false;
@@ -33028,13 +33073,13 @@ class MainMenu {
 
     _recalcLoadoutButtonRect() {
         if (this.player?.quickSlot) {
-            const qs       = this.player.quickSlot;
+            const qs = this.player.quickSlot;
             const slotSize = qs.SLOT_SIZE || qs.slotSize || 60;
-            const spacing  = qs.SLOT_SPACING || 5;
-            const count    = qs.slots?.length || 10;
-            const totalW   = count * slotSize + (count - 1) * spacing;
-            const barX     = this.WIDTH / 2 - totalW / 2;
-            const barY     = this.HEIGHT - slotSize - 20;
+            const spacing = qs.SLOT_SPACING || 5;
+            const count = qs.slots?.length || 10;
+            const totalW = count * slotSize + (count - 1) * spacing;
+            const barX = this.WIDTH / 2 - totalW / 2;
+            const barY = this.HEIGHT - slotSize - 20;
             this.loadoutButton = [barX + totalW + 100, barY, 60, slotSize];
         } else {
             this.loadoutButton = [this.WIDTH / 2 + 330, this.HEIGHT - 80, 60, 60];
@@ -33065,7 +33110,7 @@ class MainMenu {
     }
 
     _applyLoadout(loadout) {
-        const qs  = this.player?.quickSlot;
+        const qs = this.player?.quickSlot;
         const inv = this.player?.inventory;
         if (!qs || !inv) return;
 
@@ -33087,12 +33132,12 @@ class MainMenu {
             if (invItem.count > 1) {
                 invItem.count--;
                 const newItem = new Item(invItem.type, invItem.level, invItem.rarity);
-                newItem.count          = 1;
-                newItem.durability     = invItem.durability;
-                newItem.maxDurability  = invItem.maxDurability;
-                newItem.reloadTime     = invItem.reloadTime;
+                newItem.count = 1;
+                newItem.durability = invItem.durability;
+                newItem.maxDurability = invItem.maxDurability;
+                newItem.reloadTime = invItem.reloadTime;
                 newItem.baseReloadTime = invItem.baseReloadTime;
-                newItem.armor          = invItem.armor;
+                newItem.armor = invItem.armor;
                 qs.addItem(newItem, slotIdx);
             } else {
                 const taken = inv.items.splice(invIdx, 1)[0];
@@ -33108,95 +33153,85 @@ class MainMenu {
         this._recalcLoadoutButtonRect();
         const [lx, ly, lw, lh] = this.loadoutButton;
 
-        // 按钮
         const btnColor = this.hoveredButton === 'loadout'
             ? this.LOADOUT_BUTTON_HOVER_COLOR
             : this.LOADOUT_BUTTON_COLOR;
-        const g = ctx.createLinearGradient(lx, ly, lx+lw, ly+lh);
+        const g = ctx.createLinearGradient(lx, ly, lx + lw, ly + lh);
         g.addColorStop(0, `rgb(${btnColor[0]},${btnColor[1]},${btnColor[2]})`);
-        g.addColorStop(1, `rgb(${Math.floor(btnColor[0]*0.8)},${Math.floor(btnColor[1]*0.8)},${Math.floor(btnColor[2]*0.8)})`);
+        g.addColorStop(1, `rgb(${Math.floor(btnColor[0] * 0.8)},${Math.floor(btnColor[1] * 0.8)},${Math.floor(btnColor[2] * 0.8)})`);
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.roundRect(lx, ly, lw, lh, 10); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2; ctx.stroke();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('LOAD', lx+lw/2, ly+lh/2-8);
-        ctx.fillText('OUT',  lx+lw/2, ly+lh/2+8);
+        ctx.fillText('LOAD', lx + lw / 2, ly + lh / 2 - 8);
+        ctx.fillText('OUT', lx + lw / 2, ly + lh / 2 + 8);
 
         if (!this.loadoutPanelOpen) return;
 
-        // 面板背景
         const [px, py, pw, ph] = this.loadoutPanelRect;
         ctx.fillStyle = 'rgba(20,20,40,0.95)';
         ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill();
         ctx.strokeStyle = 'rgba(155,89,182,0.8)'; ctx.lineWidth = 2; ctx.stroke();
 
-        // 标题
         ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText('Loadouts', px+12, py+20);
+        ctx.fillText('Loadouts', px + 12, py + 20);
 
-        // Save 按钮
-        this._saveBtnRect = [px+pw-80, py+8, 70, 24];
+        this._saveBtnRect = [px + pw - 80, py + 8, 70, 24];
         const [sbx, sby, sbw, sbh] = this._saveBtnRect;
         ctx.fillStyle = this.hoveredButton === 'loadout_save' ? '#8048c0' : '#9b59d0';
         ctx.beginPath(); ctx.roundRect(sbx, sby, sbw, sbh, 7); ctx.fill();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Save current', sbx+sbw/2, sby+sbh/2);
+        ctx.fillText('Save current', sbx + sbw / 2, sby + sbh / 2);
 
-        // 分割线
         ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(px+8, py+38); ctx.lineTo(px+pw-8, py+38); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px + 8, py + 38); ctx.lineTo(px + pw - 8, py + 38); ctx.stroke();
 
         this._loadoutItemRects = [];
 
         if (!this.loadouts.length) {
             ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
             ctx.textAlign = 'center';
-            ctx.fillText('No loadouts saved yet.', px+pw/2, py+90);
+            ctx.fillText('No loadouts saved yet.', px + pw / 2, py + 90);
         } else {
-            const itemH      = 68;
+            const itemH = 68;
             const maxVisible = 4;
-            const total      = this.loadouts.length;
+            const total = this.loadouts.length;
 
-            // 确保滚动不越界
             this._loadoutScrollIdx = Math.max(0, Math.min(this._loadoutScrollIdx, total - maxVisible));
 
             const startIdx = Math.max(0, this._loadoutScrollIdx);
 
-            // 上箭头按钮
             this._scrollUpRect = null;
             this._scrollDownRect = null;
             if (total > maxVisible) {
                 const arrowW = 24, arrowH = 18;
                 const upX = px + pw - arrowW - 6, upY = py + 40;
                 const downX = upX, downY = py + ph - arrowH - 6;
-                this._scrollUpRect   = [upX,   upY,   arrowW, arrowH];
+                this._scrollUpRect = [upX, upY, arrowW, arrowH];
                 this._scrollDownRect = [downX, downY, arrowW, arrowH];
 
-                // 上箭头
                 ctx.fillStyle = (startIdx > 0)
                     ? (this.hoveredButton === 'loadout_up' ? '#9b59d0' : 'rgba(155,89,182,0.6)')
                     : 'rgba(100,100,100,0.3)';
                 ctx.beginPath(); ctx.roundRect(upX, upY, arrowW, arrowH, 4); ctx.fill();
                 ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('▲', upX + arrowW/2, upY + arrowH/2);
+                ctx.fillText('▲', upX + arrowW / 2, upY + arrowH / 2);
 
-                // 下箭头
                 ctx.fillStyle = (startIdx + maxVisible < total)
                     ? (this.hoveredButton === 'loadout_down' ? '#9b59d0' : 'rgba(155,89,182,0.6)')
                     : 'rgba(100,100,100,0.3)';
                 ctx.beginPath(); ctx.roundRect(downX, downY, arrowW, arrowH, 4); ctx.fill();
                 ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('▼', downX + arrowW/2, downY + arrowH/2);
+                ctx.fillText('▼', downX + arrowW / 2, downY + arrowH / 2);
 
-                // 页码
                 ctx.font = '10px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.5)';
                 ctx.textAlign = 'center';
-                ctx.fillText(`${startIdx+1}-${Math.min(startIdx+maxVisible,total)}/${total}`, upX+arrowW/2, upY+arrowH+10);
+                ctx.fillText(`${startIdx + 1}-${Math.min(startIdx + maxVisible, total)}/${total}`, upX + arrowW / 2, upY + arrowH + 10);
             }
 
             this.loadouts.slice(startIdx, startIdx + maxVisible).forEach((lo, vi) => {
@@ -33207,19 +33242,16 @@ class MainMenu {
 
                 this._loadoutItemRects.push({ idx: realIdx, rect: [ix, iy, iw, itemH] });
 
-                // 背景
                 ctx.fillStyle = lo.active ? 'rgba(155,89,182,0.3)' : 'rgba(255,255,255,0.06)';
                 ctx.beginPath(); ctx.roundRect(ix, iy, iw, itemH, 8); ctx.fill();
                 if (lo.active) {
                     ctx.strokeStyle = 'rgba(155,89,182,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
                 }
 
-                // 名称
                 ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
                 ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-                ctx.fillText(`${realIdx+1}. ${lo.name}`, ix+8, iy+13);
+                ctx.fillText(`${realIdx + 1}. ${lo.name}`, ix + 8, iy + 13);
 
-                // 迷你格子
                 const miniSize = 22, miniGap = 3;
                 lo.slots.slice(0, 10).forEach((s, si) => {
                     const mx = ix + 8 + si * (miniSize + miniGap);
@@ -33231,25 +33263,24 @@ class MainMenu {
                     if (s && s.type) {
                         ctx.font = '7px Arial'; ctx.fillStyle = 'white';
                         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(s.type.slice(0, 3), mx+miniSize/2, my+miniSize/2);
+                        ctx.fillText(s.type.slice(0, 3), mx + miniSize / 2, my + miniSize / 2);
                     }
                 });
 
-                // Update / Load / Delete 按钮
                 const btnY = iy + itemH - 20;
                 const btnW = 54, btnH = 17;
                 [
-                    { label:'Update', color:'#f5a623', key:'update' },
-                    { label:'Load',   color:'#22cc66', key:'load'   },
-                    { label:'Delete', color:'#ff4466', key:'del'    },
+                    { label: 'Update', color: '#f5a623', key: 'update' },
+                    { label: 'Load', color: '#22cc66', key: 'load' },
+                    { label: 'Delete', color: '#ff4466', key: 'del' },
                 ].forEach((btn, bi) => {
-                    const bx       = ix + 8 + bi * (btnW + 6);
+                    const bx = ix + 8 + bi * (btnW + 6);
                     const hoverKey = `loadout_${btn.key}_${realIdx}`;
-                    ctx.fillStyle  = this.hoveredButton === hoverKey ? btn.color : btn.color + 'cc';
+                    ctx.fillStyle = this.hoveredButton === hoverKey ? btn.color : btn.color + 'cc';
                     ctx.beginPath(); ctx.roundRect(bx, btnY, btnW, btnH, 4); ctx.fill();
                     ctx.font = 'bold 9px Arial'; ctx.fillStyle = 'white';
                     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(btn.label, bx+btnW/2, btnY+btnH/2);
+                    ctx.fillText(btn.label, bx + btnW / 2, btnY + btnH / 2);
                     this._loadoutItemRects.push({ key: btn.key, idx: realIdx, rect: [bx, btnY, btnW, btnH] });
                 });
             });
@@ -33268,17 +33299,15 @@ class MainMenu {
 
         if (this._saveBtnRect && this.isPointInRect(pos, this._saveBtnRect)) {
             this.loadouts.push({
-                name:   `Unnamed ${this.loadouts.length + 1}`,
+                name: `Unnamed ${this.loadouts.length + 1}`,
                 active: false,
-                slots:  this._snapshotCurrentSlots()
+                slots: this._snapshotCurrentSlots()
             });
             this.saveLoadouts();
-            // 滚动到最新保存的配装
             this._loadoutScrollIdx = Math.max(0, this.loadouts.length - 4);
             return 'loadout_saved';
         }
 
-        // 上下箭头滚动
         if (this._scrollUpRect && this.isPointInRect(pos, this._scrollUpRect)) {
             this._loadoutScrollIdx = Math.max(0, this._loadoutScrollIdx - 1);
             return 'loadout_scroll';
@@ -33302,9 +33331,7 @@ class MainMenu {
                 if (item.key === 'load') {
                     this.loadouts.forEach((l, i) => l.active = i === item.idx);
                     this.saveLoadouts();
-                    // 立即应用到快捷栏（主菜单立刻显示）
                     this._applyLoadout(this.loadouts[item.idx]);
-                    // 同时保留标记，startGame 里用来覆盖存档加载
                     this._pendingLoadout = this.loadouts[item.idx];
                     return 'loadout_loaded';
                 }
@@ -33323,7 +33350,7 @@ class MainMenu {
         if (this.isPointInRect(pos, this.loadoutButton)) return 'loadout';
         if (!this.loadoutPanelOpen) return null;
         if (this._saveBtnRect && this.isPointInRect(pos, this._saveBtnRect)) return 'loadout_save';
-        if (this._scrollUpRect   && this.isPointInRect(pos, this._scrollUpRect))   return 'loadout_up';
+        if (this._scrollUpRect && this.isPointInRect(pos, this._scrollUpRect)) return 'loadout_up';
         if (this._scrollDownRect && this.isPointInRect(pos, this._scrollDownRect)) return 'loadout_down';
         for (const item of (this._loadoutItemRects || [])) {
             if (item.key && this.isPointInRect(pos, item.rect))
@@ -33337,12 +33364,12 @@ class MainMenu {
     isPointInRect(point, rect) {
         if (!point || !rect) return false;
         let x, y;
-        if (Array.isArray(point))         { [x, y] = point; }
-        else if (point?.x !== undefined)  { x = point.x; y = point.y; }
-        else if (point?.point)            { [x, y] = point.point; }
+        if (Array.isArray(point)) { [x, y] = point; }
+        else if (point?.x !== undefined) { x = point.x; y = point.y; }
+        else if (point?.point) { [x, y] = point.point; }
         else return false;
         const [rx, ry, rw, rh] = rect;
-        return x >= rx && x <= rx+rw && y >= ry && y <= ry+rh;
+        return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
     }
 
     // ==================== 事件处理 ====================
@@ -33378,9 +33405,9 @@ class MainMenu {
         }
         if (!foundHover && this.isPointInRect(pos, this.extraBonusButton)) {
             foundHover = 'extra_bonus';
-            this.showBonusTooltip = !this.extraBonusActive && !this.extraBonusPermanent;
+            const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
+            this.showBonusTooltip = !this.extraBonusPermanent && !isActive;
         } else if (this.showBonusTooltip) {
-            // 检查是否在 tooltip 整体区域内（包含按钮之间的空隙）
             const [ex, ey, ew] = this.extraBonusButton;
             const tw = 180, th = 90;
             let tx = ex - tw - 8;
@@ -33388,7 +33415,6 @@ class MainMenu {
             const tooltipRect = [tx, ey, tw, th];
 
             if (this.isPointInRect(pos, tooltipRect)) {
-                // 在 tooltip 框内，检测具体按钮
                 if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
                     foundHover = 'bonus_buy_5d';
                 } else if (this._bonusBtnPerm && this.isPointInRect(pos, this._bonusBtnPerm)) {
@@ -33396,9 +33422,7 @@ class MainMenu {
                 } else {
                     foundHover = 'bonus_tooltip_area';
                 }
-                // 保持显示
             } else {
-                // 鼠标离开 extra bonus 和 tooltip 两个区域才隐藏
                 this.showBonusTooltip = false;
             }
         }
@@ -33412,14 +33436,12 @@ class MainMenu {
         const loadoutResult = this.handleLoadoutClick(pos);
         if (loadoutResult) return loadoutResult;
 
-        const currentTime   = Date.now();
-        const isDoubleClick = (currentTime - this.lastClickTime) < this.doubleClickDelay;
-        this.lastClickTime  = currentTime;
+        const currentTime = Date.now();
+        this.lastClickTime = currentTime;
 
         if (this.isPointInRect(pos, this.accountButton)) return "account";
-        if (this.isPointInRect(pos, this.shopButton))    return "shop";
+        if (this.isPointInRect(pos, this.shopButton)) return "shop";
 
-        // Tooltip 内购买按钮
         if (this.showBonusTooltip) {
             const shopSystem = window.gameInstance?.shopSystem;
             if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
@@ -33435,13 +33457,20 @@ class MainMenu {
         }
 
         if (this.isPointInRect(pos, this.extraBonusButton)) {
-            const shopSystem = window.gameInstance?.shopSystem;
-            if (this.extraBonusPermanent) return "extra_bonus_permanent";
-            if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime)
-                return this.reactivateWeeklyBonus() ? "extra_bonus_reactivated" : "extra_bonus_unavailable";
-            // 已激活但未购买时：点击 extra bonus 主按钮直接显示 tooltip
-            this.showBonusTooltip = true;
-            return "extra_bonus_tooltip";
+            const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
+
+            if (this.extraBonusPermanent) {
+                this.refreshBonus();
+                return "extra_bonus_refreshed";
+            }
+
+            if (isActive) {
+                this.refreshBonus();
+                return "extra_bonus_refreshed";
+            } else {
+                this.showBonusTooltip = true;
+                return "extra_bonus_expired_show_tooltip";
+            }
         }
 
         for (const [biome, rect] of Object.entries(this.biomeButtons))
@@ -33464,46 +33493,46 @@ class MainMenu {
     // ==================== 布局重算 ====================
 
     recalculatePositions() {
-        this.WIDTH  = window.WIDTH  || window.innerWidth;
+        this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
 
-        const BUTTON_WIDTH   = 180;
-        const BUTTON_HEIGHT  = 45;
+        const BUTTON_WIDTH = 180;
+        const BUTTON_HEIGHT = 45;
         const BUTTON_SPACING = 15;
         const START_Y_OFFSET = -120;
 
         this.accountButton = [20, 20, 100, 35];
-        this.shopButton    = [20, 65, 100, 35];
+        this.shopButton = [20, 65, 100, 35];
 
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
-        const cols        = 4;
-        const totalWidth  = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
-        const startX      = this.WIDTH / 2 - totalWidth / 2;
+        const cols = 4;
+        const totalWidth = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
+        const startX = this.WIDTH / 2 - totalWidth / 2;
 
         this.biomeButtons = {
-            "Plain":  [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Bio":    [startX+BUTTON_WIDTH+BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Desert": [startX+2*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Random": [startX+3*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Ocean":  [startX, biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Sewer":  [startX+BUTTON_WIDTH+BUTTON_SPACING, biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Arctic": [startX+2*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Jungle": [startX+3*(BUTTON_WIDTH+BUTTON_SPACING), biomeStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
+            "Plain": [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Bio": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Desert": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Random": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Ocean": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Sewer": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Arctic": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Jungle": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const otherStartY = biomeStartY + 2*(BUTTON_HEIGHT+BUTTON_SPACING) + 60;
+        const otherStartY = biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
         this.otherButtons = {
-            "inventory":   [this.WIDTH/2-BUTTON_WIDTH/2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "bonus":       [this.WIDTH/2-BUTTON_WIDTH/2, otherStartY-65, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "crafting":    [this.WIDTH/2-BUTTON_WIDTH/2, otherStartY+BUTTON_HEIGHT+BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "multiplayer": [this.WIDTH/2-BUTTON_WIDTH/2, otherStartY+2*(BUTTON_HEIGHT+BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
-            "quit":        [this.WIDTH/2-BUTTON_WIDTH/2, otherStartY+3*(BUTTON_HEIGHT+BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
+            "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "crafting": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "multiplayer": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "quit": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 3 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
         const EXTRA_BONUS_SIZE = 110;
-        this.extraBonusButton = [this.WIDTH-EXTRA_BONUS_SIZE-10, 10, EXTRA_BONUS_SIZE, EXTRA_BONUS_SIZE];
-        this.titleY = this.HEIGHT/2 - 200;
-        this.hintY  = this.HEIGHT/2 - 150;
+        this.extraBonusButton = [this.WIDTH - EXTRA_BONUS_SIZE - 10, 10, EXTRA_BONUS_SIZE, EXTRA_BONUS_SIZE];
+        this.titleY = this.HEIGHT / 2 - 200;
+        this.hintY = this.HEIGHT / 2 - 150;
 
         this._recalcLoadoutButtonRect();
     }
@@ -33513,124 +33542,123 @@ class MainMenu {
     draw(ctx) {
         if (!ctx) { console.error('MainMenu: No drawing context!'); return; }
 
-        this.WIDTH  = window.WIDTH  || window.innerWidth;
+        this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
 
         ctx.fillStyle = `rgb(${this.MENU_BG.join(',')})`;
         ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         this.drawFlowerPattern(ctx);
 
-        // 标题
         ctx.font = 'bold 64px Arial';
         ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
         ctx.shadowColor = 'rgba(255,255,255,0.5)'; ctx.shadowBlur = 10;
         const tw = ctx.measureText('Flwrr.pro').width;
-        ctx.fillText('Flwrr.pro', this.WIDTH/2 - tw/2, this.titleY);
+        ctx.fillText('Flwrr.pro', this.WIDTH / 2 - tw / 2, this.titleY);
         ctx.shadowBlur = 0;
 
-        // Account 按钮
         const [ax, ay, aw, ah] = this.accountButton;
         const ac = this.hoveredButton === 'account' ? this.OTHER_BUTTON_HOVER_COLORS.account : this.OTHER_BUTTON_COLORS.account;
-        const ag = ctx.createLinearGradient(ax, ay, ax+aw, ay+ah);
+        const ag = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
         ag.addColorStop(0, `rgb(${ac[0]},${ac[1]},${ac[2]})`);
-        ag.addColorStop(1, `rgb(${Math.floor(ac[0]*0.8)},${Math.floor(ac[1]*0.8)},${Math.floor(ac[2]*0.8)})`);
+        ag.addColorStop(1, `rgb(${Math.floor(ac[0] * 0.8)},${Math.floor(ac[1] * 0.8)},${Math.floor(ac[2] * 0.8)})`);
         ctx.fillStyle = ag; ctx.beginPath(); ctx.roundRect(ax, ay, aw, ah, 8); ctx.fill();
         ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
         ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
         ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Account', ax+aw/2, ay+ah/2); ctx.shadowBlur = 0;
+        ctx.fillText('Account', ax + aw / 2, ay + ah / 2); ctx.shadowBlur = 0;
 
-        // Shop 按钮
         const [sx, sy, sw, sh] = this.shopButton;
         const sc = this.hoveredButton === 'shop' ? this.SHOP_BUTTON_HOVER_COLOR : this.SHOP_BUTTON_COLOR;
-        const sg = ctx.createLinearGradient(sx, sy, sx+sw, sy+sh);
+        const sg = ctx.createLinearGradient(sx, sy, sx + sw, sy + sh);
         sg.addColorStop(0, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
-        sg.addColorStop(1, `rgb(${Math.floor(sc[0]*0.8)},${Math.floor(sc[1]*0.8)},${Math.floor(sc[2]*0.8)})`);
+        sg.addColorStop(1, `rgb(${Math.floor(sc[0] * 0.8)},${Math.floor(sc[1] * 0.8)},${Math.floor(sc[2] * 0.8)})`);
         ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 8); ctx.fill();
         ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
         ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
         ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Shop', sx+sw/2, sy+sh/2); ctx.shadowBlur = 0;
+        ctx.fillText('Shop', sx + sw / 2, sy + sh / 2); ctx.shadowBlur = 0;
 
-        // Extra Bonus 按钮
         const [ex, ey, ew, eh] = this.extraBonusButton;
         let bc;
-        if (this.extraBonusPermanent)               bc = this.EXTRA_BONUS_PERMANENT_COLOR;
-        else if (this.extraBonusActive)             bc = this.EXTRA_BONUS_ACTIVE_COLOR;
-        else if (this.hoveredButton==='extra_bonus') bc = this.EXTRA_BONUS_HOVER_COLOR;
-        else                                        bc = this.EXTRA_BONUS_COLOR;
-        const bg = ctx.createRadialGradient(ex+ew/2, ey+eh/2, 0, ex+ew/2, ey+eh/2, ew);
-        bg.addColorStop(0, `rgb(${bc[0]+30},${bc[1]+30},${bc[2]+30})`);
+        if (this.extraBonusPermanent) {
+            bc = this.EXTRA_BONUS_PERMANENT_COLOR;
+        } else if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) {
+            bc = this.EXTRA_BONUS_ACTIVE_COLOR;
+        } else if (this.hoveredButton === 'extra_bonus') {
+            bc = this.EXTRA_BONUS_HOVER_COLOR;
+        } else {
+            bc = this.EXTRA_BONUS_COLOR;
+        }
+        const bg = ctx.createRadialGradient(ex + ew / 2, ey + eh / 2, 0, ex + ew / 2, ey + eh / 2, ew);
+        bg.addColorStop(0, `rgb(${bc[0] + 30},${bc[1] + 30},${bc[2] + 30})`);
         bg.addColorStop(1, `rgb(${bc[0]},${bc[1]},${bc[2]})`);
         ctx.fillStyle = bg; ctx.fillRect(ex, ey, ew, eh);
         ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(ex, ey, ew, eh);
         ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
         if (this.extraBonusPermanent) {
-            ctx.fillText('EXTRA', ex+ew/2, ey+eh/2-9);
-            ctx.fillText('PERMANENT', ex+ew/2, ey+eh/2+9);
-        } else if (this.extraBonusActive) {
+            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 9);
+            ctx.fillText('PERMANENT', ex + ew / 2, ey + eh / 2 + 9);
+        } else if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) {
             const remaining = this.extraBonusExpireTime - Date.now();
-            const days  = Math.floor(remaining / (24*60*60*1000));
-            const hours = Math.floor((remaining % (24*60*60*1000)) / (60*60*1000));
-            const mins  = Math.floor((remaining % (60*60*1000)) / (60*1000));
+            const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const mins = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
 
             let timeStr;
-            if (days > 0)       timeStr = `${days}d ${hours}h left`;
+            if (days > 0) timeStr = `${days}d ${hours}h left`;
             else if (hours > 0) timeStr = `${hours}h ${mins}m left`;
-            else if (mins > 0)  timeStr = `${mins}m left`;
-            else                timeStr = 'Expiring soon';
+            else if (mins > 0) timeStr = `${mins}m left`;
+            else timeStr = 'Expiring soon';
 
-            ctx.fillText('EXTRA', ex+ew/2, ey+eh/2-18);
-            ctx.fillText('ACTIVE', ex+ew/2, ey+eh/2);
+            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
+            ctx.fillText('ACTIVE', ex + ew / 2, ey + eh / 2);
             ctx.font = '10px Arial';
-            ctx.fillText(timeStr, ex+ew/2, ey+eh/2+15);
-            ctx.fillText('click refresh', ex+ew/2, ey+eh/2+28);
+            ctx.fillText(timeStr, ex + ew / 2, ey + eh / 2 + 15);
+            ctx.fillText('click to refresh', ex + ew / 2, ey + eh / 2 + 28);
         } else {
-            ctx.fillText('EXTRA', ex+ew/2, ey+eh/2-18);
-            ctx.fillText('BONUS', ex+ew/2, ey+eh/2);
+            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
+            ctx.fillText('BONUS', ex + ew / 2, ey + eh / 2);
             ctx.font = '9px Arial';
-            ctx.fillText('10K⭐/7d', ex+ew/2, ey+eh/2+18);
-            ctx.fillText('1T⭐/forever', ex+ew/2, ey+eh/2+31);
+            ctx.fillText('10K⭐/5d', ex + ew / 2, ey + eh / 2 + 18);
+            ctx.fillText('1T⭐/forever', ex + ew / 2, ey + eh / 2 + 31);
         }
 
-        // Biome 按钮
         for (const [biome, rect] of Object.entries(this.biomeButtons)) {
             const [x, y, w, h] = rect;
             const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
-            const gr = ctx.createLinearGradient(x, y, x+w, y+h);
+            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
             gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0]*0.8)},${Math.floor(c[1]*0.8)},${Math.floor(c[2]*0.8)})`);
+            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
             ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
             ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
             ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white';
             ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(biome, x+w/2, y+h/2); ctx.shadowBlur = 0;
+            ctx.fillText(biome, x + w / 2, y + h / 2); ctx.shadowBlur = 0;
         }
 
-        // Other 按钮
-        const labelMap = { inventory:'Inventory', crafting:'Crafting', multiplayer:'Multiplayer', bonus:'Bonus', quit:'Quit' };
+        const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus', quit: 'Quit' };
         for (const [name, rect] of Object.entries(this.otherButtons)) {
             const [x, y, w, h] = rect;
             const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
-            const gr = ctx.createLinearGradient(x, y, x+w, y+h);
+            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
             gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0]*0.8)},${Math.floor(c[1]*0.8)},${Math.floor(c[2]*0.8)})`);
+            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
             ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
             ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
             ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
             ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(labelMap[name] || name, x+w/2, y+h/2); ctx.shadowBlur = 0;
+            ctx.fillText(labelMap[name] || name, x + w / 2, y + h / 2); ctx.shadowBlur = 0;
         }
 
-        // 版本号
         ctx.font = '12px Arial'; ctx.fillStyle = `rgb(${this.GRAY.join(',')})`;
         ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-        ctx.fillText('v0.2.0', this.WIDTH-10, this.HEIGHT-10);
+        ctx.fillText('v0.2.0', this.WIDTH - 10, this.HEIGHT - 10);
 
         ctx.textAlign = 'left';
         if (this.autoSaveSystem?.hasSaveData?.()) {
@@ -33656,31 +33684,26 @@ class MainMenu {
     }
 
     drawBonusTooltip(ctx) {
-        // 只在未购买且悬停时显示
-        if (!this.showBonusTooltip || this.extraBonusActive || this.extraBonusPermanent) return;
+        const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
+        if (!this.showBonusTooltip || this.extraBonusPermanent || isActive) return;
 
         const [ex, ey, ew, eh] = this.extraBonusButton;
         const tw = 180, th = 90;
         let tx = ex - tw - 8;
         let ty = ey;
-        // 防止超出左边界
         if (tx < 8) tx = ex + ew + 8;
 
-        // 背景
         ctx.fillStyle = 'rgba(20,20,40,0.95)';
         ctx.beginPath(); ctx.roundRect(tx, ty, tw, th, 10); ctx.fill();
         ctx.strokeStyle = 'rgba(255,215,0,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
 
-        // 标题
         ctx.font = 'bold 12px Arial'; ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Extra Bonus', tx + tw/2, ty + 16);
+        ctx.fillText('Buy Extra Bonus', tx + tw / 2, ty + 16);
 
-        // 分割线
         ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(tx+8, ty+28); ctx.lineTo(tx+tw-8, ty+28); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 8, ty + 28); ctx.lineTo(tx + tw - 8, ty + 28); ctx.stroke();
 
-        // 5天按钮
         const btn5W = tw - 16, btn5H = 22;
         const btn5X = tx + 8, btn5Y = ty + 35;
         this._bonusBtn5d = [btn5X, btn5Y, btn5W, btn5H];
@@ -33688,9 +33711,8 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(btn5X, btn5Y, btn5W, btn5H, 6); ctx.fill();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('5 Days  —  100K ⭐', btn5X + btn5W/2, btn5Y + btn5H/2);
+        ctx.fillText('5 Days  —  100K ⭐', btn5X + btn5W / 2, btn5Y + btn5H / 2);
 
-        // 永久按钮
         const btnPW = tw - 16, btnPH = 22;
         const btnPX = tx + 8, btnPY = ty + 62;
         this._bonusBtnPerm = [btnPX, btnPY, btnPW, btnPH];
@@ -33698,7 +33720,7 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(btnPX, btnPY, btnPW, btnPH, 6); ctx.fill();
         ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Permanent  —  1T ⭐', btnPX + btnPW/2, btnPY + btnPH/2);
+        ctx.fillText('Permanent  —  1T ⭐', btnPX + btnPW / 2, btnPY + btnPH / 2);
     }
 
     drawFlowerPattern(ctx) {
@@ -33708,9 +33730,9 @@ class MainMenu {
         for (let i = 0; i < 10; i++) {
             const x = (i * 150) % this.WIDTH;
             const y = (i * 100) % this.HEIGHT;
-            ctx.beginPath(); ctx.arc(x,      y,      20, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(x+30,   y-20,   15, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(x-20,   y+30,   15, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x + 30, y - 20, 15, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x - 20, y + 30, 15, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
     }
