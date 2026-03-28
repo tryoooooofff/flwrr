@@ -1273,7 +1273,7 @@ const ITEM_IMAGE_URLS = {
     "SpiderCave egg": "images/SpiderCave_egg.png",
     "Relic": "images/relic.png",
     "Plank": "images/plank.png",
-    "Pea": "images/peas.png",
+    "Pea": "images/Peas.png",
     "Soil": "images/soil.png",
     "Tomato": "images/tomato.png",
     "Rubber": "images/rubber.png",
@@ -4597,7 +4597,6 @@ class ImageLoader {
         return canvas;
     }
 }
-
 
 // ==================== 完整的 Item 类（不包含耐久条绘制）====================
 
@@ -15949,11 +15948,11 @@ class ShopSystem {
             "Corn": 8,
             "Yucca": 4,
             "Root": 3,
-            "Antennae": 5,
-            "ThirdEye": 3,
+            "Antennae": 8,
+            "ThirdEye": 10,
             "Barnacle egg":18,
             "Cactus": 4,
-            "Magnet": 8,
+            "Magnet": 10,
             "Egg": 30,
             "Ant Egg": 12,
             "Stick": 18,
@@ -15967,6 +15966,21 @@ class ShopSystem {
             "Rose":8,
             "Hive egg":45,
             "Queen Bee egg":40,
+            "Wasp egg":12,
+            "Worker Termite egg":15,
+            "Soldier Termite egg":18,
+            "StickBug egg":12,
+            "Mantis egg":15,
+            "Firefly egg":13,
+            "TermiteHole egg":40,
+            "TermiteOvermind egg":35,
+            "SpiderCave egg":40,
+            "Relic":3,
+            "Plank":4,
+            "Pea":4,
+            "Soil":5,
+            "Tomato":7,
+            "Rubber":6,
             "Ladybug egg":12,
             "Bee egg":12,
             "Suger":3,
@@ -15980,14 +15994,14 @@ class ShopSystem {
             "Salt": 3,
             "Powder":6,
             "Sand": 3,
-            "Starfish": 4,
+            "Starfish": 5,
             "Jelly": 3,
             "Lightning": 4,
             "Shell": 3,
-            "Pearl": 4,
+            "Pearl": 5,
             "Coral": 5,
             "Cotton": 4,
-            "Cancer": 15,
+            "Cancer": 20,
             "Bacteria_egg": 10,
             "Spider egg": 12,
             "Digger egg": 95,
@@ -16025,7 +16039,7 @@ class ShopSystem {
             "ArcticSpiderCave egg":42,
             "PirateDigger egg":103,
             "ArcticSpider egg":12,
-            "Bone": 8,
+            "Bone": 7,
             "Ice Cube": 5,
             "Snowball": 3,
             "Ice Rose": 5,
@@ -35059,8 +35073,6 @@ class WorldMapGame {
             }
         }
     }
-// 在 WorldMapGame 类中
-        // 简化版：只记录墙壁的边界框
     precomputeWallBoxes(biome) {
         console.log(`🔍 开始预计算 ${biome} 墙壁边界框...`);
 
@@ -35071,105 +35083,77 @@ class WorldMapGame {
         const mapImg = window.imageLoader?.getImage(mapImageKey);
         if (!mapImg || !mapImg.width) return;
 
-        const imgWidth = mapImg.width;
-        const imgHeight = mapImg.height;
-
+        // ✅ 降采样到固定尺寸，大幅减少像素数量
+        const SAMPLE_SIZE = 256;   // 原来用原图尺寸，可能高达 1000+
         const canvas = document.createElement('canvas');
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
+        canvas.width  = SAMPLE_SIZE;
+        canvas.height = SAMPLE_SIZE;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(mapImg, 0, 0);
+        ctx.drawImage(mapImg, 0, 0, SAMPLE_SIZE, SAMPLE_SIZE);
 
+        let data;
         try {
-            const imageData = ctx.getImageData(0, 0, imgWidth, imgHeight);
-            const data = imageData.data;
-
-            // 创建墙壁二值图
-            const wallMap = new Array(imgHeight);
-            for (let y = 0; y < imgHeight; y++) {
-                wallMap[y] = new Array(imgWidth).fill(false);
-                for (let x = 0; x < imgWidth; x++) {
-                    const index = (y * imgWidth + x) * 4;
-                    const a = data[index + 3];
-                    if (a < 128) continue;
-
-                    const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
-                    wallMap[y][x] = brightness < 128;
-                }
-            }
-
-            // 将墙壁合并成大的矩形
-            const boxes = [];
-            const processed = new Array(imgHeight);
-            for (let y = 0; y < imgHeight; y++) {
-                processed[y] = new Array(imgWidth).fill(false);
-            }
-
-            const MIN_SIZE = 20; // 最小墙壁大小
-
-            for (let y = 0; y < imgHeight; y++) {
-                for (let x = 0; x < imgWidth; x++) {
-                    if (wallMap[y][x] && !processed[y][x]) {
-                        // 找到最大连续宽度
-                        let maxWidth = 0;
-                        while (x + maxWidth < imgWidth && wallMap[y][x + maxWidth] && !processed[y][x + maxWidth]) {
-                            maxWidth++;
-                        }
-
-                        // 找到最大连续高度
-                        let maxHeight = 1;
-                        for (let h = 1; h < imgHeight - y; h++) {
-                            let valid = true;
-                            for (let w = 0; w < maxWidth; w++) {
-                                if (!wallMap[y + h][x + w] || processed[y + h][x + w]) {
-                                    valid = false;
-                                    break;
-                                }
-                            }
-                            if (valid) {
-                                maxHeight++;
-                            } else {
-                                break;
-                            }
-                        }
-
-                        // 只保留足够大的矩形
-                        if (maxWidth >= MIN_SIZE || maxHeight >= MIN_SIZE) {
-                            // 标记为已处理
-                            for (let dy = 0; dy < maxHeight; dy++) {
-                                for (let dx = 0; dx < maxWidth; dx++) {
-                                    processed[y + dy][x + dx] = true;
-                                }
-                            }
-
-                            // 计算世界坐标
-                            const worldX = (x / imgWidth) * WORLD_WIDTH;
-                            const worldY = (y / imgHeight) * WORLD_HEIGHT;
-                            const worldWidth = (maxWidth / imgWidth) * WORLD_WIDTH;
-                            const worldHeight = (maxHeight / imgHeight) * WORLD_HEIGHT;
-
-                            boxes.push({
-                                x: worldX,
-                                y: worldY,
-                                width: worldWidth,
-                                height: worldHeight
-                            });
-                        }
-                    }
-                }
-            }
-
-            this.wallCache.set(biome, {
-                boxes: boxes,
-                imgWidth: imgWidth,
-                imgHeight: imgHeight
-            });
-
-            console.log(`✅ ${biome} 墙壁边界框预计算完成: ${boxes.length} 个矩形`);
-
+            data = ctx.getImageData(0, 0, SAMPLE_SIZE, SAMPLE_SIZE).data;
         } catch (e) {
             console.error(`❌ 无法读取 ${biome} 像素数据:`, e);
+            return;
         }
+
+        const W = SAMPLE_SIZE, H = SAMPLE_SIZE;
+
+        // ✅ 用 Uint8Array 替代二维布尔数组，内存节省 ~8 倍
+        const wallMap   = new Uint8Array(W * H);
+        const processed = new Uint8Array(W * H);
+
+        for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+                const i = (y * W + x) * 4;
+                if (data[i + 3] < 128) continue;           // 透明
+                if ((data[i] + data[i+1] + data[i+2]) / 3 < 128) {
+                    wallMap[y * W + x] = 1;                // 深色 = 墙壁
+                }
+            }
+        }
+
+        const boxes   = [];
+        const MIN_PIX = 2;   // 降采样后最小合并尺寸（对应原图约 8px）
+
+        for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+                const idx = y * W + x;
+                if (!wallMap[idx] || processed[idx]) continue;
+
+                // 找最大宽度
+                let w = 0;
+                while (x + w < W && wallMap[y * W + x + w] && !processed[y * W + x + w]) w++;
+
+                // 找最大高度
+                let h = 1;
+                outer: for (; y + h < H; h++) {
+                    for (let dx = 0; dx < w; dx++) {
+                        const ni = (y + h) * W + x + dx;
+                        if (!wallMap[ni] || processed[ni]) break outer;
+                    }
+                }
+
+                if (w >= MIN_PIX || h >= MIN_PIX) {
+                    // 标记已处理
+                    for (let dy = 0; dy < h; dy++)
+                        for (let dx = 0; dx < w; dx++)
+                            processed[(y + dy) * W + x + dx] = 1;
+
+                    boxes.push({
+                        x:      (x / W) * WORLD_WIDTH,
+                        y:      (y / H) * WORLD_HEIGHT,
+                        width:  (w / W) * WORLD_WIDTH,
+                        height: (h / H) * WORLD_HEIGHT
+                    });
+                }
+            }
+        }
+
+        this.wallCache.set(biome, { boxes, imgWidth: W, imgHeight: H });
+        console.log(`✅ ${biome} 墙壁边界框预计算完成: ${boxes.length} 个矩形`);
     }
 
     drawWallBoxes(context, cameraOffset) {
@@ -35203,12 +35187,10 @@ class WorldMapGame {
                 continue;
             }
 
-            // ✅ 核心修正：四舍五入到整数像素
-            // 不要用 10 位小数！那会让边缘模糊。
-            const x = Math.round(box.x - cameraOffset.x);
-            const y = Math.round(box.y - cameraOffset.y);
-            const w = Math.round(box.width);
-            const h = Math.round(box.height);
+            const x = Math.floor(box.x - cameraOffset.x);
+            const y = Math.floor(box.y - cameraOffset.y);
+            const w = Math.ceil(box.width) + 1;   // +1 填补缝隙
+            const h = Math.ceil(box.height) + 1;  // +1 填补缝隙
 
             // 确保最小尺寸为 1，防止消失
             if (w === 0 || h === 0) continue;
@@ -35308,68 +35290,68 @@ class WorldMapGame {
         );
     }
 
-// 在 WorldMapGame 类中
-    isInMazeWall(worldX, worldY, returnColor = false) {
+    isInMazeWall(worldX, worldY) {
         if (typeof MAZE_ENABLED === 'undefined' || !MAZE_ENABLED) return false;
 
         const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
-        if (!bgConfig || !bgConfig.map || !bgConfig.map.image) return false;
+        if (!bgConfig?.map?.image) return false;
 
         const mapImageKey = bgConfig.map.image;
         const mapImg = window.imageLoader?.getImage(mapImageKey);
         if (!mapImg) return false;
 
-        const imgWidth = mapImg.width || mapImg.naturalWidth;
-        const imgHeight = mapImg.height || mapImg.naturalHeight;
-
+        // 边界检查
         if (worldX < 0 || worldX >= WORLD_WIDTH || worldY < 0 || worldY >= WORLD_HEIGHT) return false;
 
-        const pixelX = Math.floor((worldX / WORLD_WIDTH) * imgWidth);
-        const pixelY = Math.floor((worldY / WORLD_HEIGHT) * imgHeight);
+        const imgW = mapImg.width;
+        const imgH = mapImg.height;
+        const cacheKey = `${mapImageKey}_${imgW}_${imgH}`;
 
-        if (pixelX < 0 || pixelX >= imgWidth || pixelY < 0 || pixelY >= imgHeight) return false;
+        // ✅ 重建缓存：改为 Uint8Array，只存 0/1（墙/非墙）
+        if (!this._mazeWallMap || this._mazeWallMapKey !== cacheKey) {
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width  = imgW;
+            tmpCanvas.height = imgH;
+            const tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.drawImage(mapImg, 0, 0);
 
-        const cacheKey = `${mapImageKey}_${imgWidth}_${imgHeight}`;
-
-        if (!this._mazePixelData || this._mazePixelDataKey !== cacheKey) {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = imgWidth;
-            tempCanvas.height = imgHeight;
-            tempCtx.drawImage(mapImg, 0, 0);
-
+            let rgba;
             try {
-                const imageData = tempCtx.getImageData(0, 0, imgWidth, imgHeight);
-                this._mazePixelData = imageData.data;
-                this._mazePixelDataKey = cacheKey;
-                this._mazeImgWidth = imgWidth;
-                this._mazeImgHeight = imgHeight;
+                rgba = tmpCtx.getImageData(0, 0, imgW, imgH).data;
             } catch (e) {
                 return false;
             }
+
+            // 预计算：1 = 墙，0 = 通道
+            const wallMap = new Uint8Array(imgW * imgH);
+            for (let i = 0; i < imgW * imgH; i++) {
+                const pi = i * 4;
+                if (rgba[pi + 3] < 128) continue;          // 透明 = 非墙
+                if ((rgba[pi] + rgba[pi+1] + rgba[pi+2]) / 3 < 128) {
+                    wallMap[i] = 1;
+                }
+            }
+
+            this._mazeWallMap    = wallMap;
+            this._mazeWallMapKey = cacheKey;
+            this._mazeImgWidth   = imgW;
+            this._mazeImgHeight  = imgH;
+
+            // 向后兼容：保留 _mazePixelData 指向原始 rgba（某些地方还在用）
+            this._mazePixelData    = rgba;
+            this._mazePixelDataKey = cacheKey;
+
+            console.log(`✅ ${this.currentBiome} 墙壁查询表已建立 (${imgW}×${imgH})`);
         }
 
-        const pixelIndex = (pixelY * this._mazeImgWidth + pixelX) * 4;
-        if (pixelIndex + 3 >= this._mazePixelData.length) return false;
+        const px = Math.floor((worldX / WORLD_WIDTH)  * this._mazeImgWidth);
+        const py = Math.floor((worldY / WORLD_HEIGHT) * this._mazeImgHeight);
 
-        const r = this._mazePixelData[pixelIndex];
-        const g = this._mazePixelData[pixelIndex + 1];
-        const b = this._mazePixelData[pixelIndex + 2];
-        const a = this._mazePixelData[pixelIndex + 3];
+        if (px < 0 || px >= this._mazeImgWidth || py < 0 || py >= this._mazeImgHeight) return false;
 
-        if (a < 128) return false;
-
-        const brightness = (r + g + b) / 3;
-        const threshold = 128;
-        const isWall = brightness < threshold;
-
-        // 如果需要返回颜色
-        if (returnColor && isWall) {
-            return bgConfig?.wall_color || [100, 100, 100];
-        }
-
-        return isWall;
+        return this._mazeWallMap[py * this._mazeImgWidth + px] === 1;
     }
+
 
     autoLoadGame() {
         if (!this.autoSaveSystem || typeof this.autoSaveSystem.loadGame !== 'function') {
@@ -37324,92 +37306,109 @@ class WorldMapGame {
         }
     }
 
-    // ✅ 绘制小地图（白色底色）
     drawMinimap(ctx) {
-        const mapSize = 120; // 小地图大小
-        const mapX = ctx.canvas.width - mapSize - 20; // 右边距20px
-        const mapY = 20;      // 上边距20px
+        const MAP_SIZE = 120;
+        const mapX = ctx.canvas.width - MAP_SIZE - 20;
+        const mapY = 20;
 
-        // ===== 白色底色 =====
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(mapX, mapY, mapSize, mapSize);
-
-        // ===== 绘制墙壁（深灰色）=====
-        // 获取当前生物群系的地图图片
-        const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
-        if (bgConfig && bgConfig.map && bgConfig.map.image) {
-            const mapImageKey = bgConfig.map.image;
-            const mapImg = window.imageLoader?.getImage(mapImageKey);
-
-            if (mapImg) {
-                // 创建离屏 canvas 来处理像素数据
-                const offscreenCanvas = document.createElement('canvas');
-                const offCtx = offscreenCanvas.getContext('2d');
-                offscreenCanvas.width = mapSize;
-                offscreenCanvas.height = mapSize;
-
-                // 绘制缩放后的地图
-                offCtx.drawImage(mapImg, 0, 0, mapImg.width, mapImg.height, 0, 0, mapSize, mapSize);
-
-                // 获取像素数据
-                try {
-                    const imageData = offCtx.getImageData(0, 0, mapSize, mapSize);
-                    const data = imageData.data;
-
-                    // 绘制墙壁（深色像素）
-                    for (let y = 0; y < mapSize; y++) {
-                        for (let x = 0; x < mapSize; x++) {
-                            const index = (y * mapSize + x) * 4;
-                            const r = data[index];
-                            const g = data[index + 1];
-                            const b = data[index + 2];
-                            const a = data[index + 3];
-
-                            // 计算亮度
-                            const brightness = (r + g + b) / 3;
-
-                            // 如果是墙壁（不透明且较暗）
-                            if (a > 128 && brightness < 128) {
-                                ctx.fillStyle = '#333333'; // 深灰色墙壁
-                                ctx.fillRect(mapX + x, mapY + y, 1, 1);
-                            }
-                            // 透明或亮色区域保持白色底色
-                        }
-                    }
-                } catch (e) {
-                    console.warn('无法读取地图像素数据');
-                }
-            }
+        // ✅ 只在 biome 变化时重新生成小地图底图
+        if (!this._minimapCache || this._minimapCacheBiome !== this.currentBiome) {
+            this._minimapCache = this._buildMinimapCache(MAP_SIZE);
+            this._minimapCacheBiome = this.currentBiome;
         }
 
-        // ===== 绘制玩家位置（红点）=====
-        const scaleX = mapSize / WORLD_WIDTH;
-        const scaleY = mapSize / WORLD_HEIGHT;
+        // 直接贴缓存（一次 drawImage，几乎零开销）
+        if (this._minimapCache) {
+            ctx.drawImage(this._minimapCache, mapX, mapY);
+        } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(mapX, mapY, MAP_SIZE, MAP_SIZE);
+        }
 
-        const playerX = mapX + this.player.physicsBody.position.x * scaleX;
-        const playerY = mapY + this.player.physicsBody.position.y * scaleY;
+        // 玩家红点（每帧更新位置，开销极小）
+        const scaleX = MAP_SIZE / WORLD_WIDTH;
+        const scaleY = MAP_SIZE / WORLD_HEIGHT;
+        const px = mapX + this.player.physicsBody.position.x * scaleX;
+        const py = mapY + this.player.physicsBody.position.y * scaleY;
 
-        // 玩家红点
         ctx.fillStyle = '#ff0000';
         ctx.beginPath();
-        ctx.arc(playerX, playerY, 5, 0, Math.PI * 2);
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#000000'; // 黑色边框
+        ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // ===== 绘制边框 =====
+        // 边框
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 2;
-        ctx.strokeRect(mapX, mapY, mapSize, mapSize);
+        ctx.strokeRect(mapX, mapY, MAP_SIZE, MAP_SIZE);
 
-        // ===== 小地图标题 =====
+        // 标题
         ctx.font = 'bold 12px Arial';
         ctx.fillStyle = '#000000';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
-        ctx.fillText(this.currentBiome, mapX + mapSize - 5, mapY + 5);
+        ctx.fillText(this.currentBiome, mapX + MAP_SIZE - 5, mapY + 5);
     }
+
+    // 辅助：一次性渲染小地图底图到离屏 canvas
+    _buildMinimapCache(MAP_SIZE) {
+        const offscreen = document.createElement('canvas');
+        offscreen.width  = MAP_SIZE;
+        offscreen.height = MAP_SIZE;
+        const offCtx = offscreen.getContext('2d');
+
+        // 白底
+        offCtx.fillStyle = '#ffffff';
+        offCtx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
+
+        const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
+        if (!bgConfig?.map?.image) return offscreen;
+
+        const mapImg = window.imageLoader?.getImage(bgConfig.map.image);
+        if (!mapImg) return offscreen;
+
+        // 缩放到 MAP_SIZE，然后逐像素上色
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width  = MAP_SIZE;
+        tmpCanvas.height = MAP_SIZE;
+        const tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(mapImg, 0, 0, MAP_SIZE, MAP_SIZE);
+
+        let imageData;
+        try {
+            imageData = tmpCtx.getImageData(0, 0, MAP_SIZE, MAP_SIZE);
+        } catch (e) {
+            return offscreen;
+        }
+
+        const d = imageData.data;
+        // 批量绘制墙壁像素（用 putImageData 替代逐像素 fillRect）
+        const wallData = offCtx.createImageData(MAP_SIZE, MAP_SIZE);
+        const wd = wallData.data;
+
+        for (let i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
+            const pi = i * 4;
+            const a = d[pi + 3];
+            const brightness = (d[pi] + d[pi+1] + d[pi+2]) / 3;
+            if (a > 128 && brightness < 128) {
+                // 墙壁：深灰色
+                wd[pi]     = 51;
+                wd[pi + 1] = 51;
+                wd[pi + 2] = 51;
+                wd[pi + 3] = 255;
+            } else {
+                // 通道：保持白底（透明，显示白底）
+                wd[pi + 3] = 0;
+            }
+        }
+
+        offCtx.putImageData(wallData, 0, 0);
+        return offscreen;
+    }
+
+
     // 在 WorldMapGame 类中，修改 drawWorldBackground 方法
     drawWorldBackground(context, cameraOffset) {
         const bgConfig = BIOME_BACKGROUNDS[this.currentBiome] || BIOME_BACKGROUNDS.Plain;
