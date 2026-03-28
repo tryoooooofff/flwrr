@@ -21368,9 +21368,9 @@ class Enemy {
         if (distance <= contactRange && canMelee) {
             // 设置近战冷却
             if (this.type === "Wasp" || this.type === "Squid") {
-                this.meleeCooldown = this.meleeCooldownMax || 500;
+                this.meleeCooldown = this.meleeCooldownMax || 300;
             } else {
-                this.attackCooldown = 800;
+                this.attackCooldown = 200;
             }
 
             const selfIsFriendly = this.isFriendly;
