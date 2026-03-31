@@ -1297,7 +1297,7 @@ export const ITEM_STATS = {
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
-    "Web": {base_attack:1, base_cooldown:500, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
+    "Web": {base_attack:1, base_cooldown:1000, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
     "Pincer": {base_attack:15, base_cooldown:500, web_slow:0.5, use_rarity_multiplier: true, base_reload_time:1000},
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -4934,18 +4934,19 @@ class ImageLoader {
             return ImageLoader._instance;
         }
 
-        this.imageCache  = {};   // name → HTMLCanvasElement
-        this.scaledCache = {};   // "name_w_h" → scaled canvas
+        this.imageCache = {};   // 原始图片缓存 (name -> HTMLCanvasElement)
+        this.scaledCache = {};  // 缩放图片缓存 ("name_w_h" -> canvas)
         this._loadPromises = [];
-        this._loadingStatus = new Map(); // 跟踪每个资源的加载状态
+        this._loadingStatus = new Map(); // 跟踪状态: 'loading' | 'loaded' | 'failed'
 
         // 雪碧图状态
-        this._spriteSheet  = null;
+        this._spriteSheet = null;
         this._spriteFrames = null;
-        this._spriteReady  = false;
+        this._spriteReady = false;
 
-        // 关键修复：等待所有资源加载完成
-        this._loadPromises.push(this._initSpriteSheet());
+        // 🟢 关键修复：将初始化存为 Promise，确保 ensureMapLoaded 可以等待它
+        this.initPromise = this._initSpriteSheet();
+        this._loadPromises.push(this.initPromise);
 
         ImageLoader._instance = this;
     }
@@ -4957,8 +4958,13 @@ class ImageLoader {
         return ImageLoader._instance;
     }
 
+    /**
+     * 处理名称别名，确保大小写、空格/下划线都能匹配到图片
+     */
     _getAliases(name) {
         const aliases = new Set();
+        if (!name) return aliases;
+
         const variants = (s) => {
             const result = new Set([s]);
             if (s.length > 0) {
@@ -4967,7 +4973,6 @@ class ImageLoader {
                     : s[0].toUpperCase() + s.slice(1);
                 result.add(toggled);
                 result.add(s.toLowerCase());
-                result.add(s.split(/[ _]/).map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(s.includes('_') ? '_' : ' '));
             }
             return result;
         };
@@ -4991,12 +4996,12 @@ class ImageLoader {
 
     async _initSpriteSheet() {
         try {
-            // 1. 拉取坐标 JSON
+            // 1. 获取雪碧图坐标 JSON
             const jsonResp = await fetch('images/sprites.json?v=' + Date.now());
             if (!jsonResp.ok) throw new Error(`HTTP ${jsonResp.status}`);
             this._spriteFrames = await jsonResp.json();
 
-            // 2. 加载雪碧图本体
+            // 2. 加载雪碧图图片
             await new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
@@ -5009,16 +5014,15 @@ class ImageLoader {
             });
 
             this._spriteReady = true;
-            console.log(`✅ 雪碧图加载完成，共 ${Object.keys(this._spriteFrames).length} 帧`);
 
-            // 3. 裁剪每一帧
+            // 3. 异步裁剪每一帧（让出主线程防止掉帧）
             const cropPromises = [];
             for (const [name, frame] of Object.entries(this._spriteFrames)) {
                 cropPromises.push(this._cropFrameAsync(name, frame));
             }
             await Promise.all(cropPromises);
 
-            // 4. 加载大图清单
+            // 4. 加载大图（如地图）和备用图
             await this._loadFallbackImages();
 
         } catch (err) {
@@ -5028,9 +5032,8 @@ class ImageLoader {
         }
     }
 
-    async _cropFrameAsync(name, frame) {
+    _cropFrameAsync(name, frame) {
         return new Promise((resolve) => {
-            // 使用 setTimeout 让出主线程，避免阻塞
             setTimeout(() => {
                 const canvas = document.createElement('canvas');
                 canvas.width = frame.w;
@@ -5051,41 +5054,18 @@ class ImageLoader {
 
     async _loadFallbackImages() {
         const promises = [];
+        const maps = [
+            'map_plain', 'map_bio', 'map_desert', 'map_random',
+            'map_arctic', 'map_jungle', 'map_ocean', 'map_sewer', 'maze'
+        ];
 
-        // 尝试读取清单
-        try {
-            const resp = await fetch('images/large_images.json?v=' + Date.now());
-            if (resp.ok) {
-                const manifest = await resp.json();
-                for (const [name, url] of Object.entries(manifest)) {
-                    if (!this.imageCache[name]) {
-                        promises.push(this._loadSingleImage(name, url));
-                    }
-                }
-                console.log(`📋 大图清单加载完成，${Object.keys(manifest).length} 张单独加载`);
-            }
-        } catch (e) { /* 降级 */ }
-
-        // 硬编码已知大图
-        const knownLarge = {
-            map_plain:  'images/map_plain.png',
-            map_bio:    'images/map_bio.png',
-            map_desert: 'images/map_desert.png',
-            map_random: 'images/map_random.png',
-            map_arctic: 'images/map_arctic.png',
-            map_jungle: 'images/map_jungle.png',
-            map_ocean:  'images/map_ocean.png',
-            map_sewer:  'images/map_sewer.png',
-            maze:       'images/maze.png',
-        };
-
-        for (const [name, url] of Object.entries(knownLarge)) {
-            if (!this.imageCache[name]) {
-                promises.push(this._loadSingleImage(name, url));
+        for (const mapKey of maps) {
+            if (!this.imageCache[mapKey]) {
+                promises.push(this._loadSingleImage(mapKey, `images/${mapKey}.png`));
             }
         }
 
-        // 补充 ITEM_IMAGE_URLS
+        // 处理 ITEM_IMAGE_URLS
         if (typeof ITEM_IMAGE_URLS !== 'undefined') {
             for (const [name, url] of Object.entries(ITEM_IMAGE_URLS)) {
                 if (!this.imageCache[name]) {
@@ -5098,138 +5078,101 @@ class ImageLoader {
     }
 
     async _loadAllImagesLegacy() {
-        const promises = [];
-
-        if (typeof ITEM_IMAGE_URLS !== 'undefined') {
-            for (const [name, url] of Object.entries(ITEM_IMAGE_URLS)) {
-                promises.push(this._loadSingleImage(name, url));
-            }
-        }
-
-        const maps = [
-            ['map_plain',  'images/map_plain.png'],
-            ['map_bio',    'images/map_bio.png'],
-            ['map_desert', 'images/map_desert.png'],
-            ['map_random', 'images/map_random.png'],
-            ['map_arctic', 'images/map_arctic.png'],
-            ['map_jungle', 'images/map_jungle.png'],
-            ['map_ocean',  'images/map_ocean.png'],
-            ['map_sewer',  'images/map_sewer.png'],
-            ['maze',       'images/maze.png'],
-        ];
-
-        for (const [name, url] of maps) {
-            promises.push(this._loadSingleImage(name, url));
-        }
-
-        await Promise.all(promises);
+        return this._loadFallbackImages(); // 复用加载逻辑
     }
 
     _loadSingleImage(itemName, url) {
-        return new Promise((resolve) => {
-            if (this.imageCache[itemName]) {
-                resolve(this.imageCache[itemName]);
-                return;
-            }
+        if (this.imageCache[itemName]) return Promise.resolve(this.imageCache[itemName]);
+        if (this._loadingStatus.get(itemName) === 'loading') {
+            // 如果已经在加载中，等待已有任务
+            return new Promise(resolve => {
+                const interval = setInterval(() => {
+                    if (this.imageCache[itemName]) {
+                        clearInterval(interval);
+                        resolve(this.imageCache[itemName]);
+                    }
+                }, 100);
+            });
+        }
 
+        this._loadingStatus.set(itemName, 'loading');
+
+        return new Promise((resolve) => {
             const img = new Image();
             img.crossOrigin = 'anonymous';
 
+            const timeout = setTimeout(() => {
+                img.onload = null;
+                img.onerror = null;
+                img.src = ""; // 强行停止加载
+                console.warn(`⏰ 加载超时: ${itemName}`);
+                const placeholder = this.createPlaceholder(itemName);
+                this._registerImage(itemName, placeholder);
+                resolve(placeholder);
+            }, 20000); // 地图文件较大，给 20 秒宽限期
+
             img.onload = () => {
+                clearTimeout(timeout);
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
                 canvas.width = img.width;
                 canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
+                canvas.getContext('2d').drawImage(img, 0, 0);
                 this._registerImage(itemName, canvas);
                 resolve(canvas);
             };
 
             img.onerror = () => {
-                console.warn(`⚠️ 加载失败: ${itemName} (${url})`);
-                const placeholder = this.createPlaceholder(itemName, 'Common');
+                clearTimeout(timeout);
+                const placeholder = this.createPlaceholder(itemName);
                 this._registerImage(itemName, placeholder);
                 resolve(placeholder);
-            };
-
-            // 添加超时处理
-            const timeout = setTimeout(() => {
-                console.warn(`⏰ 超时: ${itemName}`);
-                img.onerror?.(new Error('Timeout'));
-            }, 10000);
-
-            img.onload = () => {
-                clearTimeout(timeout);
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                this._registerImage(itemName, canvas);
-                resolve(canvas);
             };
 
             img.src = url.includes('?') ? url : `${url}?v=${Date.now()}`;
         });
     }
 
-    // 关键修复：添加确保地图加载完成的方法
+    /**
+     * 🟢 核心方法：确保地图加载完成
+     */
     async ensureMapLoaded(mapName) {
-        const mapKey = `map_${mapName}`;
-        if (this.imageCache[mapKey]) {
-            return this.imageCache[mapKey];
+        const mapKey = mapName.startsWith('map_') ? mapName : `map_${mapName}`;
+
+        // 1. 检查当前是否已有
+        if (this.imageCache[mapKey]) return this.imageCache[mapKey];
+
+        // 2. 等待初始化过程（雪碧图 + 默认大图清单）
+        await this.initPromise;
+
+        // 3. 如果初始化后还是没有，强制发起单次加载并等待结果
+        if (!this.imageCache[mapKey]) {
+            console.log(`🗺️ 正在补充加载缺失的地图: ${mapKey}`);
+            await this._loadSingleImage(mapKey, `images/${mapKey}.png`);
         }
 
-        console.log(`🗺️ 等待地图加载: ${mapKey}`);
-
-        // 等待所有加载完成
-        await this.waitAllLoaded();
-
-        // 再次检查
-        if (this.imageCache[mapKey]) {
-            console.log(`✅ 地图加载完成: ${mapKey}`);
-            return this.imageCache[mapKey];
-        }
-
-        // 如果还是没有，尝试重新加载
-        console.warn(`⚠️ 地图未找到，尝试重新加载: ${mapKey}`);
-        await this._loadSingleImage(mapKey, `images/${mapKey}.png`);
         return this.imageCache[mapKey];
-    }
-
-    loadImage(itemName, url) {
-        if (this.imageCache[itemName]) {
-            return Promise.resolve(this.imageCache[itemName]);
-        }
-        return this._loadSingleImage(itemName, url);
-    }
-
-    async waitAllLoaded() {
-        console.log('⏳ 等待所有资源加载...');
-        await Promise.all(this._loadPromises);
-        console.log('✅ 所有资源加载完成');
     }
 
     getImage(itemName, rarity = 'Common', size = null) {
         let image = this.imageCache[itemName];
+
+        // 尝试别名匹配
         if (!image) {
             for (const alias of this._getAliases(itemName)) {
                 if (this.imageCache[alias]) {
                     image = this.imageCache[alias];
-                    this.imageCache[itemName] = image;
                     break;
                 }
             }
         }
 
+        // 如果最终没找到，返回一个临时占位符
         if (!image) {
-            // 不立即警告，可能还在加载中
-            console.log(`🖼️ 等待图片: ${itemName}`);
             image = this.createPlaceholder(itemName, rarity);
-            this.imageCache[itemName] = image;
         }
 
-        if (size) {
+        // 处理缩放请求
+        if (size && size[0] > 0 && size[1] > 0) {
             const key = `${itemName}_${size[0]}_${size[1]}`;
             if (!this.scaledCache[key]) {
                 this.scaledCache[key] = this.scaleImage(image, size[0], size[1]);
@@ -5244,35 +5187,41 @@ class ImageLoader {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+        const ctx = canvas.getContext('2d');
+        // 开启平滑
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(image, 0, 0, width, height);
         return canvas;
     }
 
-    createPlaceholder(itemName, rarity) {
+    createPlaceholder(itemName, rarity = 'Common') {
         const canvas = document.createElement('canvas');
         canvas.width = 128;
         canvas.height = 128;
         const ctx = canvas.getContext('2d');
 
-        ctx.clearRect(0, 0, 128, 128);
-
         const color = (typeof RARITY_COLORS !== 'undefined' && RARITY_COLORS[rarity])
-            ? RARITY_COLORS[rarity]
-            : [120, 120, 120];
-        ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
-        ctx.fillRect(0, 0, 128, 128);
+            ? `rgb(${RARITY_COLORS[rarity].join(',')})`
+            : '#787878';
 
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(0, 0, 128, 128);
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 128, 128);
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(2, 2, 124, 124);
 
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px Arial';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(itemName.substring(0, 3).toUpperCase(), 64, 64);
+        ctx.fillText(itemName.substring(0, 5), 64, 64);
 
         return canvas;
+    }
+
+    async waitAllLoaded() {
+        await Promise.all(this._loadPromises);
+        return true;
     }
 }
 
@@ -7901,13 +7850,7 @@ class EnemyDrawer {
         context.bezierCurveTo(...p(258,278), ...p(288,240), ...p(340,240));
         context.closePath();
 
-        const bodyGrad = context.createRadialGradient(
-            ...p(340, 252), 0,
-            ...p(340, 364), 135*S
-        );
-        bodyGrad.addColorStop(0,   BODY_LIGHT);
-        bodyGrad.addColorStop(1,   BODY_SHADE);
-        context.fillStyle = bodyGrad;
+        context.fillStyle = BODY_SHADE;
         context.fill();
         context.strokeStyle = BODY_DARK;
         context.lineWidth = 10 * S;
@@ -7952,7 +7895,7 @@ class EnemyDrawer {
         context.bezierCurveTo(
             ...p(305,218),   // 控制点1
             ...p(300,188),   // 控制点2
-            ...p(295,165)    // 终点
+            ...p(325,165)    // 终点
         );
         context.stroke();
 
@@ -7962,7 +7905,7 @@ class EnemyDrawer {
         context.bezierCurveTo(
             ...p(375,218),
             ...p(380,188),
-            ...p(385,165)
+            ...p(355,165)
         );
         context.stroke();
 
@@ -7975,13 +7918,7 @@ class EnemyDrawer {
         context.ellipse(hcx, hcy, 50*S, 64*S, 0, Math.PI, 0, false);
         context.closePath();
 
-        const headGrad = context.createRadialGradient(
-            hcx, hcy - 5*S, 0,
-            hcx, hcy, 60*S
-        );
-        headGrad.addColorStop(0, HEAD_LIGHT);
-        headGrad.addColorStop(1, HEAD_SHADE);
-        context.fillStyle = headGrad;
+        context.fillStyle = BODY_SHADE;
         context.fill();
         context.strokeStyle = BODY_DARK;
         context.lineWidth = 10 * S;
@@ -9372,7 +9309,7 @@ class EnemyDrawer {
 
         context.restore();
     }
-    // ==================== 🍯 蜂巢 (Hive) - 修复奇怪形状版 ====================
+    // ==================== 蜂巢 (Hive) - 修复奇怪形状版 ====================
     drawHive(context, x, y, size, viewScale = 1.0, enemyObj = null) {
         // 1. 基础尺寸计算
         const scaledSize = size * viewScale;
@@ -9494,6 +9431,224 @@ class EnemyDrawer {
         // 第 4 层
         const points4 = getHexagonPoints(x, y, r4);
         drawRoundedHexagon(points4, COLOR_INNER, cornerRadius * 0.4);
+
+        context.restore();
+    }
+    // ==================== 蜂巢 (Hive) - 完美形状 & Hel Hive 版 ====================
+// 在 enemyObj 参数中传递 { isHelHive: true } 来触发 Hel Hive 的外观
+    drawHelHive(context, x, y, size, viewScale = 1.0, enemyObj = null) {
+        // 1. 基础尺寸计算
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 2. 判断类型
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const isHelHive = enemyObj && enemyObj.isHelHive === true; // 新增
+
+        // 3. 颜色和层级定义
+        let COLOR_OUTER, COLOR_MID_1, COLOR_MID_2, COLOR_INNER;
+        let ratios; // 存储每一层的尺寸比例
+
+        if (isFriendly) {
+            // --- 友方：金色 ---
+            COLOR_OUTER = '#FFD700';      // 亮金色
+            COLOR_MID_1 = '#B8860B';      // 深金色
+            COLOR_MID_2 = '#FFD700';
+            COLOR_INNER = '#B8860B';
+            // 保持原比例
+            ratios = [0.4, 0.4 * 0.75, 0.4 * 0.5, 0.4 * 0.25];
+        } else if (isHelHive) {
+            // --- Hel Hive：红/深红 (来自 image_0.png) ---
+            COLOR_OUTER = '#E15042';      // 浅红色 (主色)
+            COLOR_MID_1 = '#8C2D25';      // 深红色 (阴影/边框色)
+            COLOR_MID_2 = '#E15042';
+            COLOR_INNER = '#8C2D25';
+            // 使用指定的比例: 100%, 80%, 60%, 40% (外面到里面)
+            // 这里的比例是相对于 full size 的
+            ratios = [1.0, 0.8, 0.6, 0.4];
+        } else {
+            // --- 普通敌方：黄色 ---
+            COLOR_OUTER = '#FFFF00';      // 黄色
+            COLOR_MID_1 = '#DAA520';      // 深黄色
+            COLOR_MID_2 = '#FFFF00';
+            COLOR_INNER = '#DAA520';
+            // 保持原比例
+            ratios = [0.4, 0.4 * 0.75, 0.4 * 0.5, 0.4 * 0.25];
+        }
+
+        // 4. 辅助函数：获取标准的 6 个六边形顶点 (平顶，-30度起始)
+        const getHexagonPoints = (cx, cy, radius) => {
+            const points = [];
+            for (let i = 0; i < 6; i++) {
+                const angle = (60 * i - 30) * Math.PI / 180;
+                points.push({
+                    x: cx + radius * Math.cos(angle),
+                    y: cy + radius * Math.sin(angle)
+                });
+            }
+            return points;
+        };
+
+        // 5. 使用二次贝塞尔曲线绘制完美的圆角六边形
+        // points 数组必须是按顺序排列的六边形顶点
+        const drawRoundedHexagon = (points, fillColor, cornerRadius) => {
+            if (points.length !== 6) return;
+
+            context.beginPath();
+
+            for (let i = 0; i < 6; i++) {
+                const current = points[i];
+                const next = points[(i + 1) % 6];
+                const prev = points[(i + 5) % 6]; // 获取上一个点
+
+                // --- 计算方向向量和切点 ---
+
+                // 到下一个点的方向
+                const nextDx = next.x - current.x;
+                const nextDy = next.y - current.y;
+                const nextDist = Math.hypot(nextDx, nextDy);
+
+                // 到上一个点的方向
+                const prevDx = prev.x - current.x;
+                const prevDy = prev.y - current.y;
+                const prevDist = Math.hypot(prevDx, prevDy);
+
+                // 确保圆角半径不超过边长的一半
+                const actualR = Math.min(cornerRadius, nextDist / 2, prevDist / 2);
+
+                // 计算该顶点出切点 (Tangent Point Out)
+                const t1x = current.x + (nextDx / nextDist) * actualR;
+                const t1y = current.y + (nextDy / nextDist) * actualR;
+
+                // 计算该顶点入切点 (Tangent Point In)
+                const t2x = current.x + (prevDx / prevDist) * actualR;
+                const t2y = current.y + (prevDy / prevDist) * actualR;
+
+                // --- 绘制 ---
+                if (i === 0) {
+                    // 如果是第一个点，移动到出切点
+                    context.moveTo(t1x, t1y);
+                } else {
+                    // 绘制直线到当前顶点的入切点
+                    context.lineTo(t2x, t2y);
+                    // 绘制圆角（以当前点为控制点，到出切点）
+                    context.quadraticCurveTo(current.x, current.y, t1x, t1y);
+                }
+
+                // 处理最后一条边：第一个顶点的圆角
+                if (i === 5) {
+                    const first = points[0];
+                    const finalNextDx = first.x - current.x;
+                    const finalNextDy = first.y - current.y;
+                    const finalNextDist = Math.hypot(finalNextDx, finalNextDy);
+                    const finalR = Math.min(cornerRadius, finalNextDist/2); // 简单的再次检查
+                    const firstT2x = first.x - (finalNextDx / finalNextDist) * finalR;
+                    const firstT2y = first.y - (finalNextDy / finalNextDist) * finalR;
+
+                    context.lineTo(firstT2x, firstT2y);
+                    context.quadraticCurveTo(first.x, first.y, context.currentPathPointX, context.currentPathPointY); // 这里需要保存第一个点的出切点
+                }
+            }
+
+            // --- 更正最后一条边和第一个圆角的连接 ---
+            // 为了完美闭合，我们需要保存第一个圆角的起点（出切点），
+            // 并在绘制完所有边后，绘制最后一条直线和第一个顶点的圆弧。
+
+            // 重新构建更健壮的循环
+            context.beginPath();
+
+            for (let i = 0; i < 6; i++) {
+                const current = points[i];
+                const next = points[(i + 1) % 6];
+                const prev = points[(i + 5) % 6];
+
+                const nextDx = next.x - current.x;
+                const nextDy = next.y - current.y;
+                const nextDist = Math.hypot(nextDx, nextDy);
+
+                const prevDx = prev.x - current.x;
+                const prevDy = prev.y - current.y;
+                const prevDist = Math.hypot(prevDx, prevDy);
+
+                const actualR = Math.min(cornerRadius, nextDist / 2, prevDist / 2);
+
+                const t_out_x = current.x + (nextDx / nextDist) * actualR;
+                const t_out_y = current.y + (nextDy / nextDist) * actualR;
+
+                const t_in_x = current.x + (prevDx / prevDist) * actualR;
+                const t_in_y = current.y + (prevDy / prevDist) * actualR;
+
+                if (i === 0) {
+                    // 移动到第一个顶点的出切点
+                    context.moveTo(t_out_x, t_out_y);
+                } else {
+                    // 连接到当前顶点的入切点
+                    context.lineTo(t_in_x, t_in_y);
+                    // 绘制当前顶点的圆角，到其出切点
+                    context.quadraticCurveTo(current.x, current.y, t_out_x, t_out_y);
+                }
+            }
+
+            // 最后：连接到第一个顶点的入切点，并绘制它的圆弧
+            const first = points[0];
+            const last = points[5];
+            const lastDx = first.x - last.x;
+            const lastDy = first.y - last.y;
+            const lastDist = Math.hypot(lastDx, lastDy);
+            const prevDx = last.x - first.x;
+            const prevDy = last.y - first.y;
+            const prevDist = Math.hypot(prevDx, prevDy);
+            // 这里需要计算第一个点的入切点
+            const firstAnglePrev = Math.atan2(last.y - first.y, last.x - first.x);
+            const firstAngleNext = Math.atan2(points[1].y - first.y, points[1].x - first.x);
+            const firstDxPrev = Math.cos(firstAnglePrev);
+            const firstDyPrev = Math.sin(firstAnglePrev);
+            const firstDxNext = Math.cos(firstAngleNext);
+            const firstDyNext = Math.sin(firstAngleNext);
+
+            const first_t_out_x = first.x + firstDxNext * cornerRadius; // 这就是我们 moveTo 的点
+            const first_t_out_y = first.y + firstDyNext * cornerRadius;
+            const first_t_in_x = first.x + firstDxPrev * cornerRadius;
+            const first_t_in_y = first.y + firstDyPrev * cornerRadius;
+
+            context.lineTo(first_t_in_x, first_t_in_y);
+            context.quadraticCurveTo(first.x, first.y, first_t_out_x, first_t_out_y);
+
+            context.closePath();
+            context.fillStyle = fillColor;
+            context.fill();
+        };
+
+        // 6. 计算各层半径 (使用从第 3 步得到的比例)
+        // Hel Hive 使用 full size (r=scaledSize), 普通模式保留其原有的 baseR 概念
+        const r_layer = [
+            scaledSize * ratios[0], // 第1层（外面）
+            scaledSize * ratios[1], // 第2层
+            scaledSize * ratios[2], // 第3层
+            scaledSize * ratios[3]  // 第4层（里面）
+        ];
+
+        // 圆角半径
+        const cornerRadiusBase = scaledSize * 0.05;
+
+        // 7. 开始绘制 (从大到小)
+        context.save();
+
+        // 绘制第 1 层
+        const points1 = getHexagonPoints(x, y, r_layer[0]);
+        drawRoundedHexagon(points1, COLOR_OUTER, cornerRadiusBase);
+
+        // 绘制第 2 层
+        const points2 = getHexagonPoints(x, y, r_layer[1]);
+        drawRoundedHexagon(points2, COLOR_MID_1, cornerRadiusBase); // 这里圆角可以保持一致，或按原逻辑递减
+
+        // 绘制第 3 层
+        const points3 = getHexagonPoints(x, y, r_layer[2]);
+        drawRoundedHexagon(points3, COLOR_MID_2, cornerRadiusBase);
+
+        // 绘制第 4 层
+        const points4 = getHexagonPoints(x, y, r_layer[3]);
+        drawRoundedHexagon(points4, COLOR_INNER, cornerRadiusBase);
 
         context.restore();
     }
@@ -9826,105 +9981,58 @@ class EnemyDrawer {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
+        // 1. 基础参数与稀有度缩放
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
         const rarity = enemyObj?.rarity || "Common";
-
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
             "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
         };
         const legendaryFactor = raritySizeFactors["Legendary"];
         const rarityFactor    = raritySizeFactors[rarity] || 1.0;
-        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size) * 0.67;
+        const ss = (rarityFactor / legendaryFactor) * (scaledSize / size) * 0.67;
 
+        // 2. 颜色定义 (提取自参考图)
         const BODY_FILL   = isFriendly ? '#404080' : '#404040';
         const BODY_STROKE = isFriendly ? '#202060' : '#202020';
-        const WING_FILL   = isFriendly ? 'rgba(64,64,160,0.53)' : 'rgba(64,64,64,0.53)';
+        const WING_FILL   = isFriendly ? 'rgba(64,64,160,0.4)' : 'rgba(64,64,64,0.53)';
         const WING_STROKE = isFriendly ? '#202060' : '#202020';
+        const MAIN_COLOR  = isFriendly ? '#6060A0' : '#505050';
 
-        const ss = scale;
-
-        // ===== 辅助：绘制圆角弯曲矩形节段 =====
+        // 3. 辅助绘制：圆角弯曲矩形节段 ( drawSegment )
         const drawSegment = (sx, sy, w, h, r, angle, curvature) => {
             context.save();
             context.translate(sx, sy);
             context.rotate(angle);
-
             context.fillStyle   = BODY_FILL;
             context.strokeStyle = BODY_STROKE;
-            context.lineWidth   = 2 * ss;
-
+            context.lineWidth   = 3 * ss;
             context.beginPath();
-            context.moveTo(-w/2 + r, -h/2);
-            context.quadraticCurveTo(0, -h/2 - curvature, w/2 - r, -h/2);
-            context.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
-            context.quadraticCurveTo(w/2 + curvature, 0, w/2, h/2 - r);
-            context.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
-            context.quadraticCurveTo(0, h/2 + curvature, -w/2 + r, h/2);
-            context.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
-            context.quadraticCurveTo(-w/2 - curvature, 0, -w/2, -h/2 + r);
-            context.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
+            context.moveTo(-w / 2 + r, -h / 2);
+            context.quadraticCurveTo(0, -h / 2 - curvature, w / 2 - r, -h / 2);
+            context.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+            context.quadraticCurveTo(w / 2 + curvature, 0, w / 2, h / 2 - r);
+            context.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+            context.quadraticCurveTo(0, h / 2 + curvature, -w / 2 + r, h / 2);
+            context.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+            context.quadraticCurveTo(-w / 2 - curvature, 0, -w / 2, -h / 2 + r);
             context.closePath();
             context.fill();
             context.stroke();
             context.restore();
         };
 
-        // ===== 辅助：绘制单侧翅膀（3倍速度）=====
-        const drawWing = (wx, wy, flip) => {
-            context.save();
-            context.translate(wx, wy);
-            if (flip) context.scale(1, -1);
-
-            // ✅ 翅膀速度提升到3倍
-            const wingFlap = Math.sin(animationTimer * 18) * 12 * ss;   // 原 6 → 18
-            const wingSwing = Math.sin(animationTimer * 18) * 5 * ss;   // 原 6 → 18
-
-            const pts = [
-                { x: 18 * ss + wingSwing,       y: -50 * ss + wingFlap * 0.4 },
-                { x: 100 * ss + wingSwing * 1.5, y: -85 * ss + wingFlap * 0.7 },
-                { x: 150 * ss + wingSwing * 2.0, y: -50 * ss + wingFlap * 0.4 },
-            ];
-
-            // 翼骨
-            context.strokeStyle = WING_STROKE;
-            context.lineWidth   = 3.5 * ss;
-            context.lineCap     = 'round';
-            for (const pt of pts) {
-                context.beginPath();
-                context.moveTo(0, 0);
-                context.lineTo(pt.x, pt.y);
-                context.stroke();
-            }
-
-            // 翼膜
-            context.fillStyle   = WING_FILL;
-            context.strokeStyle = WING_STROKE;
-            context.lineWidth   = 1.8 * ss;
-            context.beginPath();
-            context.moveTo(0, 0);
-            for (const pt of pts) context.lineTo(pt.x, pt.y);
-            context.closePath();
-            context.fill();
-            context.stroke();
-
-            context.restore();
-        };
-
-        // ===== 辅助：绘制嘴巴（保持原速）=====
+        // 4. 辅助绘制：嘴巴 ( drawMouth )
         const drawMouth = (mx, my, angle) => {
             context.save();
             context.translate(mx, my);
-            context.rotate(angle+Math.PI);
-
-            const mouthLength    = 20 * ss * 0.8;
-            const mouthSep       = 20 * ss * 0.5;
-            const mouthWidth     = 20 * ss * 0.2;
-
+            context.rotate(angle + Math.PI);
+            const mouthLength = 20 * ss * 0.8;
+            const mouthSep    = 20 * ss * 0.5;
+            const mouthWidth  = 20 * ss * 0.2;
             context.strokeStyle = BODY_STROKE;
             context.lineWidth   = mouthWidth;
             context.lineCap     = 'round';
-
             for (const side of [-1, 1]) {
                 const sy = side * mouthSep / 2;
                 context.beginPath();
@@ -9939,86 +10047,100 @@ class EnemyDrawer {
             context.restore();
         };
 
+        // 5. 辅助绘制：对称复杂翅膀 ( drawComplexWing )
+        const drawComplexWing = (wx, wy, side) => {
+            context.save();
+            context.translate(wx, wy);
+            context.scale(1, side);
+            context.rotate(-Math.PI / 1.8); // 向后方生长
+
+            const flapSpeed = 19;
+            const wave = (Math.sin(animationTimer * flapSpeed) + 1) / 2;
+            const rot1_2 = -7 * Math.PI / 180 * wave;
+            const rot3   = -1 * Math.PI / 180 * wave;
+            const baseAngle = 30 * Math.PI / 180;
+            const shoulderX = 12 * ss;
+
+            const p1 = { x: 85 * ss, y: 55 * ss }, p2 = { x: 40 * ss, y: 45 * ss }, p3 = { x: 15 * ss, y: 65 * ss };
+            const getPos = (p, ang) => {
+                const a = baseAngle + ang;
+                return { x: shoulderX + (p.x * Math.cos(a) - p.y * Math.sin(a)), y: (p.x * Math.sin(a) + p.y * Math.cos(a)), angle: a };
+            };
+
+            const pos1 = getPos(p1, rot1_2), pos2 = getPos(p2, rot1_2), pos3 = getPos(p3, rot3);
+
+            // 翼膜填充 (带连接身体逻辑)
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(shoulderX, 0);
+            context.quadraticCurveTo(shoulderX + 30 * ss * Math.cos(pos1.angle), -30 * ss, pos1.x, pos1.y);
+            context.quadraticCurveTo((pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2 - 30 * ss, pos2.x, pos2.y);
+            context.quadraticCurveTo((pos2.x + pos3.x) / 2, (pos2.y + pos3.y) / 2 - 30 * ss, pos3.x, pos3.y);
+            context.quadraticCurveTo(0, 40 * ss, -15 * ss, 30 * ss);
+            context.closePath();
+            context.fillStyle = WING_FILL;
+            context.fill();
+
+            // 骨架绘制
+            const drawBones = () => {
+                context.moveTo(0, 0); context.lineTo(shoulderX, 0);
+                context.moveTo(shoulderX, 0); context.quadraticCurveTo(shoulderX + 40 * ss * Math.cos(pos1.angle), -25 * ss, pos1.x, pos1.y);
+                context.moveTo(shoulderX, 0); context.quadraticCurveTo(shoulderX + 20 * ss * Math.cos(pos2.angle), 5 * ss, pos2.x, pos2.y);
+                context.moveTo(shoulderX, 0); context.lineTo(pos3.x, pos3.y);
+            };
+            context.lineCap = 'round';
+            context.beginPath(); drawBones(); context.strokeStyle = WING_STROKE; context.lineWidth = 4 * ss; context.stroke();
+            context.beginPath(); drawBones(); context.strokeStyle = MAIN_COLOR; context.lineWidth = 1.5 * ss; context.stroke();
+            context.restore();
+        };
+
+        // 6. 主逻辑渲染
         context.save();
         context.translate(x, y);
         context.rotate(angleToPlayer + Math.PI);
 
-        // ===== 生成身体+尾巴节段 =====
-        const totalSegments = 15;
+        const totalSegments = 16;
         const baseSpacing   = 25 * ss;
-        const bodyBendAmp   = 0.30;
-        // ✅ 尾部扭动幅度增大，速度翻倍
-        const tailBendAmp   = 2.2;  // 原 1.5 → 2.2，扭动幅度更大
-
-        let prevX = 0, prevY = 0;
-        let currentAngle = 0;
-        let headX = 0, headY = 0;
+        let prevX = 0, prevY = 0, currentAngle = 0;
         const segPos = [];
 
         for (let i = 0; i < totalSegments; i++) {
             const isBody = i < 6;
             const tailIndex = i - 6;
-
-            let baseW = isBody
-                ? 30 * (1 - i * 0.02) * ss
-                : 30 * (0.85 - tailIndex * 0.04) * ss;
-            let baseH = isBody
-                ? 18 * (1 - i * 0.02) * ss
-                : 18 * (0.85 - tailIndex * 0.04) * ss;
-            const baseR = Math.min(baseH * 0.3, baseW * 0.15);
+            let baseW = isBody ? 30 * (1 - i * 0.02) * ss : 30 * (0.85 - tailIndex * 0.04) * ss;
+            let baseH = isBody ? 18 * (1 - i * 0.02) * ss : 18 * (0.85 - tailIndex * 0.04) * ss;
 
             const phase = i * 0.8;
-            const lw = 1 + Math.sin(animationTimer * 1.5 + phase) * 0.03;
-            const hw = 1 + Math.sin(animationTimer * 1.5 + phase) * 0.00375;
-            const w = baseW * lw, h = baseH * hw;
+            const w = baseW * (1 + Math.sin(animationTimer * 1.5 + phase) * 0.03);
+            const h = baseH * (1 + Math.sin(animationTimer * 1.5 + phase) * 0.003);
 
-            let bendAngle = 0;
-            if (isBody) {
-                bendAngle = Math.sin(i * 0.4) * bodyBendAmp + Math.sin(animationTimer * 0.8 + i * 0.5) * 0.06;
-            } else {
-                // ✅ 尾部：速度翻倍 (1.2 → 2.4)，幅度增加
-                bendAngle = Math.sin(i * 0.6 + tailIndex * 0.3) * tailBendAmp +
-                            Math.sin(animationTimer * 2.4 + i * 0.7) * 0.12;  // 原 1.2 → 2.4
-            }
+            let bend = isBody ? Math.sin(i * 0.4) * 0.1 : Math.sin(i * 0.6 + tailIndex * 0.3) * 1.6 + Math.sin(animationTimer * 2.4 + i * 0.7) * 0.12;
 
             let sx, sy;
-            if (i === 0) {
-                sx = 0; sy = 0;
-            } else {
+            if (i === 0) { sx = 0; sy = 0; }
+            else {
                 const spacing = baseSpacing * (1 - i * 0.015);
-                sx = prevX + Math.cos(currentAngle + bendAngle * 0.6) * spacing;
-                sy = prevY + Math.sin(currentAngle + bendAngle * 0.6) * spacing * 0.7;
-                currentAngle += bendAngle * 0.5;
-            }
-
-            if (i === 0) {
-                headX = sx - baseW / 2;
-                headY = sy;
+                sx = prevX + Math.cos(currentAngle + bend * 0.6) * spacing;
+                sy = prevY + Math.sin(currentAngle + bend * 0.6) * spacing * 0.7;
+                currentAngle += bend * 0.5;
             }
 
             segPos.push({ x: sx, y: sy, w, h });
-
-            const segAngle = i > 0 ? Math.atan2(sy - prevY, sx - prevX) : 0;
-
-            const curvature = isBody
-                ? 1.5 * (i / 6) * ss
-                : 2.5 * (tailIndex / 8) * ss;
-
-            drawSegment(sx, sy, w, h, baseR, segAngle, curvature);
-
-            prevX = sx;
-            prevY = sy;
+            const segAngle = i > 0 ? Math.atan2(sy - prevY, sx - prevX) : currentAngle;
+            drawSegment(sx, sy, w, h, Math.min(h * 0.3, w * 0.15), segAngle, isBody ? 1.5 * ss : 2.5 * ss);
+            prevX = sx; prevY = sy;
         }
 
-        // ===== 翅膀（第1节位置，3倍速度已在 drawWing 中实现）=====
+        // 绘制嘴巴 (位于头部节段)
+        const head = segPos[0];
+        drawMouth(head.x - head.w * 0.45, head.y, 0);
+
+        // 绘制翅膀 (挂载在第1节)
         if (segPos.length > 1) {
             const wp = segPos[1];
-            drawWing(wp.x, wp.y - wp.h * 0.3, false);
-            drawWing(wp.x, wp.y + wp.h * 0.3, true);
+            drawComplexWing(wp.x, wp.y - 5 * ss, 1);
+            drawComplexWing(wp.x, wp.y + 5 * ss, -1);
         }
-
-        // ===== 嘴巴 =====
-        drawMouth(headX * 0.9, headY, 0);
 
         context.restore();
     }
@@ -10071,8 +10193,7 @@ class EnemyDrawer {
         // ===== 正面 =====
         const frontGrad = context.createLinearGradient(...p(40, 80), ...p(160, 180));
         frontGrad.addColorStop(0,   isFriendly ? '#ffe090' : '#b8eaf5');
-        frontGrad.addColorStop(0.5, isFriendly ? '#d4a020' : '#7ccce0');
-        frontGrad.addColorStop(1,   isFriendly ? '#a87800' : '#4aaac0');
+
 
         context.beginPath();
         context.moveTo(...p(40,  80));
@@ -10090,8 +10211,7 @@ class EnemyDrawer {
 
         // ===== 顶面 =====
         const topGrad = context.createLinearGradient(...p(40, 80), ...p(160, 80));
-        topGrad.addColorStop(0,   isFriendly ? '#fff0b0' : '#d8f4ff');
-        topGrad.addColorStop(1,   isFriendly ? '#e0c060' : '#90d8f0');
+        topGrad.addColorStop(0,   isFriendly ? '#fff0b0' : '#b8eaf5');
 
         context.beginPath();
         context.moveTo(...p(40,  80));
@@ -10107,8 +10227,7 @@ class EnemyDrawer {
 
         // ===== 右面 =====
         const rightGrad = context.createLinearGradient(...p(160, 80), ...p(100, 180));
-        rightGrad.addColorStop(0,   isFriendly ? '#d4a020' : '#6cc4dc');
-        rightGrad.addColorStop(1,   isFriendly ? '#906000' : '#3898b0');
+        rightGrad.addColorStop(0,   isFriendly ? '#d4a020' : '#b8eaf5');
 
         context.beginPath();
         context.moveTo(...p(100, 110));
@@ -10119,12 +10238,12 @@ class EnemyDrawer {
         context.fillStyle = rightGrad;
         context.fill();
         context.strokeStyle = STROKE;
-        context.lineWidth = 2 * s;  // 原 3 → 2
+        context.lineWidth = 7 * s;  // 原 3 → 2
         context.stroke();
 
         // ===== 反光曲线 =====
         context.strokeStyle = 'rgba(255,255,255,0.5)';
-        context.lineWidth = 7 * s;  // 原 10 → 7
+        context.lineWidth = 6 * s;  // 原 10 → 7
         context.beginPath();
         context.moveTo(...p(55, 90));
         context.quadraticCurveTo(...p(45, 110), ...p(55, 130));
@@ -10137,26 +10256,6 @@ class EnemyDrawer {
         context.quadraticCurveTo(...p(155, 125), ...p(145, 150));
         context.stroke();
 
-        // ===== 高光椭圆 =====
-        context.save();
-        const [hx1, hy1] = p(70, 95);
-        context.translate(hx1, hy1);
-        context.rotate(-20 * Math.PI / 180);
-        context.beginPath();
-        context.ellipse(0, 0, 5.5 * s, 2.5 * s, 0, 0, Math.PI * 2);  // 原 8,4 → 5.5,2.5
-        context.fillStyle = 'rgba(255,255,255,0.6)';
-        context.fill();
-        context.restore();
-
-        context.save();
-        const [hx2, hy2] = p(75, 105);
-        context.translate(hx2, hy2);
-        context.rotate(-20 * Math.PI / 180);
-        context.beginPath();
-        context.ellipse(0, 0, 3.5 * s, 1.5 * s, 0, 0, Math.PI * 2);  // 原 5,2 → 3.5,1.5
-        context.fillStyle = 'rgba(255,255,255,0.5)';
-        context.fill();
-        context.restore();
 
         context.restore();
     }
@@ -10933,8 +11032,8 @@ class EnemyDrawer {
         const rarityFactor    = raritySizeFactors[rarity] || 1.0;
         const scale = (rarityFactor / legendaryFactor) * (scaledSize / size)*0.7;
 
-        const circleR  = 128 * scale;
-        const spokeR   = 148 * scale;
+        const circleR  = 110 * scale;
+        const spokeR   = 130 * scale;
         const spokes   = 12;
         const rings    = 6;
         const cx = 0, cy = 0;
@@ -15185,6 +15284,7 @@ class EnemyDrawer {
         }
     }
 
+// ==================== 2. 寄生虫 (Parasite) ====================
     drawParasite(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         if (!enemyObj || !enemyObj.segmentColliders) return;
 
@@ -15194,7 +15294,6 @@ class EnemyDrawer {
             y: enemyObj?.gameInstance?.cameraOffset?.y || 0
         };
 
-        // ✅ 关键：坐标提取
         const screenPoints = segments.map(seg => ({
             x: seg.physicsBody.position.x - cameraOffset.x,
             y: seg.physicsBody.position.y - cameraOffset.y,
@@ -15204,15 +15303,23 @@ class EnemyDrawer {
         if (screenPoints.length < 2) return;
 
         const isFriendly = enemyObj.isFriendly === true;
-        // ✅ 调高不透明度 (0.8)，否则白色寄生虫在浅色地面完全看不见
-        const bodyColor = isFriendly ? 'rgba(255, 215, 0, 0.9)' : 'rgba(240, 240, 240, 0.8)';
-        const outlineColor = isFriendly ? '#B8860B' : '#AAAAAA';
+
+        // ✅ 70% 透明度颜色定义 (0.7 Alpha)
+        const bodyColor = isFriendly
+            ? 'rgba(255, 215, 0, 0.4)'    // 友方金色
+            : 'rgba(240, 240, 240, 0.4)';  // 敌方白色
+        const outlineColor = isFriendly
+            ? 'rgba(184, 134, 11, 0.6)'   // 友方深金边
+            : 'rgba(170, 170, 170, 0.6)';  // 敌方灰边
+
         const baseWidth = screenPoints[0].radius * 2 * viewScale;
 
         context.save();
 
-        // 1. 绘制口器
-        this.drawParasiteMouthScreen(context, screenPoints, baseWidth, animationTimer, angleToPlayer, outlineColor, viewScale, 1.0);
+        // 1. 绘制口器 (保持原有的绘制方法)
+        if (this.drawParasiteMouthScreen) {
+            this.drawParasiteMouthScreen(context, screenPoints, baseWidth, animationTimer, angleToPlayer, outlineColor, viewScale, 1.0);
+        }
 
         // 2. 绘制插值身体
         context.beginPath();
@@ -15224,7 +15331,6 @@ class EnemyDrawer {
             const p2 = screenPoints[i + 1];
             const p3 = screenPoints[Math.min(screenPoints.length - 1, i + 2)];
 
-            // 分段插值，t 的步长决定平滑度
             for (let t = 0; t <= 1; t += 0.2) {
                 const tx = this.catmullRom(p0.x, p1.x, p2.x, p3.x, t);
                 const ty = this.catmullRom(p0.y, p1.y, p2.y, p3.y, t);
@@ -15234,9 +15340,13 @@ class EnemyDrawer {
 
         context.lineCap = 'round';
         context.lineJoin = 'round';
+
+        // 绘制描边
         context.strokeStyle = outlineColor;
-        context.lineWidth = baseWidth + 2;
+        context.lineWidth = baseWidth * 1.3 ;
         context.stroke();
+
+        // 绘制填充
         context.strokeStyle = bodyColor;
         context.lineWidth = baseWidth;
         context.stroke();
@@ -16136,136 +16246,112 @@ class EnemyDrawer {
     }
     // 在 EnemyDrawer 类中添加
     drawTrashcan(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-            const scaledSize = size * viewScale;
-            if (scaledSize <= 0) return;
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
 
-            const isFriendly = enemyObj && enemyObj.isFriendly === true;
-            const rarity = enemyObj?.rarity || "Common";
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
 
-            const canGradStart  = isFriendly ? '#FFD700' : '#b0b8c8';
-            const canGradEnd    = isFriendly ? '#B8860B' : '#6e7a90';
-            const lidGradStart  = isFriendly ? '#FFF0A0' : '#c8d2e0';
-            const lidGradEnd    = isFriendly ? '#DAA520' : '#7a8298';
-            const strokeColor   = isFriendly ? '#8B691B' : '#505870';
-            const highlightColor = 'rgba(255,255,255,0.12)';
+        // 颜色配置：使用平涂色，不再使用渐变
+        // 提取自你之前的风格：友好时为金色调，敌人时为冷灰色调
+        const BODY_COLOR   = isFriendly ? '#DAA520' : '#7a8298'; // 桶身主色
+        const LID_COLOR    = isFriendly ? '#FFD700' : '#b0b8c8'; // 盖子主色
+        const STRIP_COLOR  = isFriendly ? '#B8860B' : '#6e7a90'; // 边缘条色
+        const STROKE_COLOR = isFriendly ? '#8B691B' : '#505870'; // 描边色
 
-            const scale = scaledSize / 200;
+        // 稀有度缩放因子
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
+        };
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (scaledSize / 200) * rarityFactor;
 
-            context.save();
-            context.translate(x, y);
-            context.rotate(angleToPlayer + Math.PI);
-            context.scale(scale, scale);
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI);
+        context.scale(scale, scale);
 
-            // 图形中心约在 (140, 150)，平移让它对准原点
-            context.translate(-140, -150);
+        // 将图形中心 (140, 150) 平移至原点
+        context.translate(-140, -150);
 
-            // 整体倾斜 -10度（绕图形中心）
-            context.save();
-            context.translate(140, 150);
-            context.rotate(-10 * Math.PI / 180);
-            context.translate(-140, -150);
+        // 整体倾斜 -10度（绕图形中心）
+        context.save();
+        context.translate(140, 150);
+        context.rotate(-10 * Math.PI / 180);
+        context.translate(-140, -150);
 
-            // 渐变
-            const canGrad = context.createRadialGradient(189, 195, 0, 140, 150, 140);
-            canGrad.addColorStop(0, canGradStart);
-            canGrad.addColorStop(1, canGradEnd);
+        // --- 1. 垃圾桶身体 ---
+        context.beginPath();
+        context.moveTo(50, 40);
+        context.lineTo(230, 40);
+        context.lineTo(200, 260);
+        context.lineTo(80, 260);
+        context.closePath();
 
-            const lidGrad = context.createRadialGradient(193, 203, 0, 140, 150, 130);
-            lidGrad.addColorStop(0, lidGradStart);
-            lidGrad.addColorStop(1, lidGradEnd);
+        context.fillStyle = BODY_COLOR;
+        context.fill();
+        context.strokeStyle = STROKE_COLOR;
+        context.lineWidth = 5; // 稍微加粗描边以增强扁平感
+        context.stroke();
 
-            // 身体（clip + fill）
-            context.save();
-            context.beginPath();
-            context.moveTo(50, 40);
-            context.lineTo(230, 40);
-            context.lineTo(200, 260);
-            context.lineTo(80, 260);
-            context.closePath();
-            context.clip();
+        // --- 2. 桶身纹路（三条竖线） ---
+        context.save();
+        // 再次裁剪路径，确保纹路不超出桶身
+        context.beginPath();
+        context.moveTo(50, 40);
+        context.lineTo(230, 40);
+        context.lineTo(200, 260);
+        context.lineTo(80, 260);
+        context.closePath();
+        context.clip();
 
-            context.beginPath();
-            context.moveTo(50, 40);
-            context.lineTo(230, 40);
-            context.lineTo(200, 260);
-            context.lineTo(80, 260);
-            context.closePath();
-            context.fillStyle = canGrad;
-            context.fill();
-            context.strokeStyle = strokeColor;
-            context.lineWidth = 5;
-            context.stroke();
-            context.restore();
+        context.strokeStyle = STROKE_COLOR;
+        context.lineWidth = 8;
+        context.lineCap = 'round';
+        context.globalAlpha = 0.4; // 纹路稍微淡一点
 
-            // 盖子
-            context.beginPath();
-            context.moveTo(40, 38);
-            context.lineTo(240, 38);
-            context.lineTo(232, 20);
-            context.lineTo(48, 20);
-            context.closePath();
-            context.fillStyle = lidGrad;
-            context.fill();
-            context.strokeStyle = strokeColor;
-            context.lineWidth = 4;
-            context.stroke();
+        // 左纹
+        context.beginPath();
+        context.moveTo(95, 85);
+        context.lineTo(101, 222);
+        context.stroke();
+        // 中纹
+        context.beginPath();
+        context.moveTo(140, 85);
+        context.lineTo(140, 222);
+        context.stroke();
+        // 右纹
+        context.beginPath();
+        context.moveTo(185, 85);
+        context.lineTo(179, 222);
+        context.stroke();
+        context.restore();
 
-            // 盖子高光
-            context.beginPath();
-            context.moveTo(60, 22);
-            context.lineTo(180, 22);
-            context.lineTo(178, 26);
-            context.lineTo(62, 26);
-            context.closePath();
-            context.fillStyle = 'rgba(255,255,255,0.18)';
-            context.fill();
+        // --- 3. 边缘条（桶口） ---
+        context.fillStyle = STRIP_COLOR;
+        context.fillRect(42, 36, 196, 10);
+        context.strokeStyle = STROKE_COLOR;
+        context.lineWidth = 2;
+        context.strokeRect(42, 36, 196, 10);
 
-            // 边缘条
-            context.fillStyle = '#7a8298';
-            context.fillRect(42, 36, 196, 10);
+        // --- 4. 盖子 ---
+        context.beginPath();
+        context.moveTo(40, 38);
+        context.lineTo(240, 38);
+        context.lineTo(232, 20);
+        context.lineTo(48, 20);
+        context.closePath();
 
-            // 三条纹
-            context.save();
-            context.beginPath();
-            context.moveTo(50, 40);
-            context.lineTo(230, 40);
-            context.lineTo(200, 260);
-            context.lineTo(80, 260);
-            context.closePath();
-            context.clip();
+        context.fillStyle = LID_COLOR;
+        context.fill();
+        context.strokeStyle = STROKE_COLOR;
+        context.lineWidth = 4;
+        context.stroke();
 
-            context.strokeStyle = strokeColor;
-            context.lineWidth = 8;
-            context.lineCap = 'round';
-            context.globalAlpha = 0.6;
-
-            context.beginPath();
-            context.moveTo(95, 85);
-            context.lineTo(101, 222);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(140, 85);
-            context.lineTo(140, 222);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(185, 85);
-            context.lineTo(179, 222);
-            context.stroke();
-            context.restore();
-
-            // 左边缘高光
-            context.beginPath();
-            context.moveTo(50, 40);
-            context.lineTo(80, 260);
-            context.strokeStyle = highlightColor;
-            context.lineWidth = 10;
-            context.stroke();
-
-            context.restore(); // 恢复倾斜
-            context.restore(); // 恢复整体
-        }
+        context.restore(); // 恢复倾斜
+        context.restore(); // 恢复整体
+    }
     // 在 EnemyDrawer 类中添加 drawTick 方法
     drawTick(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
@@ -16838,14 +16924,12 @@ class EnemyDrawer {
         const scale = (rarityFactor / legendaryFactor) * (scaledSize / size) * 0.6;
 
         // 原始半径（SVG中最大108，缩放到scale）- 减小半径
-        const baseRadii = [54, 43, 32, 21, 10, 4.0];  // 原来是 [108, 86, 64, 42, 20, 7]，缩小一半
+        const baseRadii = [50, 35, 20];  // 原来是 [108, 86, 64, 42, 20, 7]，缩小一半
 
-        const fills = isFriendly
-            ? ["#c8a820","#d0b428","#d8c030","#e0cc38","#e8d840","#f0e448"]
-            : ["#7ac0cb","#82c8d8","#8dd2e0","#98dce8","#a4e4ee","#b2eaf4"];
-        const strokeCol = isFriendly ? "#a08010" : "#6ab4c0";
+        const fills = isFriendly ? ["#c8a820", "#353535"] : ["#9BCAD9"];
+        const strokeCol = isFriendly ? "#a08010" : "#7CB3C6";
 
-        const widths = [2, 1.8, 1.8, 1.8, 1.8, 1.5];  // 减小线条宽度
+        const widths = [8, 8, 8, 8];  // 减小线条宽度
         const steps  = 60; // 减少采样点数，提高性能
 
         // 生成带轻微波浪的环路径点
@@ -16872,7 +16956,7 @@ class EnemyDrawer {
         // 从外到内绘制（大环先画）
         baseRadii.forEach((baseR, i) => {
             const r = baseR * scale;
-            const wobble = (baseR / baseRadii[0]) * 2.5 * scale;  // 减小波浪幅度
+            const wobble = (baseR / baseRadii[0]) * 2.1 * scale;  // 减小波浪幅度
             const pts = makeRingPoints(r, wobble);
 
             context.beginPath();
@@ -16881,7 +16965,7 @@ class EnemyDrawer {
                 context.lineTo(pts[k][0], pts[k][1]);
             }
             context.closePath();
-            context.fillStyle   = fills[i];
+            context.fillStyle   = fills[i%2];
             context.fill();
             context.strokeStyle = strokeCol;
             context.lineWidth   = widths[i] * scale;
@@ -17346,6 +17430,8 @@ class EnemyDrawer {
             this.drawFireAntHole(context, x, y, size, viewScale, enemyObj);
         }else if (enemyType === "Hive") {
             this.drawHive(context, x, y, size, viewScale, enemyObj);
+        }else if (enemyType === "HelHive" || enemyType === "Hel Hive") {
+            this.drawHelHive(context, x, y, size, viewScale, enemyObj);
         }else if (enemyType === "Beekeeper") {
             this.drawBeekeeper(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }else if (enemyType === "Wasp") {
@@ -22318,7 +22404,7 @@ class Enemy {
             "Mythic": 2430,
             "Ultra": 8645,
             "Super": 25574,
-            "Omega": 80510,
+            "Omega": 81510,
             "Eternal": 129830
         };
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
@@ -22365,10 +22451,10 @@ class Enemy {
             "Epic": 1.6,
             "Legendary": 1.8,
             "Mythic": 2.8,
-            "Ultra": 3.9,
-            "Super": 8.2,
-            "Omega": 11.8,
-            "Eternal": 14.5
+            "Ultra": 4.0,
+            "Super": 8.4,
+            "Omega": 12.0,
+            "Eternal": 15.0
         };
 
         // 计算 sizeFactor
@@ -22394,15 +22480,15 @@ class Enemy {
         this.weight = baseWeight * sizeFactor;
         this.facingAngle = 0.0;
         this.knockbackTimer = 0.0;
-        this.knockbackDuration = 0.3;
+        this.knockbackDuration = 0.2;
 
         // 攻击伤害计算
         if (enemyType === "Bush") {
-            this.attackDamage = Math.min(baseAttackDamage * rarityAttackMultiplier, 50);
+            this.attackDamage = Math.min(baseAttackDamage * rarityAttackMultiplier, 500000);
         } else if (enemyType === "Cactus") {
             this.attackDamage = baseAttackDamage * rarityAttackMultiplier * 3;
         } else if (enemyType === "Rock") {
-            this.attackDamage = baseAttackDamage / 3;
+            this.attackDamage = baseAttackDamage / 2;
         } else {
             this.attackDamage = baseAttackDamage * rarityAttackMultiplier;
         }
@@ -22900,19 +22986,19 @@ class Enemy {
             case "QueenBee": return [350, 26, 100, 500, 100];
             case "PooStorm": return [600, 22, 40 + Math.random() * 10, 300, 100];
             case "TrashDigger": return [230, 25, 100, 550, 190];
-            case "FrostDigger": return [250, 26, 80, 550, 170];
-            case "Digger": return [220, 28, 120, 600, 180];
-            case "MudDigger": return [290, 30, 70, 700, 170];
+            case "FrostDigger": return [120, 26, 80, 550, 200];
+            case "Digger": return [180, 28, 120, 600, 155];
+            case "MudDigger": return [300, 30, 70, 700, 140];
             case "Virus": return [50, 22, 0, 400, 40];
-            case "Biologist": return [200, 25, 110, 700, 170];
-            case "Beekeeper": return [220, 25, 100, 800, 190];
+            case "Biologist": return [210, 25, 110, 700, 180];
+            case "Beekeeper": return [80, 25, 100, 800, 220];
             case "Square": return [1000, 25, 10, 6000, 500];
-            case "Barnacle": return [400, 25, 1, 10000, 30];
+            case "Barnacle": return [400, 25, 1, 10000, 20];
             case "Ice Dragon": return [320, 25, 120, 550, 80];
-            case "Ice Cube": return [400, 28, 1, 600, 40];
-            case "Snowman": return [150, 20, 50, 700, 30];
-            case "SnowStorm": return [400, 22, 50, 400, 100];
-            case "Tick": return [100, 20, 150, 700, 90];
+            case "Ice Cube": return [300, 28, 1, 600, 40];
+            case "Snowman": return [100, 20, 50, 700, 30];
+            case "SnowStorm": return [100, 22, 50, 400, 90];
+            case "Tick": return [80, 20, 150, 700, 40];
             case "Igloo": return [1000, 50, 0, 14000, 30];
             case "SlagMight": return [50, 25, 150, 200, 200];
             case "ArcticSpider": return [150, 25, 120, 300, 30];
@@ -25724,7 +25810,7 @@ class Petal {
 
                 // 翅膀额外增加半径（仅非蛋类和非固定物品，且不是 Heavy）
                 if (currentItem && currentItem.type === "Wing" && !isEggItem && !isFixed && this.itemType !== "Heavy") {
-                    this.targetRadius += 50;
+                    this.targetRadius *= 1.4;
                 }
 
                 // 平滑过渡
@@ -34090,18 +34176,12 @@ class Player {
         const x = WIDTH / 2;
         const y = HEIGHT / 2;
         const scaledRadius = this.physicsBody.radius * viewScale;
-
         ctx.save();
-
-
-
         // ========== 身体主体 ==========
-
         ctx.beginPath();
         ctx.arc(x, y, scaledRadius+5, 0, Math.PI * 2);
         ctx.fillStyle = "#999900";  // 外圈深金色
         ctx.fill();
-
         ctx.beginPath();
         ctx.arc(x, y, scaledRadius+2, 0, Math.PI * 2);
         ctx.fillStyle = "#F6E476";  // 内圈亮黄色
@@ -34137,7 +34217,7 @@ class Player {
 
 
         // ========== 嘴巴（根据 spreadMode 和血量变化）==========
-        ctx.strokeStyle = "#663300";
+        ctx.strokeStyle = "#000000";
         ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         ctx.beginPath();
@@ -34147,7 +34227,7 @@ class Player {
         // ✅ 张开模式（spreadMode）时显示苦脸
         if (this.spreadMode) {
             // 苦脸 - 倒U形（向下弯曲的嘴角）
-            ctx.arc(x, y + 10, 5, 1.1 * Math.PI, 1.9 * Math.PI);
+            ctx.arc(x, y + 12, 6, 1.2 * Math.PI, 1.8 * Math.PI);
             ctx.stroke();
 
         }
