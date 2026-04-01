@@ -154,7 +154,18 @@ const ENEMY_XP_TABLE = {
     "Parasite":{ baseXp: 10, typeBonus: 1.1 },
     "Bacteriophage":{ baseXp: 13, typeBonus: 1.1 },
     "Virus":{baseXp: 5, typeBonus: 1.0},
-
+    "HelWorm": { baseXp: 12, typeBonus: 1.8 },
+    "HelSpider": { baseXp: 12, typeBonus: 2.0 },
+    "HelBee": { baseXp: 14, typeBonus: 1.9 },
+    "HelHornet": { baseXp: 15, typeBonus: 2.2 },
+    "HelBeetle": { baseXp: 18, typeBonus: 2.5 },
+    "Dragon": { baseXp: 15, typeBonus: 2.8 },
+    "DragonNest": { baseXp: 60, typeBonus: 3.0 },
+    "HelHive": { baseXp: 40, typeBonus: 2.6 },
+    "HelJellyfish": { baseXp: 18, typeBonus: 2.1 },
+    "ToxicDragon": { baseXp: 20, typeBonus: 3.2 },
+    "FireStorm": { baseXp: 20, typeBonus: 2.3 },
+    "HelQueenBee": { baseXp: 55, typeBonus: 2.7 },
     "SlagMight": { baseXp: 50, typeBonus: 2.0 },
     "Ice Cube": { baseXp: 25, typeBonus: 1.3 },
     "Ice Dragon": { baseXp: 200, typeBonus: 3.0 },
@@ -437,6 +448,29 @@ export const BIOME_BACKGROUNDS = {
             background_color: [200, 220, 255]
         }
     },
+    // ========== 🔥 Hel 地狱生物群系 ==========
+    "Hel": {
+        base_color: [80, 40, 30],
+        ground_color: [100, 50, 40],
+        wall_color: [60, 30, 20],
+        region_colors: {
+            "Ash Fields": [120, 60, 50],
+            "Molten Core": [200, 80, 40],
+            "Dragon's Lair": [150, 50, 40],
+            "Burning Wastes": [180, 70, 45],
+            "Inferno Peak": [220, 60, 35]
+        },
+        has_grid: true,
+        grid_color: [150, 70, 50],
+        fire_effect: true,
+        ash_effect: true,
+        map: {
+            image: "map_hel",
+            grid_size: 100,
+            show_grid: true,
+            background_color: [80, 40, 30]
+        }
+    },
 
 };
 // ==================== 区块类型定义 ====================
@@ -574,6 +608,19 @@ export const BIOME_SPAWN_RATES = {
         "Barnacle": { weight: 10, minLevel: 1, maxLevel: 5 },
         "Shipwreck": { weight: 0.06, minLevel: 1, maxLevel: 5 },
         "Squid": { weight: 18, minLevel: 1, maxLevel: 5 }
+    },
+     "Hel": {
+        "HelWorm": { weight: 60, minLevel: 2, maxLevel: 5 },
+        "HelSpider": { weight: 50, minLevel: 2, maxLevel: 5 },
+        "HelBee": { weight: 60, minLevel: 1, maxLevel: 5 },
+        "HelHornet": { weight: 55, minLevel: 2, maxLevel: 5 },
+        "HelBeetle": { weight: 40, minLevel: 3, maxLevel: 5 },
+        "Dragon": { weight: 15, minLevel: 3, maxLevel: 5 },
+        "DragonNest": { weight: 0.08, minLevel: 4, maxLevel: 5},
+        "HelHive": { weight: 0.1, minLevel: 3, maxLevel: 5 },
+        "HelJellyfish": { weight: 45, minLevel: 2, maxLevel: 5 },
+        "ToxicDragon": { weight: 1, minLevel: 4, maxLevel: 5 },
+        "FireStorm": { weight: 35, minLevel: 3, maxLevel: 5 },
     },
     // ========== 🆕 下水道生物生成概率 ==========
     "Sewer": {
@@ -1280,6 +1327,23 @@ const ITEM_IMAGE_URLS = {
     "Soil": "images/soil.png",
     "Tomato": "images/tomato.png",
     "Rubber": "images/rubber.png",
+    // ========== 🔥 Hel 系列物品图片 ==========
+    "HelWorm egg": "images/HelWorm_egg.png",
+    "HelSpider egg": "images/HelSpider_egg.png",
+    "Hel Bee egg": "images/HelBee_egg.png",
+    "HelHornet egg": "images/HelHornet_egg.png",
+    "HelBeetle egg": "images/HelBeetle_egg.png",
+    "Dragon egg": "images/Dragon_egg.png",
+    "DragonNest egg": "images/DragonNest_egg.png",
+    "HelHive egg": "images/HelHive_egg.png",
+    "HelJellyfish egg": "images/HelJellyfish_egg.png",
+    "Hel Queen Bee egg": "images/HelQueenBee_egg.png",
+    "Faster": "images/Faster.png",
+    "Blood Stinger": "images/Blood_Stinger.png",
+    "Fire": "images/Fire.png",
+    "Missile": "images/Missile.png",
+    "Hel Honey": "images/Hel_Honey.png",
+    "Hel Lighting": "images/Hel_Lighting.png",
 };
 
 export const ITEM_STATS = {
@@ -1291,13 +1355,13 @@ export const ITEM_STATS = {
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000},
     "Pollen": {base_attack:30, base_cooldown:300, healing:0.5, use_rarity_multiplier: true, base_reload_time:2000},
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
-    "Fang": {base_attack:22, base_cooldown:200, bleed_damage:2, use_rarity_multiplier: true, base_reload_time:2000},
+    "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
     "Corn": {base_attack:8, base_cooldown:200, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
-    "Web": {base_attack:1, base_cooldown:1000, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
+    "Web": {base_attack:0.1, base_cooldown:1000, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
     "Pincer": {base_attack:15, base_cooldown:500, web_slow:0.5, use_rarity_multiplier: true, base_reload_time:1000},
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000},
@@ -1499,6 +1563,19 @@ export const ENEMY_DROP_TABLE = {
     "Cancer": ["Cancer","Cancer egg","DNA","Iris","Chromosome"],
     "Shipwreck": ["Pearl", "Bubble Bomb", "Shipwreck egg", "Cotton", "Coin"],
     // 在 ENEMY_DROP_TABLE 中，在下水道生物后面添加
+    // ========== 🐛 Hel 系列生物掉落 ==========
+    "HelWorm": ["Fang", "Bur", "HelWorm egg"],
+    "HelSpider": ["Web", "Faster", "ThirdEye", "HelSpider egg"],
+    "HelBee": ["Blood Stinger", "Pollen", "Fire", "Hel Bee egg"],
+    "HelHornet": ["Missile", "HelHornet egg", "Antennae"],
+    "HelBeetle": ["HelBeetle egg", "Pincer", "Bone"],
+    "Dragon": ["Dragon egg", "Bone", "Fire"],
+    "DragonNest": ["DragonNest egg", "Golden Leaf"],
+    "HelHive": ["Hel Honey", "Pollen", "HelHive egg"],
+    "HelJellyfish": ["Hel Lighting", "Lightning", "HelJellyfish egg"],
+    "ToxicDragon": ["Dragon egg", "Iris", "Toxic Scale"],
+    "FireStorm": ["FireStick", "Fire", "Sand"],
+    "HelQueenBee": ["Hel Queen Bee egg", "HelHoney", "Pollen","Blood Stinger"],
     "Wasp": ["Iris", "Antennae", "Wasp egg"],
     "Worker Termite": ["Leaf", "Relic", "Worker Termite egg"],
     "Soldier Termite": ["Clover", "Wing", "Soldier Termite egg","Relic"],
@@ -4986,10 +5063,10 @@ class ImageLoader {
     }
 
     _registerImage(name, canvas) {
+        // ✅ 关键修复：如果已经存在占位符，也要覆盖
         for (const alias of this._getAliases(name)) {
-            if (!this.imageCache[alias]) {
-                this.imageCache[alias] = canvas;
-            }
+            // 直接覆盖，无论是占位符还是真实图片
+            this.imageCache[alias] = canvas;
         }
         this._loadingStatus.set(name, 'loaded');
     }
@@ -8239,6 +8316,186 @@ class EnemyDrawer {
 
         context.restore();
     }
+    drawToxicDragon(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 1. 稀有度与缩放逻辑 (保持原样)
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
+            "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
+        };
+        const rarity = enemyObj?.rarity || "Common";
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size);
+
+        // 2. 颜色定义 (紫色系)
+        const bodyColor = '#a349a4';      // 主体紫
+        const strokeColor = '#762d77';    // 深紫描边
+        const mainColor = '#8e3a91';      // 副色调
+        const wingStrokeColor = '#4b1a4c'; // 翅膀骨架深色
+        const hornsColor = '#1a1a1a';      // 黑色角
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI / 2);
+
+        const bodyR = 32 * scale;
+
+        // ===== 1. 绘制嘴部的两个角 (复刻图片形状) =====
+        const drawMouthHorn = (side) => {
+            context.save();
+            const startX = side * 8 * scale;
+            const startY = -bodyR + 10 * scale;
+            context.beginPath();
+            context.moveTo(startX, startY);
+            // 向外弯曲的弧线
+            context.quadraticCurveTo(side * 0.1 * scale, -bodyR - 40 * scale, startX + side * 15 * scale, startY);
+            context.quadraticCurveTo(side * scale, -bodyR - 10 * scale, startX, startY);
+            context.fillStyle = hornsColor;
+            context.fill();
+            context.strokeStyle = strokeColor;
+            context.lineWidth = 1 * scale;
+            context.stroke();
+            context.restore();
+        };
+        drawMouthHorn(-1);
+        drawMouthHorn(1);
+
+        // ===== 2. 绘制尾巴 (三角形堆叠，80%重叠) =====
+        const segmentCount = 4;
+        for (let i = segmentCount; i >= 0; i--) {
+            context.save();
+            // 紧凑步长实现重叠感
+            const step = 10 * scale;
+            const segmentY = bodyR - 10 * scale + i * step;
+            const wave = Math.sin(animationTimer * 3 - i * 0.4) * (3 + i) * scale;
+            const triW = (35 - i * 5) * scale;
+            const triH = 22 * scale;
+
+            context.translate(wave, segmentY);
+            context.beginPath();
+            context.moveTo(-triW / 2, 0);
+            context.lineTo(triW / 2, 0);
+            context.lineTo(0, triH);
+            context.closePath();
+            context.fillStyle = (i % 2 === 0) ? bodyColor : mainColor;
+            context.fill();
+            context.strokeStyle = strokeColor;
+            context.lineWidth = 2 * scale;
+            context.stroke();
+            context.restore();
+        }
+
+        // ===== 3. 翅膀绘制 (严格复刻你 drawDragon 模板的一模一样逻辑) =====
+        const drawWing = (side) => {
+            const shoulderX = side * 50 * scale;
+            const shoulderY = -25 * scale;
+            const wave = (Math.sin(animationTimer * 3) + 1) / 2;
+            const rot1_2 = side * -7 * Math.PI / 180 * wave;
+            const rot3 = side * -1 * Math.PI / 180 * wave;
+            const baseAngle = side * 30 * Math.PI / 180;
+
+            const p1 = { x: side * 85 * scale, y: 55 * scale };
+            const p2 = { x: side * 40 * scale, y: 45 * scale };
+            const p3 = { x: side * 15 * scale, y: 65 * scale };
+
+            const getPos = (p, angleOffset) => {
+                const totalAngle = baseAngle + angleOffset;
+                return {
+                    x: shoulderX + (p.x * Math.cos(totalAngle) - p.y * Math.sin(totalAngle)),
+                    y: shoulderY + (p.x * Math.sin(totalAngle) + p.y * Math.cos(totalAngle)),
+                    angle: totalAngle
+                };
+            };
+
+            const pos1 = getPos(p1, rot1_2);
+            const pos2 = getPos(p2, rot1_2);
+            const pos3 = getPos(p3, rot3);
+
+            const s3CP = {
+                x: shoulderX + (side * 9 * scale * Math.cos(pos3.angle) - 20 * scale * Math.sin(pos3.angle)),
+                y: shoulderY + (side * 9 * scale * Math.sin(pos3.angle) + 20 * scale * Math.cos(pos3.angle))
+            };
+
+            const mid3 = { x: (s3CP.x + pos3.x) / 2, y: (s3CP.y + pos3.y) / 2 };
+            const edgeAngle = side === 1 ? Math.PI * 0.15 : Math.PI * 0.85;
+            const start4 = { x: Math.cos(edgeAngle) * bodyR, y: Math.sin(edgeAngle) * bodyR };
+            const curve12_CP = { x: (pos1.x + pos2.x) / 2, y: (pos1.y + pos2.y) / 2 - 30 * scale };
+            const curve23_CP = { x: (pos2.x + pos3.x) / 2, y: (pos2.y + pos3.y) / 2 - 30 * scale };
+
+            // 填充翼膜
+            context.save();
+            context.beginPath();
+            context.moveTo(shoulderX, shoulderY);
+            context.quadraticCurveTo(shoulderX + side * 30 * scale * Math.cos(pos1.angle), shoulderY - 30 * scale, pos1.x, pos1.y);
+            context.quadraticCurveTo(curve12_CP.x, curve12_CP.y, pos2.x, pos2.y);
+            context.quadraticCurveTo(curve23_CP.x, curve23_CP.y, pos3.x, pos3.y);
+            context.lineTo(shoulderX, shoulderY);
+            context.fillStyle = bodyColor;
+            context.fill();
+            context.restore();
+
+            // 绘制翼膜边缘线条
+            context.save();
+            context.beginPath();
+            context.lineWidth = 4 * scale;
+            context.strokeStyle = strokeColor;
+            context.lineCap = 'round';
+            context.moveTo(pos1.x, pos1.y);
+            context.quadraticCurveTo(curve12_CP.x, curve12_CP.y, pos2.x, pos2.y);
+            context.quadraticCurveTo(curve23_CP.x, curve23_CP.y, pos3.x, pos3.y);
+            context.stroke();
+            context.restore();
+
+            // 绘制骨架
+            const bonesPath = () => {
+                context.moveTo(shoulderX, shoulderY);
+                context.quadraticCurveTo(shoulderX + side * 40 * scale * Math.cos(pos1.angle), shoulderY - 25 * scale * Math.cos(pos1.angle), pos1.x, pos1.y);
+                context.moveTo(shoulderX, shoulderY);
+                context.quadraticCurveTo(shoulderX + side * 20 * scale * Math.cos(pos2.angle), shoulderY + 5 * scale, pos2.x, pos2.y);
+                context.moveTo(shoulderX, shoulderY);
+                context.quadraticCurveTo(s3CP.x, s3CP.y, pos3.x, pos3.y);
+                context.moveTo(start4.x, start4.y);
+                context.lineTo(mid3.x, mid3.y);
+            };
+
+            context.lineCap = 'round';
+            context.lineJoin = 'round';
+            context.beginPath();
+            bonesPath();
+            context.strokeStyle = wingStrokeColor;
+            context.lineWidth = 6 * scale;
+            context.stroke();
+            context.beginPath();
+            bonesPath();
+            context.strokeStyle = mainColor;
+            context.lineWidth = 2.5 * scale;
+            context.stroke();
+        };
+        drawWing(-1);
+        drawWing(1);
+
+        // ===== 4. 绘制身体 (改为正六边形) =====
+        context.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI) / 3 - Math.PI / 2; // 旋转 90 度使尖端朝前
+            const px = bodyR * 1.15 * Math.cos(angle);
+            const py = bodyR * 1.15 * Math.sin(angle);
+            if (i === 0) context.moveTo(px, py);
+            else context.lineTo(px, py);
+        }
+        context.closePath();
+        context.fillStyle = bodyColor;
+        context.fill();
+        context.strokeStyle = strokeColor;
+        context.lineWidth = 5 * scale;
+        context.stroke();
+
+        context.restore();
+    }
     // 在 EnemyDrawer 类中添加 Dragon 绘制方法
     drawDragon(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
@@ -9193,6 +9450,117 @@ class EnemyDrawer {
             context.fill();
             context.restore();
         }
+
+        context.restore();
+    }
+    drawHelQueenBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 1. 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // 2. 颜色定义
+        let BODY_RED, STRIPE_BLACK, OUTLINE_RED, MOUTH_DARK;
+
+        if (isFriendly) {
+            BODY_RED = '#E6B422';      // 金色
+            STRIPE_BLACK = '#3D3402';  // 深古铜
+            OUTLINE_RED = '#B8860B';   // 暗金
+            MOUTH_DARK = '#8B4513';    // 棕褐色
+        } else {
+            BODY_RED = '#D6554E';      // 红色
+            STRIPE_BLACK = '#2B2B2B';  // 黑色
+            OUTLINE_RED = '#A33E3B';   // 外轮廓红
+            MOUTH_DARK = '#B01D13';    // 嘴部暗红
+        }
+
+        // 3. 参数配置
+        const scale = (scaledSize / 100) * 0.8;
+        const w = 120 * scale;
+        const h = 150 * scale;
+        const strokeW = 8 * scale;
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer);
+
+        // 身体路径定义
+        const getBodyPath = (ctx) => {
+            ctx.beginPath();
+            ctx.moveTo(0, -h / 2);
+            ctx.bezierCurveTo(w / 1.5, -h / 2.5, w / 1.5, h / 3, w / 3, h / 2);
+            ctx.quadraticCurveTo(0, h * 0.35, -w / 3, h / 2);
+            ctx.bezierCurveTo(-w / 1.5, h / 3, -w / 1.5, -h / 2.5, 0, -h / 2);
+            ctx.closePath();
+        };
+
+        // 牙齿定位参数
+        const p0 = { x: w / 3, y: h / 2 };
+        const p1 = { x: 0, y: h * 0.35 };
+        const p2 = { x: -w / 3, y: h / 2 };
+
+        // 4. 绘制牙齿
+        const teethCount = 5;
+        context.fillStyle = MOUTH_DARK;
+        for (let i = 0; i < teethCount; i++) {
+            const t = i / (teethCount - 1);
+            const tx = Math.pow(1 - t, 2) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
+            const ty = Math.pow(1 - t, 2) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
+            const dx = 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
+            const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
+            const tAngle = Math.atan2(dy, dx);
+
+            const breath = Math.sin(animationTimer * 8) * 3 * scale;
+            const tier = Math.sin(t * Math.PI) * 6 * scale;
+            const currentLen = (12 * scale) + tier + breath;
+
+            context.save();
+            context.translate(tx, ty);
+            context.rotate(tAngle - Math.PI);
+            context.beginPath();
+            context.moveTo(-4 * scale, 0);
+            context.lineTo(4 * scale, 0);
+            context.lineTo(0, currentLen);
+            context.fill();
+            context.restore();
+        }
+
+        // 5. 绘制主体
+        context.fillStyle = BODY_RED;
+        getBodyPath(context);
+        context.fill();
+
+        // 6. 裁切并绘制 4 条条纹
+        context.save();
+        getBodyPath(context);
+        context.clip();
+        context.fillStyle = STRIPE_BLACK;
+
+        // 调整间距以确保平稳显示 4 条
+        const stripeH = 18 * scale;
+        const stripeGap = 32 * scale;
+        const startY = -h / 2 + 25 * scale;
+        for (let i = 0; i < 4; i++) {
+            context.fillRect(-w, startY + (i * stripeGap), w * 2, stripeH);
+        }
+        context.restore();
+
+        // 7. 身体描边
+        context.strokeStyle = OUTLINE_RED;
+        context.lineWidth = strokeW;
+        context.lineJoin = 'round';
+        getBodyPath(context);
+        context.stroke();
+
+        context.fillStyle = OUTLINE_RED;
+        context.beginPath();
+        // 加宽根部从 10 变为 18
+        context.moveTo(-15 * scale, -h / 2 + 5 * scale);
+        // 加长针尖从 15 变为 25，且稍微变钝一点显得有力
+        context.lineTo(0, -h / 2 - 25 * scale);
+        context.lineTo(15 * scale, -h / 2 + 5 * scale);
+        context.fill();
 
         context.restore();
     }
@@ -14471,7 +14839,7 @@ class EnemyDrawer {
         context.drawImage(canvas, -scaledSize / 2, -scaledSize / 2);
         context.restore();
     }
-// ==================== 雪暴 ====================
+    // ==================== 雪暴 ====================
     drawSnowStorm(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
@@ -15165,6 +15533,64 @@ class EnemyDrawer {
         this.drawCircle(context, Math.floor(x), Math.floor(y), radius, DEEP_RED);
         this.drawCircle(context, Math.floor(x), Math.floor(y), Math.floor(radius * 0.9), DARK_RED);
         this.drawCircle(context, Math.floor(x), Math.floor(y), Math.floor(radius * 0.65), DEEP_RED);
+    }
+    drawHelWorm(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        if (!enemyObj || !enemyObj.segmentColliders) return;
+
+        const segments = enemyObj.segmentColliders;
+        const cameraOffset = {
+            x: enemyObj?.gameInstance?.cameraOffset?.x || 0,
+            y: enemyObj?.gameInstance?.cameraOffset?.y || 0
+        };
+
+        const screenPoints = segments.map(seg => ({
+            x: seg.physicsBody.position.x - cameraOffset.x,
+            y: seg.physicsBody.position.y - cameraOffset.y,
+            radius: seg.physicsBody.radius
+        }));
+
+        if (screenPoints.length < 2) return;
+
+        // ===== 颜色替换区（根据你的要求：身体红色，友方金色）=====
+        const isFriendly = enemyObj.isFriendly === true;
+        // 主体颜色：友方金色，敌人深红/血红
+        const bodyColor = isFriendly ? '#FFD700' : '#c1392b';
+        // 轮廓颜色：友方暗金，敌人更深的红（焦炭红）
+        const outlineColor = isFriendly ? '#B8860B' : '#5a1010';
+        // 牙齿颜色：保持 Hel 血红（或根据需要调整为更亮的红以示区分）
+        const bloodRed = '#e74c3c';
+
+        // =====================
+
+        const segmentWidth = screenPoints[0].radius * 2 * viewScale;
+
+        context.save();
+
+        // 1. 绘制外部深色轮廓
+        context.beginPath();
+        context.moveTo(screenPoints[0].x, screenPoints[0].y);
+        for (let i = 0; i < screenPoints.length - 1; i++) {
+            const p0 = screenPoints[i];
+            const p1 = screenPoints[i + 1];
+            const xc = (p0.x + p1.x) / 2;
+            const yc = (p0.y + p1.y) / 2;
+            context.quadraticCurveTo(p0.x, p0.y, xc, yc);
+        }
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = outlineColor;
+        context.lineWidth = segmentWidth + (6 * viewScale); // 轮廓宽度
+        context.stroke();
+
+        // 2. 绘制内部主体颜色
+        context.strokeStyle = bodyColor;
+        context.lineWidth = segmentWidth;
+        context.stroke();
+
+        // 3. 绘制口器（传入新颜色）
+        this.drawLeechMouthScreen(context, screenPoints, segmentWidth, animationTimer, bodyColor, outlineColor, bloodRed, viewScale);
+
+        context.restore();
     }
     drawLeech(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         if (!enemyObj || !enemyObj.segmentColliders) return;
@@ -16148,7 +16574,101 @@ class EnemyDrawer {
 
         context.restore();
     }
+    drawFireStorm(context, x, y, size, animationTimer, viewScale = 1.0, enemyObj = null) {
+        // 应用视野缩放
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
 
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // 友方使用金色系，敌方使用棕色系（不透明）
+        let outerColor, middleColor, innerColor;
+        if (isFriendly) {
+            outerColor = '#FFD700';      // 金色
+            middleColor = '#DAA520';      // 深金色
+            innerColor = '#B8860B';        // 暗金色
+        } else {
+            outerColor = '#DEC047';        // 深棕色
+            middleColor = '#CB9333';        // 中棕色
+            innerColor = '#B2701A';          // 深棕色
+        }
+
+        // 保存上下文状态
+        context.save();
+
+        // 移动到中心
+        context.translate(x, y);
+
+        // ===== 1. 最外层五边形（最慢旋转）=====
+        context.save();
+        const pentagonRotation = (animationTimer * 240) % 360;
+        context.rotate(pentagonRotation * Math.PI / 180);
+
+        context.beginPath();
+        const pentagonPoints = 5;
+        for (let i = 0; i < pentagonPoints; i++) {
+            const angle = (i * 72 - 90) * Math.PI / 180;
+            const px = scaledSize * 0.5 * Math.cos(angle);
+            const py = scaledSize * 0.5 * Math.sin(angle);
+
+            if (i === 0) {
+                context.moveTo(px, py);
+            } else {
+                context.lineTo(px, py);
+            }
+        }
+        context.closePath();
+        context.strokeStyle = outerColor;
+        context.lineWidth = Math.max(2, 3 * viewScale);
+        context.stroke();
+        context.fillStyle = isFriendly ? '#FFD700' : '#945932';
+        context.fill();
+        context.restore();
+
+        // ===== 2. 中间正方形（中速旋转）=====
+        context.save();
+        const squareRotation = (animationTimer * 270) % 360; // 每秒45度（更快）
+        context.rotate(squareRotation * Math.PI / 180);
+
+        const squareSize = scaledSize * 0.6;
+        context.beginPath();
+        context.rect(-squareSize/2, -squareSize/2, squareSize, squareSize);
+        context.strokeStyle = middleColor;
+        context.lineWidth = Math.max(2, 2.5 * viewScale);
+        context.stroke();
+        context.fillStyle = isFriendly ? '#DAA520' : '#793E18';
+        context.fill();
+        context.restore();
+
+        // ===== 3. 最内层三角形（最快旋转）=====
+        context.save();
+        const triangleRotation = (animationTimer * 300) % 360; // 每秒90度（最快）
+        context.rotate(triangleRotation * Math.PI / 180);
+
+        const triangleSize = scaledSize * 0.3; // 缩小一点，避免完全遮挡
+        context.beginPath();
+        for (let i = 0; i < 3; i++) {
+            const angle = (i * 120 - 90) * Math.PI / 180;
+            const px = triangleSize * Math.cos(angle);
+            const py = triangleSize * Math.sin(angle);
+
+            if (i === 0) {
+                context.moveTo(px, py);
+            } else {
+                context.lineTo(px, py);
+            }
+        }
+        context.closePath();
+        context.strokeStyle = innerColor;
+        context.lineWidth = Math.max(1, 2 * viewScale);
+        context.stroke();
+        context.fillStyle = isFriendly ? '#B8860B' : '#572504';
+        context.fill();
+        context.restore();
+
+        context.restore();
+    }
     drawPooStorm(context, x, y, size, animationTimer, viewScale = 1.0, enemyObj = null) {
         // 应用视野缩放
         const scaledSize = size * viewScale;
@@ -17416,6 +17936,8 @@ class EnemyDrawer {
             this.drawHelHornet(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "HelSpider") {
             this.drawHelSpider(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "HelQueenBee") {
+            this.drawHelQueenBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         // ========== 沙漠火蚁系列 ==========
         else if (enemyType === "WorkerFireAnt") {
@@ -17449,6 +17971,8 @@ class EnemyDrawer {
             this.drawDragon(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "DragonNest") {
             this.drawDragonNest(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "ToxicDragon"|| enemyType === "Toxic Dragon") {
+            this.drawToxicDragon(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         else if (enemyType === "Sponge") {
             this.drawSponge(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
@@ -17477,13 +18001,13 @@ class EnemyDrawer {
         } else if (enemyType === "Fly") {
             this.drawFly(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Rat") {
-            // 老鼠绘制（需要实现）
             this.drawRat(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Roach") {
-            // 蟑螂绘制（需要实现）
             this.drawRoach(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "PooStorm") {
             this.drawPooStorm(context, x, y, size, animationTimer, viewScale, enemyObj);
+        }else if (enemyType === "FireStorm") {
+            this.drawFireStorm(context, x, y, size, animationTimer, viewScale, enemyObj);
         } else if (enemyType === "TrashDigger") {
             this.drawTrashDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "MudDigger") {
@@ -17496,6 +18020,8 @@ class EnemyDrawer {
     this.drawBiologist(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Leech") {
         this.drawLeech(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "HelWorm") {
+        this.drawHelWorm(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         else if (enemyType === "Parasite") {
         this.drawParasite(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
@@ -22501,7 +23027,7 @@ class Enemy {
 
         // ===== 🆕 多节碰撞箱系统（统一处理 Leech、Parasite、Centipede）=====
         this.segmentColliders = [];
-        this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede");
+        this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede"|| enemyType === "HelWorm");
 
         if (this.hasMultiSegmentCollision) {
             this.initMultiSegmentCollision();
@@ -22643,7 +23169,7 @@ class Enemy {
         return selfDamage;
     }
     initMultiSegmentCollision() {
-        this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede");
+        this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede"|| this.type === "HelWorm");
         if (!this.hasMultiSegmentCollision) {
             this.segmentColliders = [];
             return;
@@ -22653,6 +23179,7 @@ class Enemy {
 
         const BASE_VALUES = {
             "Leech":      { count: 6, radius: 12 },
+            "HelWorm":      { count: 7, radius: 12 },
             "Parasite":   { count: 4, radius: 10 },
             "Centipede":  { count: 8, radius: 10 }
         };
@@ -22737,9 +23264,9 @@ class Enemy {
         }
 
         // 调整：稍微降低基础速度，提高稳定性
-        const FOLLOW_SPEED = 10.0;
+        const FOLLOW_SPEED = 12.0;
         const SPRING_STRENGTH = 0.15;
-        const DAMPING = 0.82; // 稍微调高阻尼，吸收碰撞产生的多余动能
+        const DAMPING = 0.85; // 稍微调高阻尼，吸收碰撞产生的多余动能
 
         const headSpeedSq = head.physicsBody.velocity.x ** 2 + head.physicsBody.velocity.y ** 2;
         const headSpeed = Math.sqrt(headSpeedSq);
@@ -23006,13 +23533,25 @@ class Enemy {
             case "Shipwreck": return [1000, 48, 0, 150000, 40];
             case "PirateDigger": return [250, 28, 90, 300, 200];//---------
             case "StickBug": return [60, 20, 100, 200, 20];
-            case "Soldier Termite": return [100, 25, 100, 600, 50];
-            case "Worker Termite": return [100, 25, 100, 400, 30];
-            case "TermiteHole": return [800, 25, 0, 15500, 80];
+            case "Soldier Termite": return [100, 25, 100, 600, 40];
+            case "Worker Termite": return [100, 25, 100, 400, 20];
+            case "TermiteHole": return [800, 25, 0, 15500, 50];
             case "TermiteOvermind": return [900, 40, 10, 600, 20];
             case "Wasp": return [150, 22, 50, 700, 30];
             case "Firefly": return [100, 20, 50, 400, 20];
-            default: return [100, 20, 60, 10, 20];
+            case "HelWorm": return [100, 15, 110, 100, 40];
+            case "HelSpider": return [110, 25, 120, 600, 40];
+            case "HelBee": return [100, 25, 100, 400, 55];
+            case "HelHornet": return [130, 25, 0, 200, 40];
+            case "HelBeetle": return [200, 40, 10, 600, 30];
+            case "Dragon": return [110, 22, 50, 700, 40];
+            case "DragonNest": return [1000, 20, 50, 17000, 20];
+            case "HelHive": return [1000, 25, 0, 15000, 40];
+            case "HelJellyfish": return [175, 40, 10, 600, 25];
+            case "ToxicDragon": return [150, 22, 50, 700, 80];
+            case "FireStorm": return [180, 20, 50, 400, 60];
+            case "HelQueenBee": return [180, 20, 50, 400, 60];
+            default: return [100, 20, 60, 10, 40];
         }
     }
 
@@ -23026,7 +23565,8 @@ class Enemy {
             "Sponge": 1, "Scallop": 100, "Bubble": 1, "Starfish": 120,
             "Jellyfish": 130, "CrabHole": 1, "ManHole": 1, "Fly": 140,
             "Rat": 190, "Roach": 125, "PooStorm": 105, "Leech": 130,
-            "Parasite": 140, "Squid": 300, "Wasp": 320, "Scorpion":350
+            "Parasite": 140, "Squid": 300, "Wasp": 320, "Scorpion":350,"HelWorm": 150,"HelSpider": 180,"HelBee": 200,"HelHornet": 320,"HelBeetle": 140,
+        "Dragon": 250,"DragonNest": 100,"HelHive": 80,"HelJellyfish": 160,"ToxicDragon": 280,"FireStorm": 170,"HelQueenBee": 150
         };
 
         const base = baseRanges[enemyType] || 80;
@@ -34108,6 +34648,14 @@ class Player {
 
                         // 应用伤害
                         const died = enemy.takeDamage(finalDamage, sourceInfo);
+                        // Fang：吸血
+                        // ✅ 修复：Fang 吸血（无论敌人是否死亡）
+                        if (petal.itemType === "Fang") {
+                            const lifestealRatio = 0.1 + (petal.level - 1) * 0.02; // 每级 +2%
+                            const heal = finalDamage * lifestealRatio;
+                            this.health = Math.min(this.maxHealth, this.health + heal);
+                            totalHeal += heal;
+                        }
 
                         if (died) {
                             totalDamage += finalDamage;
@@ -34116,13 +34664,6 @@ class Player {
                             }
                         }
 
-                        // Fang：吸血
-                        if (petal.itemType === "Fang" && !died) {
-                            const lifestealRatio = 0.1 * petal.level;
-                            const heal = finalDamage * lifestealRatio;
-                            this.health = Math.min(this.maxHealth, this.health + heal);
-                            totalHeal += heal;
-                        }
 
                         // Web：减速
                         if (petal.itemType === "Web") {
@@ -35012,13 +35553,14 @@ class MainMenu {
             "Plain": [102, 187, 106], "Bio": [38, 166, 154],
             "Desert": [255, 202, 128], "Random": [171, 71, 188],
             "Ocean": [64, 164, 223], "Sewer": [81, 55, 20],
-            "Arctic": [135, 206, 250], "Jungle": [76, 175, 80]
+            "Arctic": [135, 206, 250], "Jungle": [76, 175, 80],"Hel": [200, 80, 60]
+
         };
         this.BIOME_HOVER_COLORS = {
             "Plain": [67, 160, 71], "Bio": [0, 137, 123],
             "Desert": [255, 167, 38], "Random": [142, 36, 170],
             "Ocean": [0, 105, 148], "Sewer": [61, 41, 15],
-            "Arctic": [100, 180, 230], "Jungle": [56, 145, 60]
+            "Arctic": [100, 180, 230], "Jungle": [56, 145, 60],"Hel":[180, 70, 50]
         };
         this.OTHER_BUTTON_COLORS = {
             "inventory": [52, 152, 219], "crafting": [155, 89, 182],
@@ -36450,34 +36992,134 @@ class WorldMapGame {
         // 后台加载图片和墙壁（不阻塞）
         this.loadAssetsInBackground();
     }
-
-    // ✅ 新增：后台加载资源
     async loadAssetsInBackground() {
         console.log('🔄 开始后台加载资源...');
 
-        // 先让游戏进入主菜单（不等待）
-        setTimeout(async () => {
-            try {
-                // 等待图片加载（最多3秒）
-                await Promise.race([
-                    window.imageLoader.waitAllLoaded(),
-                    new Promise(resolve => setTimeout(resolve, 3000))
-                ]);
+        // 等待图片加载完成
+        try {
+            await window.imageLoader.waitAllLoaded();
+            this.imagesLoaded = true;
+            console.log('🖼️ 图片加载完成');
 
-                this.imagesLoaded = true;
-                console.log('🖼️ 图片加载完成');
+            // 预计算所有 biome 的墙壁（异步分批）
+            await this.precomputeAllBiomeWalls();
 
-                // 只预计算当前 biome
-                console.log(`🔍 预计算当前 biome: ${this.currentBiome}`);
-                this.precomputeWallBoxes(this.currentBiome);
+        } catch (error) {
+            console.error('❌ 资源加载失败:', error);
+            // 即使失败也标记为完成，使用降级方案
+            this.imagesLoaded = true;
+        }
+    }
 
-                // 其他 biome 慢慢后台加载
-                this.loadOtherBiomesInBackground();
+    async precomputeAllBiomeWalls() {
+        const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer", "Arctic", "Jungle"];
 
-            } catch (error) {
-                console.error('❌ 资源加载失败:', error);
+        for (const biome of biomes) {
+            await this.precomputeWallBoxesAsync(biome);
+            // 每加载一个 biome 休息一下，避免卡顿
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        this.wallsPrecomputed = true;
+        console.log('✅ 所有墙壁预计算完成');
+    }
+
+    async precomputeWallBoxesAsync(biome) {
+        return new Promise((resolve) => {
+            const bgConfig = BIOME_BACKGROUNDS[biome];
+            if (!bgConfig || !bgConfig.map || !bgConfig.map.image) {
+                resolve();
+                return;
             }
-        }, 100);
+
+            const mapImageKey = bgConfig.map.image;
+
+            // 使用异步等待图片加载
+            const checkImage = () => {
+                const mapImg = window.imageLoader?.getImage(mapImageKey);
+                if (mapImg && mapImg.width > 0) {
+                    this._precomputeWallBoxesSync(biome, mapImg);
+                    resolve();
+                } else {
+                    // 图片还没加载好，50ms 后重试
+                    setTimeout(checkImage, 50);
+                }
+            };
+
+            checkImage();
+        });
+    }
+
+    _precomputeWallBoxesSync(biome, mapImg) {
+        const SAMPLE_SIZE = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = SAMPLE_SIZE;
+        canvas.height = SAMPLE_SIZE;
+        const ctx = canvas.getContext('2d');
+
+        try {
+            ctx.drawImage(mapImg, 0, 0, SAMPLE_SIZE, SAMPLE_SIZE);
+            const data = ctx.getImageData(0, 0, SAMPLE_SIZE, SAMPLE_SIZE).data;
+
+            const W = SAMPLE_SIZE, H = SAMPLE_SIZE;
+            const wallMap = new Uint8Array(W * H);
+            const processed = new Uint8Array(W * H);
+
+            // 检测墙壁像素
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const i = (y * W + x) * 4;
+                    if (data[i + 3] < 128) continue;
+                    const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+                    if (brightness < 128) {
+                        wallMap[y * W + x] = 1;
+                    }
+                }
+            }
+
+            // 合并相邻墙壁为矩形
+            const boxes = [];
+            const MIN_PIX = 2;
+
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const idx = y * W + x;
+                    if (!wallMap[idx] || processed[idx]) continue;
+
+                    let w = 0;
+                    while (x + w < W && wallMap[y * W + x + w] && !processed[y * W + x + w]) w++;
+
+                    let h = 1;
+                    outer: for (; y + h < H; h++) {
+                        for (let dx = 0; dx < w; dx++) {
+                            const ni = (y + h) * W + x + dx;
+                            if (!wallMap[ni] || processed[ni]) break outer;
+                        }
+                    }
+
+                    if (w >= MIN_PIX || h >= MIN_PIX) {
+                        for (let dy = 0; dy < h; dy++) {
+                            for (let dx = 0; dx < w; dx++) {
+                                processed[(y + dy) * W + x + dx] = 1;
+                            }
+                        }
+
+                        boxes.push({
+                            x: (x / W) * WORLD_WIDTH,
+                            y: (y / H) * WORLD_HEIGHT,
+                            width: (w / W) * WORLD_WIDTH,
+                            height: (h / H) * WORLD_HEIGHT
+                        });
+                    }
+                }
+            }
+
+            this.wallCache.set(biome, { boxes, imgWidth: W, imgHeight: H });
+            console.log(`✅ ${biome} 墙壁预计算完成: ${boxes.length} 个矩形`);
+
+        } catch (error) {
+            console.error(`❌ ${biome} 墙壁预计算失败:`, error);
+        }
     }
     requestRedraw() {
         // 强制重绘
@@ -36522,6 +37164,132 @@ class WorldMapGame {
         if (this.player?.inventory?.craftingSystem) {
             this.player.inventory.craftingSystem.showError(message);
         }
+    }
+    async isInMazeWallAsync(worldX, worldY) {
+    if (typeof MAZE_ENABLED === 'undefined' || !MAZE_ENABLED) return false;
+
+    const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
+    if (!bgConfig?.map?.image) return false;
+
+    const mapImageKey = bgConfig.map.image;
+    let mapImg = window.imageLoader?.getImage(mapImageKey);
+
+    // 等待图片加载
+    if (!mapImg || !mapImg.width) {
+        await new Promise((resolve) => {
+            const check = () => {
+                mapImg = window.imageLoader?.getImage(mapImageKey);
+                if (mapImg && mapImg.width > 0) {
+                    resolve();
+                } else {
+                    setTimeout(check, 50);
+                }
+            };
+            check();
+        });
+    }
+
+    // 边界检查
+    if (worldX < 0 || worldX >= WORLD_WIDTH || worldY < 0 || worldY >= WORLD_HEIGHT) return false;
+
+    const imgW = mapImg.width;
+    const imgH = mapImg.height;
+    const cacheKey = `${mapImageKey}_${imgW}_${imgH}`;
+
+    if (!this._mazeWallMap || this._mazeWallMapKey !== cacheKey) {
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = imgW;
+        tmpCanvas.height = imgH;
+        const tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(mapImg, 0, 0);
+
+        let rgba;
+        try {
+            rgba = tmpCtx.getImageData(0, 0, imgW, imgH).data;
+        } catch (e) {
+            return false;
+        }
+
+        const wallMap = new Uint8Array(imgW * imgH);
+        for (let i = 0; i < imgW * imgH; i++) {
+            const pi = i * 4;
+            if (rgba[pi + 3] < 128) continue;
+            if ((rgba[pi] + rgba[pi+1] + rgba[pi+2]) / 3 < 128) {
+                wallMap[i] = 1;
+            }
+        }
+
+        this._mazeWallMap = wallMap;
+        this._mazeWallMapKey = cacheKey;
+        this._mazeImgWidth = imgW;
+        this._mazeImgHeight = imgH;
+        this._mazePixelData = rgba;
+    }
+
+    const px = Math.floor((worldX / WORLD_WIDTH) * this._mazeImgWidth);
+    const py = Math.floor((worldY / WORLD_HEIGHT) * this._mazeImgHeight);
+
+    if (px < 0 || px >= this._mazeImgWidth || py < 0 || py >= this._mazeImgHeight) return false;
+
+    return this._mazeWallMap[py * this._mazeImgWidth + px] === 1;
+}
+
+    // 保留同步版本用于碰撞检测（使用缓存）
+    isInMazeWall(worldX, worldY) {
+        if (typeof MAZE_ENABLED === 'undefined' || !MAZE_ENABLED) return false;
+
+        const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
+        if (!bgConfig?.map?.image) return false;
+
+        const mapImageKey = bgConfig.map.image;
+        const mapImg = window.imageLoader?.getImage(mapImageKey);
+
+        // 如果图片还没加载，返回 false（不阻挡）
+        if (!mapImg || !mapImg.width) return false;
+
+        // 边界检查
+        if (worldX < 0 || worldX >= WORLD_WIDTH || worldY < 0 || worldY >= WORLD_HEIGHT) return false;
+
+        const imgW = mapImg.width;
+        const imgH = mapImg.height;
+        const cacheKey = `${mapImageKey}_${imgW}_${imgH}`;
+
+        if (!this._mazeWallMap || this._mazeWallMapKey !== cacheKey) {
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = imgW;
+            tmpCanvas.height = imgH;
+            const tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.drawImage(mapImg, 0, 0);
+
+            let rgba;
+            try {
+                rgba = tmpCtx.getImageData(0, 0, imgW, imgH).data;
+            } catch (e) {
+                return false;
+            }
+
+            const wallMap = new Uint8Array(imgW * imgH);
+            for (let i = 0; i < imgW * imgH; i++) {
+                const pi = i * 4;
+                if (rgba[pi + 3] < 128) continue;
+                if ((rgba[pi] + rgba[pi+1] + rgba[pi+2]) / 3 < 128) {
+                    wallMap[i] = 1;
+                }
+            }
+
+            this._mazeWallMap = wallMap;
+            this._mazeWallMapKey = cacheKey;
+            this._mazeImgWidth = imgW;
+            this._mazeImgHeight = imgH;
+            this._mazePixelData = rgba;
+        }
+
+        const px = Math.floor((worldX / WORLD_WIDTH) * this._mazeImgWidth);
+        const py = Math.floor((worldY / WORLD_HEIGHT) * this._mazeImgHeight);
+
+        if (px < 0 || px >= this._mazeImgWidth || py < 0 || py >= this._mazeImgHeight) return false;
+
+        return this._mazeWallMap[py * this._mazeImgWidth + px] === 1;
     }
     // 在 WorldMapGame 类中添加
     addDamageNumber(x, y, damage) {
