@@ -26154,10 +26154,10 @@ class Petal {
         this.maxHelBeetles = 1;
         this.dragonList = [];
         this.maxDragons = 1;
-        this.dragonNestList = [];
-        this.maxDragonNests = 1;
-        this.helHiveList = [];
-        this.maxHelHives = 1;
+        this.NestDragonList = [];
+        this.maxNestDragons = 10;
+        this.HiveHelBeeList = [];
+        this.maxHiveHelBees = 10;
         this.helJellyfishList = [];
         this.maxHelJellyfish = 2;
         this.helQueenBeeList = [];
@@ -26287,10 +26287,10 @@ class Petal {
         this.maxHelBeetles = 1;
         this.dragonList = [];
         this.maxDragons = 1;
-        this.dragonNestList = [];
-        this.maxDragonNests = 1;
-        this.helHiveList = [];
-        this.maxHelHives = 1;
+        this.NestDragonList = [];
+        this.maxNestDragons = 10;
+        this.HiveHelBeeList = [];
+        this.maxHiveHelBees = 10;
         this.helJellyfishList = [];
         this.maxHelJellyfish = 2;
         this.helQueenBeeList = [];
@@ -26738,14 +26738,20 @@ class Petal {
             { listName:"helHornetList",     maxName:"maxHelHornets",        maxDefault:1,  spawnCount:1,  enemyType:"HelHornet",      eggType:"HelHornet egg",        cooldown:12000, spawnMethod:"HelHornet",           cleanMethod:"HelHornet",           updateMethod:"HelHornet" },
             { listName:"helBeetleList",     maxName:"maxHelBeetles",        maxDefault:1,  spawnCount:1,  enemyType:"HelBeetle",      eggType:"HelBeetle egg",        cooldown:15000, spawnMethod:"HelBeetle",           cleanMethod:"HelBeetle",           updateMethod:"HelBeetle" },
             { listName:"dragonList",        maxName:"maxDragons",           maxDefault:1,  spawnCount:1,  enemyType:"Dragon",         eggType:"Dragon egg",           cooldown:20000, spawnMethod:"Dragon",              cleanMethod:"Dragon",              updateMethod:"Dragon" },
-            { listName:"dragonNestList",    maxName:"maxDragonNests",       maxDefault:1,  spawnCount:10, enemyType:"DragonNest",     eggType:"DragonNest egg",       cooldown:30000, spawnMethod:"DragonNest",          cleanMethod:"DragonNest",          updateMethod:"DragonNest" },
+            { listName:"NestDragonList",    maxName:"maxNestDragons",       maxDefault:10, spawnCount:10, enemyType:"Dragon",         eggType:"DragonNest egg",       cooldown:28000, spawnMethod:"NestDragon",          cleanMethod:"NestDragon",          updateMethod:"NestDragon" },
+            { listName:"dragonNestList",    maxName:"maxDragonNests",       maxDefault:1,  spawnCount:10, enemyType:"DragonNest",     eggType:"DragonNest egg",       cooldown:28000, spawnMethod:"DragonNest",          cleanMethod:"DragonNest",          updateMethod:"DragonNest" },
+            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
+            { listName:"HiveHelBeeList",    maxName:"maxHiveHelBees",       maxDefault:10, spawnCount:10, enemyType:"HelBee",         eggType:"HelHive egg",          cooldown:25000, spawnMethod:"HiveHelBee",          cleanMethod:"HiveHelBee",          updateMethod:"HiveHelBee" },
+
             { listName:"helHiveList",       maxName:"maxHelHives",          maxDefault:1,  spawnCount:10, enemyType:"HelHive",        eggType:"HelHive egg",          cooldown:25000, spawnMethod:"HelHive",             cleanMethod:"HelHive",             updateMethod:"HelHive" },
+
             { listName:"helJellyfishList",  maxName:"maxHelJellyfish",      maxDefault:2,  spawnCount:2,  enemyType:"HelJellyfish",   eggType:"HelJellyfish egg",     cooldown:15000, spawnMethod:"HelJellyfish",        cleanMethod:"HelJellyfish",        updateMethod:"HelJellyfish" },
             { listName:"helQueenBeeList",   maxName:"maxHelQueenBees",      maxDefault:1,  spawnCount:1,  enemyType:"HelQueenBee",    eggType:"Hel Queen Bee egg",    cooldown:25000, spawnMethod:"HelQueenBee",         cleanMethod:"HelQueenBee",         updateMethod:"HelQueenBee" },
             { listName:"toxicDragonList",   maxName:"maxToxicDragons",      maxDefault:1,  spawnCount:1,  enemyType:"ToxicDragon",    eggType:"ToxicDragon egg",      cooldown:22000, spawnMethod:"ToxicDragon",         cleanMethod:"ToxicDragon",         updateMethod:"ToxicDragon" },
             { listName:"helDiggerList",     maxName:"maxHelDiggers",        maxDefault:1,  spawnCount:1,  enemyType:"HelDigger",      eggType:"Hel Digger egg",       cooldown:18000, spawnMethod:"HelDigger",           cleanMethod:"HelDigger",           updateMethod:"HelDigger" },
             { listName:"helBeekeeperList",  maxName:"maxHelBeekeepers",     maxDefault:1,  spawnCount:1,  enemyType:"HelBeekeeper",   eggType:"Hel Beekeeper egg",    cooldown:20000, spawnMethod:"HelBeekeeper",        cleanMethod:"HelBeekeeper",        updateMethod:"HelBeekeeper" },
             { listName:"firestormList",     maxName:"maxFirestorms",        maxDefault:3,  spawnCount:3,  enemyType:"FireStorm",      eggType:"FireStick",            cooldown:8000,  spawnMethod:"Firestorm",           cleanMethod:"Firestorm",           updateMethod:"Firestorm" },
+
             // ── Ocean ─────────────────────────────────────────────────────────
             { listName:"scallopList",       maxName:"maxScallops",          maxDefault:4,  spawnCount:4,  enemyType:"Scallop",        eggType:"Shell egg",            cooldown:7000,  spawnMethod:"ScallopsWithDna",     cleanMethod:"Scallops",            updateMethod:"Scallops" },
             { listName:"starfishList",      maxName:"maxStarfish",          maxDefault:2,  spawnCount:2,  enemyType:"Starfish",       eggType:"Starfish egg",         cooldown:8000,  spawnMethod:"StarfishWithDna",     cleanMethod:"Starfish",            updateMethod:"Starfish" },
@@ -26756,6 +26762,7 @@ class Petal {
             { listName:"squidList",         maxName:"maxSquid",             maxDefault:1,  spawnCount:1,  enemyType:"Squid",          eggType:"Squid egg",            cooldown:10000, spawnMethod:"SquidWithDNA",        cleanMethod:"Squid",               updateMethod:"Squid" },
             { listName:"shipwreckJellyfishList", maxName:"maxShipwreckJellyfish", maxDefault:10, spawnCount:10, enemyType:"Jellyfish", eggType:"Shipwreck egg",       cooldown:19000, spawnMethod:"ShipwreckJellyfish",  cleanMethod:"ShipwreckJellyfish",  updateMethod:"ShipwreckJellyfish" },
             { listName:"barnacleList",      maxName:"maxBarnacles",         maxDefault:2,  spawnCount:2,  enemyType:"Barnacle",       eggType:"Barnacle egg",         cooldown:12000, spawnMethod:"BarnaclesWithDNA",    cleanMethod:"Barnacles",           updateMethod:"Barnacles" },
+
             // ── Insects ───────────────────────────────────────────────────────
             { listName:"beetleList",        maxName:"maxBeetles",           maxDefault:1,  spawnCount:1,  enemyType:"Beetle",         eggType:"Beetle egg",           cooldown:8000,  spawnMethod:"BeetleWithDna",       cleanMethod:"Beetles",             updateMethod:"Beetles" },
             { listName:"scorpionList",      maxName:"maxScorpions",         maxDefault:2,  spawnCount:2,  enemyType:"Scorpion",       eggType:"Scorpion egg",         cooldown:20000, spawnMethod:"ScorpionsWithDNA",    cleanMethod:"Scorpions",           updateMethod:"Scorpions" },
@@ -26764,6 +26771,7 @@ class Petal {
             { listName:"hiveBeeList",       maxName:"maxHiveBees",          maxDefault:10, spawnCount:10, enemyType:"Bee",            eggType:"Hive egg",             cooldown:20000, spawnMethod:"HiveBeesWithDNA",     cleanMethod:"HiveBees",            updateMethod:"HiveBees" },
             { listName:"beekeeperList",     maxName:"maxBeekeepers",        maxDefault:1,  spawnCount:1,  enemyType:"Beekeeper",      eggType:"Beekeeper egg",        cooldown:20000, spawnMethod:"BeekeeperWithDNA",    cleanMethod:"Beekeepers",          updateMethod:"Beekeepers" },
             { listName:"queenBeeList",      maxName:"maxQueenBees",         maxDefault:1,  spawnCount:1,  enemyType:"QueenBee",       eggType:"Queen Bee egg",        cooldown:15000, spawnMethod:"QueenBeeWithDNA",     cleanMethod:"QueenBees",           updateMethod:"QueenBees" },
+
             // ── Jungle ────────────────────────────────────────────────────────
             { listName:"waspList",          maxName:"maxWasps",             maxDefault:1,  spawnCount:1,  enemyType:"Wasp",           eggType:"Wasp egg",             cooldown:10000, spawnMethod:"Wasp",                cleanMethod:"Wasps",               updateMethod:"Wasps" },
             { listName:"workerTermiteList", maxName:"maxWorkerTermites",    maxDefault:4,  spawnCount:4,  enemyType:"Worker Termite", eggType:"Worker Termite egg",   cooldown:12000, spawnMethod:"WorkerTermite",       cleanMethod:"WorkerTermites",      updateMethod:"WorkerTermites" },
@@ -26774,6 +26782,7 @@ class Petal {
             { listName:"termiteSoldierList",maxName:"maxTermiteSoldiers",   maxDefault:10, spawnCount:10, enemyType:"Soldier Termite",eggType:"TermiteHole egg",      cooldown:18000, spawnMethod:"TermiteHoleSoldiers", cleanMethod:"TermiteSoldiers",     updateMethod:"TermiteSoldiers" },
             { listName:"termiteOvermindList",maxName:"maxTermiteOverminds", maxDefault:1,  spawnCount:1,  enemyType:"TermiteOvermind",eggType:"TermiteOvermind egg",  cooldown:20000, spawnMethod:"TermiteOvermind",     cleanMethod:"TermiteOverminds",    updateMethod:"TermiteOverminds" },
             { listName:"spiderCaveSpiders", maxName:"maxSpiderCaveSpiders", maxDefault:10, spawnCount:10, enemyType:"Spider",         eggType:"SpiderCave egg",       cooldown:19000, spawnMethod:"SpiderCave",          cleanMethod:"SpiderCaveSpiders",   updateMethod:"SpiderCaveSpiders" },
+
             // ── Arctic ────────────────────────────────────────────────────────
             { listName:"slagMightList",     maxName:"maxSlagMight",         maxDefault:1,  spawnCount:1,  enemyType:"SlagMight",      eggType:"SlagMight egg",        cooldown:8000,  spawnMethod:"SlagMight",           cleanMethod:"SlagMight",           updateMethod:"SlagMight" },
             { listName:"iceCubeList",       maxName:"maxIceCubes",          maxDefault:1,  spawnCount:1,  enemyType:"Ice Cube",       eggType:"Ice Cube egg",         cooldown:6000,  spawnMethod:"IceCube",             cleanMethod:"IceCube",             updateMethod:"IceCube" },
@@ -26785,6 +26794,7 @@ class Petal {
             { listName:"snowmanList",       maxName:"maxSnowmen",           maxDefault:1,  spawnCount:1,  enemyType:"Snowman",        eggType:"Snowman egg",          cooldown:6000,  spawnMethod:"Snowman",             cleanMethod:"Snowman",             updateMethod:"Snowman" },
             { listName:"snowstormList",     maxName:"maxSnowstorms",        maxDefault:3,  spawnCount:3,  enemyType:"SnowStorm",      eggType:"SnowStick",            cooldown:8000,  spawnMethod:"Snowstorm",           cleanMethod:"Snowstorm",           updateMethod:"Snowstorm" },
             { listName:"frostDiggerList",   maxName:"maxFrostDiggers",      maxDefault:1,  spawnCount:1,  enemyType:"Frost Digger",   eggType:"Frost Digger egg",     cooldown:15000, spawnMethod:"FrostDiggerWithDNA",  cleanMethod:"FrostDiggers",        updateMethod:"FrostDiggers" },
+
             // ── Misc ──────────────────────────────────────────────────────────
             { listName:"pirateDiggerList",  maxName:"maxPirateDiggers",     maxDefault:1,  spawnCount:1,  enemyType:"PirateDigger",   eggType:"PirateDigger egg",     cooldown:18000, spawnMethod:"PirateDiggerWithDNA", cleanMethod:"PirateDiggers",       updateMethod:"PirateDiggers" },
             { listName:"soldierAntList",    maxName:"maxSoldierAnts",       maxDefault:3,  spawnCount:3,  enemyType:"Soldier Ant",    eggType:"Soldier Ant egg",      cooldown:10000, spawnMethod:"SoldierAntsWithDNA",  cleanMethod:"SoldierAnts",         updateMethod:"SoldierAnts" },
@@ -26802,6 +26812,7 @@ class Petal {
             { listName:"redBloodCellList",  maxName:"maxRedBloodCells",     maxDefault:2,  spawnCount:2,  enemyType:"RedBloodCell",   eggType:"RedBloodCell egg",     cooldown:8000,  spawnMethod:"RedBloodCellsWithDna",cleanMethod:"RedBloodCells",       updateMethod:"RedBloodCells" },
             { listName:"stemCellList",      maxName:"maxStemCells",         maxDefault:10, spawnCount:10, enemyType:"WhiteBloodCell", eggType:"StemCell egg",         cooldown:15000, spawnMethod:"StemCellsWithDna",    cleanMethod:"StemCells",           updateMethod:"StemCells" },
             { listName:"sandstormList",     maxName:"maxSandstorms",        maxDefault:2,  spawnCount:2,  enemyType:"Sandstorm",      eggType:"Stick",                cooldown:8000,  spawnMethod:"SandstormsWithDna",   cleanMethod:"Sandstorms",          updateMethod:"Sandstorms" },
+
             // ── Sewer ─────────────────────────────────────────────────────────
             { listName:"manHoleList",       maxName:"maxManHoles",          maxDefault:1,  spawnCount:1,  enemyType:"ManHole",        eggType:"ManHole egg",          cooldown:20000, spawnMethod:"ManHoleWithDna",      cleanMethod:"ManHoles",            updateMethod:"ManHoles" },
             { listName:"flyList",           maxName:"maxFlies",             maxDefault:3,  spawnCount:3,  enemyType:"Fly",            eggType:"Fly_egg",              cooldown:10000, spawnMethod:"FlyWithDna",          cleanMethod:"Flies",               updateMethod:"Flies" },
@@ -27133,8 +27144,8 @@ class Petal {
                 "HelHornet egg":      ["HelHornet",              12000, "updateHelHornet"],
                 "HelBeetle egg":      ["HelBeetle",              15000, "updateHelBeetle"],
                 "Dragon egg":         ["Dragon",                 20000, "updateDragon"],
-                "DragonNest egg":     ["DragonNest",             30000, "updateDragonNest"],
-                "HelHive egg":        ["HelHive",                25000, "updateHelHive"],
+                "DragonNest egg": ["NestDragon", 28000, "updateNestDragon"],
+                "HelHive egg": ["HiveHelBee", 25000, "updateHiveHelBee"],
                 "HelJellyfish egg":   ["HelJellyfish",           15000, "updateHelJellyfish"],
                 "Hel Queen Bee egg":  ["HelQueenBee",            25000, "updateHelQueenBee"],
                 "ToxicDragon egg":    ["ToxicDragon",            22000, "updateToxicDragon"],
