@@ -610,17 +610,17 @@ export const BIOME_SPAWN_RATES = {
         "Squid": { weight: 18, minLevel: 1, maxLevel: 5 }
     },
      "Hel": {
-        "HelWorm": { weight: 60, minLevel: 2, maxLevel: 5 },
-        "HelSpider": { weight: 50, minLevel: 2, maxLevel: 5 },
+        "HelWorm": { weight: 60, minLevel: 1, maxLevel: 5 },
+        "HelSpider": { weight: 50, minLevel: 1, maxLevel: 5 },
         "HelBee": { weight: 60, minLevel: 1, maxLevel: 5 },
-        "HelHornet": { weight: 55, minLevel: 2, maxLevel: 5 },
-        "HelBeetle": { weight: 40, minLevel: 3, maxLevel: 5 },
-        "Dragon": { weight: 15, minLevel: 3, maxLevel: 5 },
-        "DragonNest": { weight: 0.08, minLevel: 4, maxLevel: 5},
-        "HelHive": { weight: 0.1, minLevel: 3, maxLevel: 5 },
-        "HelJellyfish": { weight: 45, minLevel: 2, maxLevel: 5 },
-        "ToxicDragon": { weight: 1, minLevel: 4, maxLevel: 5 },
-        "FireStorm": { weight: 35, minLevel: 3, maxLevel: 5 },
+        "HelHornet": { weight: 55, minLevel: 1, maxLevel: 5 },
+        "HelBeetle": { weight: 40, minLevel: 1, maxLevel: 5 },
+        "Dragon": { weight: 15, minLevel: 1, maxLevel: 5 },
+        "DragonNest": { weight: 0.08, minLevel: 1, maxLevel: 5},
+        "HelHive": { weight: 0.1, minLevel: 1, maxLevel: 5 },
+        "HelJellyfish": { weight: 45, minLevel: 1, maxLevel: 5 },
+        "ToxicDragon": { weight: 1, minLevel: 1, maxLevel: 5 },
+        "FireStorm": { weight: 35, minLevel: 1, maxLevel: 5 },
     },
     // ========== 🆕 下水道生物生成概率 ==========
     "Sewer": {
@@ -689,16 +689,16 @@ export const SPECIAL_ZONES = {
         {
             name: "Ancient Ruins",           // 区域名称
             bounds: {                         // 长方形区域
-                x1: 1000, y1: 1000,
-                x2: 2000, y2: 2000
+                x1: 1000, y1: 0,
+                x2: 0, y2: 1200
             },
             // 完全自定义生成规则
             spawnRules: [
                 // 格式: [敌人类型, 权重, 最小等级, 最大等级, 稀有度列表]
-                ["QueenAnt", 10, 10, 30, ["Super", "Mythic", "Ultra"]],  // ✅ 修正：10-30级
-                ["Soldier Ant", 50, 5, 25, ["Mythic", "Ultra", "Super"]],
-                ["Worker Ant", 40, 1, 20, ["Ultra", "Mythic", "Super"]],
-                ["Anthill", 30, 1, 15, ["Super", "Ultra", "Mythic"]]
+                ["QueenAnt", 1, 1, 5, ["Super", "Mythic", "Ultra"]],  // ✅ 修正：10-30级
+                ["Soldier Ant", 80, 1, 5, ["Mythic", "Ultra", "Super"]],
+                ["Worker Ant", 70, 1, 8, ["Ultra", "Mythic", "Super"]],
+                ["Anthill", 30, 1, 5, ["Super", "Ultra", "Mythic"]]
             ],
             spawnRate: 4.0,                    // 生成速度倍率
             maxEnemies: 30                      // 最大敌人数
@@ -719,6 +719,40 @@ export const SPECIAL_ZONES = {
 
             ],
             spawnRate: 6.0,              // 生成速度快
+            maxEnemies: 30                // 最多40只 Bush
+        }
+    ],
+        "Hel": [
+        {
+            name: "Dragon Zone",           // 区域名称
+            bounds: {                         // 长方形区域
+                x1: 0, y1: 1480,
+                x2: 1500, y2: 0
+            },
+            // 完全自定义生成规则
+            spawnRules: [
+                ["Dragon", 100, 1, 5, ["Ultra"]],
+                ["Dragon", 2, 1, 5, ["Ultra", "Super"]],
+                ["DragonNest", 2, 1, 5, ["Ultra"]],
+                ["HelBeetle", 1, 2, 5, ["Ultra", "Super"]],
+            ],
+            spawnRate: 4.0,                    // 生成速度倍率
+            maxEnemies: 50                      // 最大敌人数
+        },
+        // ===== 🌳 新增 Bush Zone =====
+        {
+            name: "Hel Depth",
+            bounds: {
+                x1: 0, y1: 5950,
+                x2: 2000, y2: 4100
+            },
+            spawnRules: [
+                ["HelBee", 5, 1, 5, ["Super","Omega"]],
+                ["HelHive", 1, 5, 10, ["Super","Omega"]],
+                ["HelHornet", 100, 1, 5, ["Super","Omega"]],
+                ["HelSpider", 1, 5, 10, ["Super"]],
+            ],
+            spawnRate: 4.0,              // 生成速度快
             maxEnemies: 30                // 最多40只 Bush
         }
     ],
@@ -1338,12 +1372,17 @@ const ITEM_IMAGE_URLS = {
     "HelHive egg": "images/HelHive_egg.png",
     "HelJellyfish egg": "images/HelJellyfish_egg.png",
     "Hel Queen Bee egg": "images/HelQueenBee_egg.png",
-    "Faster": "images/Faster.png",
-    "Blood Stinger": "images/Blood_Stinger.png",
-    "Fire": "images/Fire.png",
-    "Missile": "images/Missile.png",
+    "Faster": "images/faster.png",
+    "Blood Stinger": "images/blood_stinger.png",
+    "Missile": "images/missile.png",
+    "Glass": "images/glass.png",
+    "FireStick": "images/FireStick.png",
     "Hel Honey": "images/Hel_Honey.png",
     "Hel Lighting": "images/Hel_Lighting.png",
+    "Hel Digger egg": "images/HelDigger_egg.png",
+    "Hel Beekeeper egg": "images/HelBeekeeper_egg.png",
+    "ToxicDragon egg": "images/ToxicDragon_egg.png",
+
 };
 
 export const ITEM_STATS = {
@@ -1419,9 +1458,30 @@ export const ITEM_STATS = {
     "Beekeeper egg": {base_attack:1, base_cooldown:6000, spawn_beekeeper:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000},
     "Frost Digger egg": {base_attack:1, base_cooldown:6000, spawn_frostDigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000},
     "PirateDigger egg": {base_attack:1, base_cooldown:6000, spawn_pirate_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000},
-
+// ========== 🔥 Hel 系列蛋类物品 ==========
+    "HelWorm egg": {base_attack: 1, base_cooldown: 250, spawn_helworm: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000},
+    "HelSpider egg": {base_attack: 1, base_cooldown: 250, spawn_helspider: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 12000},
+    "Hel Bee egg": {base_attack: 1, base_cooldown: 250, spawn_helbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000},
+    "HelHornet egg": {base_attack: 1, base_cooldown: 250, spawn_helhornet: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000},
+    "HelBeetle egg": {base_attack: 1, base_cooldown: 250, spawn_helbeetle: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000},
+    "Dragon egg": {base_attack: 1, base_cooldown: 250, spawn_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000},
+    "DragonNest egg": {base_attack: 1, base_cooldown: 250, spawn_nest_dragon: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 30000},
+    "HelHive egg": {base_attack: 1, base_cooldown: 250, spawn_helbees: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 25000},
+    "HelJellyfish egg": {base_attack: 1, base_cooldown: 250, spawn_heljellyfish: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 15000},
+    "Hel Queen Bee egg": {base_attack: 1, base_cooldown: 250, spawn_helqueenbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000},
+    "ToxicDragon egg": {base_attack: 1, base_cooldown: 250, spawn_toxic_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000},
+    "Hel Digger egg": {base_attack: 1, base_cooldown: 250, spawn_hel_digger: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 18000},
+    "Hel Beekeeper egg": {base_attack: 1, base_cooldown: 250, spawn_hel_beekeeper: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000},
+    "FireStick": {base_attack: 1, base_cooldown: 250, spawn_firestorm: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 8000},
+    // ========== 🔥 Hel 系列武器物品 ==========
+    "Faster": {base_attack: 12, base_cooldown: 80, speed_bonus: 0.15, use_rarity_multiplier: true, base_reload_time: 1000},
+    "Blood Stinger": {base_attack: 380, base_cooldown: 250, lifesteal: 0.15, use_rarity_multiplier: true, base_reload_time: 4000},
+    "Missile": {base_attack: 20, base_cooldown: 300, is_projectile: true, explosion_radius: 80, use_rarity_multiplier: true, base_reload_time: 6000},
+    "Glass": {base_attack: 25, base_cooldown: 120, critical_chance: 0.25, critical_multiplier: 2.5, use_rarity_multiplier: true, base_reload_time: 2500},
+    "Hel Honey": {base_attack: 8, base_cooldown: 200, healing: 2, slow_effect: 0.2, use_rarity_multiplier: true, base_reload_time: 2500},
+    "Hel Lighting": {base_attack: 35, base_cooldown: 500, chain_damage: 0.3, chain_targets: 4, use_rarity_multiplier: true, base_reload_time: 5000},
     // ========== 🌊 海洋生物 ==========
-    "Sponge": {base_attack:1, base_cooldown:0, is_sponge:true, damage_absorption:true, absorption_duration:4, use_rarity_multiplier: true, base_reload_time:3000},
+    "Sponge": {base_attack: 1,base_cooldown: 0,is_sponge: true,damage_absorption: true,absorption_duration: 4,use_rarity_multiplier: true, base_reload_time: 3000},
     "Salt": {base_attack:5, base_cooldown:100, bonus_vs_soft:3, use_rarity_multiplier: true, base_reload_time:2000},
     "Sand": {base_attack:8, base_cooldown:150, slow_effect:0.3, slow_duration:2.0, use_rarity_multiplier: true, base_reload_time:2500},
     "Starfish": {base_attack:15, base_cooldown:250, healing_starfish:3, heal_threshold:0.6, use_rarity_multiplier: true, base_reload_time:4000},
@@ -1540,7 +1600,7 @@ export const ENEMY_DROP_TABLE = {
     "Crab": ["Claw", "Powder"],
     "Soldier Ant": ["Wing", "Clover","Soldier Ant egg"],
     "Worker Ant": ["Leaf", "Corn","Worker Ant egg"],
-    "Bush": ["Leaf", "Root","Golden Leaf"],
+    "Bush": ["Leaf", "Root","Cotton"],
     "Centipede": ["Leaf", "Antennae","Centipede egg"],
     "Cactus": ["Cactus", "Lotus"],
     "Anthill": ["Magnet", "Egg"],
@@ -1566,16 +1626,16 @@ export const ENEMY_DROP_TABLE = {
     // ========== 🐛 Hel 系列生物掉落 ==========
     "HelWorm": ["Fang", "Bur", "HelWorm egg"],
     "HelSpider": ["Web", "Faster", "ThirdEye", "HelSpider egg"],
-    "HelBee": ["Blood Stinger", "Pollen", "Fire", "Hel Bee egg"],
+    "HelBee": ["Blood Stinger", "Pollen", "Hel Bee egg"],
     "HelHornet": ["Missile", "HelHornet egg", "Antennae"],
     "HelBeetle": ["HelBeetle egg", "Pincer", "Bone"],
-    "Dragon": ["Dragon egg", "Bone", "Fire"],
+    "Dragon": ["Dragon egg", "Bone", "Bur"],
     "DragonNest": ["DragonNest egg", "Golden Leaf"],
     "HelHive": ["Hel Honey", "Pollen", "HelHive egg"],
     "HelJellyfish": ["Hel Lighting", "Lightning", "HelJellyfish egg"],
-    "ToxicDragon": ["Dragon egg", "Iris", "Toxic Scale"],
-    "FireStorm": ["FireStick", "Fire", "Sand"],
-    "HelQueenBee": ["Hel Queen Bee egg", "HelHoney", "Pollen","Blood Stinger"],
+    "ToxicDragon": ["ToxicDragon egg", "Iris", "Hel Honey",],
+    "FireStorm": ["FireStick", "Glass", "Sand"],
+    "HelQueenBee": ["Hel Queen Bee egg", "Hel Honey", "Pollen","Blood Stinger"],
     "Wasp": ["Iris", "Antennae", "Wasp egg"],
     "Worker Termite": ["Leaf", "Relic", "Worker Termite egg"],
     "Soldier Termite": ["Clover", "Wing", "Soldier Termite egg","Relic"],
@@ -1602,6 +1662,8 @@ export const ENEMY_DROP_TABLE = {
     "Barnacle": ["Rock", "Coral", "Barnacle egg","Bubble Bomb","Shell"],
     "Trashcan": ["Basil", "Cotton", "Trashcan egg","Poo","Web"],
     "Scorpion": ["Iris", "Scorpion egg", "Pincer"],
+    "HelDigger": ["Heavy", "Cutter","Hel Digger egg","Bomb"],
+    "HelBeekeeper": ["Hel Honey", "Hel Beekeeper egg", "Cutter","Honey"],
     // ========== 🌊 新增海洋生物掉落 ==========
     "Starfish": [
         "Starfish",      // 海星
@@ -1709,11 +1771,11 @@ export const ARMOR_ELIGIBLE_ITEMS = new Set([
 
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
-    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle"],
-    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole"],
-    "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube"] // E级 - 最难打的Boss级生物
+    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper"],
+    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger"],
+    "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest"] // E级 - 最难打的Boss级生物
 };
 // E级护甲的倍率（比D级更高）
 export const ARMOR_CLASS_MULTIPLIERS = {
@@ -3364,7 +3426,29 @@ class BlockManager {
                 ['F', 'F', 'F', 'F', 'F', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'D', 'E', 'E', 'E', 'E', 'E', 'E'],
                 ['F', 'F', 'F', 'F', 'F', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F']
             ],
-
+            // ========== Hel Map Block - 20x20 Grid (No Zeros, Background is C) ==========
+            "Hel": [
+                ['C', 'D', 'D', 'D', 'D', 'D', 'D', 'C', 'D', 'D', 'D', 'D', 'C', 'C', 'D', 'D', 'D', 'D', 'D', 'D'],
+                ['D', 'C', 'C', 'D', 'D', 'C', 'C', 'D', 'C', 'D', 'D', 'C', 'D', 'C', 'C', 'D', 'D', 'D', 'D', 'D'],
+                ['D', 'D', 'D', 'D', 'C', 'D', 'D', 'D', 'D', 'D', 'E', 'D', 'C', 'D', 'D', 'E', 'D', 'D', 'D', 'D'],
+                ['D', 'D', 'C', 'C', 'D', 'D', 'D', 'D', 'C', 'D', 'D', 'D', 'D', 'D', 'D', 'E', 'E', 'D', 'D', 'D'],
+                ['C', 'C', 'B', 'D', 'C', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'C', 'D', 'D', 'D', 'D', 'E', 'E'],
+                ['B', 'B', 'D', 'D', 'D', 'D', 'C', 'D', 'C', 'D', 'C', 'C', 'D', 'D', 'D', 'E', 'D', 'E', 'E', 'E'],
+                ['D', 'D', 'D', 'D', 'D', 'C', 'D', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E'],
+                ['E', 'E', 'E', 'D', 'D', 'A', 'C', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'C', 'D', 'E', 'D', 'E', 'D'],
+                ['E', 'E', 'E', 'D', 'B', 'A', 'B', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'C', 'D', 'D', 'E', 'E', 'E'],
+                ['F', 'E', 'E', 'D', 'B', 'A', 'B', 'C', 'B', 'B', 'B', 'B', 'C', 'C', 'C', 'D', 'E', 'E', 'D', 'E'],
+                ['E', 'E', 'E', 'D', 'B', 'A', 'B', 'B', 'C', 'B', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'E', 'E', 'E'],
+                ['E', 'E', 'E', 'D', 'D', 'A', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'A', 'D', 'E', 'D', 'E', 'E', 'E'],
+                ['E', 'E', 'E', 'F', 'D', 'E', 'D', 'D', 'B', 'B', 'B', 'B', 'D', 'D', 'E', 'D', 'E', 'E', 'E', 'E'],
+                ['E', 'E', 'F', 'E', 'E', 'E', 'D', 'D', 'B', 'D', 'B', 'D', 'E', 'E', 'E', 'D', 'E', 'E', 'D', 'D'],
+                ['E', 'E', 'E', 'E', 'F', 'F', 'F', 'D', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'D', 'E', 'E', 'E'],
+                ['F', 'F', 'F', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F'],
+                ['F', 'F', 'F', 'F', 'E', 'E', 'E', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F'],
+                ['F', 'F', 'F', 'F', 'F', 'E', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'E', 'E', 'E', 'E', 'E', 'E'],
+                ['F', 'F', 'F', 'F', 'f', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'E', 'E', 'E'],
+                ['F', 'F', 'F', 'F', 'F', 'f', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'E', 'E', 'E']
+            ],
             // ========== 海洋 - 浅滩安全，深海危险 ==========
             "Ocean": [
                 ['E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'D', 'D', 'D', 'D', 'D', 'D', 'D'],
@@ -3390,7 +3474,7 @@ class BlockManager {
             ],
 
                         // ========== 沙漠 - 绿洲安全，深处危险 ==========
-                        "Desert": [
+            "Desert": [
                 ['E', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D'],
                 ['E', 'E', 'E', 'D', 'D', 'C', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D'],
                 ['D', 'D', 'E', 'D', 'C', 'D', 'D', 'D', 'C', 'D', 'D', 'D', 'C', 'C', 'D', 'D', 'D', 'D', 'D', 'E'],
@@ -4241,7 +4325,7 @@ class TooltipSystem {
     // 判断是否为回血物品
     static _isHealItem(itemType) {
         const healItems = new Set([
-            "Leaf", "Fang", "Basil", "Starfish", "Yucca"
+            "Leaf", "Fang", "Basil", "Starfish", "Yucca","Controller"
         ]);
         return healItems.has(itemType);
     }
@@ -4263,6 +4347,8 @@ class TooltipSystem {
                 return `Heal: 3x leaf when health < 60%`;
             case "Yucca":
                 return `Heal: ${Math.round(2 * rarityMultiplier)}/s`;
+            case "Controller":
+                return `Heal: ${Math.round(10000 * rarityMultiplier)}/s`;
             default:
                 return null;
         }
@@ -4271,10 +4357,11 @@ class TooltipSystem {
     // 获取物品描述
     static _getItemDescription(itemType) {
         const descriptions = {
-            // 基础攻击类
-            "Leaf": "A basic petal that provides both healing and damage. Heals 3 HP per second.",
+            // ==================== 基础攻击类 ====================
+            "Air": "Light as air, perfect for bubble builds",
+            "Leaf": "A basic petal that provides both healing and damage. Heals 3 HP per second",
             "Wing": "Increases petal rotation radius, comes and goes with the wind",
-            "Claw": "Deals massive damage to enemies at full health",
+            "Claw": "Deals massive damage to enemies at full health (20x damage)",
             "Fang": "Lifesteals 10-20% of damage dealt back as health",
             "Stinger": "Very high damage but low durability",
             "Pollen": "Area of effect damage from bees",
@@ -4286,8 +4373,12 @@ class TooltipSystem {
             "Powder": "Increases player movement speed",
             "Suger": "Sweet and quick attacking petal",
             "Cutter": "Fast cutting damage from an old friend",
-            "Cancer":"Clone the mob it hit",
-            // 特殊功能类
+            "Cancer": "Clone the mob it hits",
+            "Bubble Bomb": "Explodes on contact, damaging nearby enemies",
+            "Bomb": "Explodes on contact, dealing massive damage",
+            "Coin": "Valuable currency that can be traded",
+
+            // ==================== 特殊功能类 ====================
             "Magnet": "Attracts dropped items from a distance",
             "Cactus": "Increases maximum health significantly",
             "Antennae": "Expands your view range",
@@ -4295,10 +4386,10 @@ class TooltipSystem {
             "Heavy": "Knocks back enemies with great force",
             "Rock": "Very durable with high defense",
             "DNA": "1% chance to upgrade summoned mob rarity",
-            "Clover": "Increases drop rates and DNA upgrade chance",
+            "Clover": "Increases drop rates and DNA upgrade chance (1-14%)",
             "Iris": "Poisons enemies over time",
             "Lotus": "Provides resistance to poison",
-            "Sponge": "Absorbs damage over time instead of instantly",
+            "Sponge": "Absorbs all damage and returns it slowly over time. Reduces max HP by 50%",
             "Salt": "Deals extra damage to soft-bodied enemies",
             "Sand": "Slows down enemies with sand particles",
             "Jelly": "Combines knockback and slow effects",
@@ -4308,62 +4399,146 @@ class TooltipSystem {
             "Coral": "Reflects a portion of damage back to attackers",
             "Cotton": "Absorbs massive amounts of damage",
             "Poo": "Disgusting but effective at slowing and poisoning",
-            "Basil": "Cleanses poison and increases healing speed by 5-15%",
-            "Golden Leaf": "Decreases reload time of all petals",
-            "Chromosome": "Repairs nearby petals over time",
+            "Basil": "Cleanses poison and increases healing speed by 5-50%",
+            "Golden Leaf": "Decreases reload time of all petals (5-40%)",
+            "Chromosome": "Repairs nearby petals over time (25-31415 HP/s)",
             "Controller": "Extremely powerful, how did you get this?",
+            "Mimic": "Copies the petal to its right when placed",
+            "Rose": "Heals the player after a short delay (1 second)",
+            "Ice Rose": "Heals and applies slow to nearby enemies",
+            "Fission": "Splits into multiple projectiles",
+            "Fusion": "Combines with nearby projectiles",
 
-            // 蛋类物品
-            "Egg": "Summons Golden Ants to fight for you",
-            "Ant Egg": "Summons worker ants to assist in battle",
-            "Moon Egg": "Summons a durable rock companion",
-            "Stick": "Summons sandstorms to confuse enemies",
+            // ==================== 北极物品 ====================
+            "Bone": "Provides armor bonus based on rarity",
+            "Ice Cube": "Chance to freeze enemies on hit (25%)",
+            "Snowball": "Slows enemies on hit (30% slow)",
+            "Carrot": "Heals and increases movement speed",
+            "Icicle": "Pierces through enemies with freeze chance (35%)",
+            "Snowflake": "Quick attacking with slow effect (20% slow)",
+            "SnowStick": "Summons Snowstorms to freeze enemies",
+            "Ice Dragon egg": "Summons an Ice Dragon that freezes enemies",
+            "Ice Cube egg": "Summons an Ice Cube that can freeze",
+            "Igloo egg": "Summons Snowmen from an Igloo",
+            "SlagMight egg": "Summons a Slag Might minion",
+            "Tick egg": "Summons a Tick that latches onto enemies",
+            "ArcticSpider egg": "Summons Arctic Spiders",
+            "ArcticSpiderCave egg": "Summons multiple Arctic Spiders",
+            "Snowman egg": "Summons a Snowman",
+            "Frost Digger egg": "Summons a Frost Digger that freezes enemies",
+
+            // ==================== Hel 地狱物品 ====================
+            "Faster": "Increases attack speed significantly",
+            "Blood Stinger": "High damage with lifesteal (15%)",
+            "Missile": "Explosive projectile that damages area",
+            "Glass": "High critical chance (25%) and damage (2.5x)",
+            "Hel Honey": "Heals and slows enemies (20% slow)",
+            "Hel Lighting": "Chains lightning between 4 enemies",
+            "FireStick": "Summons Firestorms to burn enemies",
+            "HelWorm egg": "Summons a Hel Worm that burrows",
+            "HelSpider egg": "Summons a Hel Spider with web attack",
+            "Hel Bee egg": "Summons a Hel Bee that stings",
+            "HelHornet egg": "Summons a Hel Hornet with ranged attack",
+            "HelBeetle egg": "Summons a Hel Beetle that charges",
+            "Dragon egg": "Summons a Dragon",
+            "DragonNest egg": "Summons Dragons from a nest",
+            "HelHive egg": "Summons Hel Bees from a hive",
+            "HelJellyfish egg": "Summons a Hel Jellyfish",
+            "Hel Queen Bee egg": "Summons a Hel Queen Bee",
+            "ToxicDragon egg": "Summons a Toxic Dragon that poisons",
+            "Hel Digger egg": "Summons a Hel Digger",
+            "Hel Beekeeper egg": "Summons a Hel Beekeeper",
+
+            // ==================== Jungle 丛林物品 ====================
+            "Relic": "Mysterious ancient item with unknown power",
+            "Plank": "Durable wooden plank with good defense",
+            "Pea": "Quick healing projectile",
+            "Soil": "Slows enemies with dirt particles",
+            "Tomato": "High damage with minor healing",
+            "Rubber": "Provides damage reduction (15%)",
+            "Wasp egg": "Summons a Wasp that stings from range",
+            "Worker Termite egg": "Summons Worker Termites",
+            "Soldier Termite egg": "Summons Soldier Termites",
+            "StickBug egg": "Summons a Stick Bug that camouflages",
+            "Mantis egg": "Summons a Mantis that strikes fast",
+            "Firefly egg": "Summons Fireflies that light the way",
+            "TermiteHole egg": "Summons Soldier Termites from a hole",
+            "TermiteOvermind egg": "Summons a Termite Overmind",
+            "SpiderCave egg": "Summons Spiders from a cave",
+            "Beetle egg": "Summons a Beetle that charges",
+            "Scorpion egg": "Summons a Scorpion that poisons",
+            "Ladybug egg": "Summons a Ladybug",
+            "Bee egg": "Summons a Bee",
+            "Hive egg": "Summons Bees from a Hive",
+            "Queen Bee egg": "Summons a Queen Bee that heals allies",
+            "Centipede egg": "Summons a Centipede",
+            "Soldier Ant egg": "Summons Soldier Ants",
+            "Worker Ant egg": "Summons Worker Ants",
+
+            // ==================== 海洋物品 ====================
+            "Sponge": "Absorbs damage and returns it slowly",
+            "Salt": "Deals bonus damage to soft enemies",
+            "Sand": "Slows enemies with sand particles",
+            "Jelly": "Knocks back and slows enemies",
+            "Lightning": "Chains between multiple targets",
+            "Shell": "Provides shield that absorbs damage",
+            "Pearl": "Valuable item with good damage",
+            "Coral": "Reflects damage back to attackers",
+            "Starfish": "Heals 3x when below 60% health",
+            "Bubble": "Floating bubble that pops on contact",
+            "Squid egg": "Summons a Squid that inks enemies",
+            "Shipwreck egg": "Summons Jellyfish from a shipwreck",
+            "Barnacle egg": "Summons Barnacles that attach to enemies",
+            "Shell egg": "Summons Scallops that provide shells",
+            "Starfish egg": "Summons Starfish that heal",
+            "Bubble egg": "Summons floating Bubbles",
+            "Crab egg": "Summons Crabs with powerful claws",
+            "Jellyfish egg": "Summons Jellyfish that shock",
+            "CrabHole egg": "Summons multiple Crabs",
+            "Leech Egg": "Summons Leeches that drain health",
+            "Parasite Egg": "Summons Parasites that latch on",
+
+            // ==================== 沙漠/火蚁物品 ====================
+            "WorkerFireAnt egg": "Summons Worker Fire Ants",
+            "SoldierFireAnt egg": "Summons Soldier Fire Ants",
+            "BabyFireAnt egg": "Summons Baby Fire Ants",
+            "FireAntOvermind egg": "Summons a Fire Ant Overmind",
+            "FireAntHole egg": "Summons Soldier Fire Ants from a hole",
+
+            // ==================== 细胞类物品 ====================
+            "WhiteBloodCell egg": "Summons White Blood Cells to fight infections",
+            "Spider egg": "Summons Spiders to web enemies",
+            "RedBloodCell egg": "Summons Red Blood Cells for support",
+            "StemCell egg": "Summons Stem Cells that can differentiate",
+            "Bacteria_egg": "Summons Bacteria to swarm enemies",
+            "Cancer egg": "Summons Cancer cells that multiply",
+            "Virus egg": "Summons Viruses that infect enemies",
+            "Bacteriophage egg": "Summons Bacteriophages that hunt bacteria",
+
+            // ==================== 下水道物品 ====================
+            "ManHole egg": "Summons a Manhole that spawns Rats",
+            "Fly_egg": "Summons Flies that annoy enemies",
+            "Rat_egg": "Summons Rats that swarm and bite",
+            "Roach_egg": "Summons a resilient Roach",
             "PooStick": "Summons PooStorms to devastate enemies",
+            "Trashcan egg": "Summons Flies from a Trashcan",
 
-            // 细胞类蛋
-            "WhiteBloodCell egg": "Summons white blood cells to fight infections",
-            "Spider egg": "Summons spiders to web up enemies",
-            "RedBloodCell egg": "Summons red blood cells for support",
-            "StemCell egg": "Summons multiple stem cells that can differentiate",
-            "Bacteria_egg": "Summons bacteria to swarm enemies",
+            // ==================== Digger 系列物品 ====================
+            "TrashDigger egg": "Summons a Trash Digger that scavenges",
+            "MudDigger_egg": "Summons a Mud Digger that slows enemies",
+            "Digger egg": "Summons a Digger that tunnels through",
+            "Biologist egg": "Summons a Biologist that studies enemies",
+            "Beekeeper egg": "Summons a Beekeeper that controls bees",
+            "PirateDigger egg": "Summons a Pirate Digger with treasure",
 
-            // 蚂蚁类蛋
-            "queen ant egg": "Summons queen ants to lead the swarm",
-            "WorkerFireAnt egg": "Summons worker fire ants for labor and combat",
-            "SoldierFireAnt egg": "Summons soldier fire ants for defense",
-            "BabyFireAnt egg": "Summons baby fire ants that grow over time",
-            "FireAntOvermind egg": "Summons a powerful fire ant overmind",
-            "FireAntHole egg": "Summons multiple soldier fire ants",
+            // ==================== 基础蛋类 ====================
+            "Egg": "Summons Golden Ants to fight for you",
+            "Ant Egg": "Summons Golden Ants to assist in battle",
+            "Moon Egg": "Summons a durable Rock companion",
+            "Stick": "Summons Sandstorms to confuse enemies",
+            "Square Egg": "Summons a mysterious Square entity",
 
-            // 海洋类蛋
-            "Shell egg": "Summons scallops that provide shells",
-            "Starfish egg": "Summons starfish that heal at low health",
-            "Bubble egg": "Summons floating bubbles",
-            "Crab egg": "Summons crabs with powerful claws",
-            "Jellyfish egg": "Summons jellyfish that shock enemies",
-            "CrabHole egg": "Summons multiple crabs from a hidden hole",
-
-            // 下水道类蛋
-            "ManHole egg": "Summons a manhole that spawns rats",
-            "Fly_egg": "Summons flies that annoy enemies",
-            "Rat_egg": "Summons rats that swarm and bite",
-            "Roach_egg": "Summons a resilient roach",
-
-            // Digger系列蛋
-            "TrashDigger egg": "Summons a trash digger that scavenges",
-            "MudDigger_egg": "Summons a mud digger that slows enemies",
-            "Digger egg": "Summons a digger that tunnels through",
-            "Biologist egg": "Summons a biologist that studies enemies",
-
-            // 特殊蛋
-            "Cancer egg": "Summons cancer cells that multiply",
-            "Square Egg": "Summons a mysterious square entity",
-            "Leech Egg": "Summons leeches that drain health",
-            "Parasite Egg": "Summons parasites that latch onto enemies",
-            "Bacteriophage egg": "Summons bacteriophages that hunt bacteria",
-            "Virus egg": "Summons viruses that infect enemies",
-
-            // 默认
+            // ==================== 默认 ====================
             "normal": "A mysterious petal with unknown properties"
         };
 
@@ -5133,7 +5308,7 @@ class ImageLoader {
         const promises = [];
         const maps = [
             'map_plain', 'map_bio', 'map_desert', 'map_random',
-            'map_arctic', 'map_jungle', 'map_ocean', 'map_sewer', 'maze'
+            'map_arctic', 'map_jungle', 'map_ocean', 'map_sewer', 'maze','map_hel'
         ];
 
         for (const mapKey of maps) {
@@ -6122,7 +6297,6 @@ class QuickSlot {
         const item = this.getItem(slotIndex);
         if (!item) return false;
 
-        console.log(`🎮 使用物品: ${item.type}`);
 
         // Leaf 回血
         if (item.type === "Leaf") {
@@ -7698,30 +7872,72 @@ class ArmorSystem {
         }
     }
 
-    /**
-     * 调试方法：打印护甲计算详情
-     */
-    debugArmorCalculation(attack, defender) {
-        const result = this.calculateAttackDamage(attack, defender);
-
-        console.log('=== 护甲计算详情 ===');
-        console.log(`原始伤害: ${result.originalDamage.toFixed(1)}`);
-        console.log(`攻击者护甲: ${result.attackerArmor.toFixed(1)}`);
-        console.log(`防御者护甲: ${result.defenderArmor.toFixed(1)}`);
-        console.log(`护甲差: ${result.armorDiff.toFixed(1)}`);
-        console.log(`伤害减免: ${result.reductionPercent}%`);
-        console.log(`最终伤害: ${result.finalDamage.toFixed(1)}`);
-        console.log('==================');
-
-        return result;
-    }
 }
+
 
 class EnemyDrawer {
     constructor() {
         this.cachedSurfaces = {}; // 注意：JS中直接用普通对象模拟字典
     }
+    // 新增：获取或创建静态层缓存
+    _getHelStaticLayer(enemyType, rarity, size, viewScale) {
+        const cacheKey = `${enemyType}_${rarity}_${Math.floor(size)}_${Math.floor(viewScale * 10)}`;
 
+        if (this._helStaticCache.has(cacheKey)) {
+            return this._helStaticCache.get(cacheKey);
+        }
+
+        // 创建离屏 canvas 绘制静态层
+        const canvas = document.createElement('canvas');
+        const scaledSize = size * viewScale;
+        canvas.width = scaledSize;
+        canvas.height = scaledSize;
+        const offCtx = canvas.getContext('2d');
+
+        // 绘制静态部分（身体、法阵、固定花纹）
+        this._drawHelStaticLayer(offCtx, enemyType, rarity, scaledSize);
+
+        this._helStaticCache.set(cacheKey, canvas);
+        return canvas;
+    }
+
+    // 绘制静态层
+    _drawHelStaticLayer(ctx, enemyType, rarity, size) {
+        ctx.save();
+        ctx.translate(size / 2, size / 2);
+
+        const isFriendly = false; // 静态层不区分敌友，颜色在主绘制中处理
+        const scale = size / 100;
+
+        switch(enemyType) {
+            case "HelBeetle":
+                this._drawHelBeetleStatic(ctx, scale);
+                break;
+            case "HelBee":
+                this._drawHelBeeStatic(ctx, scale);
+                break;
+            case "HelHornet":
+                this._drawHelHornetStatic(ctx, scale);
+                break;
+            case "HelSpider":
+                this._drawHelSpiderStatic(ctx, scale);
+                break;
+            case "HelJellyfish":
+                this._drawHelJellyfishStatic(ctx, scale);
+                break;
+            case "HelQueenBee":
+                this._drawHelQueenBeeStatic(ctx, scale);
+                break;
+            case "ToxicDragon":
+                this._drawToxicDragonStatic(ctx, scale);
+                break;
+            case "Dragon":
+                this._drawDragonStatic(ctx, scale);
+                break;
+        }
+
+        ctx.restore();
+    }
     getCachedSurface(key, size) {
         return this.cachedSurfaces[key]; // JS中用 [] 访问对象属性
     }
@@ -8215,14 +8431,14 @@ class EnemyDrawer {
             darkColor = '#B8860B';      // 深金色
             teethColor = '#8B691B';     // 暗金色
         } else {
-            bodyColor = '#c1392b';      // 深红色
-            darkColor = '#331a1a';      // 深棕色
+            bodyColor = '#B21A1A';      // 深红色
+            darkColor = '#830000';      // 深棕色
             teethColor = '#1a1a1a';     // 黑色
         }
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer + Math.PI / 12);
+        context.rotate(angleToPlayer - Math.PI / 2);
 
         const w = 80 * scale;
         const h = 120 * scale;
@@ -8320,6 +8536,7 @@ class EnemyDrawer {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
         // 1. 稀有度与缩放逻辑 (保持原样)
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
@@ -8330,13 +8547,21 @@ class EnemyDrawer {
         const legendaryFactor = raritySizeFactors["Legendary"];
         const rarityFactor = raritySizeFactors[rarity] || 1.0;
         const scale = (rarityFactor / legendaryFactor) * (scaledSize / size);
-
+        let bodyColor, strokeColor, mainColor, wingStrokeColor, hornsColor;
         // 2. 颜色定义 (紫色系)
-        const bodyColor = '#a349a4';      // 主体紫
-        const strokeColor = '#762d77';    // 深紫描边
-        const mainColor = '#8e3a91';      // 副色调
-        const wingStrokeColor = '#4b1a4c'; // 翅膀骨架深色
-        const hornsColor = '#1a1a1a';      // 黑色角
+        if (isFriendly) {
+            bodyColor = '#FFD700';      // 金色
+            strokeColor = '#B8860B';    // 深金色
+            mainColor = '#DAA520';      // 金杖色
+            wingStrokeColor = '#8B691B'; // 暗金色
+            hornsColor = '#8B4513';      // 棕色
+        } else {
+            bodyColor = '#a349a4';      // 主体紫
+            strokeColor = '#762d77';    // 深紫描边
+            mainColor = '#8e3a91';      // 副色调
+            wingStrokeColor = '#4b1a4c'; // 翅膀骨架深色
+            hornsColor = '#1a1a1a';
+        }
 
         context.save();
         context.translate(x, y);
@@ -8364,18 +8589,26 @@ class EnemyDrawer {
         drawMouthHorn(-1);
         drawMouthHorn(1);
 
-        // ===== 2. 绘制尾巴 (三角形堆叠，80%重叠) =====
+        // ===== 2. 绘制尾巴（摆动幅度非常小）=====
         const segmentCount = 4;
+        // ✅ 尾部摆动：速度慢，幅度非常小
+        const tailSwingSpeed = 3.0;      // 摆动速度（慢）
+        const tailSwingAmplitude = 10;    // 摆动幅度非常小（2像素）
+
         for (let i = segmentCount; i >= 0; i--) {
             context.save();
             // 紧凑步长实现重叠感
             const step = 10 * scale;
             const segmentY = bodyR - 10 * scale + i * step;
-            const wave = Math.sin(animationTimer * 3 - i * 0.4) * (3 + i) * scale;
+
+            // ✅ 摆动强度（非常小，越靠后摆动稍微大一点）
+            const intensityFactor = ((segmentCount - i + 1) / (segmentCount + 1)) * 0.3;  // 最大0.3
+            const segmentSwing = Math.sin(animationTimer * tailSwingSpeed - i * 0.5) * tailSwingAmplitude * intensityFactor * scale;
+
             const triW = (35 - i * 5) * scale;
             const triH = 22 * scale;
 
-            context.translate(wave, segmentY);
+            context.translate(segmentSwing, segmentY);
             context.beginPath();
             context.moveTo(-triW / 2, 0);
             context.lineTo(triW / 2, 0);
@@ -8389,13 +8622,15 @@ class EnemyDrawer {
             context.restore();
         }
 
-        // ===== 3. 翅膀绘制 (严格复刻你 drawDragon 模板的一模一样逻辑) =====
+        // ===== 3. 翅膀绘制（幅度变大，摆动更快）=====
         const drawWing = (side) => {
             const shoulderX = side * 50 * scale;
             const shoulderY = -25 * scale;
-            const wave = (Math.sin(animationTimer * 3) + 1) / 2;
-            const rot1_2 = side * -7 * Math.PI / 180 * wave;
-            const rot3 = side * -1 * Math.PI / 180 * wave;
+            // ✅ 翅膀摆动幅度增大（从 0-1 改为 0-1.5，摆动范围更大）
+            const wave = (Math.sin(animationTimer * 4) + 1) / 1.5;  // 频率加快，幅度增大
+            // ✅ 翅膀旋转角度增大
+            const rot1_2 = side * -12 * Math.PI / 180 * wave;   // 原来 -7，现在 -12
+            const rot3 = side * -3 * Math.PI / 180 * wave;      // 原来 -1，现在 -3
             const baseAngle = side * 30 * Math.PI / 180;
 
             const p1 = { x: side * 85 * scale, y: 55 * scale };
@@ -8587,16 +8822,23 @@ class EnemyDrawer {
         drawMouthHorn(-1); // 左边角
         drawMouthHorn(1);  // 右边角
 
-        // ===== 2. 绘制尾巴 =====
+        // ===== 2. 绘制尾巴（摆动幅度非常小）=====
         const segmentCount = 5;
+        // ✅ 尾部摆动：速度慢，幅度非常小
+        const tailSwingSpeed = 3.0;      // 摆动速度（慢）
+        const tailSwingAmplitude = 8;    // 摆动幅度非常小（2像素）
+
         for (let i = 0; i < segmentCount; i++) {
             context.save();
             const segmentY = bodyR - 10 * scale + i * 10 * scale;
-            let intensity = i === 0 ? 1 : (i === 1 ? 2 : 5);
-            const segmentX = Math.sin(animationTimer * 0.004 - i * 0.4) * intensity * scale;
+
+            // 摆动强度（非常小）
+            const intensityFactor = (i + 1) / segmentCount * 0.3;  // 最大只有0.3
+            const segmentSwing = Math.sin(animationTimer * tailSwingSpeed + i * 0.5) * tailSwingAmplitude * intensityFactor * scale;
+
             const segW = (33 - i * 3.5) * scale;
             const segH = 8 * scale;
-            context.translate(segmentX, segmentY);
+            context.translate(segmentSwing, segmentY);
             roundRect(context, -segW / 2, 0, segW, segH, 4 * scale);
             context.fillStyle = bodyColor;
             context.fill();
@@ -8615,13 +8857,15 @@ class EnemyDrawer {
         context.lineWidth = 5 * scale;
         context.stroke();
 
-        // ===== 4. 翅膀绘制（带动态摆动）=====
+        // ===== 4. 翅膀绘制（幅度变大，摆动更快）=====
         const drawWing = (side) => {
             const shoulderX = side * 50 * scale;
             const shoulderY = -25 * scale;
-            const wave = (Math.sin(animationTimer * 3) + 1) / 2;  // 使用 animationTimer 控制摆动
-            const rot1_2 = side * -7 * Math.PI / 180 * wave;
-            const rot3 = side * -1 * Math.PI / 180 * wave;
+            // ✅ 翅膀摆动幅度增大（从 0-1 改为 0-1.5，摆动范围更大）
+            const wave = (Math.sin(animationTimer * 4) + 1) / 1.5;  // 频率加快，幅度增大
+            // ✅ 翅膀旋转角度增大
+            const rot1_2 = side * -12 * Math.PI / 180 * wave;   // 原来 -7，现在 -12
+            const rot3 = side * -3 * Math.PI / 180 * wave;      // 原来 -1，现在 -3
             const baseAngle = side * 30 * Math.PI / 180;
 
             const p1 = { x: side * 85 * scale, y: 55 * scale };
@@ -8913,34 +9157,238 @@ class EnemyDrawer {
 
         context.restore();
     }
+    drawHelBeekeeper(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        // 获取稀有度并计算大小因子
+        const rarity = enemyObj?.rarity || "Common";
+
+        const raritySizeFactors = {
+            "Common": 0.7,
+            "Unusual": 0.77,
+            "Rare": 0.84,
+            "Epic": 1.12,
+            "Legendary": 1.26,
+            "Mythic": 1.96,
+            "Ultra": 2.8,
+            "Super": 5.88,
+            "Omega": 8.4,
+            "Eternal": 10.5
+        };
+
+        const rarityFactor = raritySizeFactors[rarity] || 0.7;
+
+        // 应用视野缩放和稀有度因子
+        const scaledSize = size * viewScale * rarityFactor;
+        if (scaledSize <= 0) return;
+
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // ========== 颜色定义 ==========
+        // 友方使用金色，敌方使用黄色系
+        let bodyColor, bodyBorder, BLACK, WHITE, MOUTH_COLOR;
+
+        if (isFriendly) {
+            // 友方模式（金色）
+            bodyColor = [255, 215, 0];      // 金色
+            bodyBorder = [200, 160, 0];      // 深金色
+            BLACK = [0, 0, 0];
+            WHITE = [255, 255, 255];
+            MOUTH_COLOR = [0, 0, 0];         // 嘴巴黑色
+        } else {
+            // 敌方模式（黄色）
+            bodyColor = '#D6554E';
+            bodyBorder = '#A33E3B';
+            BLACK = [0, 0, 0];
+            WHITE = [240, 240, 240];
+            MOUTH_COLOR = [0, 0, 0];          // 嘴巴黑色
+        }
+
+        // 身体Y坐标（无浮动）
+        const bodyY = y;
+
+        // ===== 1. 绘制外部的黑色十边形边框 =====
+        context.save();
+        context.translate(x, bodyY);
+
+        // 旋转动画
+        const rotation = animationTimer * 1.5;
+        context.rotate(rotation);
+
+        const outerRadius = 45 * viewScale * rarityFactor;
+        const concaveDepth = 6 * viewScale * rarityFactor;
+        const sides = 8;
+
+        const polyPoints = this.getShallowConcavePolygon(0, 0, outerRadius, concaveDepth, sides, rotation);
+
+        this.drawPolygon(context, polyPoints, BLACK);
+        this.drawPolygon(context, polyPoints, null, BLACK, 5 * viewScale * Math.sqrt(rarityFactor));
+        context.restore();
+
+        // ===== 2. 绘制身体 ======
+        context.save();
+        context.translate(x, bodyY);
+
+        // 身体外圈（边框色）
+        context.fillStyle = this.colorToCss(bodyBorder);
+        context.beginPath();
+        context.arc(0, 0, 35 * viewScale * rarityFactor, 0, Math.PI * 2);
+        context.fill();
+
+        // 身体内圈（主色 - 黄色/金色）
+        context.fillStyle = this.colorToCss(bodyColor);
+        context.beginPath();
+        context.arc(0, 0, 32 * viewScale * rarityFactor, 0, Math.PI * 2);
+        context.fill();
+
+        context.restore();
+
+        // ===== 3. 绘制眼睛（椭圆形眼眶 + 圆形眼珠）=====
+        context.save();
+        context.translate(x, bodyY);
+
+        // 眼睛位置 - 往下调，避免超出身体
+        const eyeBaseY = -12 * viewScale * rarityFactor;  // 从-20改为-12，往下调
+        const leftEyeX = -16 * viewScale * rarityFactor;   // 从-20改为-16，稍微内收
+        const rightEyeX = 16 * viewScale * rarityFactor;   // 从20改为16，稍微内收
+
+        // 眼睛尺寸：稍微缩小，避免超出身体
+        const eyeWidth = 12 * viewScale * rarityFactor;    // 从15改为12
+        const eyeHeight = 20 * viewScale * rarityFactor;   // 从25改为20
+
+        // 眼珠半径：相应缩小
+        const pupilRadius = 4 * viewScale * rarityFactor;  // 从5改为4
+
+        // 判断是否愤怒（用于眼珠运动）
+        let isAngry = false;
+        if (enemyObj) {
+            const attackCooldown = enemyObj.attackCooldown || 0;
+            const maxCooldown = 800;
+
+            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+                isAngry = true;
+            } else if (enemyObj.hasTarget === true) {
+                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                    const vel = enemyObj.physicsBody.velocity;
+                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
+                        isAngry = true;
+                    }
+                }
+            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
+                isAngry = true;
+            }
+        }
+
+        // 计算眼珠偏移（不超出眼眶）
+        let eyeOffsetX = 0, eyeOffsetY = 0;
+        const maxOffsetX = (eyeWidth / 2) - pupilRadius;  // 水平最大偏移
+        const maxOffsetY = (eyeHeight / 2) - pupilRadius; // 垂直最大偏移
+
+        if (isAngry && enemyObj && enemyObj.gameInstance && enemyObj.gameInstance.player) {
+            // 愤怒时，眼珠看向玩家
+            const player = enemyObj.gameInstance.player;
+            const dx = player.physicsBody.position.x - x;
+            const dy = player.physicsBody.position.y - bodyY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > 0) {
+                const normX = dx / dist;
+                const normY = dy / dist;
+
+                // 限制眼珠在眼眶内
+                eyeOffsetX = normX * maxOffsetX;
+                eyeOffsetY = normY * maxOffsetY;
+            }
+        } else {
+            // 不愤怒时，眼珠随机轻微移动
+            eyeOffsetX = Math.sin(animationTimer * 2) * (maxOffsetX * 0.3);
+            eyeOffsetY = Math.cos(animationTimer * 2.5) * (maxOffsetY * 0.3);
+        }
+
+        // ===== 绘制眼眶（黑色椭圆）=====
+        context.strokeStyle = `rgb(${BLACK[0]}, ${BLACK[1]}, ${BLACK[2]})`;
+        context.fillStyle = `rgb(${BLACK[0]}, ${BLACK[1]}, ${BLACK[2]})`;
+        context.lineWidth = Math.max(1, 2 * viewScale * rarityFactor);
+
+        // 左眼眶（黑色填充椭圆）
+        context.beginPath();
+        context.ellipse(leftEyeX, eyeBaseY, eyeWidth/2, eyeHeight/2, 0, 0, Math.PI * 2);
+        context.fill();
+
+        // 右眼眶（黑色填充椭圆）
+        context.beginPath();
+        context.ellipse(rightEyeX, eyeBaseY, eyeWidth/2, eyeHeight/2, 0, 0, Math.PI * 2);
+        context.fill();
+
+        // ===== 绘制眼珠（白色圆形）=====
+        context.fillStyle = `rgb(${WHITE[0]}, ${WHITE[1]}, ${WHITE[2]})`;
+
+        // 左眼珠
+        context.beginPath();
+        context.arc(leftEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY, pupilRadius, 0, Math.PI * 2);
+        context.fill();
+
+        // 右眼珠
+        context.beginPath();
+        context.arc(rightEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY, pupilRadius, 0, Math.PI * 2);
+        context.fill();
+
+        context.restore();
+
+        // ===== 4. 绘制嘴巴 ======
+        context.save();
+        context.translate(x, bodyY);
+
+        context.strokeStyle = `rgb(${MOUTH_COLOR[0]}, ${MOUTH_COLOR[1]}, ${MOUTH_COLOR[2]})`;
+        context.lineWidth = Math.max(1, 2 * viewScale * rarityFactor);
+        context.fillStyle = `rgb(${MOUTH_COLOR[0]}, ${MOUTH_COLOR[1]}, ${MOUTH_COLOR[2]})`;
+
+        const bodyRadius = 35 * viewScale * rarityFactor;
+        const mouthY = bodyRadius * 0.2; // 嘴巴在身体下方20%的位置
+
+        if (!isAngry) {
+            // 不攻击时：非常小的黑色圆形嘴巴
+            context.beginPath();
+            context.arc(0, mouthY, 2 * viewScale * rarityFactor, 0, Math.PI * 2);
+            context.fill();
+        } else {
+            // 愤怒时：下半椭圆（非常短）
+            context.beginPath();
+            context.ellipse(0, mouthY + bodyRadius * 0.1,
+                           bodyRadius * 0.15,  // 宽度
+                           bodyRadius * 0.1,    // 高度
+                           0, Math.PI, 2 * Math.PI, false);
+            context.stroke();
+        }
+
+        context.restore();
+    }
     // ==================== 🐲 龙巢 (Dragon Nest) - 14堆触手与6颗蛋 ====================
     drawDragonNest(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
-        // 1. 颜色定义 (对应 Pygame 变量)
+        // 1. 颜色定义
         const COLORS = {
-            N5: "rgb(141, 120, 101)", // 浅褐
-            N6: "rgb(122, 101, 82)",  // 稍浅
-            N7: "rgb(94, 74, 61)",   // 深褐
-            N8: "rgb(74, 58, 48)",   // 最深
-            E1: "rgb(230, 217, 166)", // 蛋高光 (填充)
-            E2: "rgb(191, 174, 126)", // 蛋主体 (6px描边)
-            OUTLINE: "rgb(45, 35, 28)", // 触手描边
-            TENTACLE: "rgb(78, 63, 53)" // 触手主色
+            N5: "rgb(141, 120, 101)",
+            N6: "rgb(122, 101, 82)",
+            N7: "rgb(94, 74, 61)",
+            N8: "rgb(74, 58, 48)",
+            E1: "rgb(230, 217, 166)",
+            E2: "rgb(191, 174, 126)",
+            OUTLINE: "rgb(45, 35, 28)",
+            TENTACLE: "rgb(78, 63, 53)"
         };
 
-        // 2. 基座参数 (比例: 50, 40, 25, 15)
-        // 以 scaledSize 为基准进行映射
+        // 2. 基座参数 (保持比例，但缩小整体感官)
         const baseS = scaledSize / 100;
         const layers = [
-            { c: COLORS.N7, r: 50 * baseS },
-            { c: COLORS.N5, r: 40 * baseS },
-            { c: COLORS.N8, r: 25 * baseS },
-            { c: COLORS.N6, r: 15 * baseS }
+            { c: COLORS.N7, r: 45 * baseS },
+            { c: COLORS.N5, r: 35 * baseS },
+            { c: COLORS.N8, r: 20 * baseS },
+            { c: COLORS.N6, r: 12 * baseS }
         ];
 
-        // 3. 触手数据缓存 (确保 14 堆分布不闪烁)
+        // 3. 触手数据缓存
         let piles = [];
         if (!enemyObj || !enemyObj.nestPiles) {
             const numPiles = 14;
@@ -8948,16 +9396,15 @@ class EnemyDrawer {
             const newPiles = [];
 
             for (let i = 0; i < numPiles; i++) {
-                // 5-10度随机偏移 (约 0.087 到 0.174 弧度)
-                const randomOffset = 0.087 + Math.random() * 0.087;
-                const pileBaseAngle = i * baseAngleStep + randomOffset;
-                const countInPile = Math.floor(Math.random() * 4) + 1; // 1-4根
+                const pileBaseAngle = i * baseAngleStep + (Math.random() * 0.1);
+                const countInPile = Math.floor(Math.random() * 3) + 1; // 减少数量 1-3根
 
                 const pileTentacles = [];
                 for (let j = 0; j < countInPile; j++) {
                     pileTentacles.push({
-                        angleOffset: j * 0.06,
-                        length: (210 + Math.random() * 20) * (baseS / 2) // 适配长度
+                        angleOffset: j * 0.1,
+                        // 大幅缩短触手长度：从210降至80-100
+                        length: (80 + Math.random() * 20) * baseS
                     });
                 }
                 newPiles.push({ baseAngle: pileBaseAngle, tentacles: pileTentacles });
@@ -8971,38 +9418,44 @@ class EnemyDrawer {
         context.save();
         context.translate(x, y);
 
-        // --- 开始绘制 ---
-
-        // 1. 绘制 4 层基座圆盘
+        // 1. 绘制基座
         layers.forEach(layer => {
             context.beginPath();
             context.arc(0, 0, layer.r, 0, Math.PI * 2);
             context.fillStyle = layer.c;
             context.fill();
         });
-
-        // 2. 绘制 14 堆触手 (每根触手带描边)
+        // 2. 绘制触手
         piles.forEach(pile => {
             pile.tentacles.forEach(t => {
                 context.save();
                 context.rotate(pile.baseAngle + t.angleOffset);
 
+                // 计算缩短后的长度 (原长度的 3/4)
+                const shortLen = t.length * 0.6;
+
                 const drawPath = () => {
                     context.beginPath();
-                    context.moveTo(25 * baseS, 0); // 从内圆边缘开始
-                    context.bezierCurveTo(40 * baseS, -10 * baseS, t.length - 15 * baseS, 10 * baseS, t.length, 0);
+                    // 起点稍微往里收一点，显得是从巢穴长出来的
+                    context.moveTo(14 * baseS, 0);
+                    // 贝塞尔控制点也随之缩短比例，保持弯曲弧度自然
+                    context.bezierCurveTo(
+                        30 * baseS, -5 * baseS,
+                        shortLen - (10 * baseS * 0.7), 5 * baseS,
+                        shortLen, 0
+                    );
                 };
 
-                // 深色描边 (粗)
+                // 描边
                 context.strokeStyle = COLORS.OUTLINE;
-                context.lineWidth = 5 * baseS * 4;
+                context.lineWidth = 3 * baseS * 2;
                 context.lineCap = 'round';
                 drawPath();
                 context.stroke();
 
-                // 主体填充 (细)
+                // 填充主体
                 context.strokeStyle = COLORS.TENTACLE;
-                context.lineWidth = 3 * baseS * 4;
+                context.lineWidth = 1.5 * baseS * 2;
                 drawPath();
                 context.stroke();
 
@@ -9010,31 +9463,31 @@ class EnemyDrawer {
             });
         });
 
-        // 3. 绘制 6 颗蛋 (精准还原位置)
         const eggData = [
-            { x: -18, y: -42, r: -0.25 }, // 左上
-            { x: 22,  y: -38, r: 0.3 },   // 右上
-            { x: -38, y: 12,  r: -0.5 },  // 左侧
-            { x: 42,  y: 18,  r: 0.6 },   // 右侧
-            { x: 2,   y: 55,  r: 0.1 },   // 底部
-            { x: 6,   y: 2,   r: 0.2 }    // 顶层覆盖
-        ];
+                { x: -6,  y: -8,  r: -0.2, scale: 1.0 },
+                { x: 8,   y: -6,  r: 0.3,  scale: 0.9 },
+                { x: -10, y: 5,   r: -0.5, scale: 1.1 },
+                { x: 10,  y: 8,   r: 0.6,  scale: 1.0 },
+                { x: 0,   y: 12,  r: 0.1,  scale: 0.95 },
+                { x: 2,   y: -2,  r: 0.2,  scale: 1.05 } // 顶层最中心的一颗
+            ];
 
         eggData.forEach(p => {
             context.save();
-            // 坐标根据 baseS 缩放映射
-            context.translate(p.x * (baseS * 0.9), p.y * (baseS * 0.9));
+            context.translate(p.x * baseS, p.y * baseS);
             context.rotate(p.r);
 
-            // 蛋体填充 (E1)
+            // 蛋体尺寸缩小：9->6, 12->8
+            const eggW = 5 * baseS * 2;
+            const eggH = 7 * baseS * 2;
+
             context.fillStyle = COLORS.E1;
             context.beginPath();
-            context.ellipse(0, 0, 9 * baseS * 4, 12 * baseS * 4, 0, 0, Math.PI * 2);
+            context.ellipse(0, 0, eggW, eggH, 0, 0, Math.PI * 2);
             context.fill();
 
-            // 蛋体描边 (E2, 6px宽度)
             context.strokeStyle = COLORS.E2;
-            context.lineWidth = Math.max(1, 6 * viewScale);
+            context.lineWidth = Math.max(1, 0.03 * scaledSize); // 描边减半
             context.stroke();
 
             context.restore();
@@ -9210,7 +9663,7 @@ class EnemyDrawer {
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer);
+        context.rotate(angleToPlayer-Math.PI/2);
 
         // --- 内部路径函数：确保 0.7 弧度完美衔接，无多余直线 ---
         const drawBodyPath = (ctx) => {
@@ -9326,133 +9779,109 @@ class EnemyDrawer {
 
         context.restore();
     }
-    drawHelHornet(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-        const scaledSize = size * viewScale;
-        if (scaledSize <= 0) return;
+    drawHelHornet(ctx, x, y, sz, t, atp, lv, vs = 1, obj = null) {
+    const ss = sz * vs;
+    if (ss <= 0) return;
 
-        // 1. 判断是否为友方
-        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+    // 1. 参数与颜色定义
+    const fr = obj?.isFriendly;
+    const BC = fr ? '#B8860B' : '#D6554E';  // 主体颜色
+    const BRD = fr ? '#FFD700' : '#A33E3B'; // 描边颜色
+    const BS = '#2B2B2B';                   // 条纹颜色
+    const MD = fr ? '#8B4513' : '#B01D13';  // 牙齿颜色
+    const TD = fr ? '#DAA520' : '#6E0B04';  // 刺/角颜色
 
-        // 2. 颜色定义
-        let BODY_RED, STRIPE_BLACK, OUTLINE_RED, MOUTH_RED, TAIL_DARK;
-        if (isFriendly) {
-            BODY_RED = '#B8860B';      // 深金色
-            STRIPE_BLACK = '#332200';   // 深啡条纹
-            OUTLINE_RED = '#DAA520';    // 亮金描边
-            MOUTH_RED = '#8B4513';      // 棕红色嘴部
-            TAIL_DARK = '#554400';      // 暗金尾刺
-        } else {
-            BODY_RED = '#D6554E';      // 狱红
-            STRIPE_BLACK = '#2B2B2B';   // 炭黑条纹
-            OUTLINE_RED = '#A33E3B';    // 暗红描边
-            MOUTH_RED = '#B01D13';      // 血红嘴部
-            TAIL_DARK = '#6E0B04';      // 深红尾刺
-        }
+    const s = ss / 100;      // 基础缩放系数
+    const W = 80 * s;        // 宽度
+    const H = 120 * s;       // 高度
+    const bw = 5 * s;        // 描边宽度
 
-        // 3. 参数配置 (瘦长比例配置)
-        const width = scaledSize * 0.8;
-        const height = scaledSize * 1.2;
-        const centerX = 0;
-        const centerY = 0;
+    ctx.save();
+    ctx.translate(x, y);
+    // 旋转：atp 是朝向玩家的角度，-Math.PI/2 修正为头部朝前
+    ctx.rotate(atp - Math.PI / 2);
 
-        // 内部辅助逻辑：身体路径定义
-        const drawBodyPath = (ctx) => {
-            const slimFactor = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY - height / 2);
-            ctx.bezierCurveTo(
-                centerX + width / slimFactor, centerY - height / 2.5,
-                centerX + width / slimFactor, centerY + height * 0.3,
-                centerX + width / 4, centerY + height / 2
-            );
-            ctx.quadraticCurveTo(
-                centerX, centerY + height * 0.4,
-                centerX - width / 4, centerY + height / 2
-            );
-            ctx.bezierCurveTo(
-                centerX - width / slimFactor, centerY + height * 0.3,
-                centerX - width / slimFactor, centerY - height / 2.5,
-                centerX, centerY - height / 2
-            );
-            ctx.closePath();
-        };
+    // 辅助函数 A：计算二次贝塞尔曲线上的点和法线角度（用于牙齿排列）
+    const gq = (t2, p0, p1, p2) => {
+        const nx = Math.pow(1 - t2, 2) * p0.x + 2 * (1 - t2) * t2 * p1.x + t2 * t2 * p2.x;
+        const ny = Math.pow(1 - t2, 2) * p0.y + 2 * (1 - t2) * t2 * p1.y + t2 * t2 * p2.y;
+        const dx = 2 * (1 - t2) * (p1.x - p0.x) + 2 * t2 * (p2.x - p1.x);
+        const dy = 2 * (1 - t2) * (p1.y - p0.y) + 2 * t2 * (p2.y - p1.y);
+        return { x: nx, y: ny, angle: Math.atan2(dy, dx) };
+    };
 
-        // 内部辅助逻辑：计算曲线点与法线（用于牙齿对齐）
-        const getQuadPointAndNormal = (t, p0, p1, p2) => {
-            const nx = Math.pow(1 - t, 2) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
-            const ny = Math.pow(1 - t, 2) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
-            const dx = 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
-            const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
-            return { x: nx, y: ny, angle: Math.atan2(dy, dx) };
-        };
+    // 辅助函数 B：绘制身体路径
+    const db = c => {
+        const sf = 2.5; // 瘦长系数
+        c.beginPath();
+        c.moveTo(0, -H / 2);
+        c.bezierCurveTo(W / sf, -H / 2.5, W / sf, H * .3, W / 4, H / 2);
+        c.quadraticCurveTo(0, H * .4, -W / 4, H / 2);
+        c.bezierCurveTo(-W / sf, H * .3, -W / sf, -H / 2.5, 0, -H / 2);
+        c.closePath();
+    };
 
-        context.save();
-        context.translate(x, y);
+    // --- 开始绘制 ---
 
-        // 旋转：头部朝向玩家
-        context.rotate(angleToPlayer + Math.PI / 2);
+    // 1. 绘制牙齿 (根据精简版逻辑，牙齿最先绘制或在底部边缘)
+    const p0 = { x: W / 4, y: H / 2 },
+          p1 = { x: 0, y: H * .35 },
+          p2 = { x: -W / 4, y: H / 2 };
 
-        // --- 开始绘制 ---
+    ctx.fillStyle = MD;
+    for (let i = 0; i < 5; i++) {
+        const t3 = i / 4;
+        const pos = gq(t3, p0, p1, p2);
+        // 牙齿长度包含基础长度 + 正弦波形 + 动画呼吸感
+        const cl = (10 * s) + Math.sin(t3 * Math.PI) * 8 * s + Math.sin(i * 2.3) * 5 * s + Math.sin(t * 8 + i) * 3 * s;
 
-        // 1. 绘制顶部尖刺 (Hornet 角)
-        context.fillStyle = TAIL_DARK;
-        context.beginPath();
-        context.moveTo(centerX - 15 * viewScale, centerY - height / 2 + 5);
-        context.lineTo(centerX, centerY - height / 2 - 40 * viewScale);
-        context.lineTo(centerX + 15 * viewScale, centerY - height / 2 + 5);
-        context.fill();
-
-        // 2. 绘制身体主体填充
-        context.fillStyle = BODY_RED;
-        drawBodyPath(context);
-        context.fill();
-
-        // 3. 绘制条纹 (使用裁剪路径)
-        context.save();
-        drawBodyPath(context);
-        context.clip();
-        context.fillStyle = STRIPE_BLACK;
-        for (let i = 0; i < 5; i++) {
-            // 计算条纹纵向分布
-            const stripeY = (centerY - height / 2) + (i * 70 * viewScale) + 35 * viewScale;
-            context.fillRect(centerX - width, stripeY, width * 2, 35 * viewScale);
-        }
-        context.restore();
-
-        // 4. 绘制外部描边
-        context.strokeStyle = OUTLINE_RED;
-        context.lineWidth = Math.max(2, 8 * viewScale);
-        context.lineJoin = 'round';
-        drawBodyPath(context);
-        context.stroke();
-
-        // 5. 绘制动态牙齿 (位于身体底部边缘)
-        const p0 = { x: centerX + width / 4, y: centerY + height / 2 };
-        const p1 = { x: centerX, y: centerY + height * 0.4 };
-        const p2 = { x: centerX - width / 4, y: centerY + height / 2 };
-
-        context.fillStyle = MOUTH_RED;
-        for (let i = 0; i < 5; i++) {
-            const t = i / 4;
-            const pos = getQuadPointAndNormal(t, p0, p1, p2);
-
-            // 呼吸动效与长度计算
-            const breath = Math.sin(animationTimer * 8) * 3 * viewScale;
-            const toothLen = (25 + Math.sin(t * Math.PI) * 10) * viewScale + breath;
-
-            context.save();
-            context.translate(pos.x, pos.y);
-            context.rotate(pos.angle - Math.PI);
-            context.beginPath();
-            context.moveTo(-4 * viewScale, 0);
-            context.lineTo(4 * viewScale, 0);
-            context.lineTo(0, toothLen);
-            context.fill();
-            context.restore();
-        }
-
-        context.restore();
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(pos.angle - Math.PI);
+        ctx.beginPath();
+        const tw = (4 + Math.sin(i)) * s; // 牙齿宽度微变
+        ctx.moveTo(-tw, 0);
+        ctx.lineTo(tw, 0);
+        ctx.lineTo(0, cl);
+        ctx.fill();
+        ctx.restore();
     }
+
+    // 2. 绘制头顶尖角
+    ctx.fillStyle = TD;
+    ctx.beginPath();
+    const sb = 15 * s;
+    ctx.moveTo(-sb, -H / 2 + 2 * s);
+    ctx.lineTo(0, -H / 2 - 30 * s);
+    ctx.lineTo(sb, -H / 2 + 2 * s);
+    ctx.fill();
+
+    // 3. 绘制身体主体
+    ctx.fillStyle = BC;
+    db(ctx);
+    ctx.fill();
+
+    // 4. 绘制条纹 (使用身体路径裁剪)
+    ctx.save();
+    db(ctx);
+    ctx.clip();
+    ctx.fillStyle = BS;
+    const sg = H / 3.5; // 条纹间距
+    for (let i = 0; i < 4; i++) {
+        // 绘制覆盖全身的矩形条纹
+        ctx.fillRect(-W, (-H / 2) + (i * sg) + (sg * .5), W * 2, sg * .5);
+    }
+    ctx.restore();
+
+    // 5. 绘制描边
+    ctx.strokeStyle = BRD;
+    ctx.lineWidth = bw;
+    ctx.lineJoin = 'round';
+    db(ctx);
+    ctx.stroke();
+
+    ctx.restore();
+}
     drawHelQueenBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
@@ -9583,9 +10012,9 @@ class EnemyDrawer {
             MOUTH_DARK = '#8B4513';    // 棕褐色牙齿
         } else {
             // 敌方：原版红黑蜂
-            BODY_RED = '#D6554E';      // 红色身体 (redStripe)
+            BODY_RED = '#D6554E';
+            OUTLINE_RED = '#A33E3B';
             STRIPE_BLACK = '#2B2B2B';  // 黑色条纹 (blackStripe)
-            OUTLINE_RED = '#A33E3B';   // 外轮廓红 (outlineRed)
             MOUTH_DARK = '#B01D13';    // 嘴部/牙齿 (mouthDark)
         }
 
@@ -9597,7 +10026,7 @@ class EnemyDrawer {
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer);
+        context.rotate(angleToPlayer-Math.PI/2);
 
         // 内部路径函数：定义身体形状 (顶部圆润，底部凹陷)
         const getBodyPath = (ctx) => {
@@ -9836,14 +10265,13 @@ class EnemyDrawer {
             ratios = [1.0, 0.8, 0.6, 0.4];
         } else {
             // --- 普通敌方：黄色 ---
-            COLOR_OUTER = '#FFFF00';      // 黄色
-            COLOR_MID_1 = '#DAA520';      // 深黄色
-            COLOR_MID_2 = '#FFFF00';
-            COLOR_INNER = '#DAA520';
+            COLOR_OUTER = '#D6554E';      // 黄色
+            COLOR_MID_1 = '#A33E3B';      // 深黄色
+            COLOR_MID_2 = '#D6554E';
+            COLOR_INNER = '#A33E3B';
             // 保持原比例
             ratios = [0.4, 0.4 * 0.75, 0.4 * 0.5, 0.4 * 0.25];
         }
-
         // 4. 辅助函数：获取标准的 6 个六边形顶点 (平顶，-30度起始)
         const getHexagonPoints = (cx, cy, radius) => {
             const points = [];
@@ -11056,15 +11484,22 @@ class EnemyDrawer {
         const rarity = enemyObj?.rarity?.toLowerCase() || 'common';
 
         const RARITY_MULTIPLIERS = {
-            'common': 1.0, 'unusual': 1.2, 'rare': 1.3, 'epic': 1.5,
-            'legendary': 1.9, 'mythic': 2.2, 'ultra': 2.5, 'super': 3.5,
-            'omega': 4.2, 'eternal': 6.0
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
+            "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
         };
 
         const WAVE_MULTIPLIERS = {
-            'common': 1.0, 'unusual': 1.1, 'rare': 1.3, 'epic': 1.5,
-            'legendary': 1.8, 'mythic': 2.2, 'ultra': 2.7, 'super': 4.3,
-            'omega': 5.5, 'eternal': 5.5
+            "Common": 1.0,
+            "Unusual": 1.1,
+            "Rare": 1.2,
+            "Epic": 1.6,
+            "Legendary": 1.8,
+            "Mythic": 2.8,
+            "Ultra": 5.0,
+            "Super": 10.2,
+            "Omega": 18.0,
+            "Eternal": 15.0
         };
 
         const rarityMult = RARITY_MULTIPLIERS[rarity] || 1.0;
@@ -11076,28 +11511,28 @@ class EnemyDrawer {
         const bloodRed = [193, 57, 43];
 
         const bodyRadius = scaledSize / 2;
-        const legLength = bodyRadius * 2.5;
-        const legWidth = Math.max(2, Math.floor(3.0 * rarityMult * viewScale));
+        const legLength = bodyRadius * 2.2;
+        const legWidth = Math.max(2, Math.floor(0.15 * bodyRadius));
         const bodyStrokeWidth = Math.max(2, Math.floor(2.5 * rarityMult * viewScale));
-        const waveAmp1 = 8 * waveMult * viewScale;
-        const waveAmp2 = 4 * waveMult * viewScale;
+        const waveAmp1 = 1 * waveMult * viewScale;
+        const waveAmp2 = 2 * waveMult * viewScale;
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer + Math.PI / 2); // 头部朝下
+        context.rotate(angleToPlayer - Math.PI / 2); // 头部朝下
 
         // --- 3. 嘴部曲线参数计算 ---
         const mouthWidth = 0.35;
-        const offset = 0.12; // 嘴巴稍微偏左
+        const offset = 0;
         const startA = Math.PI * (0.5 - mouthWidth / 2 + offset);
         const endA = Math.PI * (0.5 + mouthWidth / 2 + offset);
         const midA = (startA + endA) / 2;
 
         // 嘴部深度控制点 (决定内凹程度)
         const cpX = Math.cos(midA) * bodyRadius * 0.35;
-        const cpY = Math.sin(midA) * bodyRadius * 0.35;
+        const cpY = Math.sin(midA) * bodyRadius * 0.4;
 
-        // --- 4. 【最底层】绘制 5 颗牙齿 ---
+        // --- 4. 【最底层】绘制 5 颗牙齿（所有牙齿长度一样）---
         const teethCount = 5;
         context.fillStyle = `rgb(${bloodRed.join(',')})`;
         for (let i = 0; i < teethCount; i++) {
@@ -11115,19 +11550,31 @@ class EnemyDrawer {
             // 计算法线角度（垂直于嘴唇向外）
             const dx = 2 * (1 - t) * (cpX - x1) + 2 * t * (x2 - cpX);
             const dy = 2 * (1 - t) * (cpY - y1) + 2 * t * (y2 - cpY);
-            const normalAngle = Math.atan2(dy, dx) + Math.PI / 2;
+            let normalAngle = Math.atan2(dy, dx) + Math.PI / 2;
 
-            const tier = Math.sin((i / (teethCount - 1)) * Math.PI) * 12 * viewScale;
-            const breath = Math.sin(animationTimer * 10 + i) * 4 * viewScale;
-            const len = (bodyRadius * 0.1) + tier + breath;
+            // 随机轻微摆动
+            const toothSwingSpeed = 5 + i * 0.3;
+            const toothSwingAmount = 0.04;
+            const randomPhase = i * 1.2;
+
+            normalAngle += Math.sin(animationTimer * toothSwingSpeed + randomPhase) * toothSwingAmount;
+
+            // ✅ 所有牙齿长度一样，不使用长度倍率
+            const tier = Math.sin((i / (teethCount - 1)) * Math.PI) * 10 * viewScale;
+            const breath = Math.sin(animationTimer * 6 + i) * 2.0 * viewScale;
+            const randomWiggle = Math.sin(animationTimer * 7 + i * 1.5) * 1.5 * viewScale;
+            // ✅ 所有牙齿使用相同的长度计算
+            const len = (bodyRadius * 0.10) + tier + breath + randomWiggle;
 
             context.save();
             context.translate(tx, ty);
             context.rotate(normalAngle - Math.PI / 2);
 
+            const toothWidth = 4 + Math.sin(animationTimer * 8 + i * 2) * 0.8;
+
             context.beginPath();
-            context.moveTo(-4 * viewScale, 0);
-            context.lineTo(4 * viewScale, 0);
+            context.moveTo(-toothWidth * viewScale, 0);
+            context.lineTo(toothWidth * viewScale, 0);
             context.quadraticCurveTo(0, len * 0.5, 0, len);
             context.fill();
             context.restore();
@@ -11877,12 +12324,6 @@ class EnemyDrawer {
         const eyeOffsetX = 10 * scale;
         const eyeOffsetY = 8 * scale;
         const pupilRadius = 2 * scale;
-
-        // 绘制外圈身体（深色）
-        this.drawCircle(context, 0, 0, bodyRadius, bodyColor);
-        // 绘制内圈身体（浅色）
-        this.drawCircle(context, 0, 0, innerRadius, innerBodyColor);
-
         // 绘制触角（像 BabyFireAnt 一样简单的线条）
         context.beginPath();
         context.moveTo(-12 * scale, -18 * scale);
@@ -11892,6 +12333,12 @@ class EnemyDrawer {
         context.strokeStyle = `rgb(${innerBodyColor[0]}, ${innerBodyColor[1]}, ${innerBodyColor[2]})`;
         context.lineWidth = 3 * scale;
         context.stroke();
+
+        // 绘制外圈身体（深色）
+        this.drawCircle(context, 0, 0, bodyRadius, bodyColor);
+        // 绘制内圈身体（浅色）
+        this.drawCircle(context, 0, 0, innerRadius, innerBodyColor);
+
 
         context.restore();
     }
@@ -12821,6 +13268,193 @@ class EnemyDrawer {
             context.ellipse(0, mouthY + bodyRadius * 0.1,
                            bodyRadius * 0.2,
                            bodyRadius * 0.15, // 愤怒时嘴巴更高
+                           0, Math.PI, 2 * Math.PI, false);
+            context.stroke();
+        }
+
+        context.restore();
+    }
+    drawHelDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        // 获取稀有度并计算大小因子
+        const rarity = enemyObj?.rarity || "Common";
+
+        const raritySizeFactors = {
+            "Common": 0.7,
+            "Unusual": 0.77,
+            "Rare": 0.84,
+            "Epic": 1.12,
+            "Legendary": 1.26,
+            "Mythic": 1.96,
+            "Ultra": 2.8,
+            "Super": 5.88,
+            "Omega": 8.4,
+            "Eternal": 10.5
+        };
+
+        const rarityFactor = raritySizeFactors[rarity] || 0.7;
+
+        // 应用视野缩放和稀有度因子
+        const scaledSize = size * viewScale * rarityFactor;
+        if (scaledSize <= 0) return;
+
+        // 判断是否为友方
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // ========== 颜色定义 ==========
+        let bodyColor, bodyBorder, BLACK, WHITE;
+
+        if (isFriendly) {
+            bodyColor = [255, 215, 0];
+            bodyBorder = [200, 160, 0];
+            BLACK = [0, 0, 0];
+            WHITE = [255, 255, 255];
+        } else {
+            bodyColor = '#B21A1A';
+            bodyBorder = '#830000';
+            BLACK = [0, 0, 0];
+            WHITE = [240, 240, 240];
+        }
+
+        // 删除浮动动画
+        const bodyY = y;
+
+        // ===== 1. 绘制外部的黑色十边形边框 =====
+        context.save();
+        context.translate(x, bodyY);
+
+        const rotation = animationTimer * 1.4;
+        context.rotate(rotation);
+
+        const outerRadius = 45 * viewScale * rarityFactor;
+        const concaveDepth = 6 * viewScale * rarityFactor;
+        const sides = 10;
+
+        const polyPoints = this.getShallowConcavePolygon(0, 0, outerRadius, concaveDepth, sides, rotation);
+
+        this.drawPolygon(context, polyPoints, BLACK);
+        this.drawPolygon(context, polyPoints, null, BLACK, 5 * viewScale * Math.sqrt(rarityFactor));
+        context.restore();
+
+        // ===== 2. 绘制身体 ======
+        context.save();
+        context.translate(x, bodyY);
+
+        context.fillStyle = this.colorToCss(bodyBorder);
+        context.beginPath();
+        context.arc(0, 0, 35 * viewScale * rarityFactor, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = this.colorToCss(bodyColor);
+        context.beginPath();
+        context.arc(0, 0, 32 * viewScale * rarityFactor, 0, Math.PI * 2);
+        context.fill();
+
+        context.restore();
+
+        // ===== 3. 绘制眼睛 ======
+        context.save();
+        context.translate(x, bodyY);
+
+        const eyeBaseY = -14 * viewScale * rarityFactor;
+        const leftEyeX = -10.5 * viewScale * rarityFactor;
+        const rightEyeX = 10.5 * viewScale * rarityFactor;
+
+        let isAngry = false;
+        if (enemyObj) {
+            const attackCooldown = enemyObj.attackCooldown || 0;
+            const maxCooldown = 800;
+
+            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+                isAngry = true;
+            } else if (enemyObj.hasTarget === true) {
+                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                    const vel = enemyObj.physicsBody.velocity;
+                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
+                        isAngry = true;
+                    }
+                }
+            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
+                isAngry = true;
+            }
+        }
+
+        let eyeOffsetX = 0, eyeOffsetY = 0;
+
+        if (isAngry && enemyObj && enemyObj.gameInstance && enemyObj.gameInstance.player) {
+            const player = enemyObj.gameInstance.player;
+            const dx = player.physicsBody.position.x - x;
+            const dy = player.physicsBody.position.y - bodyY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0) {
+                const normX = dx / dist;
+                const normY = dy / dist;
+                const maxOffset = 3 * viewScale * rarityFactor;
+                const amount = Math.min(maxOffset, dist * 0.015);
+                eyeOffsetX = normX * amount;
+                eyeOffsetY = normY * amount;
+            }
+        } else {
+            eyeOffsetX = Math.sin(animationTimer * 2) * 1.5 * viewScale * rarityFactor;
+            eyeOffsetY = Math.cos(animationTimer * 2.5) * 1.5 * viewScale * rarityFactor;
+        }
+
+        // 眼眶
+        context.strokeStyle = `rgb(${BLACK[0]}, ${BLACK[1]}, ${BLACK[2]})`;
+        context.lineWidth = Math.max(1, 7 * viewScale * rarityFactor);
+        context.lineCap = 'butt';
+
+        context.beginPath();
+        context.moveTo(leftEyeX, eyeBaseY - 7 * viewScale * rarityFactor);
+        context.lineTo(leftEyeX, eyeBaseY + 7 * viewScale * rarityFactor);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(rightEyeX, eyeBaseY - 7 * viewScale * rarityFactor);
+        context.lineTo(rightEyeX, eyeBaseY + 7 * viewScale * rarityFactor);
+        context.stroke();
+
+        // 眼珠
+        context.strokeStyle = `rgb(${WHITE[0]}, ${WHITE[1]}, ${WHITE[2]})`;
+        context.lineWidth = Math.max(1, 4.2 * viewScale * rarityFactor);
+
+        context.beginPath();
+        context.moveTo(leftEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY - 2.5 * viewScale * rarityFactor);
+        context.lineTo(leftEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY + 2.5 * viewScale * rarityFactor);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(rightEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY - 2.5 * viewScale * rarityFactor);
+        context.lineTo(rightEyeX + eyeOffsetX, eyeBaseY + eyeOffsetY + 2.5 * viewScale * rarityFactor);
+        context.stroke();
+
+        context.restore();
+
+        // ===== 4. 绘制嘴巴 - 改为 Biologist 样式 =====
+        context.save();
+        context.translate(x, bodyY);
+
+        context.strokeStyle = `rgb(${BLACK[0]}, ${BLACK[1]}, ${BLACK[2]})`;
+        context.lineWidth = Math.max(1, 2 * viewScale * rarityFactor);
+        context.lineCap = 'round';
+
+        // Biologist 的嘴巴位置计算方式
+        const bodyRadius = 35 * viewScale * rarityFactor;
+        const mouthY = bodyRadius * 0.3; // 嘴巴在身体下方30%的位置
+
+        if (!isAngry) {
+            // 微笑 - 上半椭圆
+            context.beginPath();
+            context.ellipse(0, mouthY,
+                           bodyRadius * 0.1, // 宽度为身体半径的20%
+                           bodyRadius * 0.05, // 高度为身体半径的10%
+                           0, 0, Math.PI, false);
+            context.stroke();
+        } else {
+            // 愤怒 - 下半椭圆
+            context.beginPath();
+            context.ellipse(0, mouthY + bodyRadius * 0.1,
+                           bodyRadius * 0.1,
+                           bodyRadius * 0.07, // 愤怒时嘴巴更高
                            0, Math.PI, 2 * Math.PI, false);
             context.stroke();
         }
@@ -15554,7 +16188,7 @@ class EnemyDrawer {
         // ===== 颜色替换区（根据你的要求：身体红色，友方金色）=====
         const isFriendly = enemyObj.isFriendly === true;
         // 主体颜色：友方金色，敌人深红/血红
-        const bodyColor = isFriendly ? '#FFD700' : '#c1392b';
+        const bodyColor = isFriendly ? '#FFD700' : '#830000';
         // 轮廓颜色：友方暗金，敌人更深的红（焦炭红）
         const outlineColor = isFriendly ? '#B8860B' : '#5a1010';
         // 牙齿颜色：保持 Hel 血红（或根据需要调整为更亮的红以示区分）
@@ -16600,17 +17234,17 @@ class EnemyDrawer {
         // 移动到中心
         context.translate(x, y);
 
-        // ===== 1. 最外层五边形（最慢旋转）=====
+        // ===== 1. 最外层六边形（最慢旋转）=====
         context.save();
-        const pentagonRotation = (animationTimer * 240) % 360;
-        context.rotate(pentagonRotation * Math.PI / 180);
+        const hexagonRotation = (animationTimer * 240) % 360;
+        context.rotate(hexagonRotation * Math.PI / 180);
 
         context.beginPath();
-        const pentagonPoints = 5;
-        for (let i = 0; i < pentagonPoints; i++) {
-            const angle = (i * 72 - 90) * Math.PI / 180;
-            const px = scaledSize * 0.5 * Math.cos(angle);
-            const py = scaledSize * 0.5 * Math.sin(angle);
+        const hexagonPoints = 6;
+        for (let i = 0; i < hexagonPoints; i++) {
+            const angle = (i * 60 - 90) * Math.PI / 180;
+            const px = scaledSize * 0.45 * Math.cos(angle);
+            const py = scaledSize * 0.45 * Math.sin(angle);
 
             if (i === 0) {
                 context.moveTo(px, py);
@@ -16622,36 +17256,47 @@ class EnemyDrawer {
         context.strokeStyle = outerColor;
         context.lineWidth = Math.max(2, 3 * viewScale);
         context.stroke();
-        context.fillStyle = isFriendly ? '#FFD700' : '#945932';
+        context.fillStyle = isFriendly ? '#FFD700' : '#DEC047';
         context.fill();
         context.restore();
 
-        // ===== 2. 中间正方形（中速旋转）=====
+        // ===== 2. 中间五边形（中速旋转）=====
         context.save();
-        const squareRotation = (animationTimer * 270) % 360; // 每秒45度（更快）
-        context.rotate(squareRotation * Math.PI / 180);
+        const pentagonRotation = (animationTimer * 270) % 360;
+        context.rotate(pentagonRotation * Math.PI / 180);
 
-        const squareSize = scaledSize * 0.6;
         context.beginPath();
-        context.rect(-squareSize/2, -squareSize/2, squareSize, squareSize);
+        const pentagonPoints = 5;
+        for (let i = 0; i < pentagonPoints; i++) {
+            const angle = (i * 72 - 90) * Math.PI / 180;
+            const px = scaledSize * 0.3 * Math.cos(angle);
+            const py = scaledSize * 0.3 * Math.sin(angle);
+
+            if (i === 0) {
+                context.moveTo(px, py);
+            } else {
+                context.lineTo(px, py);
+            }
+        }
+        context.closePath();
         context.strokeStyle = middleColor;
         context.lineWidth = Math.max(2, 2.5 * viewScale);
         context.stroke();
-        context.fillStyle = isFriendly ? '#DAA520' : '#793E18';
+        context.fillStyle = isFriendly ? '#DAA520' : '#CB9333';
         context.fill();
         context.restore();
 
-        // ===== 3. 最内层三角形（最快旋转）=====
+        // ===== 3. 最内层四边形（最快旋转）=====
         context.save();
-        const triangleRotation = (animationTimer * 300) % 360; // 每秒90度（最快）
-        context.rotate(triangleRotation * Math.PI / 180);
+        const squareRotation = (animationTimer * 300) % 360;
+        context.rotate(squareRotation * Math.PI / 180);
 
-        const triangleSize = scaledSize * 0.3; // 缩小一点，避免完全遮挡
         context.beginPath();
-        for (let i = 0; i < 3; i++) {
-            const angle = (i * 120 - 90) * Math.PI / 180;
-            const px = triangleSize * Math.cos(angle);
-            const py = triangleSize * Math.sin(angle);
+        const squarePoints = 4;
+        for (let i = 0; i < squarePoints; i++) {
+            const angle = (i * 90 - 90) * Math.PI / 180;
+            const px = scaledSize * 0.15 * Math.cos(angle);
+            const py = scaledSize * 0.15 * Math.sin(angle);
 
             if (i === 0) {
                 context.moveTo(px, py);
@@ -16663,7 +17308,7 @@ class EnemyDrawer {
         context.strokeStyle = innerColor;
         context.lineWidth = Math.max(1, 2 * viewScale);
         context.stroke();
-        context.fillStyle = isFriendly ? '#B8860B' : '#572504';
+        context.fillStyle = isFriendly ? '#B8860B' : '#B2701A';
         context.fill();
         context.restore();
 
@@ -16704,8 +17349,8 @@ class EnemyDrawer {
         const pentagonPoints = 5;
         for (let i = 0; i < pentagonPoints; i++) {
             const angle = (i * 72 - 90) * Math.PI / 180;
-            const px = scaledSize * 0.5 * Math.cos(angle);
-            const py = scaledSize * 0.5 * Math.sin(angle);
+            const px = scaledSize * 0.8 * Math.cos(angle);
+            const py = scaledSize * 0.8 * Math.sin(angle);
 
             if (i === 0) {
                 context.moveTo(px, py);
@@ -16723,10 +17368,10 @@ class EnemyDrawer {
 
         // ===== 2. 中间正方形（中速旋转）=====
         context.save();
-        const squareRotation = (animationTimer * 270) % 360; // 每秒45度（更快）
+        const squareRotation = (animationTimer * 270) % 360;
         context.rotate(squareRotation * Math.PI / 180);
 
-        const squareSize = scaledSize * 0.6;
+        const squareSize = scaledSize * 0.75;
         context.beginPath();
         context.rect(-squareSize/2, -squareSize/2, squareSize, squareSize);
         context.strokeStyle = middleColor;
@@ -16738,10 +17383,10 @@ class EnemyDrawer {
 
         // ===== 3. 最内层三角形（最快旋转）=====
         context.save();
-        const triangleRotation = (animationTimer * 300) % 360; // 每秒90度（最快）
+        const triangleRotation = (animationTimer * 300) % 360;
         context.rotate(triangleRotation * Math.PI / 180);
 
-        const triangleSize = scaledSize * 0.3; // 缩小一点，避免完全遮挡
+        const triangleSize = scaledSize * 0.25;
         context.beginPath();
         for (let i = 0; i < 3; i++) {
             const angle = (i * 120 - 90) * Math.PI / 180;
@@ -17084,7 +17729,7 @@ class EnemyDrawer {
         // 稀有度缩放因子
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
-            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 3.8, "Super": 8.0, "Omega": 11.0
         };
         const legendaryFactor = raritySizeFactors["Legendary"];
         const rarityFactor = raritySizeFactors[rarity] || 1.0;
@@ -17956,6 +18601,8 @@ class EnemyDrawer {
             this.drawHelHive(context, x, y, size, viewScale, enemyObj);
         }else if (enemyType === "Beekeeper") {
             this.drawBeekeeper(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "HelBeekeeper") {
+            this.drawHelBeekeeper(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }else if (enemyType === "Wasp") {
             this.drawWasp(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }// ========== 细菌 ==========
@@ -18014,6 +18661,8 @@ class EnemyDrawer {
     this.drawMudDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Digger") {
     this.drawDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "HelDigger") {
+    this.drawHelDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "PirateDigger") {
     this.drawPirateDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Biologist") {
@@ -18520,7 +19169,9 @@ class ShopSystem {
         };
 
         // Base prices (Common items)
+
         this.BASE_PRICES = {
+            // ==================== 基础攻击类 ====================
             "Air": 1,
             "Leaf": 3,
             "Wing": 5,
@@ -18533,112 +19184,163 @@ class ShopSystem {
             "Corn": 8,
             "Yucca": 4,
             "Root": 3,
-            "Antennae": 8,
-            "ThirdEye": 10,
-            "Barnacle egg":18,
-            "Cactus": 4,
-            "Magnet": 10,
-            "Egg": 30,
-            "Ant Egg": 12,
-            "Stick": 18,
-            "Moon Egg": 10,
-            "Bubble Bomb":18,
-            "Trashcan egg":40,
-            "Rock": 5,
-            "Bomb":12,
-            "DNA": 190,
-            "Clover": 5,
-            "Rose":8,
-            "Hive egg":45,
-            "Queen Bee egg":40,
-            "Wasp egg":12,
-            "Beetle egg":15,
-            "Worker Termite egg":15,
-            "Soldier Termite egg":18,
-            "StickBug egg":12,
-            "Mantis egg":15,
-            "Firefly egg":13,
-            "TermiteHole egg":40,
-            "TermiteOvermind egg":35,
-            "SpiderCave egg":40,
-            "Relic":3,
-            "Plank":4,
-            "Pea":4,
-            "Soil":5,
-            "Tomato":7,
-            "Rubber":6,
-            "Ladybug egg":12,
-            "Bee egg":12,
-            "Suger":3,
-            "Virus egg":10,
-            "Iris": 2,
-            "Lotus": 3,
-            "Bacteriophage egg":12,
-            "Heavy": 5,
-            "Sponge": 4,
-            "Golden Leaf": 105,
-            "Salt": 3,
-            "Powder":6,
-            "Sand": 3,
-            "Starfish": 5,
-            "Jelly": 3,
+            "Powder": 6,
+            "Suger": 3,
+            "Cutter": 10,
+            "Bubble Bomb": 18,
+            "Bomb": 12,
+            "Missile": 15,
+            "Glass": 20,
+            "Faster": 12,
+            "Blood Stinger": 15,
+            "Hel Lighting": 10,
+            "Hel Honey": 8,
             "Lightning": 4,
-            "Shell": 3,
+            "Jelly": 3,
             "Pearl": 5,
             "Coral": 5,
-            "Cotton": 4,
+            "Shell": 3,
+            "Salt": 3,
+            "Sand": 3,
+            "Poo": 2,
+            "Basil": 8,
+            "Golden Leaf": 105,
+            "Chromosome": 6,
+            "Mimic": 240,
+            "Rose": 8,
+            "Ice Rose": 5,
+            "Bone": 7,
+            "Ice Cube": 5,
+            "Snowball": 3,
+            "Carrot": 4,
+            "Icicle": 4,
+            "Snowflake": 5,
+            "Relic": 3,
+            "Plank": 4,
+            "Pea": 4,
+            "Soil": 5,
+            "Tomato": 7,
+            "Rubber": 6,
             "Cancer": 20,
-            "Bacteria_egg": 10,
-            "Scorpion egg":10,
-            "Spider egg": 12,
-            "Digger egg": 95,
-            "TrashDigger egg": 102,
-            "Beekeeper egg": 100,
-            "MudDigger_egg": 104,
-            "Crab egg": 18,
-            "Biologist egg": 102,
-            "Jellyfish egg": 18,
-            "Starfish egg": 15,
+            "DNA": 190,
+            "Clover": 5,
+            "Iris": 2,
+            "Lotus": 3,
+
+            // ==================== 特殊功能类 ====================
+            "Antennae": 12,
+            "ThirdEye": 15,
+            "Cactus": 4,
+            "Magnet": 10,
+            "Heavy": 5,
+            "Rock": 5,
+            "Sponge": 7,
+            "Cotton": 4,
+            "Starfish": 5,
+
+            // ==================== Hel 地狱蛋类 ====================
+            "HelWorm egg": 15,
+            "HelSpider egg": 15,
+            "Hel Bee egg": 15,
+            "HelHornet egg": 14,
+            "HelBeetle egg": 16,
+            "Dragon egg": 20,
+            "DragonNest egg": 50,
+            "HelHive egg": 45,
+            "HelJellyfish egg": 15,
+            "Hel Queen Bee egg": 45,
+            "ToxicDragon egg": 28,
+            "FireStick": 20,
+
+            // ==================== 北极蛋类 ====================
+            "SlagMight egg": 12,
+            "Ice Cube egg": 10,
+            "Ice Dragon egg": 40,
+            "Igloo egg": 40,
+            "Tick egg": 12,
+            "ArcticSpider egg": 12,
+            "ArcticSpiderCave egg": 42,
+            "Snowman egg": 10,
+            "SnowStick": 18,
+
+
+            // ==================== Jungle 丛林蛋类 ====================
+            "Wasp egg": 12,
+            "Worker Termite egg": 15,
+            "Soldier Termite egg": 18,
+            "StickBug egg": 12,
+            "Mantis egg": 15,
+            "Firefly egg": 13,
+            "TermiteHole egg": 40,
+            "TermiteOvermind egg": 35,
+            "SpiderCave egg": 40,
+            "Beetle egg": 15,
+            "Scorpion egg": 10,
+            "Ladybug egg": 12,
+            "Bee egg": 12,
+            "Hive egg": 45,
+            "Queen Bee egg": 40,
+            "Centipede egg": 15,
+            "Soldier Ant egg": 12,
+            "Worker Ant egg": 10,
+
+            // ==================== 海洋蛋类 ====================
             "Shell egg": 22,
+            "Starfish egg": 15,
             "Bubble egg": 10,
+            "Crab egg": 18,
+            "Jellyfish egg": 18,
             "CrabHole egg": 40,
+            "Squid egg": 15,
             "Shipwreck egg": 42,
-            "WhiteBloodCell egg": 12,
-            "RedBloodCell egg": 18,
+            "Barnacle egg": 18,
             "Leech Egg": 12,
             "Parasite Egg": 12,
-            "Chromosome":18,
-            "Mimic":240,
-            "StemCell egg": 45,
-            "queen ant egg": 20,
+
+            // ==================== 沙漠/火蚁蛋类 ====================
             "WorkerFireAnt egg": 12,
             "SoldierFireAnt egg": 15,
             "BabyFireAnt egg": 10,
             "FireAntOvermind egg": 16,
             "FireAntHole egg": 42,
+
+            // ==================== 细胞类蛋 ====================
+            "WhiteBloodCell egg": 12,
+            "Spider egg": 12,
+            "RedBloodCell egg": 18,
+            "StemCell egg": 45,
+            "Bacteria_egg": 10,
+            "Cancer egg": 20,
+            "Virus egg": 10,
+            "Bacteriophage egg": 12,
+
+            // ==================== 下水道蛋类 ====================
+            "ManHole egg": 55,
+            "Fly_egg": 12,
             "Rat_egg": 35,
             "Roach_egg": 25,
-            "Basil":8,
             "PooStick": 35,
-            "Fly_egg": 12,
-            "ManHole egg": 55,
-            "Igloo egg":40,
-            "ArcticSpiderCave egg":42,
-            "PirateDigger egg":103,
-            "ArcticSpider egg":12,
-            "Bone": 7,
-            "Ice Cube": 5,
-            "Snowball": 3,
-            "Ice Rose": 5,
-            "Carrot": 4,
-            "Icicle": 4,
-            "Snowflake": 5,
-            "SlagMight egg": 12,
-            "Ice Cube egg": 10,
-            "Ice Dragon egg": 40,
-            "Tick egg": 12,
-            "Snowman egg": 10,
-            "SnowStick": 18,
+            "Trashcan egg": 40,
+
+            // ==================== Digger 系列蛋类 ====================
+            "TrashDigger egg": 102,
+            "MudDigger_egg": 104,
+            "Digger egg": 95,
+            "Biologist egg": 102,
+            "Beekeeper egg": 100,
+            "PirateDigger egg": 103,
+            "Frost Digger egg": 105,
+            "Hel Digger egg": 108,
+            "Hel Beekeeper egg": 104,
+            // ==================== 基础蛋类 ====================
+            "Egg": 30,
+            "Ant Egg": 12,
+            "Moon Egg": 10,
+            "Stick": 18,
+            "Square Egg": 50,
+
+            // ==================== 其他 ====================
+            "Coin": 1
         };
 
         // Shop items list (only Common rarity configured, others calculated via multipliers)
@@ -22775,7 +23477,22 @@ class Enemy {
         this.targetLockTimer = 0;
         this.targetLockDuration = 8000;
         this.lockedTargetPos = null;
+// 在 Enemy 构造函数中，找到其他触发器变量初始化部分
+        if (enemyType === "DragonNest") {
+            this.triggered80 = false;
+            this.triggered60 = false;
+            this.triggered40 = false;
+            this.triggered20 = false;
+            this.triggeredDeath = false;
+        }
 
+        if (enemyType === "HelHive") {
+            this.triggered80 = false;
+            this.triggered60 = false;
+            this.triggered40 = false;
+            this.triggered20 = false;
+            this.triggeredDeath = false;
+        }
         // 各种生物的特殊触发器
         if (enemyType === "Hive") {
             this.triggered70 = false;
@@ -23049,7 +23766,59 @@ class Enemy {
 
         this.clampPosition();
     }
-        // 在 Enemy 类中添加
+// 在 Enemy 类中添加
+    spawnDragonFromNest(enemies) {
+        if (this.isDead || !enemies) return;
+
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 40;
+        const dragonX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+        const dragonY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+
+        const dragon = new Enemy("Dragon", dragonX, dragonY, this.level, this.rarity);
+        dragon.spawnTime = Date.now();
+        dragon.spawnProtection = 1000;
+        dragon.isSpawning = true;
+        dragon.isFriendly = this.isFriendly;
+
+        enemies.push(dragon);
+    }
+// 在 Enemy 类中添加
+    spawnHelBeeAndHelHornet(enemies) {
+        if (this.isDead || !enemies) return;
+
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        // 生成 HelBee
+        const angleBee = Math.random() * Math.PI * 2;
+        const distanceBee = 40 + Math.random() * 30;
+        const beeX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleBee) * distanceBee));
+        const beeY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleBee) * distanceBee));
+
+        const helBee = new Enemy("HelBee", beeX, beeY, this.level, this.rarity);
+        helBee.spawnTime = Date.now();
+        helBee.spawnProtection = 1000;
+        helBee.isSpawning = true;
+        helBee.isFriendly = this.isFriendly;
+        enemies.push(helBee);
+
+        // 生成 HelHornet
+        const angleHornet = Math.random() * Math.PI * 2;
+        const distanceHornet = 40 + Math.random() * 30;
+        const hornetX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleHornet) * distanceHornet));
+        const hornetY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleHornet) * distanceHornet));
+
+        const helHornet = new Enemy("HelHornet", hornetX, hornetY, this.level, this.rarity);
+        helHornet.spawnTime = Date.now();
+        helHornet.spawnProtection = 1000;
+        helHornet.isSpawning = true;
+        helHornet.isFriendly = this.isFriendly;
+        enemies.push(helHornet);
+    }
     spawnTwoSpiders(enemies) {
         if (this.isDead || !enemies) return;
 
@@ -23365,87 +24134,12 @@ class Enemy {
             this.segments[i] = { x: segments[i].x, y: segments[i].y };
         }
     }
-    // 辅助：获取稀有度倍率
-    _getRarityMultiplier() {
-        const RARITY_MULTIPLIER = {
-            "Common": 1.0, "Unusual": 1.05, "Rare": 1.1, "Epic": 1.15,
-            "Legendary": 1.2, "Mythic": 1.25, "Ultra": 1.3,
-            "Super": 1.35, "Omega": 1.4, "Eternal": 1.5
-        };
-        return RARITY_MULTIPLIER[this.rarity] || 1.0;
-    }
 
     // ===== 辅助方法：计算碰撞半径 =====
     _calculateCollisionRadius(enemyType, baseRadius, sizeFactor) {
-        let collisionRadius;
-
-        if (enemyType === "Spider") {
-            collisionRadius = baseRadius * sizeFactor * 0.8 * 0.7;
-        }
-        else if (enemyType === "Crab") {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else if (["Soldier Ant", "Worker Ant", "QueenAnt", "GoldenAnt",
-                  "WorkerFireAnt", "SoldierFireAnt", "BabyFireAnt", "FireAntOvermind"].includes(enemyType)) {
-            collisionRadius = baseRadius * sizeFactor * 0.6;
-        }
-        else if (enemyType === "Centipede") {
-            collisionRadius = baseRadius * sizeFactor * 0.6;
-        }
-        else if (enemyType === "Bush") {
-            collisionRadius = baseRadius * sizeFactor * 0.5;
-        }
-        else if (enemyType === "Cactus") {
-            collisionRadius = baseRadius * sizeFactor * 0.8;
-        }
-        else if (["Anthill", "FireAntHole", "CrabHole", "ManHole"].includes(enemyType)) {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else if (enemyType === "Sandstorm") {
-            collisionRadius = baseRadius * sizeFactor * 0.8 * 0.9;
-        }
-        else if (enemyType === "Rock") {
-            collisionRadius = baseRadius * sizeFactor * 0.7;
-        }
-        else if (["StemCell", "RedBloodCell", "WhiteBloodCell", "Cancer", "Bacteria"].includes(enemyType)) {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else if (enemyType === "Bee") {
-            collisionRadius = baseRadius * sizeFactor * 0.8;
-        }
-        else if (enemyType === "Hive") {
-            collisionRadius = baseRadius * sizeFactor * 0.7;
-        }
-        else if (["Sponge", "Bubble", "Jellyfish"].includes(enemyType)) {
-            collisionRadius = baseRadius * sizeFactor * 0.8;
-        }
-        else if (enemyType === "Scallop") {
-            collisionRadius = baseRadius * sizeFactor * 0.8;
-        }
-        else if (enemyType === "Starfish") {
-            collisionRadius = baseRadius * sizeFactor * 0.5;
-        }
-        else if (enemyType === "Fly") {
-            collisionRadius = baseRadius * sizeFactor * 0.7;
-        }
-        else if (["Rat", "Roach"].includes(enemyType)) {
-            collisionRadius = baseRadius * sizeFactor * 0.8 * 0.8;
-        }
-        else if (enemyType === "PooStorm") {
-            collisionRadius = baseRadius * sizeFactor * 0.8;
-        }
-        else if (enemyType === "TrashDigger") {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else if (enemyType === "Leech") {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else if (enemyType === "Parasite") {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
-        else {
-            collisionRadius = baseRadius * sizeFactor * 0.9;
-        }
+        // 基础半径
+        let collisionRadius = baseRadius * sizeFactor;
+        collisionRadius = baseRadius * sizeFactor * 0.9;
 
         return Math.max(3, collisionRadius);
     }
@@ -23531,7 +24225,7 @@ class Enemy {
             case "ArcticSpider": return [150, 25, 120, 300, 30];
             case "ArcticSpiderCave": return [750, 55, 0, 12000, 30];
             case "Shipwreck": return [1000, 48, 0, 150000, 40];
-            case "PirateDigger": return [250, 28, 90, 300, 200];//---------
+            case "PirateDigger": return [250, 28, 90, 300, 200];
             case "StickBug": return [60, 20, 100, 200, 20];
             case "Soldier Termite": return [100, 25, 100, 600, 40];
             case "Worker Termite": return [100, 25, 100, 400, 20];
@@ -23539,18 +24233,18 @@ class Enemy {
             case "TermiteOvermind": return [900, 40, 10, 600, 20];
             case "Wasp": return [150, 22, 50, 700, 30];
             case "Firefly": return [100, 20, 50, 400, 20];
-            case "HelWorm": return [100, 15, 110, 100, 40];
+            case "HelWorm": return [100, 15, 110, 100, 40];//---------
             case "HelSpider": return [110, 25, 120, 600, 40];
-            case "HelBee": return [100, 25, 100, 400, 55];
-            case "HelHornet": return [130, 25, 0, 200, 40];
-            case "HelBeetle": return [200, 40, 10, 600, 30];
-            case "Dragon": return [110, 22, 50, 700, 40];
-            case "DragonNest": return [1000, 20, 50, 17000, 20];
-            case "HelHive": return [1000, 25, 0, 15000, 40];
-            case "HelJellyfish": return [175, 40, 10, 600, 25];
-            case "ToxicDragon": return [150, 22, 50, 700, 80];
-            case "FireStorm": return [180, 20, 50, 400, 60];
-            case "HelQueenBee": return [180, 20, 50, 400, 60];
+            case "HelBee": return [100, 22, 100, 400, 55];
+            case "HelHornet": return [130, 22,100, 200, 40];
+            case "HelBeetle": return [200, 25, 100, 600, 30];
+            case "Dragon": return [110, 20, 50, 400, 40];
+            case "DragonNest": return [1000, 45, 0, 17000, 20];
+            case "HelHive": return [1000, 40, 0, 15000, 40];
+            case "HelJellyfish": return [175, 25, 100, 600, 25];
+            case "ToxicDragon": return [150, 22, 110, 700, 80];
+            case "FireStorm": return [180, 20, 80, 400, 60];
+            case "HelQueenBee": return [180, 20, 120, 400, 60];
             default: return [100, 20, 60, 10, 40];
         }
     }
@@ -24243,7 +24937,7 @@ class Enemy {
     }
 
     takeDamage(damage, source = null) {
-        if (this.type === "Fly" && Math.random() < 0.9) return false;
+        if (this.type === "Fly" && Math.random() < 0.95) return false;
         if (this.isSpawning || this.isDead) return false;
 
         this.health -= damage;
@@ -24309,7 +25003,17 @@ class Enemy {
             if (this.type === "StemCell" && !this.isFriendly) {
                 setTimeout(() => this.trySpawnBiologistFromDeath(this.gameInstance), 50);
             }
+            // DragonNest 死亡生成
+            if (this.type === "DragonNest" && !this.isFriendly && !this.triggeredDeath) {
+                this.triggeredDeath = true;
+                setTimeout(() => this.spawnDeathDragonNestContents(this.gameInstance), 50);
+            }
 
+            // HelHive 死亡生成
+            if (this.type === "HelHive" && !this.isFriendly && !this.triggeredDeath) {
+                this.triggeredDeath = true;
+                setTimeout(() => this.spawnDeathHelHiveContents(this.gameInstance), 50);
+            }
             if (this.type === "Shipwreck" && !this.isFriendly && !this.triggeredDeath) {
                 this.triggeredDeath = true;
                 setTimeout(() => this.spawnCrabAndJellyfish(this.gameInstance?.enemies), 50);
@@ -24364,6 +25068,95 @@ class Enemy {
             if (this.isCancerInfected && this.infectedByCancer) {
                 setTimeout(() => this.trySpawnCancerClone(this.infectedByCancer), 50);
             }
+        }
+    }
+    // 在 Enemy 类中添加
+    spawnDeathDragonNestContents(gameInstance) {
+        if (!gameInstance) return;
+
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        // 生成2只 Dragon
+        for (let i = 0; i < 2; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 40;
+            const dragonX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+            const dragonY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+            const dragon = new Enemy("Dragon", dragonX, dragonY, this.level, this.rarity);
+            dragon.isFriendly = false;
+            dragon.gameInstance = gameInstance;
+            gameInstance.enemies.push(dragon);
+        }
+
+        // 生成1只 ToxicDragon
+        const angleToxic = Math.random() * Math.PI * 2;
+        const distanceToxic = 55 + Math.random() * 45;
+        const toxicX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleToxic) * distanceToxic));
+        const toxicY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleToxic) * distanceToxic));
+        const toxicDragon = new Enemy("ToxicDragon", toxicX, toxicY, this.level, this.rarity);
+        toxicDragon.isFriendly = false;
+        toxicDragon.gameInstance = gameInstance;
+        gameInstance.enemies.push(toxicDragon);
+
+        // 10% 概率生成 HelDigger
+        if (Math.random() < 0.1) {
+            const angleDigger = Math.random() * Math.PI * 2;
+            const distanceDigger = 50 + Math.random() * 40;
+            const diggerX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleDigger) * distanceDigger));
+            const diggerY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleDigger) * distanceDigger));
+            const helDigger = new Enemy("HelDigger", diggerX, diggerY, this.level, this.rarity);
+            helDigger.isFriendly = false;
+            helDigger.gameInstance = gameInstance;
+            gameInstance.enemies.push(helDigger);
+        }
+    }
+    spawnDeathHelHiveContents(gameInstance) {
+        if (!gameInstance) return;
+
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        // 生成 HelBee
+        const angleBee = Math.random() * Math.PI * 2;
+        const distanceBee = 50 + Math.random() * 40;
+        const beeX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleBee) * distanceBee));
+        const beeY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleBee) * distanceBee));
+        const helBee = new Enemy("HelBee", beeX, beeY, this.level, this.rarity);
+        helBee.isFriendly = false;
+        helBee.gameInstance = gameInstance;
+        gameInstance.enemies.push(helBee);
+
+        // 生成 HelHornet
+        const angleHornet = Math.random() * Math.PI * 2;
+        const distanceHornet = 50 + Math.random() * 40;
+        const hornetX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleHornet) * distanceHornet));
+        const hornetY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleHornet) * distanceHornet));
+        const helHornet = new Enemy("HelHornet", hornetX, hornetY, this.level, this.rarity);
+        helHornet.isFriendly = false;
+        helHornet.gameInstance = gameInstance;
+        gameInstance.enemies.push(helHornet);
+
+        // 生成 HelQueenBee
+        const angleQueen = Math.random() * Math.PI * 2;
+        const distanceQueen = 60 + Math.random() * 50;
+        const queenX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleQueen) * distanceQueen));
+        const queenY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleQueen) * distanceQueen));
+        const helQueenBee = new Enemy("HelQueenBee", queenX, queenY, this.level, this.rarity);
+        helQueenBee.isFriendly = false;
+        helQueenBee.gameInstance = gameInstance;
+        gameInstance.enemies.push(helQueenBee);
+
+        // 10% 概率生成 HelBeekeeper
+        if (Math.random() < 0.1) {
+            const angleBeekeeper = Math.random() * Math.PI * 2;
+            const distanceBeekeeper = 55 + Math.random() * 45;
+            const beekeeperX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angleBeekeeper) * distanceBeekeeper));
+            const beekeeperY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angleBeekeeper) * distanceBeekeeper));
+            const helBeekeeper = new Enemy("HelBeekeeper", beekeeperX, beekeeperY, this.level, this.rarity);
+            helBeekeeper.isFriendly = false;
+            helBeekeeper.gameInstance = gameInstance;
+            gameInstance.enemies.push(helBeekeeper);
         }
     }
     spawnTermiteOvermindFromDeath(gameInstance) {
@@ -24765,7 +25558,59 @@ class Enemy {
                 }
             }
         }
+        // DragonNest 逻辑 - 血量触发生成龙
+        if (this.type === "DragonNest" && !this.isSpawning && !this.isDead) {
+            const healthPercent = this.health / this.maxHealth;
 
+            if (!enemies) {
+                console.log(`❌ DragonNest: enemies 参数为 null`);
+                return false;
+            }
+
+            if (healthPercent <= 0.8 && !this.triggered80) {
+                this.triggered80 = true;
+                this.spawnDragonFromNest(enemies);
+            }
+            if (healthPercent <= 0.6 && !this.triggered60) {
+                this.triggered60 = true;
+                this.spawnDragonFromNest(enemies);
+            }
+            if (healthPercent <= 0.4 && !this.triggered40) {
+                this.triggered40 = true;
+                this.spawnDragonFromNest(enemies);
+            }
+            if (healthPercent <= 0.2 && !this.triggered20) {
+                this.triggered20 = true;
+                this.spawnDragonFromNest(enemies);
+            }
+        }
+
+        // HelHive 逻辑 - 血量触发生成 HelBee + HelHornet
+        if (this.type === "HelHive" && !this.isSpawning && !this.isDead) {
+            const healthPercent = this.health / this.maxHealth;
+
+            if (!enemies) {
+                console.log(`❌ HelHive: enemies 参数为 null`);
+                return false;
+            }
+
+            if (healthPercent <= 0.8 && !this.triggered80) {
+                this.triggered80 = true;
+                this.spawnHelBeeAndHelHornet(enemies);
+            }
+            if (healthPercent <= 0.6 && !this.triggered60) {
+                this.triggered60 = true;
+                this.spawnHelBeeAndHelHornet(enemies);
+            }
+            if (healthPercent <= 0.4 && !this.triggered40) {
+                this.triggered40 = true;
+                this.spawnHelBeeAndHelHornet(enemies);
+            }
+            if (healthPercent <= 0.2 && !this.triggered20) {
+                this.triggered20 = true;
+                this.spawnHelBeeAndHelHornet(enemies);
+            }
+        }
         // 下水道井盖逻辑
         if (this.type === "ManHole" && !this.isSpawning && !this.isDead) {
             const healthPercent = this.health / this.maxHealth;
@@ -25216,33 +26061,31 @@ class Enemy {
         return !this.isDead && this.health > 0;
     }
 }
-
 class Petal {
     constructor(player, petalIndex = 0, totalPetals = 10) {
-        // 属性定义（对应 Python 的 __slots__）
         this.player = player;
+        // 在 Petal 构造函数中添加
+        this.isSponge = false;  // 标记是否为海绵花瓣
         this._petalIndex = petalIndex;
-        this.petalIndex = petalIndex;  // 保存花瓣索引
-        this.totalPetals = totalPetals; // 保存总花瓣数
+        this.petalIndex = petalIndex;
+        this.totalPetals = totalPetals;
         this.squareList = [];
         this.maxSquare = 1;
         this.healSpeedMultiplier = 0;
         this.virusList = [];
-        this.maxVirus = 1;  // 最多1个 Virus
-        // 初始化属性
-        // 根据索引计算初始角度，确保均匀分布
+        this.maxVirus = 1;
         const angleStep = (Math.PI * 2) / totalPetals;
-        this.angle = petalIndex * angleStep;  // 固定角度，不随机
+        this.angle = petalIndex * angleStep;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.09;  // 固定旋转速度，所有花瓣相同
-        this.baseRotationSpeed = 0.09; // 基础旋转速度
+        this.rotationSpeed = 0.09;
+        this.baseRotationSpeed = 0.09;
         this.screenX = 0;
         this.screenY = 0;
         this.worldX = 0;
         this.worldY = 0;
         this.color = WHITE;
-        this.absorbDelay = 0;           // 延迟计时器
+        this.absorbDelay = 0;
         this.absorbDelayTime = 1.0;
         this.size = 8;
         this.attackCooldown = 0;
@@ -25250,7 +26093,7 @@ class Petal {
         this.attackPower = 15;
         this.itemType = null;
         this.level = 1;
-        this.mimicProcessed = false; // 标记是否已经处理过复制
+        this.mimicProcessed = false;
         this.wingRotationAngle = 0;
         this.rarity = "Common";
         this.spawnCooldown = 0;
@@ -25266,14 +26109,12 @@ class Petal {
         this.hasAntennae = false;
         this.currentViewScale = 1.0;
         this.armor = 0.0;
-        this.originalMimicData = null; // 保存原始 Mimic 数据
-        this.isTransformedMimic = false; // 是否已变形
-        // ===== Still Mode 相关属性 =====
-        this.stillMode = false;           // 是否处于静止模式
-        this.stillAngle = 0;              // 静止时的角度
-        this.stillRadius = 35;             // 静止时的半径
-        this.stillPosition = {x: 0, y: 0}; // 静止时的世界坐标
-        // 在 resetToDefault 方法中
+        this.originalMimicData = null;
+        this.isTransformedMimic = false;
+        this.stillMode = false;
+        this.stillAngle = 0;
+        this.stillRadius = 35;
+        this.stillPosition = {x: 0, y: 0};
         this.frostDiggerList = [];
         this.maxFrostDiggers = 1;
         this.squidList = [];
@@ -25281,18 +26122,15 @@ class Petal {
         this.sandstormList = [];
         this.maxSandstorms = 2;
         this.rockList = [];
-        // 在 resetToDefault 方法的末尾添加
         this.hiveBeeList = [];
         this.maxHiveBees = 10;
         this.maxRocks = 1;
         this.goldenAntList = [];
         this.maxGoldenAnts = 10;
         this.bacteriophageList = [];
-        this.maxBacteriophages = 1;  // 最多1个噬菌体
-        // 在 Petal 构造函数中
+        this.maxBacteriophages = 1;
         this.absorbStartWorldX = 0;
         this.absorbStartWorldY = 0;
-        // 耐久度和生命值相关
         this.maxDurability = 10;
         this.durability = this.maxDurability;
         this.reloadTime = 5000;
@@ -25304,7 +26142,34 @@ class Petal {
         this.isBroken = false;
         this.workerFireAntList = [];
         this.maxWorkerFireAnts = 4;
-        // 在 Petal 构造函数中，添加以下列表初始化
+        this.helWormList = [];
+        this.maxHelWorms = 2;
+        this.helSpiderList = [];
+        this.maxHelSpiders = 3;
+        this.helBeeList = [];
+        this.maxHelBees = 1;
+        this.helHornetList = [];
+        this.maxHelHornets = 1;
+        this.helBeetleList = [];
+        this.maxHelBeetles = 1;
+        this.dragonList = [];
+        this.maxDragons = 1;
+        this.dragonNestList = [];
+        this.maxDragonNests = 1;
+        this.helHiveList = [];
+        this.maxHelHives = 1;
+        this.helJellyfishList = [];
+        this.maxHelJellyfish = 2;
+        this.helQueenBeeList = [];
+        this.maxHelQueenBees = 1;
+        this.toxicDragonList = [];
+        this.maxToxicDragons = 1;
+        this.helDiggerList = [];
+        this.maxHelDiggers = 1;
+        this.helBeekeeperList = [];
+        this.maxHelBeekeepers = 1;
+        this.firestormList = [];
+        this.maxFirestorms = 3;
         this.slagMightList = [];
         this.iceCubeList = [];
         this.iceDragonList = [];
@@ -25320,18 +26185,17 @@ class Petal {
         this.iceWormList = [];
         this.soldierFireAntList = [];
         this.maxSoldierFireAnts = 5;
-
+        this._registerSpawnMethods();
         this.babyFireAntList = [];
         this.maxBabyFireAnts = 3;
-        this.bacteriaList = [];          // 新增：用于存储召唤出的细菌
-        this.maxBacteria = 2;            // 最大数量，根据 spawn_count * 预期上限调整 (3只/蛋 * 3 = 9)
+        this.bacteriaList = [];
+        this.maxBacteria = 2;
         this.fireAntOvermindList = [];
         this.maxFireAntOverminds = 2;
-        this.autoAbsorb = false;      // 是否自动吸收
-        this.absorbProgress = 0;      // 吸收进度   // 'rose' 或 'shell'
+        this.autoAbsorb = false;
+        this.absorbProgress = 0;
         this.fireAntHoleList = [];
         this.maxFireAntHoles = 10;
-        // 新召唤物管理列表
         this.whiteBloodCellList = [];
         this.maxWhiteBloodCells = 1;
         this.spiderList = [];
@@ -25344,8 +26208,6 @@ class Petal {
         this.maxStemCells = 10;
         this.queenAntList = [];
         this.maxQueenAnts = 2;
-
-        // 🌊 海洋生物召唤物列表
         this.scallopList = [];
         this.maxScallops = 4;
         this.starfishList = [];
@@ -25360,42 +26222,31 @@ class Petal {
         this.maxCrabs = 3;
         this.jellyfishList = [];
         this.maxJellyfish = 3;
-        this.crabHoleCrabs = []; // 蟹洞蛋生成的螃蟹
+        this.crabHoleCrabs = [];
         this.maxCrabHoleCrabs = 10;
-
-        // 🦠 癌症召唤物列表
         this.cancerList = [];
         this.maxCancer = 2;
-        this.diggerList = [];           // 统一的 digger 列表
+        this.diggerList = [];
         this.maxDiggers = 1;
-        // 在 Petal 构造函数中，找到其他列表初始化的位置
         this.shipwreckJellyfishList = [];
         this.maxShipwreckJellyfish = 10;
-        // 🆕 下水道召唤物列表
         this.manHoleList = [];
-        this.maxManHoles = 1;              // 最多1个 ManHole
+        this.maxManHoles = 1;
         this.flyList = [];
-        this.maxFlies = 3;                  // 最多3只 Fly
+        this.maxFlies = 3;
         this.ratList = [];
-        this.maxRats = 2;                    // 最多2只 Rat
+        this.maxRats = 2;
         this.roachList = [];
-        this.maxRoaches = 1;                 // 最多1只 Roach
+        this.maxRoaches = 1;
         this.pooStormList = [];
-        this.maxPooStorms = 3;                // 最多3个 PooStorm
-
-        // ===== 蛋类物品标记（用于破碎逻辑）=====
-        this.isEggItem = false;               // 标记是否为蛋类物品
-        this.eggSpawned = false;               // 标记是否已经生成过召唤物
-
-        // 初始化时从快捷栏读取
+        this.maxPooStorms = 3;
+        this.isEggItem = false;
+        this.eggSpawned = false;
         this.resetToDefault();
     }
 
     resetToDefault(preserveAngle = false) {
-        // 保存当前角度（如果需要保留）
         const currentAngle = preserveAngle ? this.angle : null;
-
-        // 基础属性
         this.color = WHITE;
         this.attackPower = 15;
         this.attackCooldownMax = 200;
@@ -25424,70 +26275,71 @@ class Petal {
         this.workerTermiteList = [];
         this.maxWorkerTermites = 4;
         this.soldierTermiteList = [];
+        this.helWormList = [];
+        this.maxHelWorms = 2;
+        this.helSpiderList = [];
+        this.maxHelSpiders = 3;
+        this.helBeeList = [];
+        this.maxHelBees = 1;
+        this.helHornetList = [];
+        this.maxHelHornets = 1;
+        this.helBeetleList = [];
+        this.maxHelBeetles = 1;
+        this.dragonList = [];
+        this.maxDragons = 1;
+        this.dragonNestList = [];
+        this.maxDragonNests = 1;
+        this.helHiveList = [];
+        this.maxHelHives = 1;
+        this.helJellyfishList = [];
+        this.maxHelJellyfish = 2;
+        this.helQueenBeeList = [];
+        this.maxHelQueenBees = 1;
+        this.toxicDragonList = [];
+        this.maxToxicDragons = 1;
+        this.helDiggerList = [];
+        this.maxHelDiggers = 1;
+        this.helBeekeeperList = [];
+        this.maxHelBeekeepers = 1;
+        this.firestormList = [];
+        this.maxFirestorms = 3;
         this.maxSoldierTermites = 3;
         this.termiteOvermindList = [];
         this.maxTermiteOverminds = 1;
-        this.spiderCaveSpiders = [];  // 蜘蛛洞穴生成的蜘蛛列表
+        this.spiderCaveSpiders = [];
         this.maxSpiderCaveSpiders = 10;
-        // ===== 耐久度和血量统一使用相同的值 =====
-        // 基础值 100
         const baseValue = 100;
-
-        // 稀有度乘数
         const rarityMultipliers = {
-            "Common": 1,
-            "Unusual": 3,
-            "Rare": 9,
-            "Epic": 27,
-            "Legendary": 81,
-            "Mythic": 243,
-            "Ultra": 729,
-            "Super": 2187,
-            "Omega": 7561,
-            "Eternal": 18683
+            "Common": 1, "Unusual": 3, "Rare": 9, "Epic": 27,
+            "Legendary": 81, "Mythic": 243, "Ultra": 729,
+            "Super": 2187, "Omega": 7561, "Eternal": 18683
         };
-
         const multiplier = rarityMultipliers[this.rarity] || 1;
-
-        // 耐久度和血量使用相同的计算方式
         this.maxDurability = Math.floor(baseValue * multiplier);
         this.durability = this.maxDurability;
         this.maxHealth = Math.floor(baseValue * multiplier);
         this.health = this.maxHealth;
         this.isBroken = false;
-
-        // 重载时间系统
         this.baseReloadTime = 5000;
         this.reloadTime = 5000;
         this.reloadCooldown = 0;
         this.isReloading = false;
-
-        // 伤害抵抗
         this.damageResistance = 0.4;
-
-        // 护甲
         this.armor = 0.0;
-
-        // 位置和旋转
         this.radius = 35;
         this.targetRadius = 35;
         this.rotationSpeed = 0.09;
         this.baseRotationSpeed = 0.09;
-
-        // ✅ 关键修改：根据参数决定是否重置角度
         if (preserveAngle && currentAngle !== null) {
-            this.angle = currentAngle;  // 保持原有角度
+            this.angle = currentAngle;
         } else {
-            this.angle = this.petalIndex * (Math.PI * 2 / this.totalPetals);  // 重置为初始角度
+            this.angle = this.petalIndex * (Math.PI * 2 / this.totalPetals);
         }
-
         this.screenX = 0;
         this.screenY = 0;
         this.worldX = 0;
         this.worldY = 0;
         this.fixedPosition = {x: 0, y: 0};
-
-        // 特效
         this.wingRotationAngle = 0;
         this.visionBonus = 0.0;
         this.healthBonus = 0;
@@ -25497,25 +26349,17 @@ class Petal {
         this.hasAntennae = false;
         this.hasHeavy = false;
         this.healSpeedMultiplier = 0;
-
-        // 冷却
         this.spawnCooldown = 0;
         this.attackCooldown = 0;
         this.collisionCooldown = 0;
         this.frameDamageCooldown = 0;
         this.frameDamageRate = 16.67;
-
-        // 静止模式
         this.stillMode = false;
         this.stillAngle = 0;
         this.stillRadius = 35;
         this.stillPosition = {x: 0, y: 0};
-
-        // 蛋类标记
         this.isEggItem = false;
         this.eggSpawned = false;
-
-        // 召唤物列表
         this.sandstormList = [];
         this.maxSandstorms = 2;
         this.goldenAntList = [];
@@ -25549,7 +26393,7 @@ class Petal {
         this.fireAntOvermindList = [];
         this.maxFireAntOverminds = 2;
         this.barnacleList = [];
-        this.maxBarnacles = 2;  // 最多2个藤
+        this.maxBarnacles = 2;
         this.fireAntHoleList = [];
         this.maxFireAntHoles = 10;
         this.bacteriaList = [];
@@ -25570,7 +26414,6 @@ class Petal {
         this.maxCancer = 2;
         this.diggerList = [];
         this.maxDiggers = 1;
-        // 在 resetToDefault 方法的末尾添加
         this.hiveBeeList = [];
         this.maxHiveBees = 10;
         this.manHoleList = [];
@@ -25589,7 +26432,6 @@ class Petal {
         this.maxParasites = 1;
         this.beekeeperList = [];
         this.maxBeekeepers = 1;
-        // Chromosome
         this.soldierAntList = [];
         this.workerAntList = [];
         this.centipedeList = [];
@@ -25597,7 +26439,6 @@ class Petal {
         this.maxWorkerAnts = 4;
         this.maxCentipedes = 1;
         this.isChromosome = false;
-            // Jungle 生物召唤物列表
         this.termiteSoldierList = [];
         this.maxTermiteSoldiers = 10;
         this.waspList = [];
@@ -25614,92 +26455,56 @@ class Petal {
         this.maxSoldierTermites = 3;
         this.termiteOvermindList = [];
         this.maxTermiteOverminds = 1;
-        this.spiderCaveSpiders = [];  // 蜘蛛洞穴生成的蜘蛛列表
+        this.spiderCaveSpiders = [];
         this.maxSpiderCaveSpiders = 10;
     }
 
     _applyTalentToPet(pet) {
         if (!pet || !this.player) return;
-
-        // 获取天赋加成（兼容旧属性）
         const hpMult = this.player._talentSummonHpMult || this.player.bonusPetStats || 1;
         const dmgMult = this.player._talentSummonDmgMult || 1;
-
-        // 保存原始基础值（用于调试）
         if (pet._originalMaxHealth === undefined) {
             pet._originalMaxHealth = pet.maxHealth;
             pet._originalAttackDamage = pet.attackDamage;
         }
-
-        // 应用生命加成
         if (hpMult !== 1) {
             pet.maxHealth = Math.floor(pet._originalMaxHealth * hpMult);
-            pet.health = pet.maxHealth;  // ✅ 重要：血量设为满血
+            pet.health = pet.maxHealth;
         }
-
-        // 应用伤害加成
         if (dmgMult !== 1) {
             pet.attackDamage = Math.floor(pet._originalAttackDamage * dmgMult);
         }
-
-        // 调试输出
         if (this.player.gameInstance?.debugMode) {
             console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
         }
     }
 
-    // 在 Petal 类中，完全重写 restoreMimic 方法
     restoreMimic() {
         console.log("🔄 restoreMimic START ==================");
         console.log("Petal index:", this._petalIndex);
         console.log("Has original data:", !!this.originalMimicData);
-
-        if (!this.originalMimicData) {
-            console.log("❌ No original data to restore");
-            return false;
-        }
-
-        if (!this.player) {
-            console.log("❌ No player reference");
-            return false;
-        }
-
-        if (!this.player.quickSlot) {
-            console.log("❌ No quickSlot");
-            return false;
-        }
-
+        if (!this.originalMimicData) { console.log("❌ No original data to restore"); return false; }
+        if (!this.player) { console.log("❌ No player reference"); return false; }
+        if (!this.player.quickSlot) { console.log("❌ No quickSlot"); return false; }
         const slotIndex = this._petalIndex;
         console.log("Slot index:", slotIndex);
-
-        // 检查索引是否有效
         if (slotIndex < 0 || slotIndex >= this.player.quickSlot.slots.length) {
-            console.log("❌ Invalid slot index:", slotIndex);
-            return false;
+            console.log("❌ Invalid slot index:", slotIndex); return false;
         }
-
         const mimicItem = this.player.quickSlot.slots[slotIndex];
         console.log("Current item in slot:", mimicItem ? mimicItem.type : 'null');
         console.log("Original data:", this.originalMimicData);
-
         if (!mimicItem) {
             console.log("❌ No item in slot, creating new Mimic");
-            // 如果槽位空了，创建一个新的 Mimic
-            const newMimic = new Item(
-                this.originalMimicData.type,
-                this.originalMimicData.level,
-                this.originalMimicData.rarity
-            );
+            const newMimic = new Item(this.originalMimicData.type, this.originalMimicData.level, this.originalMimicData.rarity);
             newMimic.durability = this.originalMimicData.durability;
             newMimic.maxDurability = this.originalMimicData.maxDurability;
             newMimic.reloadTime = this.originalMimicData.reloadTime;
             newMimic.baseReloadTime = this.originalMimicData.baseReloadTime;
             newMimic.armor = this.originalMimicData.armor;
-
             this.player.quickSlot.slots[slotIndex] = newMimic;
             console.log("✅ Created new Mimic in empty slot");
         } else {
-            // 强制恢复为原始 Mimic
             mimicItem.type = this.originalMimicData.type;
             mimicItem.rarity = this.originalMimicData.rarity;
             mimicItem.level = this.originalMimicData.level;
@@ -25708,88 +26513,54 @@ class Petal {
             mimicItem.reloadTime = this.originalMimicData.reloadTime;
             mimicItem.baseReloadTime = this.originalMimicData.baseReloadTime;
             mimicItem.armor = this.originalMimicData.armor;
-
             console.log(`✅ Restored to: ${mimicItem.type} (${mimicItem.rarity})`);
         }
-
-        // 更新花瓣显示
         this.updateFromQuickSlot(slotIndex);
-;
         return true;
     }
-    // 在 Petal 类的 getCurrentItem 方法中
-    getCurrentItem() {
-        if (!this.player || !this.player.quickSlot) {
-            return null;
-        }
 
+    getCurrentItem() {
+        if (!this.player || !this.player.quickSlot) return null;
         const petalIndex = this._petalIndex;
         if (petalIndex >= 0 && petalIndex < this.player.quickSlot.slots.length) {
             const item = this.player.quickSlot.slots[petalIndex];
-
-            // Cancer：永远返回物品（用于感染）
-            if (item && item.type === "Cancer") {
-                return item;
-            }
-
-            // Golden Leaf：永远返回物品（即使破碎也要生效）
-            if (item && item.type === "Golden Leaf") {
-                return item;  // 不检查任何状态，始终返回
-            }
-
-            // Web：保持原样
+            if (item && item.type === "Cancer") return item;
+            if (item && item.type === "Golden Leaf") return item;
             if (item && item.type === "Web") {
                 if (this.isBroken || this.isReloading) return null;
                 return item;
             }
-
             return item;
         }
         return null;
     }
+
     _triggerBombExplosion(item) {
         if (!this.player?.gameInstance) return;
         const game = this.player.gameInstance;
         const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
-
         const isBubbleBomb = item.type === "Bubble Bomb";
-        // 爆炸半径
         const radius = isBubbleBomb ? 120 + mult * 0.5 : 100 + mult * 0.4;
-        // 基础伤害
         const damage = isBubbleBomb ? 15 * mult : 25 * mult;
-        // 基础击退
         const knockback = isBubbleBomb ? 500 + mult * 0.3 : 400 + mult * 0.3;
-
         const cx = this.worldX, cy = this.worldY;
-
         for (const enemy of game.enemies) {
             if (enemy.isDead || enemy.isFriendly) continue;
-
             const dx = enemy.physicsBody.position.x - cx;
             const dy = enemy.physicsBody.position.y - cy;
             const dist = Math.sqrt(dx * dx + dy * dy);
-
             if (dist < radius) {
-                // ✅ 完全无衰减，整个范围内伤害和击退相同
-                const falloff = 1.0;  // 固定为 1，没有衰减
-
-                // 伤害
-                enemy.health -= damage * falloff;
-
-                // 击退方向（距离越近击退越强？这里选择统一力度）
+                enemy.health -= damage;
                 if (dist > 0.1) {
                     const nx = dx / dist, ny = dy / dist;
                     enemy.physicsBody.velocity.x += nx * knockback;
                     enemy.physicsBody.velocity.y += ny * knockback;
                 } else {
-                    // 如果距离为0（理论上不会发生），随机方向
                     const angle = Math.random() * Math.PI * 2;
                     enemy.physicsBody.velocity.x += Math.cos(angle) * knockback;
                     enemy.physicsBody.velocity.y += Math.sin(angle) * knockback;
                 }
                 enemy.knockbackTimer = 0.4;
-
-                // 检查死亡
                 if (enemy.health <= 0 && !enemy.isDead) {
                     enemy.markAsDead();
                     game.dropCard(enemy);
@@ -25799,414 +26570,416 @@ class Petal {
                 }
             }
         }
-
         this.health = 0;
         this.durability = 0;
         this.isBroken = true;
         this.startReload();
     }
-    // ===== 切换静止模式 =====
+
     toggleStillMode() {
         this.stillMode = !this.stillMode;
-
         if (this.stillMode) {
-            // 进入静止模式：保存当前位置
             this.stillAngle = this.angle;
             this.stillRadius = this.radius;
-            this.stillPosition = {
-                x: this.worldX,
-                y: this.worldY
-            };
+            this.stillPosition = { x: this.worldX, y: this.worldY };
         } else {
-            // 退出静止模式：恢复旋转
             console.log(`Petal ${this._petalIndex} 退出静止模式`);
         }
     }
-    // 在 Petal 类中添加
+
     updateSpawnCooldownWithGoldenLeaf() {
-    if (!this.player) return;
-
-    // 查找玩家所有花瓣中的 Golden Leaf，计算总减少效果
-    let totalReduction = 0;
-    let goldenLeafCount = 0;
-
-    for (const petal of this.player.petals) {
-        const item = petal.getCurrentItem();
-        if (item && item.type === "Golden Leaf") {
-            const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
-            totalReduction += reduction;
-            goldenLeafCount++;
-        }
-    }
-
-    totalReduction = Math.min(totalReduction, 0.95);
-
-    // 获取当前物品的基础冷却
-    const currentItem = this.getCurrentItem();
-    if (currentItem) {
-        const itemStats = ITEM_STATS[currentItem.type];
-        if (itemStats && itemStats.base_cooldown) {
-            this.baseSpawnCooldown = itemStats.base_cooldown;
-        }
-    }
-
-    // 计算减少后的冷却值（但不立即应用）
-    if (totalReduction > 0) {
-        this.nextSpawnCooldown = Math.max(100, this.baseSpawnCooldown * (1 - totalReduction));
-    } else {
-        this.nextSpawnCooldown = this.baseSpawnCooldown;
-    }
-
-    // 🔴 关键：不要在这里设置 spawnCooldown，只在生成成功后设置
-    // 移除 this.spawnCooldown = newCooldown 的代码
-}
-    // 在 Petal 类的 updateReloadTimeWithGoldenLeaf 方法中
-    updateReloadTimeWithGoldenLeaf() {
         if (!this.player) return;
-
-        // 查找玩家所有花瓣中的 Golden Leaf，计算总减少效果
         let totalReduction = 0;
-        let goldenLeafCount = 0;
-
         for (const petal of this.player.petals) {
             const item = petal.getCurrentItem();
             if (item && item.type === "Golden Leaf") {
                 const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
                 totalReduction += reduction;
-                goldenLeafCount++;
             }
         }
+        totalReduction = Math.min(totalReduction, 0.95);
+        const currentItem = this.getCurrentItem();
+        if (currentItem) {
+            const itemStats = ITEM_STATS[currentItem.type];
+            if (itemStats && itemStats.base_cooldown) {
+                this.baseSpawnCooldown = itemStats.base_cooldown;
+            }
+        }
+        if (totalReduction > 0) {
+            this.nextSpawnCooldown = Math.max(100, this.baseSpawnCooldown * (1 - totalReduction));
+        } else {
+            this.nextSpawnCooldown = this.baseSpawnCooldown;
+        }
+    }
 
-        // 限制最大减少效果
+    updateReloadTimeWithGoldenLeaf() {
+        if (!this.player) return;
+        let totalReduction = 0;
+        for (const petal of this.player.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Golden Leaf") {
+                const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
+                totalReduction += reduction;
+            }
+        }
         totalReduction = Math.min(totalReduction, 0.99);
-
-        // ===== 关键：保存原始值 =====
         if (this.baseReloadTime === undefined) {
-            // 从物品获取原始重载时间
             const currentItem = this.getCurrentItem();
             if (currentItem && currentItem.baseReloadTime) {
                 this.baseReloadTime = currentItem.baseReloadTime;
             } else {
-                // 默认值
                 this.baseReloadTime = this.reloadTime;
             }
         }
-
-        // 应用总减少效果
         if (totalReduction > 0) {
             const newReloadTime = Math.max(10, this.baseReloadTime * (1 - totalReduction));
-            if (this.reloadTime !== newReloadTime) {
-                this.reloadTime = newReloadTime;
-            }
+            if (this.reloadTime !== newReloadTime) this.reloadTime = newReloadTime;
         } else {
-            // 没有 Golden Leaf 效果，恢复原始值
             if (this.baseReloadTime !== undefined && this.reloadTime !== this.baseReloadTime) {
                 this.reloadTime = this.baseReloadTime;
             }
         }
     }
+
     updateFromQuickSlot(petalIndex) {
-        this._petalIndex = petalIndex;
-        this.petalIndex = petalIndex;
+    this._petalIndex = petalIndex;
+    this.petalIndex = petalIndex;
 
-        if (!this.player || !this.player.quickSlot) return;
-
-        if (petalIndex < this.player.quickSlot.slots.length) {
-            const item = this.player.quickSlot.slots[petalIndex];
-            if (item) {
-                // 直接从物品复制属性
-                this.itemType = item.type;
-                this.rarity = item.rarity;
-                this.level = item.level || 1;
-
-                // 从物品获取 stats
-                const stats = item.getStats();
-                this.attackPower = stats.attack_power || 0;
-                this.attackCooldownMax = stats.attack_cooldown || 200;
-                this.color = stats.rarity_color || WHITE;
-
-                // 根据稀有度设置大小
-                const rarityIndex = RARITY_LIST.indexOf(this.rarity);
-                this.size = 20 + (rarityIndex >= 0 ? rarityIndex * 1.2 : 0);
-
-                // ===== 耐久度和血量统一 =====
-                // 优先使用物品的耐久度值
-                if (item.durability !== undefined && item.maxDurability !== undefined) {
-                    this.durability = item.durability;
-                    this.maxDurability = item.maxDurability;
-                } else {
-                    // 如果物品没有耐久度，重新计算
-                    const baseValue = 100;
-                    const rarityMultipliers = {
-                        "Common": 1, "Unusual": 3, "Rare": 9, "Epic": 27,
-                        "Legendary": 81, "Mythic": 243, "Ultra": 729,
-                        "Super": 2187, "Omega": 6561, "Eternal": 19683
-                    };
-                    const multiplier = rarityMultipliers[this.rarity] || 1;
-                    this.maxDurability = Math.floor(baseValue * multiplier);
-                    this.durability = this.maxDurability;
-                }
-
-                // 血量与耐久度保持一致
-                this.maxHealth = this.maxDurability;
-                this.health = this.durability;
-
-                this.isBroken = item.isBroken || (this.health <= 0);
-
-                // 重载时间
-                this.baseReloadTime = item.baseReloadTime || 5000;
-                this.reloadTime = item.reloadTime || this.baseReloadTime;
-
-                // 护甲
-                this.armor = item.armor || 0;
-
-                // 特殊属性
-                const itemConfig = ITEM_STATS[item.type] || {};
-
-                // 磁铁
-                if (item.type === "Magnet" || itemConfig.magnet_range) {
-                    this.magnetRange = (itemConfig.magnet_range || 100) * this.getRarityMultiplier();
-                    this.magnetActive = true;
-                } else {
-                    this.magnetActive = false;
-                }
-
-                // 触角
-                this.hasAntennae = (item.type === "Antennae");
-
-                // Heavy
-                this.hasHeavy = (item.type === "Heavy");
-                if (this.hasHeavy) {
-                    this.targetRadius = 65;
-                }
-
-                // Chromosome
-                this.isChromosome = (item.type === "Chromosome");
-
-                // 蛋类物品标记
-                const EGG_ITEMS = new Set([
-                    "Egg", "Ant Egg", "Moon Egg",
-                    "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
-                    "queen ant egg",
-                    "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                    "FireAntOvermind egg", "FireAntHole egg",
-                    "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-                    "Cancer egg",
-                    "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-                    "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-                    "Square Egg",
-                    "Leech Egg", "Parasite Egg", "Bacteriophage egg","Virus egg","Soldier Ant egg","Worker ant egg","Centipede egg","Ladybug egg","Bee egg","Hive egg","Beetle egg"
-                ]);
-
-                this.isEggItem = EGG_ITEMS.has(item.type);
-
-                // ===== 强制同步回物品，确保一致 =====
-                item.durability = this.durability;
-                item.maxDurability = this.maxDurability;
-                item.isBroken = this.isBroken;
-                item.reloadTime = this.reloadTime;
-                item.baseReloadTime = this.baseReloadTime;
-
-                // 调试输出
-
-                return;
+    if (!this.player || !this.player.quickSlot) return;
+    if (petalIndex < this.player.quickSlot.slots.length) {
+        const item = this.player.quickSlot.slots[petalIndex];
+        if (item) {
+            this.itemType = item.type;
+            this.rarity = item.rarity;
+            this.level = item.level || 1;
+            const stats = item.getStats();
+            this.attackPower = stats.attack_power || 0;
+            this.attackCooldownMax = stats.attack_cooldown || 200;
+            this.color = stats.rarity_color || WHITE;
+            const rarityIndex = RARITY_LIST.indexOf(this.rarity);
+            this.size = 20 + (rarityIndex >= 0 ? rarityIndex * 1.2 : 0);
+            if (item.durability !== undefined && item.maxDurability !== undefined) {
+                this.durability = item.durability;
+                this.maxDurability = item.maxDurability;
+            } else {
+                const baseValue = 100;
+                const rarityMultipliers = {
+                    "Common": 1, "Unusual": 3, "Rare": 9, "Epic": 27,
+                    "Legendary": 81, "Mythic": 243, "Ultra": 729,
+                    "Super": 2187, "Omega": 6561, "Eternal": 19683
+                };
+                const multiplier = rarityMultipliers[this.rarity] || 1;
+                this.maxDurability = Math.floor(baseValue * multiplier);
+                this.durability = this.maxDurability;
             }
-        }
+            this.maxHealth = this.maxDurability;
+            this.health = this.durability;
+            this.isBroken = item.isBroken || (this.health <= 0);
+            this.baseReloadTime = item.baseReloadTime || 5000;
+            this.reloadTime = item.reloadTime || this.baseReloadTime;
+            this.armor = item.armor || 0;
+            const itemConfig = ITEM_STATS[item.type] || {};
+            if (item.type === "Magnet" || itemConfig.magnet_range) {
+                this.magnetRange = (itemConfig.magnet_range || 100) * this.getRarityMultiplier();
+                this.magnetActive = true;
+            } else {
+                this.magnetActive = false;
+            }
+            this.hasAntennae = (item.type === "Antennae");
+            this.hasHeavy = (item.type === "Heavy");
+            if (this.hasHeavy) this.targetRadius = 65;
+            this.isChromosome = (item.type === "Chromosome");
 
-        // 如果没有物品，重置为默认
-        this.resetToDefault();
+            // ✅ 添加海绵标记
+            this.isSponge = (item.type === "Sponge");
+
+            const EGG_ITEMS = new Set([
+                "Egg", "Ant Egg", "Moon Egg",
+                "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
+                "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
+                "FireAntOvermind egg", "FireAntHole egg",
+                "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
+                "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
+                "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
+                "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
+                "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
+                "Bee egg", "Hive egg", "Beetle egg"
+            ]);
+            this.isEggItem = EGG_ITEMS.has(item.type);
+            item.durability = this.durability;
+            item.maxDurability = this.maxDurability;
+            item.isBroken = this.isBroken;
+            item.reloadTime = this.reloadTime;
+            item.baseReloadTime = this.baseReloadTime;
+            return;
+        }
     }
-    // 辅助方法：获取稀有度倍率
+    this.resetToDefault();
+}
+
     getRarityMultiplier() {
         const rarityMultipliers = {
-            "Common": 1.0,
-            "Unusual": 3.0,
-            "Rare": 9.0,
-            "Epic": 27.0,
-            "Legendary": 81.0,
-            "Mythic": 243.0,
-            "Ultra": 729.0,
-            "Super": 2187.0,
-            "Omega": 6561.0,
-            "Eternal": 19683.0
+            "Common": 1.0, "Unusual": 3.0, "Rare": 9.0, "Epic": 27.0,
+            "Legendary": 81.0, "Mythic": 243.0, "Ultra": 729.0,
+            "Super": 2187.0, "Omega": 6561.0, "Eternal": 19683.0
         };
         return rarityMultipliers[this.rarity] || 1.0;
     }
 
-// 在 Petal 类中修改 repairPetalsWithChromosome 方法
+    // =========================================================================
+    // SPAWN SYSTEM — Data-driven registration
+    // =========================================================================
+    _registerSpawnMethods() {
+        const SPAWN_CONFIGS = [
+            // ── Hel / Dragon ─────────────────────────────────────────────────
+            { listName:"helWormList",       maxName:"maxHelWorms",          maxDefault:2,  spawnCount:2,  enemyType:"HelWorm",        eggType:"HelWorm egg",          cooldown:10000, spawnMethod:"HelWorm",             cleanMethod:"HelWorm",             updateMethod:"HelWorm" },
+            { listName:"helSpiderList",     maxName:"maxHelSpiders",        maxDefault:3,  spawnCount:3,  enemyType:"HelSpider",      eggType:"HelSpider egg",        cooldown:12000, spawnMethod:"HelSpider",           cleanMethod:"HelSpider",           updateMethod:"HelSpider" },
+            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
+            { listName:"helHornetList",     maxName:"maxHelHornets",        maxDefault:1,  spawnCount:1,  enemyType:"HelHornet",      eggType:"HelHornet egg",        cooldown:12000, spawnMethod:"HelHornet",           cleanMethod:"HelHornet",           updateMethod:"HelHornet" },
+            { listName:"helBeetleList",     maxName:"maxHelBeetles",        maxDefault:1,  spawnCount:1,  enemyType:"HelBeetle",      eggType:"HelBeetle egg",        cooldown:15000, spawnMethod:"HelBeetle",           cleanMethod:"HelBeetle",           updateMethod:"HelBeetle" },
+            { listName:"dragonList",        maxName:"maxDragons",           maxDefault:1,  spawnCount:1,  enemyType:"Dragon",         eggType:"Dragon egg",           cooldown:20000, spawnMethod:"Dragon",              cleanMethod:"Dragon",              updateMethod:"Dragon" },
+            { listName:"dragonNestList",    maxName:"maxDragonNests",       maxDefault:1,  spawnCount:10, enemyType:"DragonNest",     eggType:"DragonNest egg",       cooldown:30000, spawnMethod:"DragonNest",          cleanMethod:"DragonNest",          updateMethod:"DragonNest" },
+            { listName:"helHiveList",       maxName:"maxHelHives",          maxDefault:1,  spawnCount:10, enemyType:"HelHive",        eggType:"HelHive egg",          cooldown:25000, spawnMethod:"HelHive",             cleanMethod:"HelHive",             updateMethod:"HelHive" },
+            { listName:"helJellyfishList",  maxName:"maxHelJellyfish",      maxDefault:2,  spawnCount:2,  enemyType:"HelJellyfish",   eggType:"HelJellyfish egg",     cooldown:15000, spawnMethod:"HelJellyfish",        cleanMethod:"HelJellyfish",        updateMethod:"HelJellyfish" },
+            { listName:"helQueenBeeList",   maxName:"maxHelQueenBees",      maxDefault:1,  spawnCount:1,  enemyType:"HelQueenBee",    eggType:"Hel Queen Bee egg",    cooldown:25000, spawnMethod:"HelQueenBee",         cleanMethod:"HelQueenBee",         updateMethod:"HelQueenBee" },
+            { listName:"toxicDragonList",   maxName:"maxToxicDragons",      maxDefault:1,  spawnCount:1,  enemyType:"ToxicDragon",    eggType:"ToxicDragon egg",      cooldown:22000, spawnMethod:"ToxicDragon",         cleanMethod:"ToxicDragon",         updateMethod:"ToxicDragon" },
+            { listName:"helDiggerList",     maxName:"maxHelDiggers",        maxDefault:1,  spawnCount:1,  enemyType:"HelDigger",      eggType:"Hel Digger egg",       cooldown:18000, spawnMethod:"HelDigger",           cleanMethod:"HelDigger",           updateMethod:"HelDigger" },
+            { listName:"helBeekeeperList",  maxName:"maxHelBeekeepers",     maxDefault:1,  spawnCount:1,  enemyType:"HelBeekeeper",   eggType:"Hel Beekeeper egg",    cooldown:20000, spawnMethod:"HelBeekeeper",        cleanMethod:"HelBeekeeper",        updateMethod:"HelBeekeeper" },
+            { listName:"firestormList",     maxName:"maxFirestorms",        maxDefault:3,  spawnCount:3,  enemyType:"FireStorm",      eggType:"FireStick",            cooldown:8000,  spawnMethod:"Firestorm",           cleanMethod:"Firestorm",           updateMethod:"Firestorm" },
+            // ── Ocean ─────────────────────────────────────────────────────────
+            { listName:"scallopList",       maxName:"maxScallops",          maxDefault:4,  spawnCount:4,  enemyType:"Scallop",        eggType:"Shell egg",            cooldown:7000,  spawnMethod:"ScallopsWithDna",     cleanMethod:"Scallops",            updateMethod:"Scallops" },
+            { listName:"starfishList",      maxName:"maxStarfish",          maxDefault:2,  spawnCount:2,  enemyType:"Starfish",       eggType:"Starfish egg",         cooldown:8000,  spawnMethod:"StarfishWithDna",     cleanMethod:"Starfish",            updateMethod:"Starfish" },
+            { listName:"bubbleList",        maxName:"maxBubbles",           maxDefault:3,  spawnCount:3,  enemyType:"Bubble",         eggType:"Bubble egg",           cooldown:5000,  spawnMethod:"BubblesWithDna",      cleanMethod:"Bubbles",             updateMethod:"Bubbles" },
+            { listName:"crabList",          maxName:"maxCrabs",             maxDefault:3,  spawnCount:3,  enemyType:"Crab",           eggType:"Crab egg",             cooldown:6000,  spawnMethod:"CrabsWithDna",        cleanMethod:"Crabs",               updateMethod:"Crabs" },
+            { listName:"jellyfishList",     maxName:"maxJellyfish",         maxDefault:3,  spawnCount:3,  enemyType:"Jellyfish",      eggType:"Jellyfish egg",        cooldown:10000, spawnMethod:"JellyfishWithDna",    cleanMethod:"Jellyfish",           updateMethod:"Jellyfish" },
+            { listName:"crabHoleCrabs",     maxName:"maxCrabHoleCrabs",     maxDefault:10, spawnCount:10, enemyType:"Crab",           eggType:"CrabHole egg",         cooldown:15000, spawnMethod:"CrabHoleWithDna",     cleanMethod:"CrabHoleCrabs",       updateMethod:"CrabHoles" },
+            { listName:"squidList",         maxName:"maxSquid",             maxDefault:1,  spawnCount:1,  enemyType:"Squid",          eggType:"Squid egg",            cooldown:10000, spawnMethod:"SquidWithDNA",        cleanMethod:"Squid",               updateMethod:"Squid" },
+            { listName:"shipwreckJellyfishList", maxName:"maxShipwreckJellyfish", maxDefault:10, spawnCount:10, enemyType:"Jellyfish", eggType:"Shipwreck egg",       cooldown:19000, spawnMethod:"ShipwreckJellyfish",  cleanMethod:"ShipwreckJellyfish",  updateMethod:"ShipwreckJellyfish" },
+            { listName:"barnacleList",      maxName:"maxBarnacles",         maxDefault:2,  spawnCount:2,  enemyType:"Barnacle",       eggType:"Barnacle egg",         cooldown:12000, spawnMethod:"BarnaclesWithDNA",    cleanMethod:"Barnacles",           updateMethod:"Barnacles" },
+            // ── Insects ───────────────────────────────────────────────────────
+            { listName:"beetleList",        maxName:"maxBeetles",           maxDefault:1,  spawnCount:1,  enemyType:"Beetle",         eggType:"Beetle egg",           cooldown:8000,  spawnMethod:"BeetleWithDna",       cleanMethod:"Beetles",             updateMethod:"Beetles" },
+            { listName:"scorpionList",      maxName:"maxScorpions",         maxDefault:2,  spawnCount:2,  enemyType:"Scorpion",       eggType:"Scorpion egg",         cooldown:20000, spawnMethod:"ScorpionsWithDNA",    cleanMethod:"Scorpions",           updateMethod:"Scorpions" },
+            { listName:"beeList",           maxName:"maxBees",              maxDefault:1,  spawnCount:1,  enemyType:"Bee",            eggType:"Bee egg",              cooldown:10000, spawnMethod:"BeesWithDNA",         cleanMethod:"Bees",                updateMethod:"Bees" },
+            { listName:"ladybugList",       maxName:"maxLadybugs",          maxDefault:2,  spawnCount:2,  enemyType:"Ladybug",        eggType:"Ladybug egg",          cooldown:12000, spawnMethod:"LadybugsWithDNA",     cleanMethod:"Ladybugs",            updateMethod:"Ladybugs" },
+            { listName:"hiveBeeList",       maxName:"maxHiveBees",          maxDefault:10, spawnCount:10, enemyType:"Bee",            eggType:"Hive egg",             cooldown:20000, spawnMethod:"HiveBeesWithDNA",     cleanMethod:"HiveBees",            updateMethod:"HiveBees" },
+            { listName:"beekeeperList",     maxName:"maxBeekeepers",        maxDefault:1,  spawnCount:1,  enemyType:"Beekeeper",      eggType:"Beekeeper egg",        cooldown:20000, spawnMethod:"BeekeeperWithDNA",    cleanMethod:"Beekeepers",          updateMethod:"Beekeepers" },
+            { listName:"queenBeeList",      maxName:"maxQueenBees",         maxDefault:1,  spawnCount:1,  enemyType:"QueenBee",       eggType:"Queen Bee egg",        cooldown:15000, spawnMethod:"QueenBeeWithDNA",     cleanMethod:"QueenBees",           updateMethod:"QueenBees" },
+            // ── Jungle ────────────────────────────────────────────────────────
+            { listName:"waspList",          maxName:"maxWasps",             maxDefault:1,  spawnCount:1,  enemyType:"Wasp",           eggType:"Wasp egg",             cooldown:10000, spawnMethod:"Wasp",                cleanMethod:"Wasps",               updateMethod:"Wasps" },
+            { listName:"workerTermiteList", maxName:"maxWorkerTermites",    maxDefault:4,  spawnCount:4,  enemyType:"Worker Termite", eggType:"Worker Termite egg",   cooldown:12000, spawnMethod:"WorkerTermite",       cleanMethod:"WorkerTermites",      updateMethod:"WorkerTermites" },
+            { listName:"soldierTermiteList",maxName:"maxSoldierTermites",   maxDefault:3,  spawnCount:3,  enemyType:"Soldier Termite",eggType:"Soldier Termite egg",  cooldown:12000, spawnMethod:"SoldierTermite",      cleanMethod:"SoldierTermites",     updateMethod:"SoldierTermites" },
+            { listName:"stickBugList",      maxName:"maxStickBugs",         maxDefault:1,  spawnCount:1,  enemyType:"StickBug",       eggType:"StickBug egg",         cooldown:6000,  spawnMethod:"StickBug",            cleanMethod:"StickBugs",           updateMethod:"StickBugs" },
+            { listName:"mantisList",        maxName:"maxMantises",          maxDefault:1,  spawnCount:1,  enemyType:"Mantis",         eggType:"Mantis egg",           cooldown:10000, spawnMethod:"Mantis",              cleanMethod:"Mantises",            updateMethod:"Mantises" },
+            { listName:"fireflyList",       maxName:"maxFireflies",         maxDefault:2,  spawnCount:2,  enemyType:"Firefly",        eggType:"Firefly egg",          cooldown:14000, spawnMethod:"Firefly",             cleanMethod:"Fireflies",           updateMethod:"Fireflies" },
+            { listName:"termiteSoldierList",maxName:"maxTermiteSoldiers",   maxDefault:10, spawnCount:10, enemyType:"Soldier Termite",eggType:"TermiteHole egg",      cooldown:18000, spawnMethod:"TermiteHoleSoldiers", cleanMethod:"TermiteSoldiers",     updateMethod:"TermiteSoldiers" },
+            { listName:"termiteOvermindList",maxName:"maxTermiteOverminds", maxDefault:1,  spawnCount:1,  enemyType:"TermiteOvermind",eggType:"TermiteOvermind egg",  cooldown:20000, spawnMethod:"TermiteOvermind",     cleanMethod:"TermiteOverminds",    updateMethod:"TermiteOverminds" },
+            { listName:"spiderCaveSpiders", maxName:"maxSpiderCaveSpiders", maxDefault:10, spawnCount:10, enemyType:"Spider",         eggType:"SpiderCave egg",       cooldown:19000, spawnMethod:"SpiderCave",          cleanMethod:"SpiderCaveSpiders",   updateMethod:"SpiderCaveSpiders" },
+            // ── Arctic ────────────────────────────────────────────────────────
+            { listName:"slagMightList",     maxName:"maxSlagMight",         maxDefault:1,  spawnCount:1,  enemyType:"SlagMight",      eggType:"SlagMight egg",        cooldown:8000,  spawnMethod:"SlagMight",           cleanMethod:"SlagMight",           updateMethod:"SlagMight" },
+            { listName:"iceCubeList",       maxName:"maxIceCubes",          maxDefault:1,  spawnCount:1,  enemyType:"Ice Cube",       eggType:"Ice Cube egg",         cooldown:6000,  spawnMethod:"IceCube",             cleanMethod:"IceCube",             updateMethod:"IceCube" },
+            { listName:"iceDragonList",     maxName:"maxIceDragons",        maxDefault:1,  spawnCount:1,  enemyType:"Ice Dragon",     eggType:"Ice Dragon egg",       cooldown:10000, spawnMethod:"IceDragon",           cleanMethod:"IceDragon",           updateMethod:"IceDragon" },
+            { listName:"iglooSnowmenList",  maxName:"maxIglooSnowmen",      maxDefault:10, spawnCount:10, enemyType:"Snowman",        eggType:"Igloo egg",            cooldown:20000, spawnMethod:"IglooSnowmen",        cleanMethod:"IglooSnowmen",        updateMethod:"IglooSnowmen" },
+            { listName:"tickList",          maxName:"maxTicks",             maxDefault:1,  spawnCount:1,  enemyType:"Tick",           eggType:"Tick egg",             cooldown:6000,  spawnMethod:"Tick",                cleanMethod:"Tick",                updateMethod:"Tick" },
+            { listName:"arcticSpiderList",  maxName:"maxArcticSpiders",     maxDefault:3,  spawnCount:3,  enemyType:"ArcticSpider",   eggType:"ArcticSpider egg",     cooldown:12000, spawnMethod:"ArcticSpiders",       cleanMethod:"ArcticSpiders",       updateMethod:"ArcticSpiders" },
+            { listName:"arcticCaveSpiderList",maxName:"maxArcticCaveSpiders",maxDefault:10,spawnCount:10, enemyType:"ArcticSpider",   eggType:"ArcticSpiderCave egg", cooldown:18000, spawnMethod:"ArcticCaveSpiders",   cleanMethod:"ArcticCaveSpiders",   updateMethod:"ArcticCaveSpiders" },
+            { listName:"snowmanList",       maxName:"maxSnowmen",           maxDefault:1,  spawnCount:1,  enemyType:"Snowman",        eggType:"Snowman egg",          cooldown:6000,  spawnMethod:"Snowman",             cleanMethod:"Snowman",             updateMethod:"Snowman" },
+            { listName:"snowstormList",     maxName:"maxSnowstorms",        maxDefault:3,  spawnCount:3,  enemyType:"SnowStorm",      eggType:"SnowStick",            cooldown:8000,  spawnMethod:"Snowstorm",           cleanMethod:"Snowstorm",           updateMethod:"Snowstorm" },
+            { listName:"frostDiggerList",   maxName:"maxFrostDiggers",      maxDefault:1,  spawnCount:1,  enemyType:"Frost Digger",   eggType:"Frost Digger egg",     cooldown:15000, spawnMethod:"FrostDiggerWithDNA",  cleanMethod:"FrostDiggers",        updateMethod:"FrostDiggers" },
+            // ── Misc ──────────────────────────────────────────────────────────
+            { listName:"pirateDiggerList",  maxName:"maxPirateDiggers",     maxDefault:1,  spawnCount:1,  enemyType:"PirateDigger",   eggType:"PirateDigger egg",     cooldown:18000, spawnMethod:"PirateDiggerWithDNA", cleanMethod:"PirateDiggers",       updateMethod:"PirateDiggers" },
+            { listName:"soldierAntList",    maxName:"maxSoldierAnts",       maxDefault:3,  spawnCount:3,  enemyType:"Soldier Ant",    eggType:"Soldier Ant egg",      cooldown:10000, spawnMethod:"SoldierAntsWithDNA",  cleanMethod:"SoldierAnts",         updateMethod:"SoldierAnts" },
+            { listName:"workerAntList",     maxName:"maxWorkerAnts",        maxDefault:4,  spawnCount:4,  enemyType:"Worker Ant",     eggType:"Worker Ant egg",       cooldown:8000,  spawnMethod:"WorkerAntsWithDNA",   cleanMethod:"WorkerAnts",          updateMethod:"WorkerAnts" },
+            { listName:"centipedeList",     maxName:"maxCentipedes",        maxDefault:1,  spawnCount:1,  enemyType:"Centipede",      eggType:"Centipede egg",        cooldown:15000, spawnMethod:"CentipedeWithDNA",    cleanMethod:"Centipedes",          updateMethod:"Centipedes" },
+            { listName:"leechList",         maxName:"maxLeeches",           maxDefault:2,  spawnCount:2,  enemyType:"Leech",          eggType:"Leech Egg",            cooldown:10000, spawnMethod:"LeechWithDNA",        cleanMethod:"Leeches",             updateMethod:"Leeches" },
+            { listName:"parasiteList",      maxName:"maxParasites",         maxDefault:1,  spawnCount:1,  enemyType:"Parasite",       eggType:"Parasite Egg",         cooldown:9000,  spawnMethod:"ParasiteWithDNA",     cleanMethod:"Parasites",           updateMethod:"Parasites" },
+            { listName:"bacteriophageList", maxName:"maxBacteriophages",    maxDefault:1,  spawnCount:1,  enemyType:"Bacteriophage",  eggType:"Bacteriophage egg",    cooldown:15000, spawnMethod:"BacteriophageWithDNA",cleanMethod:"Bacteriophages",      updateMethod:"Bacteriophages" },
+            { listName:"virusList",         maxName:"maxVirus",             maxDefault:1,  spawnCount:1,  enemyType:"Virus",          eggType:"Virus egg",            cooldown:5000,  spawnMethod:"VirusWithDNA",        cleanMethod:"Virus",               updateMethod:"Virus" },
+            { listName:"squareList",        maxName:"maxSquare",            maxDefault:1,  spawnCount:1,  enemyType:"Square",         eggType:"Square Egg",           cooldown:15000, spawnMethod:"SquareWithDNA",       cleanMethod:"Square",              updateMethod:"Square" },
+            { listName:"cancerList",        maxName:"maxCancer",            maxDefault:2,  spawnCount:2,  enemyType:"Cancer",         eggType:"Cancer egg",           cooldown:12000, spawnMethod:"CancerWithDNA",       cleanMethod:"Cancer",              updateMethod:"Cancer" },
+            { listName:"bacteriaList",      maxName:"maxBacteria",          maxDefault:2,  spawnCount:3,  enemyType:"Bacteria",       eggType:"Bacteria_egg",         cooldown:10000, spawnMethod:"BacteriaWithDna",     cleanMethod:"Bacteria",            updateMethod:"Bacteria" },
+            { listName:"whiteBloodCellList",maxName:"maxWhiteBloodCells",   maxDefault:1,  spawnCount:2,  enemyType:"WhiteBloodCell", eggType:"WhiteBloodCell egg",   cooldown:5000,  spawnMethod:"WhiteBloodCellsWithDna",cleanMethod:"WhiteBloodCells",   updateMethod:"WhiteBloodCells" },
+            { listName:"spiderList",        maxName:"maxSpiders",           maxDefault:3,  spawnCount:3,  enemyType:"Spider",         eggType:"Spider egg",           cooldown:6000,  spawnMethod:"SpidersWithDna",      cleanMethod:"Spiders",             updateMethod:"Spiders" },
+            { listName:"redBloodCellList",  maxName:"maxRedBloodCells",     maxDefault:2,  spawnCount:2,  enemyType:"RedBloodCell",   eggType:"RedBloodCell egg",     cooldown:8000,  spawnMethod:"RedBloodCellsWithDna",cleanMethod:"RedBloodCells",       updateMethod:"RedBloodCells" },
+            { listName:"stemCellList",      maxName:"maxStemCells",         maxDefault:10, spawnCount:10, enemyType:"WhiteBloodCell", eggType:"StemCell egg",         cooldown:15000, spawnMethod:"StemCellsWithDna",    cleanMethod:"StemCells",           updateMethod:"StemCells" },
+            { listName:"sandstormList",     maxName:"maxSandstorms",        maxDefault:2,  spawnCount:2,  enemyType:"Sandstorm",      eggType:"Stick",                cooldown:8000,  spawnMethod:"SandstormsWithDna",   cleanMethod:"Sandstorms",          updateMethod:"Sandstorms" },
+            // ── Sewer ─────────────────────────────────────────────────────────
+            { listName:"manHoleList",       maxName:"maxManHoles",          maxDefault:1,  spawnCount:1,  enemyType:"ManHole",        eggType:"ManHole egg",          cooldown:20000, spawnMethod:"ManHoleWithDna",      cleanMethod:"ManHoles",            updateMethod:"ManHoles" },
+            { listName:"flyList",           maxName:"maxFlies",             maxDefault:3,  spawnCount:3,  enemyType:"Fly",            eggType:"Fly_egg",              cooldown:10000, spawnMethod:"FlyWithDna",          cleanMethod:"Flies",               updateMethod:"Flies" },
+            { listName:"ratList",           maxName:"maxRats",              maxDefault:2,  spawnCount:2,  enemyType:"Rat",            eggType:"Rat_egg",              cooldown:20000, spawnMethod:"RatWithDna",          cleanMethod:"Rats",                updateMethod:"Rats" },
+            { listName:"roachList",         maxName:"maxRoaches",           maxDefault:1,  spawnCount:1,  enemyType:"Roach",          eggType:"Roach_egg",            cooldown:6000,  spawnMethod:"RoachWithDna",        cleanMethod:"Roaches",             updateMethod:"Roaches" },
+            { listName:"pooStormList",      maxName:"maxPooStorms",         maxDefault:3,  spawnCount:3,  enemyType:"PooStorm",       eggType:"PooStick",             cooldown:8000,  spawnMethod:"PooStormWithDna",     cleanMethod:"PooStorms",           updateMethod:"PooStorms" },
+        ];
+
+        for (const cfg of SPAWN_CONFIGS) {
+            const tryName    = "trySpawn"   + cfg.spawnMethod;
+            const cleanName  = "_cleanDead" + cfg.cleanMethod;
+            const updateName = "update"     + cfg.updateMethod;
+            this[tryName]    = this._createSpawnMethod(cfg).bind(this);
+            this[cleanName]  = this._createCleanMethod(cfg.listName).bind(this);
+            this[updateName] = this._createUpdateMethod(cfg).bind(this);
+        }
+    }
+
+    _createSpawnMethod(cfg) {
+        return function(gameEnemies, playerWorldPos, hasDNA) {
+            if (this.isBroken || this.isReloading) return false;
+            if (this.spawnCooldown > 0) return false;
+            if (!this.player || this.player.isDead) return false;
+            if (!this[cfg.listName]) this[cfg.listName] = [];
+            const cleanName = "_cleanDead" + cfg.cleanMethod;
+            if (typeof this[cleanName] === "function") this[cleanName](gameEnemies);
+            const maxCount = this[cfg.maxName] !== undefined ? this[cfg.maxName] : cfg.maxDefault;
+            const toSpawn  = Math.min(cfg.spawnCount, Math.max(0, maxCount - this[cfg.listName].length));
+            if (toSpawn <= 0) return false;
+            const finalRarity = this.player.getSummonRarityWithDna(this);
+            const summonLevel = this.player.getRandomSummonLevel();
+            for (let i = 0; i < toSpawn; i++) {
+                const angle    = Math.random() * Math.PI * 2;
+                const distance = 40 + Math.random() * 30;
+                const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+                const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+                const entity = new Enemy(cfg.enemyType, x, y, summonLevel, finalRarity);
+                entity.isFriendly  = true;
+                entity.ownerPetal  = this;
+                entity.ownerPlayer = this.player;
+                this._applyTalentToPet(entity);
+                gameEnemies.push(entity);
+                this[cfg.listName].push(entity);
+            }
+            this.spawnCooldown = cfg.cooldown;
+            return true;
+        };
+    }
+
+    _createCleanMethod(listName) {
+        return function(gameEnemies) {
+            if (!this[listName]) { this[listName] = []; return; }
+            const kept = [];
+            for (const e of this[listName]) {
+                if (e && gameEnemies.includes(e) && e.health > 0 && !e.isDead) {
+                    kept.push(e);
+                } else {
+                    const idx = gameEnemies.indexOf(e);
+                    if (idx !== -1) gameEnemies.splice(idx, 1);
+                }
+            }
+            this[listName] = kept;
+        };
+    }
+
+    _createUpdateMethod(cfg) {
+        const tryName   = "trySpawn"   + cfg.spawnMethod;
+        const cleanName = "_cleanDead" + cfg.cleanMethod;
+        return function(dt, gameEnemies, playerWorldPos) {
+            if (!this[cfg.listName]) this[cfg.listName] = [];
+            if (typeof this[cleanName] === "function") this[cleanName](gameEnemies);
+            if (this.isBroken || this.isReloading) return;
+            const maxCount = this[cfg.maxName] !== undefined ? this[cfg.maxName] : cfg.maxDefault;
+            if (this[cfg.listName].length < maxCount && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                const currentItem = this.getCurrentItem();
+                if (currentItem && currentItem.type === cfg.eggType) {
+                    const hasDNA = this.player && this.player.petals.some(p => {
+                        const item = p.getCurrentItem();
+                        return item && item.type === "DNA" && !p.isBroken;
+                    });
+                    if (typeof this[tryName] === "function") {
+                        this[tryName](gameEnemies, playerWorldPos, hasDNA);
+                    }
+                }
+            }
+        };
+    }
+
     repairPetalsWithChromosome(dt) {
         if (!this.player || !this.player.petals) return;
-
-        // 检查玩家快捷栏中是否有 Chromosome（无论是否破碎）
         let hasChromosome = false;
         let totalRepairRate = 0;
-        let highestRarity = "Common";
-        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
-
-        // 遍历快捷栏所有槽位
+        const rarityOrder = ["Common","Unusual","Rare","Epic","Legendary","Mythic","Ultra","Super","Omega","Eternal"];
         for (let i = 0; i < this.player.quickSlot.slots.length; i++) {
             const slotItem = this.player.quickSlot.slots[i];
             if (slotItem && slotItem.type === "Chromosome") {
                 hasChromosome = true;
-
-                // 获取该 Chromosome 的修复速度
                 const baseRepairRate = ITEM_STATS["Chromosome"].repair_rate || 25;
                 const rarityMultiplier = ITEM_STATS["Chromosome"].repair_rate_multiplier?.[slotItem.rarity] || 1.0;
-                const repairRate = baseRepairRate * rarityMultiplier;
-
-                // 累加修复速度
-                totalRepairRate += repairRate;
-
-                // 记录最高稀有度（用于视觉效果）
-                if (rarityOrder.indexOf(slotItem.rarity) > rarityOrder.indexOf(highestRarity)) {
-                    highestRarity = slotItem.rarity;
-                }
+                totalRepairRate += baseRepairRate * rarityMultiplier;
             }
         }
-
-        // 如果没有 Chromosome，直接返回
         if (!hasChromosome || totalRepairRate <= 0) return;
-
-        // 计算这一帧的修复量
         const frameRepair = totalRepairRate * dt;
-
-        let totalRepaired = 0;
-
-        // 遍历所有花瓣进行修复（包括自己）
         for (const petal of this.player.petals) {
-            // 跳过已破碎的花瓣（可选：也可以修复破碎的？）
             if (petal.isBroken) continue;
-
-            // 修复耐久度
             if (petal.durability < petal.maxDurability) {
-                const oldDurability = petal.durability;
                 petal.durability = Math.min(petal.maxDurability, petal.durability + frameRepair);
-                totalRepaired += petal.durability - oldDurability;
-
-                // 如果耐久度恢复，清除破碎标记
-                if (petal.durability > 0 && petal.isBroken) {
-                    petal.isBroken = false;
-                }
-
-                // 同步回物品
+                if (petal.durability > 0 && petal.isBroken) petal.isBroken = false;
                 const item = petal.getCurrentItem();
                 if (item) {
                     item.durability = petal.durability;
-                    if (petal.durability > 0 && item.isBroken) {
-                        item.isBroken = false;
-                    }
+                    if (petal.durability > 0 && item.isBroken) item.isBroken = false;
                 }
             }
-
-            // 修复生命值（如果花瓣有生命值）
             if (petal.health < petal.maxHealth) {
                 petal.health = Math.min(petal.maxHealth, petal.health + frameRepair * 0.5);
             }
         }
-
     }
+
     update(dt, spreadMode = false, playerWorldPos = null) {
         const currentItem = this.getCurrentItem();
-            if (currentItem && (currentItem.type === "Rose" || currentItem.type === "Shell" || currentItem.type === "Ice Rose")) {
-                // 如果不在吸收中且不在重载中，开始延迟
-                if (!this.autoAbsorb && !this.isReloading && this.absorbDelay <= 0) {
-                    this.absorbDelay = this.absorbDelayTime; // 设置1秒延迟
+        if (currentItem && (currentItem.type === "Rose" || currentItem.type === "Shell" || currentItem.type === "Ice Rose")) {
+            if (!this.autoAbsorb && !this.isReloading && this.absorbDelay <= 0) {
+                this.absorbDelay = this.absorbDelayTime;
+            }
+        }
+        if (this.absorbDelay > 0) {
+            this.absorbDelay -= dt;
+            if (this.absorbDelay <= 0) {
+                this.autoAbsorb = true;
+                this.absorbProgress = 0;
+                if (this.fixedPosition && this.fixedPosition.x !== undefined) {
+                    this.absorbStartWorldX = this.fixedPosition.x;
+                    this.absorbStartWorldY = this.fixedPosition.y;
+                } else if (this.player && this.player.physicsBody) {
+                    const playerPos = this.player.physicsBody.position;
+                    this.absorbStartWorldX = playerPos.x + Math.cos(this.angle) * this.radius;
+                    this.absorbStartWorldY = playerPos.y + Math.sin(this.angle) * this.radius;
+                } else {
+                    this.absorbStartWorldX = this.worldX;
+                    this.absorbStartWorldY = this.worldY;
                 }
             }
-
-            // ===== 处理延迟 =====
-            if (this.absorbDelay > 0) {
-                this.absorbDelay -= dt;
-                if (this.absorbDelay <= 0) {
-                    // 延迟结束，开始吸收
-                    this.autoAbsorb = true;
-                    this.absorbProgress = 0;
-
-                    // 保存开始吸收时的世界位置
-                    if (this.fixedPosition && this.fixedPosition.x !== undefined) {
-                        this.absorbStartWorldX = this.fixedPosition.x;
-                        this.absorbStartWorldY = this.fixedPosition.y;
-                    } else if (this.player && this.player.physicsBody) {
-                        const playerPos = this.player.physicsBody.position;
-                        const angle = this.angle;
-                        const radius = this.radius;
-                        this.absorbStartWorldX = playerPos.x + Math.cos(angle) * radius;
-                        this.absorbStartWorldY = playerPos.y + Math.sin(angle) * radius;
-                    } else {
-                        this.absorbStartWorldX = this.worldX;
-                        this.absorbStartWorldY = this.worldY;
-                    }
+        }
+        if (this.autoAbsorb) {
+            this.absorbProgress += dt * 0.67;
+            if (this.absorbProgress >= 1) {
+                if (currentItem && currentItem.type === "Rose") {
+                    const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
+                    this.player.health = Math.min(this.player.maxHealth, this.player.health + 50 * rarityMultiplier);
+                } else if (currentItem && currentItem.type === "Shell") {
+                    const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
+                    this.player.shield = (this.player.shield || 0) + 30 * rarityMultiplier;
+                } else if (currentItem && currentItem.type === "Ice Rose") {
+                    const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
+                    this.player.health = Math.min(this.player.maxHealth, this.player.health + 40 * rarityMultiplier);
+                    this.player.slowMultiplier = 0.2;
+                    this.player.slowDuration = 3000;
                 }
+                this.startReload();
+                this.autoAbsorb = false;
+                this.absorbProgress = 0;
+                this.absorbDelay = 0;
             }
-
-            // ===== 处理吸收动画 =====
-            if (this.autoAbsorb) {
-                this.absorbProgress += dt * 0.67; // 1.5秒完成
-                if (this.absorbProgress >= 1) {
-                    // ✅ 关键：这里需要执行实际效果
-                    if (currentItem && currentItem.type === "Rose") {
-                        const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
-                        const healAmount = 50 * rarityMultiplier;
-                        this.player.health = Math.min(this.player.maxHealth, this.player.health + healAmount);
-                    } else if (currentItem && currentItem.type === "Shell") {
-                        const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
-                        const shieldAmount = 30 * rarityMultiplier;
-                        this.player.shield = (this.player.shield || 0) + shieldAmount;
-                    } else if (currentItem && currentItem.type === "Ice Rose") {
-                        const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
-                        const healAmount = 40 * rarityMultiplier;
-                        this.player.health = Math.min(this.player.maxHealth, this.player.health + healAmount);
-
-                        // 减速效果
-                        this.player.slowMultiplier = 0.2;
-                        this.player.slowDuration = 3000;
-                    }
-
-                    // 进入重载状态
-                    this.startReload();
-
-                    this.autoAbsorb = false;
-                    this.absorbProgress = 0;
-                    this.absorbDelay = 0;
-                }
-            }
-
-        // 🍃 每次更新都检查 Golden Leaf 效果（同时影响重载和生成冷却）
+        }
         this.updateReloadTimeWithGoldenLeaf();
         this.updateSpawnCooldownWithGoldenLeaf();
-
-
-        // 每次更新时强制从物品同步关键属性
         if (currentItem) {
-            // 同步耐久度
-            if (this.durability !== currentItem.durability) {
-                this.durability = currentItem.durability;
-            }
-            // 同步最大耐久度
-            if (this.maxDurability !== currentItem.maxDurability) {
-                this.maxDurability = currentItem.maxDurability;
-            }
-            // 同步破碎状态
-            if (this.isBroken !== currentItem.isBroken) {
-                this.isBroken = currentItem.isBroken;
-            }
-            // 同步重载时间
-            if (this.reloadTime !== currentItem.reloadTime) {
-                this.reloadTime = currentItem.reloadTime;
-            }
-            if (this.baseReloadTime !== currentItem.baseReloadTime) {
-                this.baseReloadTime = currentItem.baseReloadTime;
-            }
+            if (this.durability !== currentItem.durability) this.durability = currentItem.durability;
+            if (this.maxDurability !== currentItem.maxDurability) this.maxDurability = currentItem.maxDurability;
+            if (this.isBroken !== currentItem.isBroken) this.isBroken = currentItem.isBroken;
+            if (this.reloadTime !== currentItem.reloadTime) this.reloadTime = currentItem.reloadTime;
+            if (this.baseReloadTime !== currentItem.baseReloadTime) this.baseReloadTime = currentItem.baseReloadTime;
         }
-
-        // 每次更新时检查快捷栏是否有变化
         this.checkQuickSlotChange();
-
-        if (this.collisionCooldown > 0) {
-            this.collisionCooldown -= dt * 1000;
-        }
-
-        // 处理重载状态
+        if (this.collisionCooldown > 0) this.collisionCooldown -= dt * 1000;
         if (this.isReloading) {
             this.reloadCooldown -= dt * 1000;
             if (this.reloadCooldown <= 0) {
@@ -26215,472 +26988,236 @@ class Petal {
                 this.isBroken = false;
                 this.health = this.maxHealth;
                 this.durability = this.maxDurability;
-
-                // 同步回物品
-                if (currentItem) {
-                    currentItem.isBroken = false;
-                    currentItem.durability = this.maxDurability;
-                }
-
-                // 重置蛋类标记
+                if (currentItem) { currentItem.isBroken = false; currentItem.durability = this.maxDurability; }
                 this.eggSpawned = false;
             }
-
-            // 即使重载中，也要更新已存在的召唤物
             this._updateExistingSummonedCreatures(dt);
             return;
         }
-
-        // 处理破碎状态
         if (this.isBroken) {
-            // ✅ Cancer 和 Web：破碎时完全无效，不更新召唤物
-            if (currentItem && (currentItem.type === "Cancer" || currentItem.type === "Web")) {
-                return;
-            }
-            // ✅ 其他物品：即使破碎，也要更新已存在的召唤物
+            if (currentItem && (currentItem.type === "Cancer" || currentItem.type === "Web")) return;
             this._updateExistingSummonedCreatures(dt);
             return;
         }
-
         const screenCenterX = WIDTH / 2;
         const screenCenterY = HEIGHT / 2;
-
-        // ===== 静止模式处理 =====
         if (this.stillMode) {
-            // 静止模式下，花瓣位置固定在世界坐标中
             if (this.player && this.player.physicsBody) {
                 const playerX = this.player.physicsBody.position.x;
                 const playerY = this.player.physicsBody.position.y;
-
-                // 使用保存的静止世界位置计算屏幕位置
                 this.screenX = screenCenterX + (this.stillPosition.x - playerX);
                 this.screenY = screenCenterY + (this.stillPosition.y - playerY);
-
-                // 更新 worldX/worldY 为静止位置
                 this.worldX = this.stillPosition.x;
                 this.worldY = this.stillPosition.y;
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             }
         } else {
-            // 正常旋转模式
-            if (!this.hasAntennae) {
-                // 所有花瓣使用各自的旋转速度
-                this.angle += this.rotationSpeed * dt * 60;
-            }
-
-            // 获取 ThirdEye 范围加成
+            if (!this.hasAntennae) this.angle += this.rotationSpeed * dt * 60;
             let thirdEyeBonus = 0;
             if (this.player && typeof this.player.updateThirdEye === 'function') {
                 this.player.updateThirdEye();
                 thirdEyeBonus = this.player.thirdEyeRangeBonus || 0;
             }
-
-            // ========== 定义所有蛋类物品 ==========
             const EGG_ITEMS = new Set([
-                // 基础蛋类
-                "Egg", "Ant Egg", "Moon Egg","Squid egg",
-
-                // 细胞类蛋
-                "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg", "Bacteria_egg", "Stick", "PooStick",
-                "queen ant egg", "Hive Egg",
-
-                // 沙漠火蚁系列
-                "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                "FireAntOvermind egg", "FireAntHole egg",
-
-                // 🌊 海洋生物蛋
-                "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-
-                // 🦠 癌症蛋
-                "Cancer egg",
-
-                // 🆕 下水道蛋
-                "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-
-                // 🆕 Digger 系列蛋
-                "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-
-                // 🟦 Square 蛋
-                "Square Egg",
-
-                // ========== 🆕 新生物蛋 ==========
-                "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-
-                // ========== 🐝 蜜蜂蛋和瓢虫蛋 ==========
-                "Bee egg", "Ladybug egg", "Hive egg", "Beekeeper egg", "Barnacle egg", "Centipede egg",
-                "Soldier Ant egg", "Worker Ant egg",
-
-                // ========== 🧊 北极生物蛋 ==========
-                "SlagMight egg", "Frost Digger egg", "Tick egg", "Ice Cube egg", "Igloo egg",
-                "Ice Dragon egg", "ArcticSpider egg", "ArcticSpiderCave egg", "SnowStick", "Queen Bee egg","Snowman egg",
-
-                // ========== 🌴 Jungle 生物蛋 ==========
-                "Wasp egg", "Worker Termite egg", "Soldier Termite egg", "StickBug egg",
-                "Mantis egg", "Firefly egg", "TermiteHole egg", "TermiteOvermind egg", "SpiderCave egg","Beetle egg"
+                "Egg","Ant Egg","Moon Egg","Squid egg","WhiteBloodCell egg","StemCell egg","Spider egg",
+                "RedBloodCell egg","Bacteria_egg","Stick","PooStick","queen ant egg","Hive Egg",
+                "WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg","FireAntOvermind egg",
+                "FireAntHole egg","Shell egg","Starfish egg","Bubble egg","Crab egg","Jellyfish egg",
+                "CrabHole egg","Cancer egg","ManHole egg","Fly_egg","Rat_egg","Roach_egg",
+                "TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg","Square Egg",
+                "Leech Egg","Parasite Egg","Bacteriophage egg","Virus egg","Bee egg","Ladybug egg",
+                "Hive egg","Beekeeper egg","Barnacle egg","Centipede egg","Soldier Ant egg",
+                "Worker Ant egg","SlagMight egg","Frost Digger egg","Tick egg","Ice Cube egg",
+                "Igloo egg","Ice Dragon egg","ArcticSpider egg","ArcticSpiderCave egg","SnowStick",
+                "Queen Bee egg","Snowman egg","Wasp egg","Worker Termite egg","Soldier Termite egg",
+                "StickBug egg","Mantis egg","Firefly egg","TermiteHole egg","TermiteOvermind egg",
+                "SpiderCave egg","Beetle egg","HelWorm egg","HelSpider egg","Hel Bee egg",
+                "HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg","HelHive egg",
+                "HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg","Hel Digger egg",
+                "Hel Beekeeper egg","FireStick"
             ]);
-
-            // 触角花瓣固定在头部，不参与花圈旋转
             if (this.hasAntennae) {
                 this.radius = 0;
                 this.targetRadius = 0;
             } else {
-                // 检查是否为蛋类物品
                 const isEggItem = currentItem && EGG_ITEMS.has(currentItem.type);
-
-                // 固定位置物品（原有的 Magnet 等）
-                const fixedItems = new Set(["Magnet", "Stick", "PooStick","Plank"]);
+                const fixedItems = new Set(["Magnet","Stick","PooStick","Plank"]);
                 const isFixed = currentItem && fixedItems.has(currentItem.type);
-
                 if (isEggItem) {
-                    // ========== 蛋类物品：永远固定在 35 ==========
                     this.targetRadius = 35;
                 } else if (isFixed) {
-                    // 固定物品：始终 35，不受 Spread Mode 和 ThirdEye 影响
                     this.targetRadius = 35;
                 } else if (this.itemType === "Heavy") {
-                    // Heavy 特殊处理：固定半径 65
                     this.targetRadius = 65;
                 } else if (spreadMode) {
-                    // 展开模式：基础 100 + ThirdEye 加成
                     this.targetRadius = 100 + thirdEyeBonus;
                 } else {
-                    // 收缩模式：基础 35（无 ThirdEye 加成）
                     this.targetRadius = 35;
                 }
-
-                // 翅膀额外增加半径（仅非蛋类和非固定物品，且不是 Heavy）
                 if (currentItem && currentItem.type === "Wing" && !isEggItem && !isFixed && this.itemType !== "Heavy") {
                     this.targetRadius *= 1.4;
                 }
-
-                // 平滑过渡
                 this.radius += (this.targetRadius - this.radius) * 0.1;
             }
-
-            // 更新屏幕位置
             this.screenX = screenCenterX + Math.cos(this.angle) * this.radius;
             this.screenY = screenCenterY + Math.sin(this.angle) * this.radius;
-
-            // 更新世界位置
             if (playerWorldPos) {
                 this.worldX = playerWorldPos.x + Math.cos(this.angle) * this.radius;
                 this.worldY = playerWorldPos.y + Math.sin(this.angle) * this.radius;
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             } else if (!this.worldX || !this.worldY) {
-                // 如果没有提供playerWorldPos，使用默认值
                 this.worldX = screenCenterX + Math.cos(this.angle) * this.radius;
                 this.worldY = screenCenterY + Math.sin(this.angle) * this.radius;
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             }
         }
-
-        // 冷却更新（所有模式都需要）
-        if (this.attackCooldown > 0) {
-            this.attackCooldown -= dt * 1000;
-        }
-
-        // ===== 根据稀有度加速 spawnCooldown =====
+        if (this.attackCooldown > 0) this.attackCooldown -= dt * 1000;
         if (this.spawnCooldown > 0) {
-            const currentItem = this.getCurrentItem();
+            const ci = this.getCurrentItem();
             let speedMultiplier = 1.0;
-
-            if (currentItem) {
-                // 根据稀有度设置冷却速度倍率
+            if (ci) {
                 const raritySpeed = {
-                    "Common": 1.2,
-                    "Unusual": 1.1,
-                    "Rare": 1.1,
-                    "Epic": 1.1,
-                    "Legendary": 1.0,
-                    "Mythic": 1.0,
-                    "Ultra": 1.0,
-                    "Super": 1.0,
-                    "Omega": 0.9,
-                    "Eternal": 0.8
+                    "Common":1.2,"Unusual":1.1,"Rare":1.1,"Epic":1.1,
+                    "Legendary":1.0,"Mythic":1.0,"Ultra":1.0,"Super":1.0,
+                    "Omega":0.9,"Eternal":0.8
                 };
-                speedMultiplier = raritySpeed[currentItem.rarity] || 1.0;
+                speedMultiplier = raritySpeed[ci.rarity] || 1.0;
             }
-
-            // 按倍率加速冷却
             this.spawnCooldown -= dt * 1000 * speedMultiplier;
-
-            // 确保不小于0
-            if (this.spawnCooldown < 0) {
-                this.spawnCooldown = 0;
-            }
+            if (this.spawnCooldown < 0) this.spawnCooldown = 0;
         }
-
-        // Wing 特效更新
         if (currentItem && currentItem.type === "Wing") {
             this.wingRotationAngle = (this.wingRotationAngle + 180 * dt) % 360;
         }
-
-        // ===== Chromosome 修复逻辑 =====
         this.repairPetalsWithChromosome(dt);
-
-        // === 检查是否有 DNA 物品 ===
         const hasDNA = this.player && this.player.petals && this.player.petals.some(petal => {
             const item = petal.getCurrentItem();
             return item && item.type === "DNA" && !petal.isBroken;
         });
-
-        // ===== ✅ 新增：Mimic 自动复制（只在游戏中）=====
         if (this.player?.gameInstance?.gameState === GameState.IN_GAME &&
             currentItem && currentItem.type === "Mimic" && !this.mimicProcessed) {
             this.autoCopyWithMimic(this._petalIndex);
             this.mimicProcessed = true;
         }
-
-        // === 召唤逻辑 ===
         if (currentItem) {
-            // ✅ Cancer 和 Web：破碎时不执行召唤逻辑
-            if ((currentItem.type === "Cancer" || currentItem.type === "Web") && this.isBroken) {
-                return;
-            }
+            if ((currentItem.type === "Cancer" || currentItem.type === "Web") && this.isBroken) return;
 
             const handleEggSpawn = (spawnFunction, defaultCooldown) => {
-                const eggItem = this.getCurrentItem();
-                const eggType = eggItem?.type || 'unknown';
-
-                // 检查生成条件
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
-
                         const spawned = spawnFunction.call(
                             this,
                             this.player.gameInstance.enemies,
                             this.player.getWorldPosition(),
                             hasDNA
                         );
-
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
-
-                            const reducedCooldown = this.nextSpawnCooldown || defaultCooldown;
-                            this.spawnCooldown = reducedCooldown;
-
+                            this.spawnCooldown = this.nextSpawnCooldown || defaultCooldown;
                         }
                     }
                 }
             };
 
-            // 白细胞蛋
-            if (currentItem.type === "WhiteBloodCell egg") {
-                handleEggSpawn(this.trySpawnWhiteBloodCellsWithDna, 5000);
-                this.updateWhiteBloodCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 蜘蛛蛋
-            else if (currentItem.type === "Spider egg") {
-                handleEggSpawn(this.trySpawnSpidersWithDna, 6000);
-                this.updateSpiders?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Hive egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
+            // ── Auto-generated spawn methods (called by name) ────────────────
+            const autoEggMap = {
+                "WhiteBloodCell egg": ["WhiteBloodCellsWithDna", 5000,  "updateWhiteBloodCells"],
+                "Spider egg":         ["SpidersWithDna",         6000,  "updateSpiders"],
+                "RedBloodCell egg":   ["RedBloodCellsWithDna",   8000,  "updateRedBloodCells"],
+                "StemCell egg":       ["StemCellsWithDna",       15000, "updateStemCells"],
+                "Stick":              ["SandstormsWithDna",      8000,  "updateSandstorms"],
+                "HelWorm egg":        ["HelWorm",                10000, "updateHelWorm"],
+                "HelSpider egg":      ["HelSpider",              12000, "updateHelSpider"],
+                "Hel Bee egg":        ["HelBee",                 10000, "updateHelBee"],
+                "HelHornet egg":      ["HelHornet",              12000, "updateHelHornet"],
+                "HelBeetle egg":      ["HelBeetle",              15000, "updateHelBeetle"],
+                "Dragon egg":         ["Dragon",                 20000, "updateDragon"],
+                "DragonNest egg":     ["DragonNest",             30000, "updateDragonNest"],
+                "HelHive egg":        ["HelHive",                25000, "updateHelHive"],
+                "HelJellyfish egg":   ["HelJellyfish",           15000, "updateHelJellyfish"],
+                "Hel Queen Bee egg":  ["HelQueenBee",            25000, "updateHelQueenBee"],
+                "ToxicDragon egg":    ["ToxicDragon",            22000, "updateToxicDragon"],
+                "Hel Digger egg":     ["HelDigger",              18000, "updateHelDigger"],
+                "Hel Beekeeper egg":  ["HelBeekeeper",           20000, "updateHelBeekeeper"],
+                "FireStick":          ["Firestorm",              8000,  "updateFirestorm"],
+                "Shell egg":          ["ScallopsWithDna",        7000,  "updateScallops"],
+                "Starfish egg":       ["StarfishWithDna",        8000,  "updateStarfish"],
+                "Bubble egg":         ["BubblesWithDna",         5000,  "updateBubbles"],
+                "Crab egg":           ["CrabsWithDna",           6000,  "updateCrabs"],
+                "Jellyfish egg":      ["JellyfishWithDna",       10000, "updateJellyfish"],
+                "CrabHole egg":       ["CrabHoleWithDna",        15000, "updateCrabHoles"],
+                "Cancer egg":         ["CancerWithDNA",          12000, "updateCancer"],
+                "ManHole egg":        ["ManHoleWithDna",         20000, "updateManHoles"],
+                "Fly_egg":            ["FlyWithDna",             10000, "updateFlies"],
+                "Rat_egg":            ["RatWithDna",             20000, "updateRats"],
+                "Roach_egg":          ["RoachWithDna",           6000,  "updateRoaches"],
+                "PooStick":           ["PooStormWithDna",        8000,  "updatePooStorms"],
+                "Wasp egg":           ["Wasp",                   10000, "updateWasps"],
+                "Worker Termite egg": ["WorkerTermite",          12000, "updateWorkerTermites"],
+                "Soldier Termite egg":["SoldierTermite",         12000, "updateSoldierTermites"],
+                "StickBug egg":       ["StickBug",               6000,  "updateStickBugs"],
+                "Mantis egg":         ["Mantis",                 10000, "updateMantises"],
+                "Firefly egg":        ["Firefly",                14000, "updateFireflies"],
+                "TermiteHole egg":    ["TermiteHoleSoldiers",    18000, "updateTermiteSoldiers"],
+                "TermiteOvermind egg":["TermiteOvermind",        20000, "updateTermiteOverminds"],
+                "SpiderCave egg":     ["SpiderCave",             19000, "updateSpiderCaveSpiders"],
+                "Square Egg":         ["SquareWithDNA",          15000, "updateSquare"],
+                "Leech Egg":          ["LeechWithDNA",           10000, "updateLeeches"],
+                "Parasite Egg":       ["ParasiteWithDNA",        9000,  "updateParasites"],
+                "Bacteriophage egg":  ["BacteriophageWithDNA",   15000, "updateBacteriophages"],
+                "Virus egg":          ["VirusWithDNA",           5000,  "updateVirus"],
+                "SlagMight egg":      ["SlagMight",              8000,  "updateSlagMight"],
+                "Ice Cube egg":       ["IceCube",                6000,  "updateIceCube"],
+                "Ice Dragon egg":     ["IceDragon",              10000, "updateIceDragon"],
+                "Igloo egg":          ["IglooSnowmen",           20000, "updateIglooSnowmen"],
+                "Beetle egg":         ["BeetleWithDna",          8000,  "updateBeetles"],
+                "Tick egg":           ["Tick",                   6000,  "updateTick"],
+                "Shipwreck egg":      ["ShipwreckJellyfish",     19000, "updateShipwreckJellyfish"],
+                "ArcticSpider egg":   ["ArcticSpiders",          12000, "updateArcticSpiders"],
+                "Scorpion egg":       ["ScorpionsWithDNA",       20000, "updateScorpions"],
+                "ArcticSpiderCave egg":["ArcticCaveSpiders",     18000, "updateArcticCaveSpiders"],
+                "Snowman egg":        ["Snowman",                6000,  "updateSnowman"],
+                "SnowStick":          ["Snowstorm",              8000,  "updateSnowstorm"],
+                "Soldier Ant egg":    ["SoldierAntsWithDNA",     10000, "updateSoldierAnts"],
+                "Worker Ant egg":     ["WorkerAntsWithDNA",      8000,  "updateWorkerAnts"],
+                "Barnacle egg":       ["BarnaclesWithDNA",       12000, "updateBarnacles"],
+                "Centipede egg":      ["CentipedeWithDNA",       15000, "updateCentipedes"],
+                "Frost Digger egg":   ["FrostDiggerWithDNA",     15000, "updateFrostDiggers"],
+                "PirateDigger egg":   ["PirateDiggerWithDNA",    18000, "updatePirateDiggers"],
+                "Queen Bee egg":      ["QueenBeeWithDNA",        15000, "updateQueenBees"],
+                "Bee egg":            ["BeesWithDNA",            10000, "updateBees"],
+                "Ladybug egg":        ["LadybugsWithDNA",        12000, "updateLadybugs"],
+                "Squid egg":          ["SquidWithDNA",           10000, "updateSquid"],
+                "Bacteria_egg":       ["BacteriaWithDna",        10000, "updateBacteria"],
+                "Hive egg":           ["HiveBeesWithDNA",        20000, "updateHiveBees"],
+                "Beekeeper egg":      ["BeekeeperWithDNA",       20000, "updateBeekeepers"],
+            };
 
-                        const spawned = this.trySpawnHiveBeesWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 20000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateHiveBees?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+            if (autoEggMap[currentItem.type]) {
+                const [spawnSuffix, defaultCooldown, updateMethod] = autoEggMap[currentItem.type];
+                handleEggSpawn(this["trySpawn" + spawnSuffix], defaultCooldown);
+                this[updateMethod]?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            else if (currentItem.type === "RedBloodCell egg") {
-                handleEggSpawn(this.trySpawnRedBloodCellsWithDna, 8000);
-                this.updateRedBloodCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 干细胞蛋
-            else if (currentItem.type === "StemCell egg") {
-                handleEggSpawn(this.trySpawnStemCellsWithDna, 15000);
-                this.updateStemCells?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 普通蛋
+            // ── Special cases with non-standard logic ────────────────────────
             else if (currentItem.type === "Egg") {
                 handleEggSpawn(this.trySpawnGoldenAntsWithDna, 15000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 蚂蚁蛋
             else if (currentItem.type === "Ant Egg") {
                 handleEggSpawn(this.trySpawnGoldenAnts, 5000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 沙尘暴
-            else if (currentItem.type === "Stick") {
-                handleEggSpawn(this.trySpawnSandstormsWithDna, 8000);
-                this.updateSandstorms?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 岩石
             else if (currentItem.type === "Moon Egg") {
                 handleEggSpawn(this.trySpawnRockWithDna, 15000);
                 this.updateRocks?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 细菌蛋
-            else if (currentItem.type === "Bacteria_egg") {
-                handleEggSpawn(this.trySpawnBacteriaWithDna, 10000);
-                this.updateBacteria?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 海洋生物蛋
-            else if (currentItem.type === "Shell egg") {
-                handleEggSpawn(this.trySpawnScallopsWithDna, 7000);
-                this.updateScallops?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Starfish egg") {
-                handleEggSpawn(this.trySpawnStarfishWithDna, 8000);
-                this.updateStarfish?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Bubble egg") {
-                handleEggSpawn(this.trySpawnBubblesWithDna, 5000);
-                this.updateBubbles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Crab egg") {
-                handleEggSpawn(this.trySpawnCrabsWithDna, 6000);
-                this.updateCrabs?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Jellyfish egg") {
-                handleEggSpawn(this.trySpawnJellyfishWithDna, 10000);
-                this.updateJellyfish?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "CrabHole egg") {
-                handleEggSpawn(this.trySpawnCrabHoleWithDna, 15000);
-                this.updateCrabHoles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Beekeeper egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnBeekeeperWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 20000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateBeekeepers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Cancer egg") {
-                handleEggSpawn(this.trySpawnCancerWithDNA, 12000);
-                this.updateCancer?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 下水道生物蛋
-            else if (currentItem.type === "ManHole egg") {
-                handleEggSpawn(this.trySpawnManHoleWithDna, 20000);
-                this.updateManHoles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Fly_egg") {
-                handleEggSpawn(this.trySpawnFlyWithDna, 10000);
-                this.updateFlies?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Rat_egg") {
-                handleEggSpawn(this.trySpawnRatWithDna, 20000);
-                this.updateRats?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Roach_egg") {
-                handleEggSpawn(this.trySpawnRoachWithDna, 6000);
-                this.updateRoaches?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "PooStick") {
-                handleEggSpawn(this.trySpawnPooStormWithDna, 8000);
-                this.updatePooStorms?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Wasp egg") {
-                handleEggSpawn(this.trySpawnWasp, 10000);
-                this.updateWasps?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Worker Termite egg") {
-                handleEggSpawn(this.trySpawnWorkerTermite, 12000);
-                this.updateWorkerTermites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Soldier Termite egg") {
-                handleEggSpawn(this.trySpawnSoldierTermite, 12000);
-                this.updateSoldierTermites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "StickBug egg") {
-                handleEggSpawn(this.trySpawnStickBug, 6000);
-                this.updateStickBugs?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Mantis egg") {
-                handleEggSpawn(this.trySpawnMantis, 10000);
-                this.updateMantises?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Firefly egg") {
-                handleEggSpawn(this.trySpawnFirefly, 14000);
-                this.updateFireflies?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "TermiteHole egg") {
-                handleEggSpawn(this.trySpawnTermiteHoleSoldiers, 18000);
-                this.updateTermiteSoldiers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "TermiteOvermind egg") {
-                handleEggSpawn(this.trySpawnTermiteOvermind, 20000);
-                this.updateTermiteOverminds?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🆕 Digger 系列蛋 ==========
-            else if (currentItem.type === "TrashDigger egg" ||
-                     currentItem.type === "MudDigger_egg" ||
-                     currentItem.type === "Digger egg" ||
-                     currentItem.type === "Biologist egg") {
-
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        // 根据蛋的类型确定要生成的 Digger 类型
-                        const eggToDigger = {
-                            "TrashDigger egg": "TrashDigger",
-                            "MudDigger_egg": "MudDigger",
-                            "Digger egg": "Digger",
-                            "Biologist egg": "Biologist"
-                        };
-                        const diggerType = eggToDigger[currentItem.type];
-
-                        const spawned = this.trySpawnDiggers?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA,
-                            diggerType
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            // 使用减少后的冷却
-                            const reducedCooldown = this.nextSpawnCooldown || 15000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 火蚁系列
-            else if (["WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                      "FireAntOvermind egg", "FireAntHole egg"].includes(currentItem.type)) {
+            else if (["WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg",
+                      "FireAntOvermind egg","FireAntHole egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         let spawned = false;
                         let defaultCooldown = 8000;
-
                         if (currentItem.type === "WorkerFireAnt egg") {
                             spawned = this.trySpawnWorkerFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 12000;
@@ -26697,819 +27234,154 @@ class Petal {
                             spawned = this.trySpawnFireAntHole?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 18000;
                         }
-
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
-                            // 使用减少后的冷却
-                            const reducedCooldown = this.nextSpawnCooldown || defaultCooldown;
-                            this.spawnCooldown = reducedCooldown;
+                            this.spawnCooldown = this.nextSpawnCooldown || defaultCooldown;
                         }
                     }
                 }
                 this.updateFireAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 女王蚁蛋
             else if (currentItem.type === "queen ant egg") {
                 handleEggSpawn(this.trySpawnQueenAntsWithDna, 20000);
                 this.updateQueenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // 🟦 Square 蛋
-            else if (currentItem.type === "Square Egg") {
-                handleEggSpawn(this.trySpawnSquareWithDNA, 15000);
-                this.updateSquare?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🆕 Leech 蛋 ==========
-            else if (currentItem.type === "Leech Egg") {
-                handleEggSpawn(this.trySpawnLeechWithDNA, 10000);
-                this.updateLeeches?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🆕 Parasite 蛋 ==========
-            else if (currentItem.type === "Parasite Egg") {
-                handleEggSpawn(this.trySpawnParasiteWithDNA, 9000);
-                this.updateParasites?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🆕 噬菌体蛋 ==========
-            else if (currentItem.type === "Bacteriophage egg") {
-                handleEggSpawn(this.trySpawnBacteriophageWithDNA, 15000);
-                this.updateBacteriophages?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🆕 Virus Egg ==========
-            else if (currentItem.type === "Virus egg") {
-                handleEggSpawn(this.trySpawnVirusWithDNA, 5000);
-                this.updateVirus?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "SlagMight egg") {
+            else if (["TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnSlagMight?.(
+                        const eggToDigger = {
+                            "TrashDigger egg":"TrashDigger","MudDigger_egg":"MudDigger",
+                            "Digger egg":"Digger","Biologist egg":"Biologist"
+                        };
+                        const spawned = this.trySpawnDiggers?.(
                             this.player.gameInstance.enemies,
                             this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 8000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateSlagMight?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "SpiderCave egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-                        const spawned = this.trySpawnSpiderCave?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
+                            hasDNA,
+                            eggToDigger[currentItem.type]
                         );
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
-                            this.spawnCooldown = ITEM_STATS["SpiderCave egg"]?.base_cooldown || 19000;
+                            this.spawnCooldown = this.nextSpawnCooldown || 15000;
                         }
                     }
                 }
-                this.updateSpiderCaveSpiders?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
+                this.updateDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
-            // Ice Cube egg
-            else if (currentItem.type === "Ice Cube egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnIceCube?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 6000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateIceCube?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-
-            // Ice Dragon egg
-            else if (currentItem.type === "Ice Dragon egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnIceDragon?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 10000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateIceDragon?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-
-            // Igloo egg (生成雪人)
-            else if (currentItem.type === "Igloo egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnIglooSnowmen?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 20000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateIglooSnowmen?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Beetle egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnBeetleWithDna?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 8000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                // ✅ 添加这行：更新 Beetle 状态，维持数量
-                this.updateBeetles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，修改 Trashcan egg 的处理
             else if (currentItem.type === "Trashcan egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
                         const spawned = this.trySpawnFliesFromEgg?.(
                             this.player.gameInstance.enemies,
                             this.player.getWorldPosition(),
                             hasDNA
                         );
-
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 22000;
-                            this.spawnCooldown = reducedCooldown;
+                            this.spawnCooldown = this.nextSpawnCooldown || 22000;
                         }
                     }
                 }
-            }
-            // Tick egg
-            else if (currentItem.type === "Tick egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnTick?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 6000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateTick?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ===== 🚢 沉船蛋（生成10只水母）=====
-            else if (currentItem.type === "Shipwreck egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnShipwreckJellyfish?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            this.spawnCooldown = ITEM_STATS["Shipwreck egg"]?.base_cooldown || 19000;
-                        }
-                    }
-                }
-                this.updateShipwreckJellyfish?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ArcticSpider egg
-            else if (currentItem.type === "ArcticSpider egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnArcticSpiders?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 12000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateArcticSpiders?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，找到其他蛋类处理的附近添加
-            else if (currentItem.type === "Scorpion egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnScorpionsWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 20000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateScorpions?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ArcticSpiderCave egg
-            else if (currentItem.type === "ArcticSpiderCave egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnArcticCaveSpiders?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 18000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateArcticCaveSpiders?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-
-            // Snowman egg
-            else if (currentItem.type === "Snowman egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnSnowman?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 6000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateSnowman?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-
-            // SnowStick (生成雪风暴)
-            else if (currentItem.type === "SnowStick") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnSnowstorm?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 8000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateSnowstorm?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-
-            // ========== 兵蚁蛋 ==========
-            else if (currentItem.type === "Soldier Ant egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnSoldierAntsWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 10000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateSoldierAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 工蚁蛋 ==========
-            else if (currentItem.type === "Worker Ant egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnWorkerAntsWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 8000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateWorkerAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，在现有的蛋类处理逻辑后添加
-            else if (currentItem.type === "Barnacle egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnBarnaclesWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 12000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateBarnacles?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 蜈蚣蛋 ==========
-            else if (currentItem.type === "Centipede egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnCentipedeWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 15000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateCentipedes?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，找到处理蛋类物品的位置，添加：
-            else if (currentItem.type === "Frost Digger egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnFrostDiggerWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 15000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateFrostDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🏴‍☠️ PirateDigger 蛋 ==========
-            else if (currentItem.type === "PirateDigger egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-
-                        const spawned = this.trySpawnPirateDiggerWithDNA(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 6000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updatePirateDiggers(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，找到处理蛋类物品的地方，添加：
-            else if (currentItem.type === "Queen Bee egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-                        const spawned = this.trySpawnQueenBeeWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            this.spawnCooldown = 15000;
-                        }
-                    }
-                }
-                this.updateQueenBees?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🐝 蜜蜂蛋 ==========
-            else if (currentItem.type === "Bee egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnBeesWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 10000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateBees?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ========== 🐞 瓢虫蛋 ==========
-            else if (currentItem.type === "Ladybug egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnLadybugsWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            const reducedCooldown = this.nextSpawnCooldown || 12000;
-                            this.spawnCooldown = reducedCooldown;
-                        }
-                    }
-                }
-                this.updateLadybugs?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // 在 Petal.update 方法中，找到处理蛋类物品的位置
-            else if (currentItem.type === "Squid egg") {
-                if (this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    if (this.player && this.player.gameInstance) {
-                        const hasDNA = this.player && this.player.petals.some(p => {
-                            const item = p.getCurrentItem();
-                            return item && item.type === "DNA" && !p.isBroken;
-                        });
-                        const spawned = this.trySpawnSquidWithDNA?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
-                        if (spawned) {
-                            this.eggSpawned = true;
-                            this.breakPetal();
-                            this.spawnCooldown = ITEM_STATS["Squid egg"]?.base_cooldown || 10000;
-                        }
-                    }
-                }
-                this.updateSquid?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
             }
         }
-
     }
-    // ===== 辅助方法：更新已存在的召唤物 =====
+
     _updateExistingSummonedCreatures(dt) {
-        const gameEnemies = this.player?.gameInstance?.enemies;
+        const gameEnemies    = this.player?.gameInstance?.enemies;
         const playerWorldPos = this.player?.getWorldPosition();
-
         if (!gameEnemies || !playerWorldPos) return;
-
-        this.updateScorpions?.(dt, gameEnemies, playerWorldPos);
-        this.updateBeetles?.(dt, gameEnemies, playerWorldPos);
-        this.updateGoldenAnts?.(dt, gameEnemies, playerWorldPos);
-        this.updateWhiteBloodCells?.(dt, gameEnemies, playerWorldPos);
-        this.updateSpiders?.(dt, gameEnemies, playerWorldPos);
-        this.updateRedBloodCells?.(dt, gameEnemies, playerWorldPos);
-        this.updateStemCells?.(dt, gameEnemies, playerWorldPos);
-        this.updateSandstorms?.(dt, gameEnemies, playerWorldPos);
-        this.updateRocks?.(dt, gameEnemies, playerWorldPos);
-        this.updateBacteria?.(dt, gameEnemies, playerWorldPos);
-        this.updateCancer?.(dt, gameEnemies, playerWorldPos);
-        this.updateManHoles?.(dt, gameEnemies, playerWorldPos);
-        this.updateBacteriophages?.(dt, gameEnemies, playerWorldPos);
-        this.updateFlies?.(dt, gameEnemies, playerWorldPos);
-        this.updateRats?.(dt, gameEnemies, playerWorldPos);
-        this.updateHiveBees?.(dt, gameEnemies, playerWorldPos);
-        this.updateBarnacles?.(dt, gameEnemies, playerWorldPos);
-        this.updateRoaches?.(dt, gameEnemies, playerWorldPos);
-        this.updatePooStorms?.(dt, gameEnemies, playerWorldPos);
-        this.updateDiggers?.(dt, gameEnemies, playerWorldPos);
-        this.updateFireAnts?.(dt, gameEnemies, playerWorldPos);
-        this.updateQueenAnts?.(dt, gameEnemies, playerWorldPos);
-        this.updateScallops?.(dt, gameEnemies, playerWorldPos);
-        this.updateQueenBees?.(dt, gameEnemies, playerWorldPos);
-        this.updateStarfish?.(dt, gameEnemies, playerWorldPos);
-        this.updateBubbles?.(dt, gameEnemies, playerWorldPos);
-        this.updateBeekeepers?.(dt, gameEnemies, playerWorldPos);
-        this.updateCrabs?.(dt, gameEnemies, playerWorldPos);
-        this.updateJellyfish?.(dt, gameEnemies, playerWorldPos);
-        this.updateCrabHoles?.(dt, gameEnemies, playerWorldPos);
-        this.updateBees?.(dt, gameEnemies, playerWorldPos);
-        this.updateLadybugs?.(dt, gameEnemies, playerWorldPos);
-        this.updateLeeches?.(dt, gameEnemies, playerWorldPos);
-        this.updateParasites?.(dt, gameEnemies, playerWorldPos);
-        this.updateSquid?.(dt, gameEnemies, playerWorldPos);
-        this.updateVirus?.(dt, gameEnemies, playerWorldPos);
-        this.updateSlagMight?.(dt, gameEnemies, playerWorldPos);
-        this.updateIceCube?.(dt, gameEnemies, playerWorldPos);
-        this.updateIceDragon?.(dt, gameEnemies, playerWorldPos);
-        this.updateIglooSnowmen?.(dt, gameEnemies, playerWorldPos);
-        this.updateTick?.(dt, gameEnemies, playerWorldPos);
-        this.updateArcticSpiders?.(dt, gameEnemies, playerWorldPos);
-        this.updateArcticCaveSpiders?.(dt, gameEnemies, playerWorldPos);
-        this.updateSnowman?.(dt, gameEnemies, playerWorldPos);
-        this.updateSnowstorm?.(dt, gameEnemies, playerWorldPos);
-        this.updateFrostDiggers?.(dt, gameEnemies, playerWorldPos);
-        this.updatePirateDiggers?.(dt, gameEnemies, playerWorldPos);
-        this.updateSoldierAnts?.(dt, gameEnemies, playerWorldPos);
-        this.updateWorkerAnts?.(dt, gameEnemies, playerWorldPos);
-        this.updateCentipedes?.(dt, gameEnemies, playerWorldPos);
-
-        // ========== 🌴 Jungle 召唤物更新 ==========
-        this.updateWasps?.(dt, gameEnemies, playerWorldPos);
-        this.updateWorkerTermites?.(dt, gameEnemies, playerWorldPos);
-        this.updateSoldierTermites?.(dt, gameEnemies, playerWorldPos);
-        this.updateStickBugs?.(dt, gameEnemies, playerWorldPos);
-        this.updateMantises?.(dt, gameEnemies, playerWorldPos);
-        this.updateFireflies?.(dt, gameEnemies, playerWorldPos);
-        this.updateTermiteSoldiers?.(dt, gameEnemies, playerWorldPos);  // TermiteHole 生成的士兵
-        this.updateTermiteOverminds?.(dt, gameEnemies, playerWorldPos);
-        this.updateSpiderCaveSpiders?.(dt, gameEnemies, playerWorldPos);  // SpiderCave 生成的蜘蛛
+        // All auto-generated update methods
+        const autoUpdates = [
+            "updateHelWorm","updateHelSpider","updateHelBee","updateHelHornet","updateHelBeetle",
+            "updateDragon","updateDragonNest","updateHelHive","updateHelJellyfish","updateHelQueenBee",
+            "updateToxicDragon","updateHelDigger","updateHelBeekeeper","updateFirestorm",
+            "updateScorpions","updateBeetles","updateGoldenAnts","updateWhiteBloodCells",
+            "updateSpiders","updateRedBloodCells","updateStemCells","updateSandstorms","updateRocks",
+            "updateBacteria","updateCancer","updateManHoles","updateBacteriophages",
+            "updateFlies","updateRats","updateHiveBees","updateBarnacles","updateRoaches",
+            "updatePooStorms","updateDiggers","updateFireAnts","updateQueenAnts",
+            "updateScallops","updateQueenBees","updateStarfish","updateBubbles","updateBeekeepers",
+            "updateCrabs","updateJellyfish","updateCrabHoles","updateBees","updateLadybugs",
+            "updateLeeches","updateParasites","updateSquid","updateVirus","updateSlagMight",
+            "updateIceCube","updateIceDragon","updateIglooSnowmen","updateTick",
+            "updateArcticSpiders","updateArcticCaveSpiders","updateSnowman","updateSnowstorm",
+            "updateFrostDiggers","updatePirateDiggers","updateSoldierAnts","updateWorkerAnts",
+            "updateCentipedes","updateWasps","updateWorkerTermites","updateSoldierTermites",
+            "updateStickBugs","updateMantises","updateFireflies","updateTermiteSoldiers",
+            "updateTermiteOverminds","updateSpiderCaveSpiders","updateShipwreckJellyfish","updateSquare",
+        ];
+        for (const method of autoUpdates) {
+            this[method]?.(dt, gameEnemies, playerWorldPos);
+        }
     }
 
-    // 在 Petal 类中修改 checkQuickSlotChange 方法
     checkQuickSlotChange() {
         const currentItem = this.getCurrentItem();
-
-        // 如果当前有物品
         if (currentItem) {
-            // 如果itemType或rarity发生变化，更新属性
             if (this.itemType !== currentItem.type || this.rarity !== currentItem.rarity) {
-                // 使用缓存的索引更新
                 this.updateFromQuickSlot(this._petalIndex);
                 return true;
             }
-
-            // 即使类型相同，也要检查耐久度和重载时间
-            if (this.durability !== currentItem.durability) {
-                this.durability = currentItem.durability;
-            }
-            if (this.maxDurability !== currentItem.maxDurability) {
-                this.maxDurability = currentItem.maxDurability;
-            }
+            if (this.durability !== currentItem.durability) this.durability = currentItem.durability;
+            if (this.maxDurability !== currentItem.maxDurability) this.maxDurability = currentItem.maxDurability;
             if (this.isBroken !== currentItem.isBroken) {
                 this.isBroken = currentItem.isBroken;
-                if (this.isBroken) {
-                    this.startReload();
-                }
+                if (this.isBroken) this.startReload();
             }
         } else {
-            // 如果没有物品但花瓣还有物品类型，说明物品被移除了
-            if (this.itemType !== null) {
-                this.resetToDefault();
-            }
+            if (this.itemType !== null) this.resetToDefault();
         }
-
         return false;
     }
 
-    canAttack() {
-        return this.attackCooldown <= 0 && !this.isReloading && !this.isBroken;
-    }
+    canAttack() { return this.attackCooldown <= 0 && !this.isReloading && !this.isBroken; }
 
     getPosition() {
-        // 确保总是返回 Vector2 对象
-        if (this.worldX !== undefined && this.worldY !== undefined) {
-            return new Vector2(this.worldX, this.worldY);
-        } else if (this.fixedPosition && this.fixedPosition.x !== undefined) {
-            return new Vector2(this.fixedPosition.x, this.fixedPosition.y);
-        } else {
-            // 默认返回玩家位置或零向量
-            if (this.player && this.player.physicsBody) {
-                return this.player.physicsBody.position.copy();
-            }
-            return new Vector2(0, 0);
-        }
+        if (this.worldX !== undefined && this.worldY !== undefined) return new Vector2(this.worldX, this.worldY);
+        if (this.fixedPosition && this.fixedPosition.x !== undefined) return new Vector2(this.fixedPosition.x, this.fixedPosition.y);
+        if (this.player && this.player.physicsBody) return this.player.physicsBody.position.copy();
+        return new Vector2(0, 0);
     }
 
     getPositionObj() {
-        return {
-            x: this.worldX || this.fixedPosition.x || 0,
-            y: this.worldY || this.fixedPosition.y || 0
-        };
+        return { x: this.worldX || this.fixedPosition.x || 0, y: this.worldY || this.fixedPosition.y || 0 };
     }
 
-    getRadius() {
-        return this.size;
-    }
+    getRadius() { return this.size; }
 
     canTakeDamage() {
         return !this.isReloading && !this.isBroken && this.health > 0 && this.collisionCooldown <= 0;
     }
 
     breakPetal() {
-        if (this.isBroken || this.isReloading) {
-            return;
-        }
+        if (this.isBroken || this.isReloading) return;
         this.isBroken = true;
         this.startReload();
     }
 
     startReload() {
-        if (this.isReloading) {
-            return;
-        }
+        if (this.isReloading) return;
         this.isReloading = true;
         this.reloadCooldown = this.reloadTime;
     }
 
     getPetalIndex() {
-        if (!this.player || !this.player.petals) {
-            return this._petalIndex;
-        }
-        try {
-            return this.player.petals.indexOf(this);
-        } catch (error) {
-            return this._petalIndex;
-        }
+        if (!this.player || !this.player.petals) return this._petalIndex;
+        try { return this.player.petals.indexOf(this); } catch (e) { return this._petalIndex; }
     }
 
-    getHealthRatio() {
-        return this.maxHealth > 0 ? this.health / this.maxHealth : 0;
-    }
-
-    getDurabilityRatio() {
-        return this.maxDurability > 0 ? this.durability / this.maxDurability : 0;
-    }
+    getHealthRatio()     { return this.maxHealth     > 0 ? this.health     / this.maxHealth     : 0; }
+    getDurabilityRatio() { return this.maxDurability > 0 ? this.durability / this.maxDurability : 0; }
 
     getDamageOverlayRatio() {
-        if (this.isBroken || this.isReloading) {
-            return 1.0;
-        }
-        const healthRatio = this.getHealthRatio();
-        const durabilityRatio = this.getDurabilityRatio();
-        return 1.0 - Math.min(healthRatio, durabilityRatio);
+        if (this.isBroken || this.isReloading) return 1.0;
+        return 1.0 - Math.min(this.getHealthRatio(), this.getDurabilityRatio());
     }
 
     getReloadProgress() {
-        if (!this.isReloading) {
-            return 1.0;
-        }
+        if (!this.isReloading) return 1.0;
         return 1.0 - (this.reloadCooldown / this.reloadTime);
     }
 
@@ -27518,22 +27390,32 @@ class Petal {
 
         const currentItem = this.getCurrentItem();
 
+        // ===== 💣 炸弹处理 =====
         if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb")) {
             this._triggerBombExplosion(currentItem);
-            return true; // 返回true表示花瓣破碎
+            return true;
         }
-        // ===== 检查是否为海绵 =====
-        if (currentItem && currentItem.type === "Sponge") {
-            if (!this.player || this.player.isDead) {
-                return false;
-            }
 
+        // ===== 🧽 海绵处理（吸收所有伤害，缓慢返还）=====
+        if (currentItem && currentItem.type === "Sponge") {
+            if (!this.player || this.player.isDead) return false;
+
+            // 检查是否已有活跃的海绵吸收效果（同一花瓣不叠加）
+            const existingIndex = this.player.spongeDamageQueue.findIndex(
+                item => item.petalIndex === this._petalIndex
+            );
+
+            // ✅ 计算持续时间：基础4秒 + 稀有度等级 * 3秒
             const rarity = currentItem.rarity;
             const rarityIndex = RARITY_LIST.indexOf(rarity);
-            const baseDuration = ITEM_STATS.Sponge.absorption_duration || 4;
-            const duration = baseDuration + rarityIndex * 3;
+            const duration = 3 + (rarityIndex * 2);  // Common: 4秒, Unusual: 7秒, Rare: 10秒, ...
 
-            if (this.player) {
+            if (existingIndex !== -1) {
+                // 已有海绵效果，累加伤害
+                this.player.spongeDamageQueue[existingIndex].totalDamage += damage;
+                this.player.spongeDamageQueue[existingIndex].remainingDamage += damage;
+            } else {
+                // 新海绵效果，添加到队列
                 this.player.spongeDamageQueue.push({
                     totalDamage: damage,
                     remainingDamage: damage,
@@ -27543,10 +27425,12 @@ class Petal {
                     petalIndex: this._petalIndex
                 });
             }
+
+            // 海绵本身不破碎，不扣血
             return false;
         }
 
-        // ===== 检查是否为棉花 =====
+        // ===== 🧽 棉花处理（吸收固定伤害）=====
         if (currentItem && currentItem.type === "Cotton") {
             const rarityIndex = RARITY_LIST.indexOf(currentItem.rarity);
             const baseAbsorb = ITEM_STATS.Cotton.damage_absorption || 12.5;
@@ -27554,17 +27438,18 @@ class Petal {
             const absorbAmount = baseAbsorb * Math.pow(multiplier, rarityIndex);
 
             if (damage <= absorbAmount) {
+                // 伤害完全被吸收
                 return false;
             } else {
+                // 超出部分继续计算
                 damage -= absorbAmount;
             }
         }
 
-        // ===== 检查是否为Shell（护盾）=====
+        // ===== 🛡️ 贝壳护盾 =====
         if (currentItem && currentItem.type === "Shell" && this.player && !this.player.isDead) {
             const shieldValue = ITEM_STATS.Shell.shield_value || 2;
-            const shieldAmount = damage / shieldValue;
-            this.player.addShield(shieldAmount);
+            this.player.addShield(damage / shieldValue);
             return false;
         }
 
@@ -27577,12 +27462,11 @@ class Petal {
         // 应用伤害抵抗
         actualDamage = actualDamage * (1 - this.damageResistance);
 
-        // ===== 耐久度和血量同时减少相同数值 =====
+        // ===== 💔 扣除耐久度和血量 =====
         this.health -= actualDamage;
         this.durability -= actualDamage;
 
         this.collisionCooldown = 200;
-
 
         // 如果血量归零或耐久归零，花瓣破碎
         if (this.health <= 0 || this.durability <= 0) {
@@ -27594,669 +27478,507 @@ class Petal {
 
         return false;
     }
-
-    // 在 Petal 类的 tryHeal 方法中
     tryHeal(player, dt) {
-        if (this.isBroken || this.isReloading) {
-            return 0.0;
-        }
-
+        if (this.isBroken || this.isReloading) return 0.0;
         const currentItem = this.getCurrentItem();
-
-        // ===== 叶子回血 =====
         if (currentItem && currentItem.type === "Leaf" && player.health < player.maxHealth) {
-            const rarity = currentItem.rarity;
             const baseHealPerSecond = 3.0;
-            const rarityMultiplier = RARITY_MULTIPLIERS[rarity] || 1.0;
+            const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
             let healPerSecond = baseHealPerSecond * rarityMultiplier;
-
-            // ✅ 应用 Basil 回血速度加成（如果有）
-            if (this.healSpeedMultiplier > 0) {
-                healPerSecond *= (1 + this.healSpeedMultiplier);
-            }
-
+            if (this.healSpeedMultiplier > 0) healPerSecond *= (1 + this.healSpeedMultiplier);
             const healAmount = healPerSecond * dt;
             player.health = Math.min(player.maxHealth, player.health + healAmount);
             return healAmount;
         }
-
-        // ===== 海星回血（3倍叶子，但需要血量低于60%）=====
         if (currentItem && currentItem.type === "Starfish") {
             const stats = ITEM_STATS.Starfish;
             const threshold = stats.heal_threshold || 0.6;
-
             if (player.health < player.maxHealth * threshold) {
-                const rarity = currentItem.rarity;
                 const baseHealPerSecond = stats.healing || 3.0;
-                const rarityMultiplier = RARITY_MULTIPLIERS[rarity] || 1.0;
+                const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
                 let healPerSecond = baseHealPerSecond * rarityMultiplier;
-
-                // ✅ 应用 Basil 回血速度加成（如果有）
-                if (this.healSpeedMultiplier > 0) {
-                    healPerSecond *= (1 + this.healSpeedMultiplier);
-                }
-
+                if (this.healSpeedMultiplier > 0) healPerSecond *= (1 + this.healSpeedMultiplier);
                 const healAmount = healPerSecond * dt;
                 player.health = Math.min(player.maxHealth, player.health + healAmount);
                 return healAmount;
             }
         }
-
+        if (currentItem && currentItem.type === "Yucca" && player.health < player.maxHealth) {
+            const baseHealPerSecond = 5.0;
+            const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
+            let healPerSecond = baseHealPerSecond * rarityMultiplier;
+            if (this.healSpeedMultiplier > 0) healPerSecond *= (1 + this.healSpeedMultiplier);
+            const healAmount = healPerSecond * dt;
+            player.health = Math.min(player.maxHealth, player.health + healAmount);
+            return healAmount;
+        }
+        if (currentItem && currentItem.type === "Controller" && player.health < player.maxHealth) {
+            const baseHealPerSecond = 100000.0;
+            const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1.0;
+            let healPerSecond = baseHealPerSecond * rarityMultiplier;
+            if (this.healSpeedMultiplier > 0) healPerSecond *= (1 + this.healSpeedMultiplier);
+            const healAmount = healPerSecond * dt;
+            player.health = Math.min(player.maxHealth, player.health + healAmount);
+            return healAmount;
+        }
         return 0.0;
     }
 
     mapRarityToAntRarity(petalRarity) {
         const rarityMapping = {
-            "Common": "Common",
-            "Unusual": "Unusual",
-            "Rare": "Unusual",
-            "Epic": "Rare",
-            "Legendary": "Epic",
-            "Mythic": "Legendary",
-            "Ultra": "Mythic",
-            "Super": "Ultra",
-            "Omega": "Super",
-            "Eternal": "Omega"
+            "Common":"Common","Unusual":"Unusual","Rare":"Unusual","Epic":"Rare",
+            "Legendary":"Epic","Mythic":"Legendary","Ultra":"Mythic",
+            "Super":"Ultra","Omega":"Super","Eternal":"Omega"
         };
         return rarityMapping[petalRarity] || "Common";
     }
 
-    // 在 Petal 类中添加
-    trySpawnSquidWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+    mapRarityToSummonRarity(petalRarity) {
+        const rarityMapping = {
+            "Common":"Common","Unusual":"Unusual","Rare":"Unusual","Epic":"Rare",
+            "Legendary":"Epic","Mythic":"Legendary","Ultra":"Mythic",
+            "Super":"Ultra","Omega":"Super","Eternal":"Omega","Unique":"Eternal"
+        };
+        return rarityMapping[petalRarity] || "Common";
+    }
+
+    // =========================================================================
+    // NON-STANDARD SPAWN METHODS (kept hand-written — custom logic)
+    // =========================================================================
+
+    // ── GoldenAnt (Egg / Ant Egg) ─────────────────────────────────────────────
+    trySpawnGoldenAntsWithDna(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
-
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Squid egg") return false;
-
+        if (!currentItem || currentItem.type !== "Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
-
-        if (!this.squidList) this.squidList = [];
-        this._cleanDeadSquid(gameEnemies);
-
-        if (this.squidList.length >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const squid = new Enemy("Squid", x, y, summonLevel, finalRarity);
-        squid.isFriendly = true;
-        squid.ownerPetal = this;
-        squid.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(squid);
-
-        gameEnemies.push(squid);
-        this.squidList.push(squid);
-
-        this.spawnCooldown = ITEM_STATS["Squid egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    _cleanDeadSquid(gameEnemies) {
-        if (!this.squidList) {
-            this.squidList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.squidList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            }
-        }
-        this.squidList = newList;
-    }
-
-    updateSquid(dt, gameEnemies, playerWorldPos) {
-        if (!this.squidList) this.squidList = [];
-        this._cleanDeadSquid(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Squid egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.squidList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnSquidWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnGoldenAntsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
         this._cleanDeadAnts(gameEnemies);
         const antsNeeded = 15 - this.goldenAntList.length;
-        if (antsNeeded <= 0) {
-            return false;
-        }
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const safeMinX = 100, safeMaxX = WORLD_WIDTH - 100;
-        const safeMinY = 100, safeMaxY = WORLD_HEIGHT - 100;
-
+        if (antsNeeded <= 0) return false;
+        const finalRarity  = this.player.getSummonRarityWithDna(this);
+        const summonLevel  = this.player.getRandomSummonLevel();
         for (let i = 0; i < antsNeeded; i++) {
-            const angle = Math.random() * Math.PI * 2;
+            const angle    = Math.random() * Math.PI * 2;
             const distance = 40 + Math.random() * 30;
-            const spawnX = Math.max(safeMinX, Math.min(safeMaxX, playerWorldPos.x + Math.cos(angle) * distance));
-            const spawnY = Math.max(safeMinY, Math.min(safeMaxY, playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 直接使用 Enemy 类，不创建 GoldenAnt
+            const spawnX = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const spawnY = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
             const goldenAnt = new Enemy("GoldenAnt", spawnX, spawnY, summonLevel, finalRarity);
-            goldenAnt.isFriendly = true;  // 设置为友方
+            goldenAnt.isFriendly = true;
             goldenAnt.ownerPetal = this;
             goldenAnt.ownerPlayer = this.player;
-
-            // 应用天赋加成
             this._applyTalentToPet(goldenAnt);
-
             gameEnemies.push(goldenAnt);
             this.goldenAntList.push(goldenAnt);
         }
-
         const rarityToCooldown = {
-            "Common": 10000, "Unusual": 9500, "Rare": 9000, "Epic": 8500,
-            "Legendary": 8000, "Mythic": 7500, "Ultra": 7000, "Super": 6500, "Omega": 30500
+            "Common":10000,"Unusual":9500,"Rare":9000,"Epic":8500,
+            "Legendary":8000,"Mythic":7500,"Ultra":7000,"Super":6500,"Omega":30500
         };
         this.spawnCooldown = rarityToCooldown[currentItem.rarity] || 10000;
         return true;
     }
 
-    // 尝试生成藤壶
-    trySpawnBarnaclesWithDNA(gameEnemies, playerWorldPos, hasDNA) {
+    trySpawnGoldenAnts(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
-
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Barnacle egg") return false;
-
+        if (!currentItem || currentItem.type !== "Ant Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
-
-        // 初始化藤壶列表
-        if (!this.barnacleList) this.barnacleList = [];
-
-        // 清理死亡的藤壶
-        this._cleanDeadBarnacles(gameEnemies);
-
-        // 需要生成的数量（最多2只）
-        const currentCount = this.barnacleList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
+        this._cleanDeadAnts(gameEnemies);
+        const antsNeeded = 4 - this.goldenAntList.length;
+        if (antsNeeded <= 0) return false;
         const finalRarity = this.player.getSummonRarityWithDna(this);
         const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
+        for (let i = 0; i < antsNeeded; i++) {
+            const angle    = Math.random() * Math.PI * 2;
             const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建藤壶敌人作为友方单位
-            const barnacle = new Enemy("Barnacle", x, y, summonLevel, finalRarity);
-            barnacle.isFriendly = true;
-            barnacle.ownerPetal = this;
-            barnacle.ownerPlayer = this.player;
-            barnacle.speed = 0;  // 藤壶是静止的
-
-            // 应用天赋加成
-            this._applyTalentToPet(barnacle);
-
-            gameEnemies.push(barnacle);
-            this.barnacleList.push(barnacle);
+            const spawnX = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const spawnY = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const goldenAnt = new Enemy("GoldenAnt", spawnX, spawnY, summonLevel, finalRarity);
+            goldenAnt.isFriendly = true;
+            goldenAnt.ownerPetal = this;
+            goldenAnt.ownerPlayer = this.player;
+            this._applyTalentToPet(goldenAnt);
+            gameEnemies.push(goldenAnt);
+            this.goldenAntList.push(goldenAnt);
         }
-
-        this.spawnCooldown = ITEM_STATS["Barnacle egg"]?.base_cooldown || 12000;
+        const rarityToCooldown = {
+            "Common":5000,"Unusual":4500,"Rare":4000,"Epic":3500,
+            "Legendary":3000,"Mythic":2500,"Ultra":2000,"Super":1500
+        };
+        this.spawnCooldown = rarityToCooldown[currentItem.rarity] || 5000;
         return true;
     }
 
-    // 清理死亡的藤壶
-    _cleanDeadBarnacles(gameEnemies) {
-        if (!this.barnacleList) {
-            this.barnacleList = [];
-            return;
-        }
-        const newList = [];
-        for (const b of this.barnacleList) {
-            if (b && gameEnemies.includes(b) && b.health > 0 && !b.isDead) {
-                newList.push(b);
-            } else {
-                const index = gameEnemies.indexOf(b);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.barnacleList = newList;
-    }
-
-    // 更新藤壶状态
-    updateBarnacles(dt, gameEnemies, playerWorldPos) {
-        if (!this.barnacleList) this.barnacleList = [];
-        this._cleanDeadBarnacles(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Barnacle egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.barnacleList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnBarnaclesWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
     _cleanDeadAnts(gameEnemies) {
         const newList = [];
         for (const ant of this.goldenAntList) {
-            if (gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                const index = gameEnemies.indexOf(ant);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
+            if (gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) newList.push(ant);
+            else { const idx = gameEnemies.indexOf(ant); if (idx !== -1) gameEnemies.splice(idx, 1); }
         }
         this.goldenAntList = newList;
     }
-    // 在 Petal 类中添加
-    trySpawnBeetleWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
 
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Beetle egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Beetle 列表
-        if (!this.beetleList) this.beetleList = [];
-
-        // 清理死亡的 Beetle
-        this._cleanDeadBeetles(gameEnemies);
-
-        // 需要生成的数量（最多1只）
-        const currentCount = this.beetleList.length;
-        if (currentCount >= 1) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        // 创建 Beetle 作为友方单位
-        const beetle = new Enemy("Beetle", x, y, summonLevel, finalRarity);
-        beetle.isFriendly = true;
-        beetle.ownerPetal = this;
-        beetle.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(beetle);
-
-        gameEnemies.push(beetle);
-        this.beetleList.push(beetle);
-
-        this.spawnCooldown = ITEM_STATS["Beetle egg"]?.base_cooldown || 8000;
-        return true;
-    }
-
-    // 清理死亡的 Beetle
-    _cleanDeadBeetles(gameEnemies) {
-        if (!this.beetleList) {
-            this.beetleList = [];
-            return;
-        }
-        const newList = [];
-        for (const b of this.beetleList) {
-            if (b && gameEnemies.includes(b) && b.health > 0 && !b.isDead) {
-                newList.push(b);
-            } else {
-                const index = gameEnemies.indexOf(b);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.beetleList = newList;
-    }
-
-    // 更新 Beetle 状态
-    updateBeetles(dt, gameEnemies, playerWorldPos) {
-        if (!this.beetleList) this.beetleList = [];
-        this._cleanDeadBeetles(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Beetle egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.beetleList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnBeetleWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 在 Petal 类中添加
-    trySpawnScorpionsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Scorpion egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化蝎子列表
-        if (!this.scorpionList) this.scorpionList = [];
-
-        // 清理死亡的蝎子
-        this._cleanDeadScorpions(gameEnemies);
-
-        // 需要生成的数量（最多2只）
-        const currentCount = this.scorpionList.length;
-        const maxScorpions = 2;
-        const toSpawn = Math.max(0, maxScorpions - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建蝎子作为友方单位
-            const scorpion = new Enemy("Scorpion", x, y, summonLevel, finalRarity);
-            scorpion.isFriendly = true;
-            scorpion.ownerPetal = this;
-            scorpion.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(scorpion);
-
-            gameEnemies.push(scorpion);
-            this.scorpionList.push(scorpion);
-        }
-
-        // 设置冷却时间
-        this.spawnCooldown = ITEM_STATS["Scorpion egg"]?.base_reload_time || 20000;
-        return true;
-    }
-
-    // 清理死亡的蝎子
-    _cleanDeadScorpions(gameEnemies) {
-        if (!this.scorpionList) {
-            this.scorpionList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.scorpionList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.scorpionList = newList;
-    }
-
-    // 更新蝎子状态
-    updateScorpions(dt, gameEnemies, playerWorldPos) {
-        if (!this.scorpionList) this.scorpionList = [];
-        this._cleanDeadScorpions(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Scorpion egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.scorpionList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnScorpionsWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 在 Petal 类的 trySpawnQueenBeeWithDNA 方法中
-    trySpawnQueenBeeWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Queen Bee egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.queenBeeList) this.queenBeeList = [];
-        this._cleanDeadQueenBees(gameEnemies);
-
-        if (this.queenBeeList.length >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100, playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
-
-        const queenBee = new Enemy("QueenBee", x, y, summonLevel, finalRarity);
-        queenBee.isFriendly = true;
-        queenBee.ownerPetal = this;
-        queenBee.ownerPlayer = this.player;
-        queenBee.healRadius = 600;     // 治疗范围 600
-        queenBee.healAmount = 30;      // 基础治疗量 10
-
-        // 应用天赋加成
-        this._applyTalentToPet(queenBee);
-
-        gameEnemies.push(queenBee);
-        this.queenBeeList.push(queenBee);
-
-        this.spawnCooldown = 15000;
-        return true;
-    }
-
-    _cleanDeadQueenBees(gameEnemies) {
-        if (!this.queenBeeList) {
-            this.queenBeeList = [];
-            return;
-        }
-        const newList = [];
-        for (const qb of this.queenBeeList) {
-            if (qb && gameEnemies.includes(qb) && qb.health > 0 && !qb.isDead) {
-                newList.push(qb);
-            }
-        }
-        this.queenBeeList = newList;
-    }
-
-    updateQueenBees(dt, gameEnemies, playerWorldPos) {
-        if (!this.queenBeeList) this.queenBeeList = [];
-        this._cleanDeadQueenBees(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Queen Bee egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.queenBeeList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnQueenBeeWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
     updateGoldenAnts(dt, gameEnemies, playerWorldPos) {
         const currentItem = this.getCurrentItem();
-        if (this.isBroken || this.isReloading || !currentItem || (currentItem.type !== "Egg" && currentItem.type !== "Ant Egg")) {
-            return;
-        }
-
-        if (this.spawnCooldown > 0) {
-            this.spawnCooldown -= dt * 1000;
-        }
-
+        if (this.isBroken || this.isReloading || !currentItem ||
+            (currentItem.type !== "Egg" && currentItem.type !== "Ant Egg")) return;
+        if (this.spawnCooldown > 0) this.spawnCooldown -= dt * 1000;
         this._cleanDeadAnts(gameEnemies);
-
-        // 自动补充逻辑（仅在非破碎模式下）
         if (!this.isBroken && !this.isReloading) {
             if (currentItem.type === "Egg" && this.goldenAntList.length < 15 && this.spawnCooldown <= 0 && !this.eggSpawned) {
                 this.trySpawnGoldenAnts(gameEnemies, playerWorldPos);
             }
         }
     }
-    // 在 Petal 类中添加
-    trySpawnShipwreckJellyfish(gameEnemies, playerWorldPos, hasDNA) {
+
+    // ── Rock (Moon Egg — rarity-gated) ───────────────────────────────────────
+    trySpawnRockWithDna(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
-
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Shipwreck egg") return false;
-
+        if (!currentItem || currentItem.type !== "Moon Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
-
-        // 初始化水母列表
-        if (!this.shipwreckJellyfishList) this.shipwreckJellyfishList = [];
-
-        // 清理死亡的水母
-        this._cleanDeadShipwreckJellyfish(gameEnemies);
-
-        // 需要生成的数量（最多10只）
-        const currentCount = this.shipwreckJellyfishList.length;
-        const maxJellyfish = 10;
-        const toSpawn = Math.max(0, maxJellyfish - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建水母作为友方单位
-            const jellyfish = new Enemy("Jellyfish", x, y, summonLevel, finalRarity);
-            jellyfish.isFriendly = true;
-            jellyfish.ownerPetal = this;
-            jellyfish.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(jellyfish);
-
-            gameEnemies.push(jellyfish);
-            this.shipwreckJellyfishList.push(jellyfish);
-        }
-
-        // 设置冷却时间（从配置读取）
-        const baseCooldown = ITEM_STATS["Shipwreck egg"]?.base_cooldown || 19000;
-        const rarityCooldown = this.getSpawnCooldownByRarity(baseCooldown);
-        this.spawnCooldown = rarityCooldown;
-
+        this._cleanDeadRocks(gameEnemies);
+        if (this.rockList.length >= this.maxRocks) return false;
+        const summonRarity = this.player.getSummonRarityWithDna(this);
+        if (!["Mythic","Ultra","Super","Omega"].includes(summonRarity)) return false;
+        const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + (Math.random() * 120 - 60)));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + (Math.random() * 120 - 60)));
+        const rock = new Enemy("Rock", x, y, 1, summonRarity);
+        rock.isFriendly = true;
+        rock.ownerPetal = this;
+        rock.ownerPlayer = this.player;
+        rock.maxHealth *= 10;
+        rock.health = rock.maxHealth;
+        rock.attackDamage /= 3;
+        this._applyTalentToPet(rock);
+        gameEnemies.push(rock);
+        this.rockList.push(rock);
+        this.spawnCooldown = 15000;
         return true;
     }
 
-    // 清理死亡的水母
-    _cleanDeadShipwreckJellyfish(gameEnemies) {
-        if (!this.shipwreckJellyfishList) {
-            this.shipwreckJellyfishList = [];
-            return;
-        }
+    _cleanDeadRocks(gameEnemies) {
         const newList = [];
-        for (const j of this.shipwreckJellyfishList) {
-            if (j && gameEnemies.includes(j) && j.health > 0 && !j.isDead) {
-                newList.push(j);
-            } else {
-                const index = gameEnemies.indexOf(j);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
+        for (const rock of this.rockList) {
+            if (gameEnemies.includes(rock) && rock.health > 0 && !rock.isDead) newList.push(rock);
+            else { const idx = gameEnemies.indexOf(rock); if (idx !== -1) gameEnemies.splice(idx, 1); }
         }
-        this.shipwreckJellyfishList = newList;
+        this.rockList = newList;
     }
 
-    // 更新水母状态
-    updateShipwreckJellyfish(dt, gameEnemies, playerWorldPos) {
-        if (!this.shipwreckJellyfishList) this.shipwreckJellyfishList = [];
-        this._cleanDeadShipwreckJellyfish(gameEnemies);
+    updateRocks(dt, gameEnemies, playerWorldPos) {
+        if (!this.rockList) this.rockList = [];
+        this._cleanDeadRocks(gameEnemies);
+    }
 
+    // ── Digger (type dispatch) ────────────────────────────────────────────────
+    trySpawnDiggers(gameEnemies, playerWorldPos, hasDNA, diggerType) {
+        if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Shipwreck egg") {
+        if (!currentItem) return false;
+        const eggToDigger = {
+            "TrashDigger egg":"TrashDigger","MudDigger_egg":"MudDigger",
+            "Digger egg":"Digger","Biologist egg":"Biologist"
+        };
+        if (eggToDigger[currentItem.type] !== diggerType) return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadDiggers(gameEnemies);
+        if (this.diggerList.length >= (this.maxDiggers || 2)) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        const angle    = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 30;
+        const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+        const digger = new Enemy(diggerType, x, y, summonLevel, finalRarity);
+        digger.isFriendly = true;
+        digger.isAngry = false;
+        digger.ownerPetal = this;
+        digger.ownerPlayer = this.player;
+        digger.gameInstance = this.player.gameInstance;
+        this._applyTalentToPet(digger);
+        gameEnemies.push(digger);
+        this.diggerList.push(digger);
+        this.spawnCooldown = ITEM_STATS[`${diggerType} egg`]?.base_cooldown || 15000;
+        return true;
+    }
+
+    _cleanDeadDiggers(gameEnemies) {
+        if (!this.diggerList) { this.diggerList = []; return; }
+        const newList = [];
+        for (const digger of this.diggerList) {
+            if (digger && gameEnemies.includes(digger) && digger.health > 0 && !digger.isDead) newList.push(digger);
+            else { const idx = gameEnemies.indexOf(digger); if (idx !== -1) gameEnemies.splice(idx, 1); }
+        }
+        this.diggerList = newList;
+    }
+
+    updateDiggers(dt, gameEnemies, playerWorldPos) {
+        if (!this.diggerList) this.diggerList = [];
+        this._cleanDeadDiggers(gameEnemies);
+        const currentItem = this.getCurrentItem();
+        if (!currentItem) return;
+        const eggToDigger = {
+            "TrashDigger egg":"TrashDigger","Digger egg":"Digger",
+            "MudDigger_egg":"MudDigger","Biologist egg":"Biologist"
+        };
+        const diggerType = eggToDigger[currentItem.type];
+        if (!diggerType) return;
+        if (!this.isBroken && !this.isReloading) {
+            if (this.diggerList.length < this.maxDiggers && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                const hasDNA = this.player && this.player.petals.some(p => {
+                    const item = p.getCurrentItem();
+                    return item && item.type === "DNA" && !p.isBroken;
+                });
+                this.trySpawnDiggers(gameEnemies, playerWorldPos, hasDNA, diggerType);
+            }
+        }
+    }
+
+    // ── Fire Ants (5 types under one updater) ────────────────────────────────
+    trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "WorkerFireAnt egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadWorkerFireAnts(gameEnemies);
+        const toSpawn = 4 - this.workerFireAntList.length;
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const ant = new Enemy("WorkerFireAnt", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true; ant.ownerPetal = this; ant.ownerPlayer = this.player;
+            this._applyTalentToPet(ant);
+            gameEnemies.push(ant); this.workerFireAntList.push(ant);
+        }
+        this.spawnCooldown = 8000; return true;
+    }
+
+    trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "SoldierFireAnt egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadSoldierFireAnts(gameEnemies);
+        const toSpawn = 5 - this.soldierFireAntList.length;
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const ant = new Enemy("SoldierFireAnt", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true; ant.ownerPetal = this; ant.ownerPlayer = this.player;
+            this._applyTalentToPet(ant);
+            gameEnemies.push(ant); this.soldierFireAntList.push(ant);
+        }
+        this.spawnCooldown = 10000; return true;
+    }
+
+    trySpawnBabyFireAnts(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "BabyFireAnt egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadBabyFireAnts(gameEnemies);
+        const toSpawn = 3 - this.babyFireAntList.length;
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const ant = new Enemy("BabyFireAnt", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true; ant.ownerPetal = this; ant.ownerPlayer = this.player;
+            this._applyTalentToPet(ant);
+            gameEnemies.push(ant); this.babyFireAntList.push(ant);
+        }
+        this.spawnCooldown = 3000; return true;
+    }
+
+    trySpawnFireAntOverminds(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "FireAntOvermind egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadFireAntOverminds(gameEnemies);
+        const toSpawn = 2 - this.fireAntOvermindList.length;
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 40;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const ant = new Enemy("FireAntOvermind", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true; ant.ownerPetal = this; ant.ownerPlayer = this.player;
+            this._applyTalentToPet(ant);
+            gameEnemies.push(ant); this.fireAntOvermindList.push(ant);
+        }
+        this.spawnCooldown = 5000; return true;
+    }
+
+    trySpawnFireAntHole(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "FireAntHole egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        this._cleanDeadFireAntHoles(gameEnemies);
+        const toSpawn = 10 - this.fireAntHoleList.length;
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const ant = new Enemy("SoldierFireAnt", x, y, summonLevel, finalRarity);
+            ant.isFriendly = true; ant.ownerPetal = this; ant.ownerPlayer = this.player;
+            this._applyTalentToPet(ant);
+            gameEnemies.push(ant); this.fireAntHoleList.push(ant);
+        }
+        this.spawnCooldown = 15000; return true;
+    }
+
+    _cleanDeadWorkerFireAnts(gameEnemies)  { this.workerFireAntList  = this._filterList(this.workerFireAntList,  gameEnemies); }
+    _cleanDeadSoldierFireAnts(gameEnemies) { this.soldierFireAntList = this._filterList(this.soldierFireAntList, gameEnemies); }
+    _cleanDeadBabyFireAnts(gameEnemies)    { this.babyFireAntList    = this._filterList(this.babyFireAntList,    gameEnemies); }
+    _cleanDeadFireAntOverminds(gameEnemies){ this.fireAntOvermindList= this._filterList(this.fireAntOvermindList,gameEnemies); }
+    _cleanDeadFireAntHoles(gameEnemies)    { this.fireAntHoleList    = this._filterList(this.fireAntHoleList,    gameEnemies); }
+
+    // Shared helper used by fire ant cleaners
+    _filterList(list, gameEnemies) {
+        if (!list) return [];
+        const kept = [];
+        for (const e of list) {
+            if (e && gameEnemies && gameEnemies.includes(e) && e.health > 0 && !e.isDead) {
+                kept.push(e);
+            } else if (gameEnemies) {
+                const idx = gameEnemies.indexOf(e);
+                if (idx !== -1) gameEnemies.splice(idx, 1);
+            }
+        }
+        return kept;
+    }
+
+    updateFireAnts(dt, gameEnemies, playerWorldPos) {
+        if (!this.workerFireAntList)   this.workerFireAntList   = [];
+        if (!this.soldierFireAntList)  this.soldierFireAntList  = [];
+        if (!this.babyFireAntList)     this.babyFireAntList     = [];
+        if (!this.fireAntOvermindList) this.fireAntOvermindList = [];
+        if (!this.fireAntHoleList)     this.fireAntHoleList     = [];
+        this._cleanDeadWorkerFireAnts(gameEnemies);
+        this._cleanDeadSoldierFireAnts(gameEnemies);
+        this._cleanDeadBabyFireAnts(gameEnemies);
+        this._cleanDeadFireAntOverminds(gameEnemies);
+        this._cleanDeadFireAntHoles(gameEnemies);
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || this.isBroken || this.isReloading) return;
+        if (currentItem.type === "WorkerFireAnt egg"    && this.workerFireAntList.length   < 4  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "SoldierFireAnt egg"   && this.soldierFireAntList.length  < 5  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "BabyFireAnt egg"      && this.babyFireAntList.length     < 3  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnBabyFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "FireAntOvermind egg"  && this.fireAntOvermindList.length < 2  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntOverminds(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "FireAntHole egg"      && this.fireAntHoleList.length     < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntHole(gameEnemies, playerWorldPos, false);
+    }
+
+    // ── Queen Ant (lowercase type comparison quirk) ───────────────────────────
+    trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "queen ant egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        if (!this.queenAntList) this.queenAntList = [];
+        this._cleanDeadQueenAnts(gameEnemies);
+        const toSpawn = Math.max(0, 2 - this.queenAntList.length);
+        if (toSpawn <= 0) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < toSpawn; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 40;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const queenAnt = new Enemy("QueenAnt", x, y, summonLevel, finalRarity);
+            queenAnt.isFriendly = true; queenAnt.ownerPetal = this; queenAnt.ownerPlayer = this.player;
+            this._applyTalentToPet(queenAnt);
+            gameEnemies.push(queenAnt); this.queenAntList.push(queenAnt);
+        }
+        this.spawnCooldown = 20000; return true;
+    }
+
+    _cleanDeadQueenAnts(gameEnemies) {
+        if (!this.queenAntList) { this.queenAntList = []; return; }
+        if (!gameEnemies) return;
+        this.queenAntList = this.queenAntList.filter(q => q && gameEnemies.includes(q) && q.health > 0 && !q.isDead);
+    }
+
+    updateQueenAnts(dt, gameEnemies, playerWorldPos) {
+        if (!this.queenAntList) this.queenAntList = [];
+        this._cleanDeadQueenAnts(gameEnemies);
+        const currentItem = this.getCurrentItem();
+        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "queen ant egg") {
             if (!this.isBroken && !this.isReloading) {
-                const maxJellyfish = 10;
-                if (this.shipwreckJellyfishList.length < maxJellyfish &&
-                    this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnShipwreckJellyfish(gameEnemies, playerWorldPos, hasDNA);
+                if (this.queenAntList.length < this.maxQueenAnts && this.spawnCooldown <= 0 && !this.eggSpawned) {
+                    this.trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, false);
                 }
             }
         }
     }
-    applyWeb(enemy) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
 
+    // ── Trashcan egg (anonymous fly spawn, no list tracking) ─────────────────
+    trySpawnFliesFromEgg(gameEnemies, playerWorldPos, hasDNA) {
+        if (this.isBroken || this.isReloading) return false;
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Trashcan egg") return false;
+        if (this.spawnCooldown > 0) return false;
+        if (!this.player || this.player.isDead) return false;
+        const finalRarity = this.player.getSummonRarityWithDna(this);
+        const summonLevel = this.player.getRandomSummonLevel();
+        for (let i = 0; i < 12; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const x = Math.max(100, Math.min(WORLD_WIDTH  - 100, playerWorldPos.x + Math.cos(angle) * distance));
+            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
+            const fly = new Enemy("Fly", x, y, summonLevel, finalRarity);
+            fly.isFriendly = true; fly.ownerPetal = this; fly.ownerPlayer = this.player;
+            this._applyTalentToPet(fly);
+            gameEnemies.push(fly);
+        }
+        this.spawnCooldown = ITEM_STATS["Trashcan egg"]?.base_cooldown || 22000;
+        return true;
+    }
+
+    // =========================================================================
+    // OTHER METHODS
+    // =========================================================================
+
+    applyWeb(enemy) {
+        if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
         if (currentItem && currentItem.type === "Web" && enemy.slowDuration <= 0) {
             const slowMap = {
-                "Common": 0.70,
-                "Unusual": 0.80,
-                "Rare": 0.90,
-                "Epic": 0.95,
-                "Legendary": 0.99
+                "Common":0.70,"Unusual":0.80,"Rare":0.90,"Epic":0.95,"Legendary":0.99
             };
             const durationSec = 2.0 + 0.2 * (this.level - 1);
             if (slowMap[currentItem.rarity] !== undefined) {
@@ -28268,55 +27990,31 @@ class Petal {
         return false;
     }
 
-    getCooldownRatio() {
-        return this.attackCooldown / this.attackCooldownMax;
-    }
-    // 在 Petal 类的 autoCopyWithMimic 方法中
+    getCooldownRatio() { return this.attackCooldown / this.attackCooldownMax; }
+
     autoCopyWithMimic(mimicSlotIndex) {
         if (!this.player || !this.player.quickSlot) return;
-
         const targetSlotIndex = mimicSlotIndex + 1;
         if (targetSlotIndex >= this.player.quickSlot.slots.length) return;
-
         const targetItem = this.player.quickSlot.slots[targetSlotIndex];
         if (!targetItem) return;
-
         const mimicItem = this.player.quickSlot.slots[mimicSlotIndex];
-
-        // 保存原始 Mimic 信息
         const originalData = {
-            type: mimicItem.type,
-            rarity: mimicItem.rarity,
-            level: mimicItem.level,
-            durability: mimicItem.durability,
-            maxDurability: mimicItem.maxDurability,
-            reloadTime: mimicItem.reloadTime,
-            baseReloadTime: mimicItem.baseReloadTime,
+            type: mimicItem.type, rarity: mimicItem.rarity, level: mimicItem.level,
+            durability: mimicItem.durability, maxDurability: mimicItem.maxDurability,
+            reloadTime: mimicItem.reloadTime, baseReloadTime: mimicItem.baseReloadTime,
             armor: mimicItem.armor
         };
-
-        // ✅ 标记这是一个活跃的变形 Mimic
         this._isTransformedMimic = true;
         this._originalMimicData = originalData;
-
-        // 在物品上也标记
         mimicItem._isTransformedMimic = true;
         mimicItem._originalMimicData = originalData;
-
-        // 多重备份
-        if (!this.player._mimicBackups) {
-            this.player._mimicBackups = {};
-        }
+        if (!this.player._mimicBackups) this.player._mimicBackups = {};
         this.player._mimicBackups[mimicSlotIndex] = originalData;
-
         if (this.player.gameInstance) {
-            if (!this.player.gameInstance._mimicBackups) {
-                this.player.gameInstance._mimicBackups = {};
-            }
+            if (!this.player.gameInstance._mimicBackups) this.player.gameInstance._mimicBackups = {};
             this.player.gameInstance._mimicBackups[mimicSlotIndex] = originalData;
         }
-
-        // 变形为目标物品
         mimicItem.type = targetItem.type;
         mimicItem.level = targetItem.level;
         mimicItem.durability = targetItem.durability;
@@ -28324,148 +28022,90 @@ class Petal {
         mimicItem.reloadTime = targetItem.reloadTime;
         mimicItem.baseReloadTime = targetItem.baseReloadTime;
         mimicItem.armor = targetItem.armor;
-
         console.log(`✨ Mimic 变形成功: ${mimicItem.rarity} ${mimicItem.type} (原始: ${originalData.type})`);
-
-        // 更新花瓣显示
         this.updateFromQuickSlot(mimicSlotIndex);
     }
+
     applyFrameDamageToEnemy(enemy) {
-        if (this.isReloading || this.isBroken || !this.isInsideEnemy) {
-            return 0.0;
-        }
-
-        if (this.frameDamageCooldown > 0) {
-            return 0.0;
-        }
-
+        if (this.isReloading || this.isBroken || !this.isInsideEnemy) return 0.0;
+        if (this.frameDamageCooldown > 0) return 0.0;
         const damage = this.attackPower;
         this.frameDamageCooldown = this.frameDamageRate;
         return damage;
     }
 
     checkInsideEnemy(enemy) {
-        if (!enemy || enemy.isDead || enemy.health <= 0) {
-            this.isInsideEnemy = false;
-            return false;
-        }
-
+        if (!enemy || enemy.isDead || enemy.health <= 0) { this.isInsideEnemy = false; return false; }
         const petalPos = this.getPosition();
         const enemyPos = enemy.physicsBody.position;
-
         const dx = petalPos.x - enemyPos.x;
         const dy = petalPos.y - enemyPos.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-
         const petalRadius = this.getRadius();
         const enemyRadius = enemy.getScaledRadius ? enemy.getScaledRadius() : enemy.radius;
-
         const isInside = distance < enemyRadius * 0.8;
         this.isInsideEnemy = isInside;
-
         return isInside;
     }
 
     applyMagnetEffect(droppedCards, dt) {
-        if (!this.magnetActive || this.isBroken || this.isReloading) {
-            return 0;
-        }
-
-        if (this.magnetRange <= 0) {
-            return 0;
-        }
-
+        if (!this.magnetActive || this.isBroken || this.isReloading || this.magnetRange <= 0) return 0;
         let cardsAttracted = 0;
         const playerPos = this.player.physicsBody.position;
-
         for (const card of droppedCards) {
-            if (card.collected) {
-                continue;
-            }
-
+            if (card.collected) continue;
             const cardPos = card.physicsBody.position;
             const dx = playerPos.x - cardPos.x;
             const dy = playerPos.y - cardPos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
             if (distance <= this.magnetRange) {
                 let directionX = playerPos.x - cardPos.x;
                 let directionY = playerPos.y - cardPos.y;
-
                 if (directionX !== 0 || directionY !== 0) {
                     const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
                     directionX /= magnitude;
                     directionY /= magnitude;
-
                     const distanceFactor = 1.0 - (distance / this.magnetRange);
                     const attractionSpeed = this.magnetStrength * (10 + distanceFactor * 20) * dt * 60;
-
                     card.physicsBody.position.x += directionX * attractionSpeed;
                     card.physicsBody.position.y += directionY * attractionSpeed;
-
                     cardsAttracted++;
-
                     if (distance <= this.player.physicsBody.radius + card.physicsBody.radius + 5) {
                         card.collected = true;
-                        if (this.player.inventory) {
-                            this.player.inventory.addItem(card.item);
-                        }
+                        if (this.player.inventory) this.player.inventory.addItem(card.item);
                     }
                 }
             }
         }
-
         return cardsAttracted;
     }
 
-    getMagnetRange() {
-        if (!this.magnetActive) {
-            return 0;
-        }
-        return this.magnetRange;
-    }
+    getMagnetRange() { return this.magnetActive ? this.magnetRange : 0; }
 
     drawAntennaeSimple() {
         const playerX = WIDTH / 2;
         const playerY = HEIGHT / 2;
         const baseY = playerY - 25;
-
         const leftX = playerX - 8;
         const rightX = playerX + 8;
         const antennaeLength = 15;
-        const antennaeWidth = 2;
-
-        const leftEndX = leftX - 5;
-        const leftEndY = baseY - antennaeLength;
-
-        const rightEndX = rightX + 5;
-        const rightEndY = baseY - antennaeLength;
     }
 
     draw(ctx, cameraOffset = {x: 0, y: 0}, viewScale = 1.0) {
-        // ===== 绘制吸收动画 =====
         if (this.autoAbsorb) {
             const centerX = WIDTH / 2;
             const centerY = HEIGHT / 2;
-
-            // 使用保存的世界坐标计算屏幕起始位置
             const startScreenX = this.absorbStartWorldX - cameraOffset.x;
             const startScreenY = this.absorbStartWorldY - cameraOffset.y;
-
-            // 计算当前位置（从保存的位置向玩家中心移动）
             const drawX = startScreenX * (1 - this.absorbProgress) + centerX * this.absorbProgress;
             const drawY = startScreenY * (1 - this.absorbProgress) + centerY * this.absorbProgress;
-
-            // 逐渐缩小
             const scale = 1 - this.absorbProgress * 0.5;
             const scaledSize = this.size * viewScale * 2.5 * scale;
-
             const currentItem = this.getCurrentItem();
             if (currentItem) {
                 const itemImg = window.imageLoader?.getImage(currentItem.type, currentItem.rarity, [scaledSize, scaledSize]);
                 if (itemImg) {
                     ctx.save();
-                    // 添加半透明效果
                     ctx.globalAlpha = 1 - this.absorbProgress * 0.3;
                     ctx.drawImage(itemImg, drawX - scaledSize/2, drawY - scaledSize/2, scaledSize, scaledSize);
                     ctx.restore();
@@ -28473,38 +28113,24 @@ class Petal {
             }
             return;
         }
-
         if (this.isBroken || this.isReloading) return;
-
         const currentItem = this.getCurrentItem();
-
         if (currentItem && currentItem.type === "ThirdEye") return;
-
-        if (this.hasAntennae) {
-            this.drawAntennaeSimple(ctx);
-            return;
-        }
-
+        if (this.hasAntennae) { this.drawAntennaeSimple(ctx); return; }
         const sizeMultiplier = 2.5;
         const scaledSize = this.size * viewScale * sizeMultiplier;
         const drawX = this.screenX;
         const drawY = this.screenY;
-
-        // ===== 在延迟期间添加闪烁效果 =====
         if (this.absorbDelay > 0) {
             ctx.save();
-            // 闪烁效果：根据时间正弦变化
             const blink = 0.5 + 0.5 * Math.sin(Date.now() * 0.01);
             ctx.globalAlpha = blink;
         }
-
-        // ✅ 添加 Eternal 特效
         if (this.rarity === "Eternal") {
             this.drawEternalParticles(ctx, drawX, drawY, scaledSize);
         } else if (this.rarity === "Omega") {
             this.drawOmegaParticles(ctx, drawX, drawY, scaledSize);
         }
-
         if (!currentItem) {
             const rarityColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
             ctx.save();
@@ -28515,16 +28141,10 @@ class Petal {
             ctx.arc(drawX, drawY, scaledSize/2, 0, Math.PI * 2);
             ctx.stroke();
             ctx.restore();
-
-            // 恢复透明度（如果有闪烁）
-            if (this.absorbDelay > 0) {
-                ctx.restore();
-            }
+            if (this.absorbDelay > 0) ctx.restore();
             return;
         }
-
         const itemImg = window.imageLoader?.getImage(currentItem.type, this.rarity, [scaledSize, scaledSize]);
-
         if (itemImg) {
             ctx.save();
             ctx.globalAlpha = 1.0;
@@ -28536,13 +28156,8 @@ class Petal {
             ctx.strokeStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
             ctx.lineWidth = 3;
             ctx.globalAlpha = 0.8;
-
             if (currentItem.type === "DNA") {
                 this.drawDNAOutline(ctx, drawX, drawY, scaledSize/2, rarityColor);
-            } else if (currentItem.type === "Coin") {
-                ctx.beginPath();
-                ctx.arc(drawX, drawY, scaledSize/2, 0, Math.PI * 2);
-                ctx.stroke();
             } else {
                 ctx.beginPath();
                 ctx.arc(drawX, drawY, scaledSize/2, 0, Math.PI * 2);
@@ -28550,102 +28165,61 @@ class Petal {
             }
             ctx.restore();
         }
-
-        // 恢复透明度（如果有闪烁）
-        if (this.absorbDelay > 0) {
-            ctx.restore();
-        }
+        if (this.absorbDelay > 0) ctx.restore();
     }
 
-    // ✅ 新增：Eternal 粒子特效
     drawEternalParticles(ctx, x, y, size) {
         const now = Date.now() / 200;
         const particleCount = 15;
-
         ctx.save();
-
         for (let i = 0; i < particleCount; i++) {
             const seed = i * 100;
             const randomAngle = (seed * 0.1) % (Math.PI * 2);
             const randomSpeed = 0.3 + (seed * 0.01) % 0.5;
             const randomMaxDist = size * (1.0 + (seed * 0.02) % 0.5);
             const randomDelay = (seed * 0.05) % (Math.PI * 2);
-
-            // 粒子生命周期进度
             const progress = (Math.sin(now * randomSpeed + randomDelay) + 1) / 2;
-
-            // 粒子方向 - 缓慢旋转
             const angle = randomAngle + now * 0.01;
-
-            // 粒子距离
             const distance = progress * randomMaxDist;
-
-            // 粒子位置
             const px = x + Math.cos(angle) * distance;
             const py = y + Math.sin(angle) * distance;
-
-            // 粒子大小
             const sizeFactor = Math.sin(progress * Math.PI);
             const particleSize = 2 + sizeFactor * 4;
-
-            // 透明度 - 使用金色/白色渐变
             const alpha = sizeFactor * 0.6;
-
-            // 绘制粒子（金色到白色渐变）
             const gradient = ctx.createRadialGradient(px, py, 0, px, py, particleSize);
             gradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
             gradient.addColorStop(1, `rgba(255, 215, 0, ${alpha * 0.5})`);
-
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(px, py, particleSize, 0, Math.PI * 2);
             ctx.fill();
         }
-
         ctx.restore();
     }
 
     drawOmegaParticles(ctx, x, y, size) {
         const now = Date.now() / 180;
         const particleCount = 10;
-
         ctx.save();
-
         for (let i = 0; i < particleCount; i++) {
-            // 为每个粒子生成固定的随机参数
             const seed = i * 100;
             const randomAngle = (seed * 0.1) % (Math.PI * 2);
             const randomSpeed = 0.5 + (seed * 0.01) % 1;
             const randomMaxDist = size * (0.8 + (seed * 0.02) % 0.7);
             const randomDelay = (seed * 0.05) % (Math.PI * 2);
-
-            // 粒子生命周期进度 (0 到 1)
             const progress = (Math.sin(now * randomSpeed + randomDelay) + 1) / 2;
-
-            // 粒子方向 - 基础角度加上随机偏移
             const angle = randomAngle + now * 0.1;
-
-            // 粒子距离 - 从0到最大距离
             const distance = progress * randomMaxDist;
-
-            // 粒子位置
             const px = x + Math.cos(angle) * distance;
             const py = y + Math.sin(angle) * distance;
-
-            // 粒子大小 - 中间大两头小
             const sizeFactor = Math.sin(progress * Math.PI);
             const particleSize = 1.1 + sizeFactor * 2;
-
-            // 透明度 - 中间高两头低
             const alpha = sizeFactor * 0.7;
-
-            // 绘制粒子
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.beginPath();
             ctx.arc(px, py, particleSize, 0, Math.PI * 2);
             ctx.fill();
         }
-
         ctx.restore();
     }
 
@@ -28653,17 +28227,14 @@ class Petal {
         ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         ctx.lineWidth = 3;
         ctx.globalAlpha = 0.8;
-
         ctx.beginPath();
         ctx.moveTo(x - radius/2, y - radius);
         ctx.lineTo(x - radius/2, y + radius);
         ctx.stroke();
-
         ctx.beginPath();
         ctx.moveTo(x + radius/2, y - radius);
         ctx.lineTo(x + radius/2, y + radius);
         ctx.stroke();
-
         for (let i = -0.6; i <= 0.6; i += 0.3) {
             ctx.beginPath();
             ctx.moveTo(x - radius/2, y + i * radius);
@@ -28674,4793 +28245,27 @@ class Petal {
 
     getVisionBonus() {
         if (this.itemType === "Antennae") {
-            const RARITY_ORDER = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega","Eternal","Unique"];
-            try {
-                const level = RARITY_ORDER.indexOf(this.rarity);
-                return 0.1 * level;
-            } catch (error) {
-                return 0.0;
-            }
+            const RARITY_ORDER = ["Common","Unusual","Rare","Epic","Legendary","Mythic","Ultra","Super","Omega","Eternal","Unique"];
+            try { return 0.1 * RARITY_ORDER.indexOf(this.rarity); } catch (e) { return 0.0; }
         }
         return 0.0;
     }
 
-    getHealthBonus() {
-        return this.healthBonus;
-    }
-
-    _cleanDeadSandstorms(gameEnemies) {
-        const newList = [];
-        for (const sandstorm of this.sandstormList) {
-            if (gameEnemies.includes(sandstorm) && sandstorm.health > 0 && !sandstorm.isDead) {
-                newList.push(sandstorm);
-            } else {
-                const index = gameEnemies.indexOf(sandstorm);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.sandstormList = newList;
-    }
-
-    updateSandstorms(dt, gameEnemies, playerWorldPos) {
-        if (!this.sandstormList) this.sandstormList = [];
-        this._cleanDeadSandstorms(gameEnemies);
-    }
-
-    updateRocks(dt, gameEnemies, playerWorldPos) {
-        if (!this.rockList) this.rockList = [];
-        this._cleanDeadRocks(gameEnemies);
-    }
-    // ========== 🧊 北极生物召唤方法（完整版）==========
-
-    // ==================== SlagMight ====================
-    trySpawnSlagMight(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "SlagMight egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.slagMightList) this.slagMightList = [];
-        this._cleanDeadSlagMight(gameEnemies);
-
-        const currentCount = this.slagMightList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const slagMight = new Enemy("SlagMight", x, y, summonLevel, finalRarity);
-        slagMight.isFriendly = true;
-        slagMight.ownerPetal = this;
-        slagMight.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(slagMight);
-
-        gameEnemies.push(slagMight);
-        this.slagMightList.push(slagMight);
-
-        this.spawnCooldown = 8000;
-        return true;
-    }
-
-    _cleanDeadSlagMight(gameEnemies) {
-        if (!this.slagMightList) {
-            this.slagMightList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.slagMightList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.slagMightList = newList;
-    }
-
-    updateSlagMight(dt, gameEnemies, playerWorldPos) {
-        if (!this.slagMightList) this.slagMightList = [];
-        this._cleanDeadSlagMight(gameEnemies);
-    }
-    // 在 Petal 类中添加
-    trySpawnPirateDiggerWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "PirateDigger egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化列表
-        if (!this.pirateDiggerList) this.pirateDiggerList = [];
-
-        // 清理死亡的海盗
-        this._cleanDeadPirateDiggers(gameEnemies);
-
-        // 检查数量限制
-        const currentCount = this.pirateDiggerList.length;
-        if (currentCount >= this.maxPirateDiggers) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        // 生成位置（玩家周围）
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        // 创建 PirateDigger 作为友方单位
-        const pirateDigger = new Enemy("PirateDigger", x, y, summonLevel, finalRarity);
-        pirateDigger.isFriendly = true;
-        pirateDigger.ownerPetal = this;
-        pirateDigger.ownerPlayer = this.player;
-        pirateDigger.isAngry = false;  // 初始不愤怒（微笑）
-
-        // 应用天赋加成
-        this._applyTalentToPet(pirateDigger);
-
-        gameEnemies.push(pirateDigger);
-        this.pirateDiggerList.push(pirateDigger);
-
-        // 设置冷却时间
-        const baseCooldown = ITEM_STATS["PirateDigger egg"]?.base_cooldown || 18000;
-        this.spawnCooldown = this.getSpawnCooldownByRarity(baseCooldown);
-
-        console.log(`🏴‍☠️ 召唤 PirateDigger (${finalRarity}) 在位置 (${x.toFixed(0)}, ${y.toFixed(0)})`);
-        return true;
-    }
-
-    // 清理死亡的海盗
-    _cleanDeadPirateDiggers(gameEnemies) {
-        if (!this.pirateDiggerList) {
-            this.pirateDiggerList = [];
-            return;
-        }
-        const newList = [];
-        for (const p of this.pirateDiggerList) {
-            if (p && gameEnemies.includes(p) && p.health > 0 && !p.isDead) {
-                newList.push(p);
-            } else {
-                const index = gameEnemies.indexOf(p);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.pirateDiggerList = newList;
-    }
-
-    // 更新海盗状态
-    updatePirateDiggers(dt, gameEnemies, playerWorldPos) {
-        if (!this.pirateDiggerList) this.pirateDiggerList = [];
-        this._cleanDeadPirateDiggers(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "PirateDigger egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.pirateDiggerList.length < this.maxPirateDiggers &&
-                    this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnPirateDiggerWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ==================== Ice Cube ====================
-    trySpawnIceCube(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Ice Cube egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.iceCubeList) this.iceCubeList = [];
-        this._cleanDeadIceCube(gameEnemies);
-
-        const currentCount = this.iceCubeList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40 + Math.random() * 30;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const iceCube = new Enemy("Ice Cube", x, y, summonLevel, finalRarity);
-        iceCube.isFriendly = true;
-        iceCube.ownerPetal = this;
-        iceCube.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(iceCube);
-
-        gameEnemies.push(iceCube);
-        this.iceCubeList.push(iceCube);
-
-        this.spawnCooldown = 6000;
-        return true;
-    }
-
-    _cleanDeadIceCube(gameEnemies) {
-        if (!this.iceCubeList) {
-            this.iceCubeList = [];
-            return;
-        }
-        const newList = [];
-        for (const i of this.iceCubeList) {
-            if (i && gameEnemies.includes(i) && i.health > 0 && !i.isDead) {
-                newList.push(i);
-            } else {
-                const index = gameEnemies.indexOf(i);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.iceCubeList = newList;
-    }
-
-    updateIceCube(dt, gameEnemies, playerWorldPos) {
-        if (!this.iceCubeList) this.iceCubeList = [];
-        this._cleanDeadIceCube(gameEnemies);
-    }
-
-    // ==================== Ice Dragon ====================
-    trySpawnIceDragon(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Ice Dragon egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.iceDragonList) this.iceDragonList = [];
-        this._cleanDeadIceDragon(gameEnemies);
-
-        const currentCount = this.iceDragonList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 60 + Math.random() * 50;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const iceDragon = new Enemy("Ice Dragon", x, y, summonLevel, finalRarity);
-        iceDragon.isFriendly = true;
-        iceDragon.ownerPetal = this;
-        iceDragon.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(iceDragon);
-
-        gameEnemies.push(iceDragon);
-        this.iceDragonList.push(iceDragon);
-
-        this.spawnCooldown = 10000;
-        return true;
-    }
-
-    _cleanDeadIceDragon(gameEnemies) {
-        if (!this.iceDragonList) {
-            this.iceDragonList = [];
-            return;
-        }
-        const newList = [];
-        for (const d of this.iceDragonList) {
-            if (d && gameEnemies.includes(d) && d.health > 0 && !d.isDead) {
-                newList.push(d);
-            } else {
-                const index = gameEnemies.indexOf(d);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.iceDragonList = newList;
-    }
-
-    updateIceDragon(dt, gameEnemies, playerWorldPos) {
-        if (!this.iceDragonList) this.iceDragonList = [];
-        this._cleanDeadIceDragon(gameEnemies);
-    }
-
-    // 添加召唤 Frost Digger 的方法
-    trySpawnFrostDiggerWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Frost Digger egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.frostDiggerList) this.frostDiggerList = [];
-        this._cleanDeadFrostDiggers(gameEnemies);
-
-        const currentCount = this.frostDiggerList.length;
-        if (currentCount >= this.maxFrostDiggers) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const frostDigger = new Enemy("Frost Digger", x, y, summonLevel, finalRarity);
-        frostDigger.isFriendly = true;
-        frostDigger.ownerPetal = this;
-        frostDigger.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(frostDigger);
-
-        gameEnemies.push(frostDigger);
-        this.frostDiggerList.push(frostDigger);
-
-        this.spawnCooldown = ITEM_STATS["Frost Digger egg"]?.base_cooldown || 15000;
-        return true;
-    }
-
-    // 清理死亡的 Frost Digger
-    _cleanDeadFrostDiggers(gameEnemies) {
-        if (!this.frostDiggerList) {
-            this.frostDiggerList = [];
-            return;
-        }
-        const newList = [];
-        for (const d of this.frostDiggerList) {
-            if (d && gameEnemies.includes(d) && d.health > 0 && !d.isDead) {
-                newList.push(d);
-            } else {
-                const index = gameEnemies.indexOf(d);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.frostDiggerList = newList;
-    }
-
-    // 更新 Frost Digger 状态
-    updateFrostDiggers(dt, gameEnemies, playerWorldPos) {
-        if (!this.frostDiggerList) this.frostDiggerList = [];
-        this._cleanDeadFrostDiggers(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Frost Digger egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.frostDiggerList.length < this.maxFrostDiggers &&
-                    this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnFrostDiggerWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnWorkerTermite(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Worker Termite egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.workerTermiteList) this.workerTermiteList = [];
-        this._cleanDeadWorkerTermites(gameEnemies);
-
-        const currentCount = this.workerTermiteList.length;
-        const toSpawn = Math.max(0, 4 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const termite = new Enemy("Worker Termite", x, y, summonLevel, finalRarity);
-            termite.isFriendly = true;
-            termite.ownerPetal = this;
-            termite.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(termite);
-
-            gameEnemies.push(termite);
-            this.workerTermiteList.push(termite);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Worker Termite egg"]?.base_cooldown || 12000;
-        return true;
-    }
-
-    _cleanDeadWorkerTermites(gameEnemies) {
-        if (!this.workerTermiteList) { this.workerTermiteList = []; return; }
-        const newList = [];
-        for (const t of this.workerTermiteList) {
-            if (t && gameEnemies.includes(t) && t.health > 0 && !t.isDead) newList.push(t);
-            else { const idx = gameEnemies.indexOf(t); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.workerTermiteList = newList;
-    }
-
-    updateWorkerTermites(dt, gameEnemies, playerWorldPos) {
-        if (!this.workerTermiteList) this.workerTermiteList = [];
-        this._cleanDeadWorkerTermites(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Worker Termite egg") {
-            if (!this.isBroken && !this.isReloading && this.workerTermiteList.length < 4 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnWorkerTermite(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    trySpawnSoldierTermite(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Soldier Termite egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.soldierTermiteList) this.soldierTermiteList = [];
-        this._cleanDeadSoldierTermites(gameEnemies);
-
-        const currentCount = this.soldierTermiteList.length;
-        const toSpawn = Math.max(0, 3 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const termite = new Enemy("Soldier Termite", x, y, summonLevel, finalRarity);
-            termite.isFriendly = true;
-            termite.ownerPetal = this;
-            termite.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(termite);
-
-            gameEnemies.push(termite);
-            this.soldierTermiteList.push(termite);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Soldier Termite egg"]?.base_cooldown || 12000;
-        return true;
-    }
-
-    _cleanDeadSoldierTermites(gameEnemies) {
-        if (!this.soldierTermiteList) { this.soldierTermiteList = []; return; }
-        const newList = [];
-        for (const t of this.soldierTermiteList) {
-            if (t && gameEnemies.includes(t) && t.health > 0 && !t.isDead) newList.push(t);
-            else { const idx = gameEnemies.indexOf(t); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.soldierTermiteList = newList;
-    }
-
-    updateSoldierTermites(dt, gameEnemies, playerWorldPos) {
-        if (!this.soldierTermiteList) this.soldierTermiteList = [];
-        this._cleanDeadSoldierTermites(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Soldier Termite egg") {
-            if (!this.isBroken && !this.isReloading && this.soldierTermiteList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnSoldierTermite(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    trySpawnStickBug(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "StickBug egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.stickBugList) this.stickBugList = [];
-        this._cleanDeadStickBugs(gameEnemies);
-
-        if (this.stickBugList.length >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const stickBug = new Enemy("StickBug", x, y, summonLevel, finalRarity);
-        stickBug.isFriendly = true;
-        stickBug.ownerPetal = this;
-        stickBug.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(stickBug);
-
-        gameEnemies.push(stickBug);
-        this.stickBugList.push(stickBug);
-
-        this.spawnCooldown = ITEM_STATS["StickBug egg"]?.base_cooldown || 6000;
-        return true;
-    }
-
-    _cleanDeadStickBugs(gameEnemies) {
-        if (!this.stickBugList) { this.stickBugList = []; return; }
-        const newList = [];
-        for (const s of this.stickBugList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) newList.push(s);
-            else { const idx = gameEnemies.indexOf(s); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.stickBugList = newList;
-    }
-
-    updateStickBugs(dt, gameEnemies, playerWorldPos) {
-        if (!this.stickBugList) this.stickBugList = [];
-        this._cleanDeadStickBugs(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "StickBug egg") {
-            if (!this.isBroken && !this.isReloading && this.stickBugList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnStickBug(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    trySpawnMantis(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Mantis egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.mantisList) this.mantisList = [];
-        this._cleanDeadMantises(gameEnemies);
-
-        if (this.mantisList.length >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const mantis = new Enemy("Mantis", x, y, summonLevel, finalRarity);
-        mantis.isFriendly = true;
-        mantis.ownerPetal = this;
-        mantis.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(mantis);
-
-        gameEnemies.push(mantis);
-        this.mantisList.push(mantis);
-
-        this.spawnCooldown = ITEM_STATS["Mantis egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    _cleanDeadMantises(gameEnemies) {
-        if (!this.mantisList) { this.mantisList = []; return; }
-        const newList = [];
-        for (const m of this.mantisList) {
-            if (m && gameEnemies.includes(m) && m.health > 0 && !m.isDead) newList.push(m);
-            else { const idx = gameEnemies.indexOf(m); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.mantisList = newList;
-    }
-
-    updateMantises(dt, gameEnemies, playerWorldPos) {
-        if (!this.mantisList) this.mantisList = [];
-        this._cleanDeadMantises(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Mantis egg") {
-            if (!this.isBroken && !this.isReloading && this.mantisList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnMantis(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    trySpawnFirefly(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Firefly egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.fireflyList) this.fireflyList = [];
-        this._cleanDeadFireflies(gameEnemies);
-
-        const currentCount = this.fireflyList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const firefly = new Enemy("Firefly", x, y, summonLevel, finalRarity);
-            firefly.isFriendly = true;
-            firefly.ownerPetal = this;
-            firefly.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(firefly);
-
-            gameEnemies.push(firefly);
-            this.fireflyList.push(firefly);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Firefly egg"]?.base_cooldown || 14000;
-        return true;
-    }
-
-    _cleanDeadFireflies(gameEnemies) {
-        if (!this.fireflyList) { this.fireflyList = []; return; }
-        const newList = [];
-        for (const f of this.fireflyList) {
-            if (f && gameEnemies.includes(f) && f.health > 0 && !f.isDead) newList.push(f);
-            else { const idx = gameEnemies.indexOf(f); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.fireflyList = newList;
-    }
-
-    updateFireflies(dt, gameEnemies, playerWorldPos) {
-        if (!this.fireflyList) this.fireflyList = [];
-        this._cleanDeadFireflies(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Firefly egg") {
-            if (!this.isBroken && !this.isReloading && this.fireflyList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnFirefly(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    // 在 Petal 类中添加
-    trySpawnTermiteHoleSoldiers(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "TermiteHole egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化白蚁士兵列表
-        if (!this.termiteSoldierList) this.termiteSoldierList = [];
-
-        // 清理死亡的白蚁士兵
-        this._cleanDeadTermiteSoldiers(gameEnemies);
-
-        // 需要生成的数量（最多10只）
-        const currentCount = this.termiteSoldierList.length;
-        const maxSoldiers = 10;
-        const toSpawn = Math.max(0, maxSoldiers - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Soldier Termite 作为友方单位
-            const termite = new Enemy("Soldier Termite", x, y, summonLevel, finalRarity);
-            termite.isFriendly = true;
-            termite.ownerPetal = this;
-            termite.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(termite);
-
-            gameEnemies.push(termite);
-            this.termiteSoldierList.push(termite);
-        }
-
-        // 设置冷却时间
-        this.spawnCooldown = ITEM_STATS["TermiteHole egg"]?.base_cooldown || 18000;
-        return true;
-    }
-
-    // 清理死亡的 Termite 士兵
-    _cleanDeadTermiteSoldiers(gameEnemies) {
-        if (!this.termiteSoldierList) {
-            this.termiteSoldierList = [];
-            return;
-        }
-        const newList = [];
-        for (const t of this.termiteSoldierList) {
-            if (t && gameEnemies.includes(t) && t.health > 0 && !t.isDead) {
-                newList.push(t);
-            } else {
-                const index = gameEnemies.indexOf(t);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.termiteSoldierList = newList;
-    }
-
-    // 更新 Termite 士兵状态
-    updateTermiteSoldiers(dt, gameEnemies, playerWorldPos) {
-        if (!this.termiteSoldierList) this.termiteSoldierList = [];
-        this._cleanDeadTermiteSoldiers(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "TermiteHole egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.termiteSoldierList.length < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnTermiteHoleSoldiers(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnTermiteOvermind(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "TermiteOvermind egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.termiteOvermindList) this.termiteOvermindList = [];
-        this._cleanDeadTermiteOverminds(gameEnemies);
-
-        if (this.termiteOvermindList.length >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 60 + Math.random() * 50;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const overmind = new Enemy("TermiteOvermind", x, y, summonLevel, finalRarity);
-        overmind.isFriendly = true;
-        overmind.ownerPetal = this;
-        overmind.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(overmind);
-
-        gameEnemies.push(overmind);
-        this.termiteOvermindList.push(overmind);
-
-        this.spawnCooldown = ITEM_STATS["TermiteOvermind egg"]?.base_cooldown || 20000;
-        return true;
-    }
-
-    _cleanDeadTermiteOverminds(gameEnemies) {
-        if (!this.termiteOvermindList) { this.termiteOvermindList = []; return; }
-        const newList = [];
-        for (const o of this.termiteOvermindList) {
-            if (o && gameEnemies.includes(o) && o.health > 0 && !o.isDead) newList.push(o);
-            else { const idx = gameEnemies.indexOf(o); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.termiteOvermindList = newList;
-    }
-
-    updateTermiteOverminds(dt, gameEnemies, playerWorldPos) {
-        if (!this.termiteOvermindList) this.termiteOvermindList = [];
-        this._cleanDeadTermiteOverminds(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "TermiteOvermind egg") {
-            if (!this.isBroken && !this.isReloading && this.termiteOvermindList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnTermiteOvermind(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    // 修改 trySpawnSpiderCave 方法，改为生成 10 只蜘蛛
-    trySpawnSpiderCave(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "SpiderCave egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化蜘蛛列表
-        if (!this.spiderCaveSpiders) this.spiderCaveSpiders = [];
-        this._cleanDeadSpiderCaveSpiders(gameEnemies);
-
-        // 需要生成的数量（最多10只）
-        const currentCount = this.spiderCaveSpiders.length;
-        const maxSpiders = 10;
-        const toSpawn = Math.max(0, maxSpiders - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Spider 作为友方单位
-            const spider = new Enemy("Spider", x, y, summonLevel, finalRarity);
-            spider.isFriendly = true;
-            spider.ownerPetal = this;
-            spider.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(spider);
-
-            gameEnemies.push(spider);
-            this.spiderCaveSpiders.push(spider);
-        }
-
-        // 设置冷却时间
-        this.spawnCooldown = ITEM_STATS["SpiderCave egg"]?.base_cooldown || 19000;
-        return true;
-    }
-
-    // 清理死亡的蜘蛛
-    _cleanDeadSpiderCaveSpiders(gameEnemies) {
-        if (!this.spiderCaveSpiders) {
-            this.spiderCaveSpiders = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.spiderCaveSpiders) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.spiderCaveSpiders = newList;
-    }
-
-    // 更新蜘蛛状态
-    updateSpiderCaveSpiders(dt, gameEnemies, playerWorldPos) {
-        if (!this.spiderCaveSpiders) this.spiderCaveSpiders = [];
-        this._cleanDeadSpiderCaveSpiders(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "SpiderCave egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.spiderCaveSpiders.length < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnSpiderCave(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnWasp(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Wasp egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.waspList) this.waspList = [];
-        this._cleanDeadWasps(gameEnemies);
-
-        const currentCount = this.waspList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const wasp = new Enemy("Wasp", x, y, summonLevel, finalRarity);
-        wasp.isFriendly = true;
-        wasp.ownerPetal = this;
-        wasp.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(wasp);
-
-        gameEnemies.push(wasp);
-        this.waspList.push(wasp);
-
-        this.spawnCooldown = ITEM_STATS["Wasp egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    _cleanDeadWasps(gameEnemies) {
-        if (!this.waspList) { this.waspList = []; return; }
-        const newList = [];
-        for (const w of this.waspList) {
-            if (w && gameEnemies.includes(w) && w.health > 0 && !w.isDead) newList.push(w);
-            else { const idx = gameEnemies.indexOf(w); if (idx !== -1) gameEnemies.splice(idx, 1); }
-        }
-        this.waspList = newList;
-    }
-
-    updateWasps(dt, gameEnemies, playerWorldPos) {
-        if (!this.waspList) this.waspList = [];
-        this._cleanDeadWasps(gameEnemies);
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Wasp egg") {
-            if (!this.isBroken && !this.isReloading && this.waspList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnWasp(gameEnemies, playerWorldPos, hasDNA);
-            }
-        }
-    }
-    // ==================== Igloo (生成雪人) ====================
-    trySpawnIglooSnowmen(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Igloo egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.iglooSnowmenList) this.iglooSnowmenList = [];
-        this._cleanDeadIglooSnowmen(gameEnemies);
-
-        const currentCount = this.iglooSnowmenList.length;
-        const maxSnowmen = 10;
-        const toSpawn = Math.max(0, maxSnowmen - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const snowman = new Enemy("Snowman", x, y, summonLevel, finalRarity);
-            snowman.isFriendly = true;
-            snowman.ownerPetal = this;
-            snowman.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(snowman);
-
-            gameEnemies.push(snowman);
-            this.iglooSnowmenList.push(snowman);
-        }
-
-        this.spawnCooldown = 20000;
-        return true;
-    }
-
-    _cleanDeadIglooSnowmen(gameEnemies) {
-        if (!this.iglooSnowmenList) {
-            this.iglooSnowmenList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.iglooSnowmenList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.iglooSnowmenList = newList;
-    }
-
-    updateIglooSnowmen(dt, gameEnemies, playerWorldPos) {
-        if (!this.iglooSnowmenList) this.iglooSnowmenList = [];
-        this._cleanDeadIglooSnowmen(gameEnemies);
-    }
-
-    // ==================== Tick ====================
-    trySpawnTick(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Tick egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.tickList) this.tickList = [];
-        this._cleanDeadTick(gameEnemies);
-
-        const currentCount = this.tickList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40 + Math.random() * 30;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const tick = new Enemy("Tick", x, y, summonLevel, finalRarity);
-        tick.isFriendly = true;
-        tick.ownerPetal = this;
-        tick.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(tick);
-
-        gameEnemies.push(tick);
-        this.tickList.push(tick);
-
-        this.spawnCooldown = 6000;
-        return true;
-    }
-
-    _cleanDeadTick(gameEnemies) {
-        if (!this.tickList) {
-            this.tickList = [];
-            return;
-        }
-        const newList = [];
-        for (const t of this.tickList) {
-            if (t && gameEnemies.includes(t) && t.health > 0 && !t.isDead) {
-                newList.push(t);
-            } else {
-                const index = gameEnemies.indexOf(t);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.tickList = newList;
-    }
-
-    updateTick(dt, gameEnemies, playerWorldPos) {
-        if (!this.tickList) this.tickList = [];
-        this._cleanDeadTick(gameEnemies);
-    }
-
-    // ==================== Arctic Spider ====================
-    trySpawnArcticSpiders(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "ArcticSpider egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.arcticSpiderList) this.arcticSpiderList = [];
-        this._cleanDeadArcticSpiders(gameEnemies);
-
-        const currentCount = this.arcticSpiderList.length;
-        const maxSpiders = 3;
-        const toSpawn = Math.max(0, maxSpiders - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const spider = new Enemy("ArcticSpider", x, y, summonLevel, finalRarity);
-            spider.isFriendly = true;
-            spider.ownerPetal = this;
-            spider.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(spider);
-
-            gameEnemies.push(spider);
-            this.arcticSpiderList.push(spider);
-        }
-
-        this.spawnCooldown = 12000;
-        return true;
-    }
-
-    _cleanDeadArcticSpiders(gameEnemies) {
-        if (!this.arcticSpiderList) {
-            this.arcticSpiderList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.arcticSpiderList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.arcticSpiderList = newList;
-    }
-
-    updateArcticSpiders(dt, gameEnemies, playerWorldPos) {
-        if (!this.arcticSpiderList) this.arcticSpiderList = [];
-        this._cleanDeadArcticSpiders(gameEnemies);
-    }
-
-    // ==================== Arctic Spider Cave (生成10只) ====================
-    trySpawnArcticCaveSpiders(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "ArcticSpiderCave egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.arcticCaveSpiderList) this.arcticCaveSpiderList = [];
-        this._cleanDeadArcticCaveSpiders(gameEnemies);
-
-        const currentCount = this.arcticCaveSpiderList.length;
-        const maxSpiders = 10;
-        const toSpawn = Math.max(0, maxSpiders - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const spider = new Enemy("ArcticSpider", x, y, summonLevel, finalRarity);
-            spider.isFriendly = true;
-            spider.ownerPetal = this;
-            spider.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(spider);
-
-            gameEnemies.push(spider);
-            this.arcticCaveSpiderList.push(spider);
-        }
-
-        this.spawnCooldown = 18000;
-        return true;
-    }
-
-    _cleanDeadArcticCaveSpiders(gameEnemies) {
-        if (!this.arcticCaveSpiderList) {
-            this.arcticCaveSpiderList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.arcticCaveSpiderList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.arcticCaveSpiderList = newList;
-    }
-
-    updateArcticCaveSpiders(dt, gameEnemies, playerWorldPos) {
-        if (!this.arcticCaveSpiderList) this.arcticCaveSpiderList = [];
-        this._cleanDeadArcticCaveSpiders(gameEnemies);
-    }
-
-    // ==================== Snowman ====================
-    trySpawnSnowman(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Snowman egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.snowmanList) this.snowmanList = [];
-        this._cleanDeadSnowman(gameEnemies);
-
-        const currentCount = this.snowmanList.length;
-        if (currentCount >= 1) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40 + Math.random() * 30;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const snowman = new Enemy("Snowman", x, y, summonLevel, finalRarity);
-        snowman.isFriendly = true;
-        snowman.ownerPetal = this;
-        snowman.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(snowman);
-
-        gameEnemies.push(snowman);
-        this.snowmanList.push(snowman);
-
-        this.spawnCooldown = 6000;
-        return true;
-    }
-
-    _cleanDeadSnowman(gameEnemies) {
-        if (!this.snowmanList) {
-            this.snowmanList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.snowmanList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.snowmanList = newList;
-    }
-
-    updateSnowman(dt, gameEnemies, playerWorldPos) {
-        if (!this.snowmanList) this.snowmanList = [];
-        this._cleanDeadSnowman(gameEnemies);
-    }
-
-    // ==================== Snowstorm ====================
-    trySpawnSnowstorm(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "SnowStick") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.snowstormList) this.snowstormList = [];
-        this._cleanDeadSnowstorm(gameEnemies);
-
-        const currentCount = this.snowstormList.length;
-        const maxSnowstorms = 3;
-        const toSpawn = Math.max(0, maxSnowstorms - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const snowstorm = new Enemy("SnowStorm", x, y, summonLevel, finalRarity);
-            snowstorm.isFriendly = true;
-            snowstorm.ownerPetal = this;
-            snowstorm.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(snowstorm);
-
-            gameEnemies.push(snowstorm);
-            this.snowstormList.push(snowstorm);
-        }
-
-        this.spawnCooldown = 8000;
-        return true;
-    }
-
-    _cleanDeadSnowstorm(gameEnemies) {
-        if (!this.snowstormList) {
-            this.snowstormList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.snowstormList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.snowstormList = newList;
-    }
-
-    updateSnowstorm(dt, gameEnemies, playerWorldPos) {
-        if (!this.snowstormList) this.snowstormList = [];
-        this._cleanDeadSnowstorm(gameEnemies);
-    }
-
-
-    // Queen Ant Egg - 生成2只友方蚁后
-    trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "queen ant egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        // 初始化蚁后列表
-        if (!this.queenAntList) {
-            this.queenAntList = [];
-        }
-
-        // 清理死亡的蚁后
-        this._cleanDeadQueenAnts(gameEnemies);
-
-        // 计算需要生成的数量（最多2只）
-        const currentCount = this.queenAntList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-
-        if (toSpawn <= 0) {
-            return false;
-        }
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 40;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const queenAnt = new Enemy("QueenAnt", x, y, summonLevel, finalRarity);
-            queenAnt.isFriendly = true;
-            queenAnt.ownerPetal = this;
-            queenAnt.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(queenAnt);
-
-            gameEnemies.push(queenAnt);
-            this.queenAntList.push(queenAnt);
-        }
-
-        this.spawnCooldown = 20000; // 20秒冷却
-        return true;
-    }
-
-    // 清理死亡的蚁后
-    _cleanDeadQueenAnts(gameEnemies) {
-        if (!this.queenAntList) {
-            this.queenAntList = [];
-            return;
-        }
-
-        if (!gameEnemies) return;
-
-        const newList = [];
-        for (const queen of this.queenAntList) {
-            if (queen && gameEnemies.includes(queen) && queen.health > 0 && !queen.isDead) {
-                newList.push(queen);
-            } else {
-                const index = gameEnemies.indexOf(queen);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.queenAntList = newList;
-    }
-    // ========== 🐝 养蜂人蛋召唤方法 ==========
-    trySpawnBeekeeperWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Beekeeper egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化养蜂人列表
-        if (!this.beekeeperList) this.beekeeperList = [];
-
-        // 清理死亡的养蜂人
-        this._cleanDeadBeekeepers(gameEnemies);
-
-        // 计算需要生成的数量（最多1只）
-        const currentCount = this.beekeeperList.length;
-        const maxBeekeepers = 1;
-        if (currentCount >= maxBeekeepers) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        let finalRarity;
-        if (hasDNA) {
-            finalRarity = this.player.getSummonRarityWithDna(this);
-        } else {
-            finalRarity = this.mapRarityToSummonRarity(this.rarity);
-        }
-
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        // 创建养蜂人作为友方单位
-        const beekeeper = new Enemy("Beekeeper", x, y, summonLevel, finalRarity);
-        beekeeper.isFriendly = true;
-        beekeeper.ownerPetal = this;
-        beekeeper.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(beekeeper);
-
-        gameEnemies.push(beekeeper);
-        this.beekeeperList.push(beekeeper);
-
-        // 设置冷却时间
-        this.spawnCooldown = ITEM_STATS["Beekeeper egg"]?.base_cooldown || 20000;
-        return true;
-    }
-
-    // 清理死亡的养蜂人
-    _cleanDeadBeekeepers(gameEnemies) {
-        if (!this.beekeeperList) {
-            this.beekeeperList = [];
-            return;
-        }
-        const newList = [];
-        for (const beekeeper of this.beekeeperList) {
-            if (beekeeper && gameEnemies.includes(beekeeper) && beekeeper.health > 0 && !beekeeper.isDead) {
-                newList.push(beekeeper);
-            } else {
-                const index = gameEnemies.indexOf(beekeeper);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.beekeeperList = newList;
-    }
-
-    // 更新养蜂人状态
-    updateBeekeepers(dt, gameEnemies, playerWorldPos) {
-        if (!this.beekeeperList) this.beekeeperList = [];
-        this._cleanDeadBeekeepers(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Beekeeper egg") {
-            if (!this.isBroken && !this.isReloading) {
-                const maxBeekeepers = 1;
-                if (this.beekeeperList.length < maxBeekeepers && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnBeekeeperWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ========== 🐝 蜂巢蛋召唤方法（生成10只蜜蜂）==========
-    trySpawnHiveBeesWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Hive egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化蜜蜂列表
-        if (!this.hiveBeeList) this.hiveBeeList = [];
-
-        // 清理死亡的蜜蜂
-        this._cleanDeadHiveBees(gameEnemies);
-
-        // 计算需要生成的数量（最多10只）
-        const currentCount = this.hiveBeeList.length;
-        const maxBees = 10;
-        const toSpawn = Math.max(0, maxBees - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        let finalRarity;
-        if (hasDNA) {
-            // 如果有DNA，使用DNA升级逻辑
-            finalRarity = this.player.getSummonRarityWithDna(this);
-        } else {
-            // 没有DNA，使用映射稀有度
-            finalRarity = this.mapRarityToSummonRarity(this.rarity);
-        }
-
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-        // 蜜蜂颜色（可选：根据稀有度改变）
-        const beeColor = RARITY_COLORS[finalRarity] || [255, 215, 0];
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 40;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建蜜蜂作为友方单位
-            const bee = new Enemy("Bee", x, y, summonLevel, finalRarity);
-            bee.isFriendly = true;
-            bee.ownerPetal = this;
-            bee.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(bee);
-
-            // 如果是友方蜜蜂，可以设置速度慢一点（可选）
-            if (bee.isFriendly) {
-                bee.speed = Math.floor(bee.speed * 0.8); // 减速20%
-            }
-
-            gameEnemies.push(bee);
-            this.hiveBeeList.push(bee);
-        }
-
-        // 设置冷却时间
-        this.spawnCooldown = ITEM_STATS["Hive egg"]?.base_cooldown || 20000;
-        return true;
-    }
-
-    // 清理死亡的蜂巢蜜蜂
-    _cleanDeadHiveBees(gameEnemies) {
-        if (!this.hiveBeeList) {
-            this.hiveBeeList = [];
-            return;
-        }
-        const newList = [];
-        for (const bee of this.hiveBeeList) {
-            if (bee && gameEnemies.includes(bee) && bee.health > 0 && !bee.isDead) {
-                newList.push(bee);
-            } else {
-                const index = gameEnemies.indexOf(bee);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.hiveBeeList = newList;
-    }
-
-    // 更新蜂巢蜜蜂状态
-    updateHiveBees(dt, gameEnemies, playerWorldPos) {
-        if (!this.hiveBeeList) this.hiveBeeList = [];
-        this._cleanDeadHiveBees(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Hive egg") {
-            if (!this.isBroken && !this.isReloading) {
-                const maxBees = 10;
-                if (this.hiveBeeList.length < maxBees && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnHiveBeesWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 更新蚁后状态
-    updateQueenAnts(dt, gameEnemies, playerWorldPos) {
-        if (!this.queenAntList) {
-            this.queenAntList = [];
-        }
-
-        this._cleanDeadQueenAnts(gameEnemies);
-
-        // 检查是否需要自动补充（仅在非破碎模式下）
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "queen ant egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.queenAntList.length < this.maxQueenAnts && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    _cleanDeadRocks(gameEnemies) {
-        const newList = [];
-        for (const rock of this.rockList) {
-            if (gameEnemies.includes(rock) && rock.health > 0 && !rock.isDead) {
-                newList.push(rock);
-            } else {
-                const index = gameEnemies.indexOf(rock);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.rockList = newList;
-    }
-
-    trySpawnBeetle(gameEnemies, playerWorldPos) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Ant Egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        this._cleanDeadAnts(gameEnemies);
-        const antsNeeded = 4 - this.goldenAntList.length;
-        if (antsNeeded <= 0) {
-            return false;
-        }
-
-        const antRarity = this.player.getSummonRarityWithDna(this);
-
-        const safeMinX = 100, safeMaxX = WORLD_WIDTH - 100;
-        const safeMinY = 100, safeMaxY = WORLD_HEIGHT - 100;
-
-        for (let i = 0; i < antsNeeded; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const spawnX = Math.max(safeMinX, Math.min(safeMaxX, playerWorldPos.x + Math.cos(angle) * distance));
-            const spawnY = Math.max(safeMinY, Math.min(safeMaxY, playerWorldPos.y + Math.sin(angle) * distance));
-
-            const goldenAnt = new GoldenAnt(spawnX, spawnY, antRarity);
-            goldenAnt.ownerPetal = this;
-            goldenAnt.ownerPlayer = this.player;
-            gameEnemies.push(goldenAnt);
-            this.goldenAntList.push(goldenAnt);
-        }
-
-        const rarityToCooldown = {
-            "Common": 1500, "Unusual": 4500, "Rare": 4000, "Epic": 3500,
-            "Legendary": 3000, "Mythic": 2500, "Ultra": 2000, "Super": 5000,"Omega":6000
+    getHealthBonus() { return this.healthBonus; }
+
+    getSpawnCooldownByRarity(baseCooldown) {
+        const rarityMultiplier = {
+            "Common":1.0,"Unusual":0.95,"Rare":0.9,"Epic":0.85,"Legendary":0.8,
+            "Mythic":0.75,"Ultra":0.7,"Super":0.65,"Omega":0.6,"Eternal":0.5
         };
-        this.spawnCooldown = rarityToCooldown[currentItem.rarity] || 5000;
-        return true;
-    }
-
-    // 在 Petal 类中修改 mapRarityToSummonRarity 方法
-    mapRarityToSummonRarity(petalRarity) {
-        const rarityMapping = {
-            "Common": "Common",
-            "Unusual": "Unusual",
-            "Rare": "Unusual",
-            "Epic": "Rare",
-            "Legendary": "Epic",
-            "Mythic": "Legendary",
-            "Ultra": "Mythic",
-            "Super": "Ultra",
-            "Omega": "Super",    // Omega 召唤 Super
-            "Eternal": "Omega",   // Eternal 召唤 Omega
-            "Unique": "Eternal"   // Unique 召唤 Eternal
-        };
-        return rarityMapping[petalRarity] || "Common";
-    }
-    // 在 Petal 类中添加 Leech 召唤方法
-    trySpawnLeechWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Leech Egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Leech 列表
-        if (!this.leechList) this.leechList = [];
-
-        // 清理死亡的 Leech
-        this._cleanDeadLeeches(gameEnemies);
-
-        // 需要生成的数量（最多2只）
-        const currentCount = this.leechList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Leech 敌人作为友方单位
-            const leech = new Enemy("Leech", x, y, summonLevel, finalRarity);
-            leech.isFriendly = true;
-            leech.ownerPetal = this;
-            leech.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(leech);
-
-            gameEnemies.push(leech);
-            this.leechList.push(leech);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Leech Egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    // 清理死亡的 Leech
-    _cleanDeadLeeches(gameEnemies) {
-        if (!this.leechList) {
-            this.leechList = [];
-            return;
-        }
-        const newList = [];
-        for (const l of this.leechList) {
-            if (l && gameEnemies.includes(l) && l.health > 0 && !l.isDead) {
-                newList.push(l);
-            } else {
-                const index = gameEnemies.indexOf(l);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.leechList = newList;
-    }
-
-    // 更新 Leech 状态
-    updateLeeches(dt, gameEnemies, playerWorldPos) {
-        if (!this.leechList) this.leechList = [];
-        this._cleanDeadLeeches(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Leech Egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.leechList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnLeechWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 在 Petal 类中添加 Parasite 召唤方法
-    trySpawnParasiteWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Parasite Egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Parasite 列表
-        if (!this.parasiteList) this.parasiteList = [];
-
-        // 清理死亡的 Parasite
-        this._cleanDeadParasites(gameEnemies);
-
-        // 需要生成的数量（最多2只）
-        const currentCount = this.parasiteList.length;
-        const toSpawn = Math.max(0, 1 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Parasite 敌人作为友方单位
-            const parasite = new Enemy("Parasite", x, y, summonLevel, finalRarity);
-            parasite.isFriendly = true;
-            parasite.ownerPetal = this;
-            parasite.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(parasite);
-
-            gameEnemies.push(parasite);
-            this.parasiteList.push(parasite);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Parasite Egg"]?.base_cooldown || 9000;
-        return true;
-    }
-
-    // 清理死亡的 Parasite
-    _cleanDeadParasites(gameEnemies) {
-        if (!this.parasiteList) {
-            this.parasiteList = [];
-            return;
-        }
-        const newList = [];
-        for (const p of this.parasiteList) {
-            if (p && gameEnemies.includes(p) && p.health > 0 && !p.isDead) {
-                newList.push(p);
-            } else {
-                const index = gameEnemies.indexOf(p);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.parasiteList = newList;
-    }
-
-    // 更新 Parasite 状态
-    updateParasites(dt, gameEnemies, playerWorldPos) {
-        if (!this.parasiteList) this.parasiteList = [];
-        this._cleanDeadParasites(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Parasite Egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.parasiteList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnParasiteWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-        // 🟦 新增：trySpawnSquareWithDNA 方法（支持 DNA 升级）
-    trySpawnSquareWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Square Egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化列表
-        if (!this.squareList) this.squareList = [];
-
-        // 清理死亡的 Square
-        this._cleanDeadSquare(gameEnemies);
-
-        // 计算需要生成的数量
-        const currentCount = this.squareList.length;
-        const maxCount = this.maxSquare || 2;
-
-        if (currentCount >= maxCount) {
-            return false;
-        }
-
-        const toSpawn = Math.min(1, maxCount - currentCount); // 每次最多生成1个
-
-        // 使用 DNA 升级逻辑获取召唤稀有度
-        let finalRarity;
-        if (hasDNA) {
-            // 如果有 DNA，使用 getSummonRarityWithDna 方法
-            finalRarity = this.player.getSummonRarityWithDna(this);
-        } else {
-            // 没有 DNA，使用映射稀有度
-            finalRarity = this.mapRarityToSummonRarity(this.rarity);
-
-        }
-
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 40;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Square 敌人作为友方单位
-            const square = new Enemy("Square", x, y, summonLevel, finalRarity);
-            square.isFriendly = true;           // 设置为友方
-            square.ownerPetal = this;
-            square.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(square);
-
-            // Square 特殊属性
-            square.canUseDNA = true;             // 可以使用 DNA
-
-            gameEnemies.push(square);
-            this.squareList.push(square);
-
-        }
-
-        // 设置冷却时间
-        const baseCooldown = ITEM_STATS["Square Egg"]?.base_cooldown || 15000;
-        this.spawnCooldown = this.getSpawnCooldownByRarity(baseCooldown);
-
-
-        return true;
-    }
-
-    // 新增：清理死亡的 Square
-    _cleanDeadSquare(gameEnemies) {
-        if (!this.squareList) {
-            this.squareList = [];
-            return;
-        }
-        const newList = [];
-        for (const square of this.squareList) {
-            if (square && gameEnemies.includes(square) && square.health > 0 && !square.isDead) {
-                newList.push(square);
-            } else {
-                const index = gameEnemies.indexOf(square);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.squareList = newList;
-    }
-
-    // 新增：更新 Square 状态
-    updateSquare(dt, gameEnemies, playerWorldPos) {
-        if (!this.squareList) this.squareList = [];
-        this._cleanDeadSquare(gameEnemies);
-
-        // 自动补充逻辑（如果需要）
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Square Egg") {
-            if (!this.isBroken && !this.isReloading) {
-                const maxCount = this.maxSquare || 2;
-                if (this.squareList.length < maxCount && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnSquareWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ========== 🐝 蜜蜂召唤方法 ==========
-    trySpawnBeesWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Bee egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化蜜蜂列表
-        if (!this.beeList) this.beeList = [];
-
-        // 清理死亡的蜜蜂
-        this._cleanDeadBees(gameEnemies);
-
-        // 计算需要生成的数量（最多3只）
-        const currentCount = this.beeList.length;
-        const maxBees = 1;
-        const toSpawn = Math.max(0, maxBees - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建蜜蜂作为友方单位
-            const bee = new Enemy("Bee", x, y, summonLevel, finalRarity);
-            bee.isFriendly = true;
-            bee.ownerPetal = this;
-            bee.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(bee);
-
-            gameEnemies.push(bee);
-            this.beeList.push(bee);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Bee egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    // 清理死亡的蜜蜂
-    _cleanDeadBees(gameEnemies) {
-        if (!this.beeList) {
-            this.beeList = [];
-            return;
-        }
-        const newList = [];
-        for (const bee of this.beeList) {
-            if (bee && gameEnemies.includes(bee) && bee.health > 0 && !bee.isDead) {
-                newList.push(bee);
-            } else {
-                const index = gameEnemies.indexOf(bee);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.beeList = newList;
-    }
-
-    // 更新蜜蜂状态
-    updateBees(dt, gameEnemies, playerWorldPos) {
-        if (!this.beeList) this.beeList = [];
-        this._cleanDeadBees(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Bee egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.beeList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnBeesWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ========== 🐞 瓢虫召唤方法 ==========
-    trySpawnLadybugsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Ladybug egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化瓢虫列表
-        if (!this.ladybugList) this.ladybugList = [];
-
-        // 清理死亡的瓢虫
-        this._cleanDeadLadybugs(gameEnemies);
-
-        // 计算需要生成的数量（最多2只）
-        const currentCount = this.ladybugList.length;
-        const maxLadybugs = 2;
-        const toSpawn = Math.max(0, maxLadybugs - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建瓢虫作为友方单位
-            const ladybug = new Enemy("Ladybug", x, y, summonLevel, finalRarity);
-            ladybug.isFriendly = true;
-            ladybug.ownerPetal = this;
-            ladybug.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ladybug);
-
-            // 随机生成斑点（由Enemy类的构造函数处理）
-
-            gameEnemies.push(ladybug);
-            this.ladybugList.push(ladybug);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Ladybug egg"]?.base_cooldown || 12000;
-        return true;
-    }
-
-    // 清理死亡的瓢虫
-    _cleanDeadLadybugs(gameEnemies) {
-        if (!this.ladybugList) {
-            this.ladybugList = [];
-            return;
-        }
-        const newList = [];
-        for (const ladybug of this.ladybugList) {
-            if (ladybug && gameEnemies.includes(ladybug) && ladybug.health > 0 && !ladybug.isDead) {
-                newList.push(ladybug);
-            } else {
-                const index = gameEnemies.indexOf(ladybug);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.ladybugList = newList;
-    }
-
-    // 更新瓢虫状态
-    updateLadybugs(dt, gameEnemies, playerWorldPos) {
-        if (!this.ladybugList) this.ladybugList = [];
-        this._cleanDeadLadybugs(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Ladybug egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.ladybugList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnLadybugsWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnSandstormsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Stick") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        this._cleanDeadSandstorms(gameEnemies);
-        const toSpawn = this.maxSandstorms - this.sandstormList.length;
-        if (toSpawn <= 0) {
-            return false;
-        }
-
-        // 这里可以使用 hasDNA 参数
-        const summonRarity = this.player.getSummonRarityWithDna(this);  // 这个方法内部会处理 DNA 逻辑
-
-        let spawnedCount = 0;
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100, playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + Math.sin(angle) * distance));
-
-            const sandstorm = new Enemy("Sandstorm", x, y, 1, summonRarity);
-            sandstorm.isFriendly = true;
-            sandstorm.ownerPetal = this;
-            sandstorm.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(sandstorm);
-
-            gameEnemies.push(sandstorm);
-            this.sandstormList.push(sandstorm);
-            spawnedCount++;
-        }
-
-        if (spawnedCount > 0) {
-            this.spawnCooldown = 8000;
-            return true;
-        }
-        return false;
-    }
-
-    // ========== 🦠 癌症蛋召唤逻辑 (新增) ==========
-    // 尝试生成 Cancer 细胞（带DNA升级）
-    trySpawnCancerWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Cancer egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        // 确保 cancerList 已初始化
-        if (!this.cancerList) {
-            this.cancerList = [];
-        }
-
-        // 清理死亡的 Cancer
-        this._cleanDeadCancer(gameEnemies);
-
-        // 需要生成的数量（最多2只）
-        const currentCount = this.cancerList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-
-        if (toSpawn <= 0) {
-            return false;
-        }
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity);
-
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Cancer 敌人作为友方单位
-            const cancer = new Enemy("Cancer", x, y, summonLevel, finalRarity);
-            cancer.isFriendly = true;           // 设置为友方
-            cancer.ownerPetal = this;
-            cancer.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(cancer);
-
-            // Cancer 特殊属性
-            cancer.isCancerInfected = true;      // 癌症细胞自带感染能力
-            cancer.canInfectOthers = true;       // 可以感染其他生物
-
-            gameEnemies.push(cancer);
-            this.cancerList.push(cancer);
-
-        }
-
-        // 设置冷却时间（基于稀有度）
-        const baseCooldown = ITEM_STATS["Cancer Egg"]?.base_cooldown || 12000;
-        this.spawnCooldown = this.getSpawnCooldownByRarity(baseCooldown);
-
-
-        return true;
-    }
-
-    // 清理死亡的癌症细胞
-    _cleanDeadCancer(gameEnemies) {
-        if (!this.cancerList) {
-            this.cancerList = [];
-            return;
-        }
-        if (!gameEnemies) return;
-
-        const newList = [];
-        for (const cancer of this.cancerList) {
-            if (cancer && gameEnemies.includes(cancer) && cancer.health > 0 && !cancer.isDead) {
-                newList.push(cancer);
-            } else {
-                const index = gameEnemies.indexOf(cancer);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.cancerList = newList;
-    }
-
-    // 更新癌症细胞状态 (在 update 循环中调用以自动补充)
-    updateCancer(dt, gameEnemies, playerWorldPos) {
-        if (!this.cancerList) this.cancerList = [];
-        this._cleanDeadCancer(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Cancer Egg") {
-            if (!this.isBroken && !this.isReloading) {
-                const maxCancer = this.maxCancer || 2;
-                if (this.cancerList.length < maxCancer && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnCancerWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ========== 兵蚁更新 ==========
-    updateSoldierAnts(dt, gameEnemies, playerWorldPos) {
-        if (!this.soldierAntList) this.soldierAntList = [];
-        this._cleanDeadSoldierAnts(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Soldier Ant egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.soldierAntList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnSoldierAntsWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // ========== 工蚁更新 ==========
-    updateWorkerAnts(dt, gameEnemies, playerWorldPos) {
-        if (!this.workerAntList) this.workerAntList = [];
-        this._cleanDeadWorkerAnts(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Worker Ant egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.workerAntList.length < 4 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnWorkerAntsWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // ========== 蜈蚣更新 ==========
-    updateCentipedes(dt, gameEnemies, playerWorldPos) {
-        if (!this.centipedeList) this.centipedeList = [];
-        this._cleanDeadCentipedes(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Centipede egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.centipedeList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnCentipedeWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    trySpawnRockWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Moon Egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        this._cleanDeadRocks(gameEnemies);
-        if (this.rockList.length >= this.maxRocks) {
-            return false;
-        }
-
-        const summonRarity = this.player.getSummonRarityWithDna(this);
-
-        if (!["Mythic", "Ultra", "Super", "Omega"].includes(summonRarity)) {
-            return false;
-        }
-
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100, playerWorldPos.x + (Math.random() * 120 - 60)));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100, playerWorldPos.y + (Math.random() * 120 - 60)));
-
-        const rock = new Enemy("Rock", x, y, 1, summonRarity);
-        rock.isFriendly = true;
-        rock.ownerPetal = this;
-        rock.ownerPlayer = this.player;
-        rock.maxHealth *= 10;
-        rock.health = rock.maxHealth;
-        rock.attackDamage /= 3;
-
-        // 应用天赋加成
-        this._applyTalentToPet(rock);
-
-        gameEnemies.push(rock);
-        this.rockList.push(rock);
-        this.spawnCooldown = 15000;
-        return true;
+        return baseCooldown * (rarityMultiplier[this.rarity] || 1.0);
     }
 
     _getUpgradedRarity(originalRarity) {
         try {
             const idx = RARITY_LIST.indexOf(originalRarity);
             return RARITY_LIST[Math.min(idx + 1, RARITY_LIST.length - 1)];
-        } catch (error) {
-            return originalRarity;
-        }
-    }
-
-    trySpawnGoldenAnts(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Ant Egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        this._cleanDeadAnts(gameEnemies);
-        const antsNeeded = 4 - this.goldenAntList.length;
-        if (antsNeeded <= 0) {
-            return false;
-        }
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const safeMinX = 100, safeMaxX = WORLD_WIDTH - 100;
-        const safeMinY = 100, safeMaxY = WORLD_HEIGHT - 100;
-
-        for (let i = 0; i < antsNeeded; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const spawnX = Math.max(safeMinX, Math.min(safeMaxX, playerWorldPos.x + Math.cos(angle) * distance));
-            const spawnY = Math.max(safeMinY, Math.min(safeMaxY, playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 直接使用 Enemy 类
-            const goldenAnt = new Enemy("GoldenAnt", spawnX, spawnY, summonLevel, finalRarity);
-            goldenAnt.isFriendly = true;
-            goldenAnt.ownerPetal = this;
-            goldenAnt.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(goldenAnt);
-
-            gameEnemies.push(goldenAnt);
-            this.goldenAntList.push(goldenAnt);
-        }
-
-        const rarityToCooldown = {
-            "Common": 5000, "Unusual": 4500, "Rare": 4000, "Epic": 3500,
-            "Legendary": 3000, "Mythic": 2500, "Ultra": 2000, "Super": 1500
-        };
-        this.spawnCooldown = rarityToCooldown[currentItem.rarity] || 5000;
-        return true;
-    }
-
-
-
-// 在 Petal 类中的 trySpawnDiggers 方法
-    trySpawnDiggers(gameEnemies, playerWorldPos, hasDNA, diggerType) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem) return false;
-
-        // 检查物品类型是否匹配
-        const eggToDigger = {
-            "TrashDigger egg": "TrashDigger",
-            "MudDigger_egg": "MudDigger",
-            "Digger egg": "Digger",
-            "Biologist egg": "Biologist"
-        };
-
-        const expectedDiggerType = eggToDigger[currentItem.type];
-        if (expectedDiggerType !== diggerType) return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadDiggers(gameEnemies);
-
-        const currentCount = this.diggerList.length;
-        const maxCount = this.maxDiggers || 2;
-
-        // 所有 Digger 蛋都只生成1只
-        const spawnCount = 1;
-
-        // 检查是否已达到最大数量
-        if (currentCount >= maxCount) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < spawnCount; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const digger = new Enemy(diggerType, x, y, summonLevel, finalRarity);
-            digger.isFriendly = true;
-            digger.isAngry = false; // 初始为微笑
-            digger.ownerPetal = this;
-            digger.ownerPlayer = this.player;
-            digger.gameInstance = this.player.gameInstance;
-
-            // 应用天赋加成
-            this._applyTalentToPet(digger);
-
-            gameEnemies.push(digger);
-            this.diggerList.push(digger);
-        }
-
-        this.spawnCooldown = ITEM_STATS[`${diggerType} egg`]?.base_cooldown || 15000;
-        return true;
-    }
-
-    // 清理死亡的 Digger
-    _cleanDeadDiggers(gameEnemies) {
-        if (!this.diggerList) {
-            this.diggerList = [];
-            return;
-        }
-        const newList = [];
-        for (const digger of this.diggerList) {
-            if (digger && gameEnemies.includes(digger) && digger.health > 0 && !digger.isDead) {
-                newList.push(digger);
-            } else {
-                const index = gameEnemies.indexOf(digger);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.diggerList = newList;
-    }
-
-    // 更新 Digger 状态
-    updateDiggers(dt, gameEnemies, playerWorldPos) {
-        if (!this.diggerList) this.diggerList = [];
-        this._cleanDeadDiggers(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem) return;
-
-        const eggToDigger = {
-            "TrashDigger egg": "TrashDigger",
-            "Digger egg": "Digger",
-            "MudDigger_egg": "MudDigger",
-            "Biologist egg": "Biologist"
-        };
-
-        const diggerType = eggToDigger[currentItem.type];
-        if (!diggerType) return;
-
-        if (!this.isBroken && !this.isReloading) {
-            if (this.diggerList.length < this.maxDiggers && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                const hasDNA = this.player && this.player.petals.some(p => {
-                    const item = p.getCurrentItem();
-                    return item && item.type === "DNA" && !p.isBroken;
-                });
-                this.trySpawnDiggers(gameEnemies, playerWorldPos, hasDNA, diggerType);
-            }
-        }
-    }
-    trySpawnWhiteBloodCellsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) {
-            return false;
-        }
-
-        const currentItem = this.getCurrentItem();
-
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "whitebloodcell egg") {
-            return false;
-        }
-
-        if (this.spawnCooldown > 0) {
-            return false;
-        }
-
-        if (!this.player || this.player.isDead) {
-            return false;
-        }
-
-        if (!this.whiteBloodCellList) {
-            this.whiteBloodCellList = [];
-        }
-
-        this._cleanDeadWhiteBloodCells(gameEnemies);
-
-        const currentCount = this.whiteBloodCellList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-
-        if (toSpawn <= 0) {
-            return false;
-        }
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        let spawnedCount = 0;
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            try {
-                const whiteBloodCell = new Enemy("WhiteBloodCell", x, y, summonLevel, finalRarity);
-                whiteBloodCell.isFriendly = true;
-                whiteBloodCell.ownerPetal = this;
-                whiteBloodCell.ownerPlayer = this.player;
-
-                // 应用天赋加成
-                this._applyTalentToPet(whiteBloodCell);
-
-                if (gameEnemies) {
-                    gameEnemies.push(whiteBloodCell);
-                    this.whiteBloodCellList.push(whiteBloodCell);
-                    spawnedCount++;
-                }
-            } catch (error) {
-            }
-        }
-
-        if (spawnedCount > 0) {
-            this.spawnCooldown = 5000;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    trySpawnSpidersWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "spider egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadSpiders(gameEnemies);
-        const toSpawn = 3 - this.spiderList.length;
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const spider = new Enemy("Spider", x, y, summonLevel, finalRarity);
-            spider.isFriendly = true;
-            spider.ownerPetal = this;
-            spider.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(spider);
-
-            gameEnemies.push(spider);
-            this.spiderList.push(spider);
-        }
-
-        this.spawnCooldown = 6000;
-        return true;
-    }
-
-    trySpawnRedBloodCellsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "redbloodcell egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadRedBloodCells(gameEnemies);
-        const toSpawn = 2 - this.redBloodCellList.length;
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const redBloodCell = new Enemy("RedBloodCell", x, y, summonLevel, finalRarity);
-            redBloodCell.isFriendly = true;
-            redBloodCell.ownerPetal = this;
-            redBloodCell.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(redBloodCell);
-
-            gameEnemies.push(redBloodCell);
-            this.redBloodCellList.push(redBloodCell);
-        }
-
-        this.spawnCooldown = 8000;
-        return true;
-    }
-
-    // ========== 🆕 下水道召唤物逻辑 ==========
-
-    // 生成 ManHole
-    trySpawnManHoleWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "ManHole egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 ManHole 列表
-        if (!this.manHoleList) this.manHoleList = [];
-
-        // 清理死亡的 ManHole
-        this._cleanDeadManHoles(gameEnemies);
-
-        // 需要生成的数量（最多1个）
-        const currentCount = this.manHoleList.length;
-        const toSpawn = Math.max(0, 1 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 ManHole 敌人作为友方单位
-            const manHole = new Enemy("ManHole", x, y, summonLevel, finalRarity);
-            manHole.isFriendly = true;
-            manHole.ownerPetal = this;
-            manHole.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(manHole);
-
-            gameEnemies.push(manHole);
-            this.manHoleList.push(manHole);
-        }
-
-        this.spawnCooldown = ITEM_STATS["ManHole egg"]?.base_cooldown || 20000;
-        return true;
-    }
-
-    // 清理死亡的 ManHole
-    _cleanDeadManHoles(gameEnemies) {
-        if (!this.manHoleList) {
-            this.manHoleList = [];
-            return;
-        }
-        const newList = [];
-        for (const m of this.manHoleList) {
-            if (m && gameEnemies.includes(m) && m.health > 0 && !m.isDead) {
-                newList.push(m);
-            } else {
-                const index = gameEnemies.indexOf(m);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.manHoleList = newList;
-    }
-
-    // 更新 ManHole 状态
-    updateManHoles(dt, gameEnemies, playerWorldPos) {
-        if (!this.manHoleList) this.manHoleList = [];
-        this._cleanDeadManHoles(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "ManHole egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.manHoleList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnManHoleWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 在 Petal 类中添加
-    trySpawnFliesFromEgg(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Trashcan egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-        const spawnCount = 12; // 生成10只苍蝇
-
-        for (let i = 0; i < spawnCount; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const fly = new Enemy("Fly", x, y, summonLevel, finalRarity);
-            fly.isFriendly = true;
-            fly.ownerPetal = this;
-            fly.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(fly);
-
-            gameEnemies.push(fly);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Trashcan egg"]?.base_cooldown || 22000;
-        return true;
-    }
-    // 生成 Fly
-    trySpawnFlyWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Fly_egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Fly 列表
-        if (!this.flyList) this.flyList = [];
-
-        // 清理死亡的 Fly
-        this._cleanDeadFlies(gameEnemies);
-
-        // 需要生成的数量（最多3个）
-        const currentCount = this.flyList.length;
-        const toSpawn = Math.max(0, 3 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Fly 敌人作为友方单位
-            const fly = new Enemy("Fly", x, y, summonLevel, finalRarity);
-            fly.isFriendly = true;
-            fly.ownerPetal = this;
-            fly.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(fly);
-
-            gameEnemies.push(fly);
-            this.flyList.push(fly);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Fly_egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    // 更新 Fly 状态
-    updateFliesFromEgg(dt, gameEnemies, playerWorldPos) {
-        if (!this.flyList) this.flyList = [];
-        this._cleanDeadFlies(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Trashcan egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.flyList.length < this.maxFlies && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnFliesFromEgg(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 清理死亡的 Fly
-    _cleanDeadFlies(gameEnemies) {
-        if (!this.flyList) {
-            this.flyList = [];
-            return;
-        }
-        const newList = [];
-        for (const f of this.flyList) {
-            if (f && gameEnemies.includes(f) && f.health > 0 && !f.isDead) {
-                newList.push(f);
-            } else {
-                const index = gameEnemies.indexOf(f);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.flyList = newList;
-    }
-
-    // 更新 Fly 状态
-    updateFlies(dt, gameEnemies, playerWorldPos) {
-        if (!this.flyList) this.flyList = [];
-        this._cleanDeadFlies(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Fly_egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.flyList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnFlyWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // 生成 Rat
-    trySpawnRatWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Rat_egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Rat 列表
-        if (!this.ratList) this.ratList = [];
-
-        // 清理死亡的 Rat
-        this._cleanDeadRats(gameEnemies);
-
-        // 需要生成的数量（最多2个）
-        const currentCount = this.ratList.length;
-        const toSpawn = Math.max(0, 2 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Rat 敌人作为友方单位
-            const rat = new Enemy("Rat", x, y, summonLevel, finalRarity);
-            rat.isFriendly = true;
-            rat.ownerPetal = this;
-            rat.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(rat);
-
-            gameEnemies.push(rat);
-            this.ratList.push(rat);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Rat_egg"]?.base_cooldown || 20000;
-        return true;
-    }
-
-    // 清理死亡的 Rat
-    _cleanDeadRats(gameEnemies) {
-        if (!this.ratList) {
-            this.ratList = [];
-            return;
-        }
-        const newList = [];
-        for (const r of this.ratList) {
-            if (r && gameEnemies.includes(r) && r.health > 0 && !r.isDead) {
-                newList.push(r);
-            } else {
-                const index = gameEnemies.indexOf(r);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.ratList = newList;
-    }
-
-    // 更新 Rat 状态
-    updateRats(dt, gameEnemies, playerWorldPos) {
-        if (!this.ratList) this.ratList = [];
-        this._cleanDeadRats(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Rat_egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.ratList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnRatWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // 生成 Roach
-    trySpawnRoachWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Roach_egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Roach 列表
-        if (!this.roachList) this.roachList = [];
-
-        // 清理死亡的 Roach
-        this._cleanDeadRoaches(gameEnemies);
-
-        // 需要生成的数量（最多1个）
-        const currentCount = this.roachList.length;
-        const toSpawn = Math.max(0, 1 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Roach 敌人作为友方单位
-            const roach = new Enemy("Roach", x, y, summonLevel, finalRarity);
-            roach.isFriendly = true;
-            roach.ownerPetal = this;
-            roach.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(roach);
-
-            gameEnemies.push(roach);
-            this.roachList.push(roach);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Roach_egg"]?.base_cooldown || 6000;
-        return true;
-    }
-
-    // 清理死亡的 Roach
-    _cleanDeadRoaches(gameEnemies) {
-        if (!this.roachList) {
-            this.roachList = [];
-            return;
-        }
-        const newList = [];
-        for (const r of this.roachList) {
-            if (r && gameEnemies.includes(r) && r.health > 0 && !r.isDead) {
-                newList.push(r);
-            } else {
-                const index = gameEnemies.indexOf(r);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.roachList = newList;
-    }
-
-    // 更新 Roach 状态
-    updateRoaches(dt, gameEnemies, playerWorldPos) {
-        if (!this.roachList) this.roachList = [];
-        this._cleanDeadRoaches(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Roach_egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.roachList.length < 1 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnRoachWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // 生成 PooStorm
-    trySpawnPooStormWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "PooStick") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 PooStorm 列表
-        if (!this.pooStormList) this.pooStormList = [];
-
-        // 清理死亡的 PooStorm
-        this._cleanDeadPooStorms(gameEnemies);
-
-        // 需要生成的数量（最多3个）
-        const currentCount = this.pooStormList.length;
-        const toSpawn = Math.max(0, 3 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 PooStorm 敌人作为友方单位
-            const pooStorm = new Enemy("PooStorm", x, y, summonLevel, finalRarity);
-            pooStorm.isFriendly = true;
-            pooStorm.ownerPetal = this;
-            pooStorm.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(pooStorm);
-
-            gameEnemies.push(pooStorm);
-            this.pooStormList.push(pooStorm);
-        }
-
-        this.spawnCooldown = ITEM_STATS["PooStick"]?.base_cooldown || 8000;
-        return true;
-    }
-
-    // 清理死亡的 PooStorm
-    _cleanDeadPooStorms(gameEnemies) {
-        if (!this.pooStormList) {
-            this.pooStormList = [];
-            return;
-        }
-        const newList = [];
-        for (const p of this.pooStormList) {
-            if (p && gameEnemies.includes(p) && p.health > 0 && !p.isDead) {
-                newList.push(p);
-            } else {
-                const index = gameEnemies.indexOf(p);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.pooStormList = newList;
-    }
-
-    // 更新 PooStorm 状态
-    updatePooStorms(dt, gameEnemies, playerWorldPos) {
-        if (!this.pooStormList) this.pooStormList = [];
-        this._cleanDeadPooStorms(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "PooStick") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.pooStormList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnPooStormWithDna(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-
-    // ========== 🌊 扇贝蛋 ==========
-    trySpawnScallopsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Shell egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化扇贝列表
-        if (!this.scallopList) this.scallopList = [];
-
-        // 清理死亡的扇贝
-        this._cleanDeadScallops(gameEnemies);
-
-        // 需要生成的数量（最多4个）
-        const currentCount = this.scallopList.length;
-        const toSpawn = Math.max(0, 4 - currentCount);
-        if (toSpawn <= 0) return false;
-
-        // 获取召唤稀有度和等级
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const scallop = new Enemy("Scallop", x, y, summonLevel, finalRarity);
-            scallop.isFriendly = true;
-            scallop.ownerPetal = this;
-            scallop.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(scallop);
-
-            gameEnemies.push(scallop);
-            this.scallopList.push(scallop);
-        }
-
-        this.spawnCooldown = 7000; // 7秒冷却
-        return true;
-    }
-
-    // 清理死亡的扇贝
-    _cleanDeadScallops(gameEnemies) {
-        if (!this.scallopList) {
-            this.scallopList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.scallopList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.scallopList = newList;
-    }
-    // ========== 兵蚁蛋召唤 ==========
-    trySpawnSoldierAntsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Soldier Ant egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.soldierAntList) this.soldierAntList = [];
-        this._cleanDeadSoldierAnts(gameEnemies);
-
-        const currentCount = this.soldierAntList.length;
-        const maxCount = 3;
-        const toSpawn = Math.max(0, maxCount - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("Soldier Ant", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.soldierAntList.push(ant);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Soldier Ant egg"]?.base_cooldown || 10000;
-        return true;
-    }
-
-    // ========== 工蚁蛋召唤 ==========
-    trySpawnWorkerAntsWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Worker Ant egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.workerAntList) this.workerAntList = [];
-        this._cleanDeadWorkerAnts(gameEnemies);
-
-        const currentCount = this.workerAntList.length;
-        const maxCount = 4;
-        const toSpawn = Math.max(0, maxCount - currentCount);
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("Worker Ant", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.workerAntList.push(ant);
-        }
-
-        this.spawnCooldown = ITEM_STATS["Worker Ant egg"]?.base_cooldown || 8000;
-        return true;
-    }
-
-    // ========== 蜈蚣蛋召唤 ==========
-    trySpawnCentipedeWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Centipede egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.centipedeList) this.centipedeList = [];
-        this._cleanDeadCentipedes(gameEnemies);
-
-        const currentCount = this.centipedeList.length;
-        const maxCount = 1;
-        if (currentCount >= maxCount) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 40;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        const centipede = new Enemy("Centipede", x, y, summonLevel, finalRarity);
-        centipede.isFriendly = true;
-        centipede.ownerPetal = this;
-        centipede.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(centipede);
-
-        gameEnemies.push(centipede);
-        this.centipedeList.push(centipede);
-
-        this.spawnCooldown = ITEM_STATS["Centipede egg"]?.base_cooldown || 15000;
-        return true;
-    }
-
-    _cleanDeadSoldierAnts(gameEnemies) {
-        if (!this.soldierAntList) {
-            this.soldierAntList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.soldierAntList) {
-            if (ant && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            }
-        }
-        this.soldierAntList = newList;
-    }
-
-    _cleanDeadWorkerAnts(gameEnemies) {
-        if (!this.workerAntList) {
-            this.workerAntList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.workerAntList) {
-            if (ant && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            }
-        }
-        this.workerAntList = newList;
-    }
-
-    _cleanDeadCentipedes(gameEnemies) {
-        if (!this.centipedeList) {
-            this.centipedeList = [];
-            return;
-        }
-        const newList = [];
-        for (const centipede of this.centipedeList) {
-            if (centipede && gameEnemies.includes(centipede) && centipede.health > 0 && !centipede.isDead) {
-                newList.push(centipede);
-            }
-        }
-        this.centipedeList = newList;
-    }
-    // 更新扇贝
-    updateScallops(dt, gameEnemies, playerWorldPos) {
-        if (!this.scallopList) this.scallopList = [];
-        this._cleanDeadScallops(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Shell egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.scallopList.length < 4 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnScallopsWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    // ========== 🌊 海星蛋 ==========
-    trySpawnStarfishWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Starfish egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.starfishList) this.starfishList = [];
-
-        this._cleanDeadStarfish(gameEnemies);
-
-        const currentCount = this.starfishList.length;
-        const toSpawn = Math.max(0, 2 - currentCount); // 最多2个
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const starfish = new Enemy("Starfish", x, y, summonLevel, finalRarity);
-            starfish.isFriendly = true;
-            starfish.ownerPetal = this;
-            starfish.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(starfish);
-
-            gameEnemies.push(starfish);
-            this.starfishList.push(starfish);
-        }
-
-        this.spawnCooldown = 8000; // 8秒冷却
-        return true;
-    }
-
-    _cleanDeadStarfish(gameEnemies) {
-        if (!this.starfishList) {
-            this.starfishList = [];
-            return;
-        }
-        const newList = [];
-        for (const s of this.starfishList) {
-            if (s && gameEnemies.includes(s) && s.health > 0 && !s.isDead) {
-                newList.push(s);
-            } else {
-                const index = gameEnemies.indexOf(s);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.starfishList = newList;
-    }
-
-    updateStarfish(dt, gameEnemies, playerWorldPos) {
-        if (!this.starfishList) this.starfishList = [];
-        this._cleanDeadStarfish(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Starfish egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.starfishList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnStarfishWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    // ========== 🌊 气泡蛋 ==========
-    trySpawnBubblesWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Bubble egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.bubbleList) this.bubbleList = [];
-
-        this._cleanDeadBubbles(gameEnemies);
-
-        const currentCount = this.bubbleList.length;
-        const toSpawn = Math.max(0, 3 - currentCount); // 最多3个
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const bubble = new Enemy("Bubble", x, y, summonLevel, finalRarity);
-            bubble.isFriendly = true;
-            bubble.ownerPetal = this;
-            bubble.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(bubble);
-
-            gameEnemies.push(bubble);
-            this.bubbleList.push(bubble);
-        }
-
-        this.spawnCooldown = 5000; // 5秒冷却
-        return true;
-    }
-
-    _cleanDeadBubbles(gameEnemies) {
-        if (!this.bubbleList) {
-            this.bubbleList = [];
-            return;
-        }
-        const newList = [];
-        for (const b of this.bubbleList) {
-            if (b && gameEnemies.includes(b) && b.health > 0 && !b.isDead) {
-                newList.push(b);
-            } else {
-                const index = gameEnemies.indexOf(b);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.bubbleList = newList;
-    }
-
-    updateBubbles(dt, gameEnemies, playerWorldPos) {
-        if (!this.bubbleList) this.bubbleList = [];
-        this._cleanDeadBubbles(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Bubble egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.bubbleList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnBubblesWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-    // 尝试召唤噬菌体
-    trySpawnBacteriophageWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Bacteriophage egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化噬菌体列表
-        if (!this.bacteriophageList) this.bacteriophageList = [];
-
-        // 清理死亡的噬菌体
-        this._cleanDeadBacteriophages(gameEnemies);
-
-        // 需要生成的数量（最多1个）
-        const currentCount = this.bacteriophageList.length;
-        if (currentCount >= this.maxBacteriophages) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40 + Math.random() * 30;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        // 创建噬菌体作为友方单位
-        const phage = new Enemy("Bacteriophage", x, y, summonLevel, finalRarity);
-        phage.isFriendly = true;
-        phage.ownerPetal = this;
-        phage.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(phage);
-
-        gameEnemies.push(phage);
-        this.bacteriophageList.push(phage);
-
-        this.spawnCooldown = ITEM_STATS["Bacteriophage egg"]?.base_cooldown || 15000;
-        return true;
-    }
-
-    // 清理死亡的噬菌体
-    _cleanDeadBacteriophages(gameEnemies) {
-        if (!this.bacteriophageList) {
-            this.bacteriophageList = [];
-            return;
-        }
-        const newList = [];
-        for (const phage of this.bacteriophageList) {
-            if (phage && gameEnemies.includes(phage) && phage.health > 0 && !phage.isDead) {
-                newList.push(phage);
-            } else {
-                const index = gameEnemies.indexOf(phage);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.bacteriophageList = newList;
-    }
-
-    // 更新噬菌体状态
-    updateBacteriophages(dt, gameEnemies, playerWorldPos) {
-        if (!this.bacteriophageList) this.bacteriophageList = [];
-        this._cleanDeadBacteriophages(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Bacteriophage egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.bacteriophageList.length < this.maxBacteriophages &&
-                    this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnBacteriophageWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // ========== 🌊 螃蟹蛋 ==========
-    trySpawnCrabsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Crab egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.crabList) this.crabList = [];
-
-        this._cleanDeadCrabs(gameEnemies);
-
-        const currentCount = this.crabList.length;
-        const toSpawn = Math.max(0, 3 - currentCount); // 最多3个
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const crab = new Enemy("Crab", x, y, summonLevel, finalRarity);
-            crab.isFriendly = true;
-            crab.ownerPetal = this;
-            crab.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(crab);
-
-            gameEnemies.push(crab);
-            this.crabList.push(crab);
-        }
-
-        this.spawnCooldown = 6000; // 6秒冷却
-        return true;
-    }
-
-    _cleanDeadCrabs(gameEnemies) {
-        if (!this.crabList) {
-            this.crabList = [];
-            return;
-        }
-        const newList = [];
-        for (const c of this.crabList) {
-            if (c && gameEnemies.includes(c) && c.health > 0 && !c.isDead) {
-                newList.push(c);
-            } else {
-                const index = gameEnemies.indexOf(c);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.crabList = newList;
-    }
-
-    updateCrabs(dt, gameEnemies, playerWorldPos) {
-        if (!this.crabList) this.crabList = [];
-        this._cleanDeadCrabs(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Crab egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.crabList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnCrabsWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    // ========== 🌊 水母蛋 ==========
-    trySpawnJellyfishWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Jellyfish egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.jellyfishList) this.jellyfishList = [];
-
-        this._cleanDeadJellyfish(gameEnemies);
-
-        const currentCount = this.jellyfishList.length;
-        const toSpawn = Math.max(0, 3 - currentCount); // 最多3个
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const jellyfish = new Enemy("Jellyfish", x, y, summonLevel, finalRarity);
-            jellyfish.isFriendly = true;
-            jellyfish.ownerPetal = this;
-            jellyfish.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(jellyfish);
-
-            gameEnemies.push(jellyfish);
-            this.jellyfishList.push(jellyfish);
-        }
-
-        this.spawnCooldown = 10000; // 10秒冷却
-        return true;
-    }
-
-    _cleanDeadJellyfish(gameEnemies) {
-        if (!this.jellyfishList) {
-            this.jellyfishList = [];
-            return;
-        }
-        const newList = [];
-        for (const j of this.jellyfishList) {
-            if (j && gameEnemies.includes(j) && j.health > 0 && !j.isDead) {
-                newList.push(j);
-            } else {
-                const index = gameEnemies.indexOf(j);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.jellyfishList = newList;
-    }
-
-    updateJellyfish(dt, gameEnemies, playerWorldPos) {
-        if (!this.jellyfishList) this.jellyfishList = [];
-        this._cleanDeadJellyfish(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Jellyfish egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.jellyfishList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnJellyfishWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-
-    // ========== 🌊 蟹洞蛋 (生成 10 只螃蟹) ==========
-    trySpawnCrabHoleWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        // 检查物品是否为蟹洞蛋
-        if (!currentItem || currentItem.type !== "CrabHole egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化螃蟹列表 (注意：这里存的是螃蟹，不是洞)
-        if (!this.crabHoleCrabs) this.crabHoleCrabs = [];
-
-        this._cleanDeadCrabHoleCrabs(gameEnemies);
-
-        const currentCount = this.crabHoleCrabs.length;
-        const toSpawn = Math.max(0, 10 - currentCount); // 最多生成 10 只螃蟹
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 40;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // ✅ 关键修改：生成 "Crab" 而不是 "CrabHole"
-            const crab = new Enemy("Crab", x, y, summonLevel, finalRarity);
-            crab.isFriendly = true;
-            crab.ownerPetal = this;
-            crab.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(crab);
-
-            gameEnemies.push(crab);
-            this.crabHoleCrabs.push(crab);
-        }
-
-        this.spawnCooldown = 15000; // 15 秒冷却
-        return true;
-    }
-
-    // 清理死亡的螃蟹
-    _cleanDeadCrabHoleCrabs(gameEnemies) {
-        if (!this.crabHoleCrabs) {
-            this.crabHoleCrabs = [];
-            return;
-        }
-        const newList = [];
-        for (const c of this.crabHoleCrabs) {
-            if (c && gameEnemies.includes(c) && c.health > 0 && !c.isDead) {
-                newList.push(c);
-            } else {
-                const index = gameEnemies.indexOf(c);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.crabHoleCrabs = newList;
-    }
-
-    // 更新螃蟹状态
-    updateCrabHoles(dt, gameEnemies, playerWorldPos) {
-        if (!this.crabHoleCrabs) this.crabHoleCrabs = [];
-        this._cleanDeadCrabHoleCrabs(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "CrabHole egg") {
-            if (!this.isBroken && !this.isReloading) {
-                // 如果螃蟹数量少于 10 且冷却结束，继续生成
-                if (this.crabHoleCrabs.length < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnCrabHoleWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    trySpawnStemCellsWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "stemcell egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        if (!this.stemCellList) {
-            this.stemCellList = [];
-        }
-
-        this._cleanDeadStemCells(gameEnemies);
-
-        const currentCount = this.stemCellList.length;
-        const toSpawn = Math.max(0, 10 - currentCount);
-
-        if (toSpawn <= 0) return false;
-
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const whiteBloodCell = new Enemy("WhiteBloodCell", x, y, summonLevel, finalRarity);
-            whiteBloodCell.isFriendly = true;
-            whiteBloodCell.ownerPetal = this;
-            whiteBloodCell.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(whiteBloodCell);
-
-            gameEnemies.push(whiteBloodCell);
-            this.stemCellList.push(whiteBloodCell);
-        }
-
-        this.spawnCooldown = 15000;
-        return true;
-    }
-
-    updateWhiteBloodCells(dt, gameEnemies, playerWorldPos) {
-        if (!this.whiteBloodCellList) {
-            this.whiteBloodCellList = [];
-        }
-
-        this._cleanDeadWhiteBloodCells(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "whitebloodcell egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.whiteBloodCellList.length < this.maxWhiteBloodCells && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnWhiteBloodCellsWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    updateSpiders(dt, gameEnemies, playerWorldPos) {
-        if (!this.spiderList) this.spiderList = [];
-        this._cleanDeadSpiders(gameEnemies);
-    }
-
-    updateRedBloodCells(dt, gameEnemies, playerWorldPos) {
-        if (!this.redBloodCellList) this.redBloodCellList = [];
-        this._cleanDeadRedBloodCells(gameEnemies);
-    }
-
-    updateStemCells(dt, gameEnemies, playerWorldPos) {
-        if (!this.stemCellList) {
-            this.stemCellList = [];
-        }
-
-        this._cleanDeadStemCells(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "stemcell egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.stemCellList.length < this.maxStemCells && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnStemCellsWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    // 生成工火蚁（支持DNA升级）
-    trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "WorkerFireAnt egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadWorkerFireAnts(gameEnemies);
-        const toSpawn = 4 - this.workerFireAntList.length;
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA升级逻辑
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("WorkerFireAnt", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.workerFireAntList.push(ant);
-        }
-
-        this.spawnCooldown = 8000; // 8秒
-        return true;
-    }
-    // 尝试召唤 Virus
-    trySpawnVirusWithDNA(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Virus egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 初始化 Virus 列表
-        if (!this.virusList) this.virusList = [];
-
-        // 清理死亡的 Virus
-        this._cleanDeadVirus(gameEnemies);
-
-        // 需要生成的数量（最多1个）
-        const currentCount = this.virusList.length;
-        if (currentCount >= this.maxVirus) return false;
-
-        // 获取召唤稀有度（DNA升级逻辑）
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 40 + Math.random() * 30;
-        const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-            playerWorldPos.x + Math.cos(angle) * distance));
-        const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-            playerWorldPos.y + Math.sin(angle) * distance));
-
-        // 创建 Virus 作为友方单位
-        const virus = new Enemy("Virus", x, y, summonLevel, finalRarity);
-        virus.isFriendly = true;
-        virus.ownerPetal = this;
-        virus.ownerPlayer = this.player;
-
-        // 应用天赋加成
-        this._applyTalentToPet(virus);
-
-        gameEnemies.push(virus);
-        this.virusList.push(virus);
-
-        this.spawnCooldown = ITEM_STATS["Virus egg"]?.base_cooldown || 5000;
-        return true;
-    }
-
-    // 清理死亡的 Virus
-    _cleanDeadVirus(gameEnemies) {
-        if (!this.virusList) {
-            this.virusList = [];
-            return;
-        }
-        const newList = [];
-        for (const virus of this.virusList) {
-            if (virus && gameEnemies.includes(virus) && virus.health > 0 && !virus.isDead) {
-                newList.push(virus);
-            } else {
-                const index = gameEnemies.indexOf(virus);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.virusList = newList;
-    }
-
-    // 更新 Virus 状态
-    updateVirus(dt, gameEnemies, playerWorldPos) {
-        if (!this.virusList) this.virusList = [];
-        this._cleanDeadVirus(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Virus egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.virusList.length < this.maxVirus &&
-                    this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    const hasDNA = this.player && this.player.petals.some(p => {
-                        const item = p.getCurrentItem();
-                        return item && item.type === "DNA" && !p.isBroken;
-                    });
-                    this.trySpawnVirusWithDNA(gameEnemies, playerWorldPos, hasDNA);
-                }
-            }
-        }
-    }
-    // 生成兵火蚁（支持DNA升级）
-    trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "SoldierFireAnt egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadSoldierFireAnts(gameEnemies);
-        const toSpawn = 5 - this.soldierFireAntList.length;
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA升级逻辑
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("SoldierFireAnt", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.soldierFireAntList.push(ant);
-        }
-
-        this.spawnCooldown = 10000; // 10秒
-        return true;
-    }
-
-    // 生成幼火蚁（支持DNA升级）
-    trySpawnBabyFireAnts(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "BabyFireAnt egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadBabyFireAnts(gameEnemies);
-        const toSpawn = 3 - this.babyFireAntList.length;
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA升级逻辑
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("BabyFireAnt", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.babyFireAntList.push(ant);
-        }
-
-        this.spawnCooldown = 3000; // 3秒
-        return true;
-    }
-
-    // 生成火蚁主宰（支持DNA升级）
-    trySpawnFireAntOverminds(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "FireAntOvermind egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadFireAntOverminds(gameEnemies);
-        const toSpawn = 2 - this.fireAntOvermindList.length;
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA升级逻辑
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 40;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            const ant = new Enemy("FireAntOvermind", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.fireAntOvermindList.push(ant);
-        }
-
-        this.spawnCooldown = 5000; // 5秒
-        return true;
-    }
-
-    // 在 Petal 类中添加
-    trySpawnBacteriaWithDna(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        // 检查物品类型，注意大小写可能需匹配 "Bacteria_egg"
-        if (!currentItem || currentItem.type !== "Bacteria_egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        // 清理死亡的细菌
-        this._cleanDeadBacteria(gameEnemies);
-
-        // 计算需要召唤的数量（最多不超过 maxBacteria）
-        const toSpawn = Math.min(3, this.maxBacteria - this.bacteriaList.length);
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA逻辑确定召唤的稀有度
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel(finalRarity); // 根据稀有度获取等级
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // 创建 Bacteria 实例
-            const bacteria = new Enemy("Bacteria", x, y, summonLevel, finalRarity);
-            bacteria.isFriendly = true;          // 设置为友方
-            bacteria.ownerPetal = this;
-            bacteria.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(bacteria);
-
-            gameEnemies.push(bacteria);
-            this.bacteriaList.push(bacteria);
-        }
-
-        // 设置冷却时间 (从 ITEM_STATS 读取，默认为10000)
-        const cooldown = ITEM_STATS["Bacteria_egg"]?.base_cooldown || 10000;
-        this.spawnCooldown = cooldown;
-        return true;
-    }
-
-    // 添加清理方法
-    _cleanDeadBacteria(gameEnemies) {
-        if (!this.bacteriaList) {
-            this.bacteriaList = [];
-            return;
-        }
-        const newList = [];
-        for (const b of this.bacteriaList) {
-            if (b && gameEnemies.includes(b) && b.health > 0 && !b.isDead) {
-                newList.push(b);
-            } else {
-                const index = gameEnemies.indexOf(b);
-                if (index !== -1) gameEnemies.splice(index, 1);
-            }
-        }
-        this.bacteriaList = newList;
-    }
-
-    // 添加更新方法（可在 Petal.update 中调用，用于维护数量）
-    updateBacteria(dt, gameEnemies, playerWorldPos) {
-        if (!this.bacteriaList) this.bacteriaList = [];
-        this._cleanDeadBacteria(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "Bacteria_egg") {
-            if (!this.isBroken && !this.isReloading) {
-                if (this.bacteriaList.length < this.maxBacteria && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    // 检查是否有DNA，第二个参数假设为false，但你的 hasDNA 逻辑需要从外部传入
-                    this.trySpawnBacteriaWithDna(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    // 生成火蚁洞（生成兵火蚁，支持DNA升级）
-    trySpawnFireAntHole(gameEnemies, playerWorldPos, hasDNA) {
-        if (this.isBroken || this.isReloading) return false;
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "FireAntHole egg") return false;
-
-        if (this.spawnCooldown > 0) return false;
-        if (!this.player || this.player.isDead) return false;
-
-        this._cleanDeadFireAntHoles(gameEnemies);
-        const toSpawn = 10 - this.fireAntHoleList.length;
-        if (toSpawn <= 0) return false;
-
-        // 使用DNA升级逻辑
-        const finalRarity = this.player.getSummonRarityWithDna(this);
-        const summonLevel = this.player.getRandomSummonLevel();
-
-        for (let i = 0; i < toSpawn; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30;
-            const x = Math.max(100, Math.min(WORLD_WIDTH - 100,
-                playerWorldPos.x + Math.cos(angle) * distance));
-            const y = Math.max(100, Math.min(WORLD_HEIGHT - 100,
-                playerWorldPos.y + Math.sin(angle) * distance));
-
-            // FireAntHole egg 生成兵火蚁
-            const ant = new Enemy("SoldierFireAnt", x, y, summonLevel, finalRarity);
-            ant.isFriendly = true;
-            ant.ownerPetal = this;
-            ant.ownerPlayer = this.player;
-
-            // 应用天赋加成
-            this._applyTalentToPet(ant);
-
-            gameEnemies.push(ant);
-            this.fireAntHoleList.push(ant);
-        }
-
-        this.spawnCooldown = 15000; // 15秒
-        return true;
-    }
-
-    // 清理死亡的工火蚁
-    _cleanDeadWorkerFireAnts(gameEnemies) {
-        if (!this.workerFireAntList) {
-            this.workerFireAntList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.workerFireAntList) {
-            if (ant && gameEnemies && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(ant);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.workerFireAntList = newList;
-    }
-
-    // 清理死亡的兵火蚁
-    _cleanDeadSoldierFireAnts(gameEnemies) {
-        if (!this.soldierFireAntList) {
-            this.soldierFireAntList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.soldierFireAntList) {
-            if (ant && gameEnemies && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(ant);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.soldierFireAntList = newList;
-    }
-
-    // 清理死亡的幼火蚁
-    _cleanDeadBabyFireAnts(gameEnemies) {
-        if (!this.babyFireAntList) {
-            this.babyFireAntList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.babyFireAntList) {
-            if (ant && gameEnemies && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(ant);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.babyFireAntList = newList;
-    }
-
-    // 清理死亡的火蚁主宰
-    _cleanDeadFireAntOverminds(gameEnemies) {
-        if (!this.fireAntOvermindList) {
-            this.fireAntOvermindList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.fireAntOvermindList) {
-            if (ant && gameEnemies && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(ant);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.fireAntOvermindList = newList;
-    }
-
-    // 清理死亡的火蚁洞（生成的兵火蚁）
-    _cleanDeadFireAntHoles(gameEnemies) {
-        if (!this.fireAntHoleList) {
-            this.fireAntHoleList = [];
-            return;
-        }
-        const newList = [];
-        for (const ant of this.fireAntHoleList) {
-            if (ant && gameEnemies && gameEnemies.includes(ant) && ant.health > 0 && !ant.isDead) {
-                newList.push(ant);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(ant);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.fireAntHoleList = newList;
-    }
-
-    // 更新火蚁状态
-    updateFireAnts(dt, gameEnemies, playerWorldPos) {
-        // 初始化列表
-        if (!this.workerFireAntList) this.workerFireAntList = [];
-        if (!this.soldierFireAntList) this.soldierFireAntList = [];
-        if (!this.babyFireAntList) this.babyFireAntList = [];
-        if (!this.fireAntOvermindList) this.fireAntOvermindList = [];
-        if (!this.fireAntHoleList) this.fireAntHoleList = [];
-
-        // 清理死亡的
-        this._cleanDeadWorkerFireAnts(gameEnemies);
-        this._cleanDeadSoldierFireAnts(gameEnemies);
-        this._cleanDeadBabyFireAnts(gameEnemies);
-        this._cleanDeadFireAntOverminds(gameEnemies);
-        this._cleanDeadFireAntHoles(gameEnemies);
-
-        const currentItem = this.getCurrentItem();
-        if (!currentItem) return;
-
-        // 根据蛋类型自动补充（仅在非破碎模式下）
-        if (!this.isBroken && !this.isReloading) {
-            if (currentItem.type === "WorkerFireAnt egg") {
-                if (this.workerFireAntList.length < 4 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, false);
-                }
-            } else if (currentItem.type === "SoldierFireAnt egg") {
-                if (this.soldierFireAntList.length < 5 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, false);
-                }
-            } else if (currentItem.type === "BabyFireAnt egg") {
-                if (this.babyFireAntList.length < 3 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnBabyFireAnts(gameEnemies, playerWorldPos, false);
-                }
-            } else if (currentItem.type === "FireAntOvermind egg") {
-                if (this.fireAntOvermindList.length < 2 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnFireAntOverminds(gameEnemies, playerWorldPos, false);
-                }
-            } else if (currentItem.type === "FireAntHole egg") {
-                if (this.fireAntHoleList.length < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) {
-                    this.trySpawnFireAntHole(gameEnemies, playerWorldPos, false);
-                }
-            }
-        }
-    }
-
-    _cleanDeadStemCells(gameEnemies) {
-        if (!this.stemCellList) {
-            this.stemCellList = [];
-            return;
-        }
-
-        if (!gameEnemies) return;
-
-        const newList = [];
-        for (const cell of this.stemCellList) {
-            if (cell && gameEnemies.includes(cell) && cell.health > 0 && !cell.isDead) {
-                newList.push(cell);
-            } else {
-                const index = gameEnemies.indexOf(cell);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
-        }
-
-        this.stemCellList = newList;
-    }
-
-    _cleanDeadWhiteBloodCells(gameEnemies) {
-        if (!this.whiteBloodCellList) {
-            this.whiteBloodCellList = [];
-            return;
-        }
-
-        if (!gameEnemies) return;
-
-        const newList = [];
-        for (const cell of this.whiteBloodCellList) {
-            if (cell && gameEnemies.includes(cell) && cell.health > 0 && !cell.isDead) {
-                newList.push(cell);
-            } else {
-                const index = gameEnemies.indexOf(cell);
-                if (index !== -1) {
-                    gameEnemies.splice(index, 1);
-                }
-            }
-        }
-
-        this.whiteBloodCellList = newList;
-    }
-
-    _cleanDeadSpiders(gameEnemies) {
-        if (!this.spiderList) {
-            this.spiderList = [];
-            return;
-        }
-        const newList = [];
-        for (const spider of this.spiderList) {
-            if (spider && gameEnemies && gameEnemies.includes(spider) && spider.health > 0 && !spider.isDead) {
-                newList.push(spider);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(spider);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.spiderList = newList;
-    }
-
-    _cleanDeadRedBloodCells(gameEnemies) {
-        if (!this.redBloodCellList) {
-            this.redBloodCellList = [];
-            return;
-        }
-        const newList = [];
-        for (const cell of this.redBloodCellList) {
-            if (cell && gameEnemies && gameEnemies.includes(cell) && cell.health > 0 && !cell.isDead) {
-                newList.push(cell);
-            } else {
-                if (gameEnemies) {
-                    const index = gameEnemies.indexOf(cell);
-                    if (index !== -1) gameEnemies.splice(index, 1);
-                }
-            }
-        }
-        this.redBloodCellList = newList;
-    }
-
-    // 辅助方法：根据稀有度获取冷却时间
-    getSpawnCooldownByRarity(baseCooldown) {
-        const rarityMultiplier = {
-            "Common": 1.0,
-            "Unusual": 0.95,
-            "Rare": 0.9,
-            "Epic": 0.85,
-            "Legendary": 0.8,
-            "Mythic": 0.75,
-            "Ultra": 0.7,
-            "Super": 0.65,
-            "Omega": 0.6,
-            "Eternal": 0.5
-        };
-        const multiplier = rarityMultiplier[this.rarity] || 1.0;
-        return baseCooldown * multiplier;
+        } catch (e) { return originalRarity; }
     }
 }
 // 在 WorldMapGame 类中添加多人游戏菜单
@@ -33622,7 +28427,7 @@ class Player {
             this.playerId = playerId || 'local_' + Math.random().toString(36).substring(7);
             this.isLocalPlayer = playerId === null; // 本地玩家
             this.spongeDamageQueue = [];
-
+            this._baseMaxHealthWithBonuses = this.baseMaxHealth;
             this.physicsBody = new PhysicsBody(new Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2), 20, 2.0, "circle");
             this.levelSystem = new LevelSystemExact();
             this.xp = 0;
@@ -33791,51 +28596,60 @@ class Player {
             this.recalculatePetalAngles();
         }
     }
-    // 在 Player 类中修改 updateStatsFromPetals 方法
     updateStatsFromPetals() {
-        /** 根据花瓣和快捷栏更新玩家属性 */
         let totalVisionBonus = 0.0;
         let totalHealthBonus = 0;
         this.antennaeCount = 0;
         let hasAntennae = false;
 
-        // ===== 新增：统计 Golden Leaf 信息 =====
         this.goldenLeafCount = 0;
         this.totalReloadReduction = 0;
 
-        // 1. 从花瓣获取常规属性（Cancer 和 Web 需要检查破碎，其他物品即使破碎也生效）
-        for (const petal of this.petals) {
+        let hasSponge = false;
+
+        // 1. 从花瓣获取常规属性
+        for (let i = 0; i < this.petals.length; i++) {
+            const petal = this.petals[i];
             const item = petal.getCurrentItem();
 
-            // 如果没有物品，跳过
             if (!item) continue;
 
-            // Cancer 和 Web：只有未破碎/未重载时才生效
             if (item.type === "Cancer" || item.type === "Web") {
                 if (petal.isBroken || petal.isReloading) continue;
             }
 
-            // 其他所有物品：即使破碎也生效
             totalVisionBonus += petal.getVisionBonus();
             if (petal.hasAntennae) {
                 hasAntennae = true;
                 this.antennaeCount += 1;
             }
 
-            // ===== 统计 Golden Leaf（即使破碎也统计）=====
             if (item.type === "Golden Leaf") {
                 this.goldenLeafCount++;
                 const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
                 this.totalReloadReduction += reduction;
             }
+
+            if (item.type === "Sponge") {
+                if (!petal.isBroken && !petal.isReloading) {
+                    hasSponge = true;
+                }
+            }
+
+            if (item.type === "Cactus") {
+                const stats = item.getStats();
+                if (stats.health_bonus !== undefined) {
+                    totalHealthBonus += stats.health_bonus;
+                }
+            }
         }
 
-        // 2. 从快捷栏强制获取 Cactus 血量加成（无视破碎状态）
+        // 2. 从快捷栏获取 Cactus 血量加成
         for (const slotItem of this.quickSlot.slots) {
             if (slotItem && slotItem.type === "Cactus") {
                 const stats = slotItem.getStats();
-                if ("health_bonus" in stats) {
-                    totalHealthBonus += stats["health_bonus"];
+                if (stats.health_bonus !== undefined) {
+                    totalHealthBonus += stats.health_bonus;
                 }
             }
         }
@@ -33846,21 +28660,36 @@ class Player {
         if (hasAntennae && this.visionMultiplier < 1.5) {
             this.visionMultiplier = 1.5;
         }
-        // 限制最大视野倍数
         const maxVisionMultiplier = 3.0;
         if (this.visionMultiplier > maxVisionMultiplier) {
             this.visionMultiplier = maxVisionMultiplier;
         }
 
-        // 4. 更新最大血量（基础血量 + 快捷栏 Cactus 加成）
-        this.maxHealth = this.baseMaxHealth + totalHealthBonus;
-        if (this._health > this.maxHealth) {
-            this._health = this.maxHealth;
+        // 4. ✅ 关键修复：计算新的最大血量
+        let newMaxHealth = this.baseMaxHealth + totalHealthBonus;
+
+        if (hasSponge) {
+            newMaxHealth = newMaxHealth * 1.0;
         }
+
+        // 5. ✅ 只有当最大血量增加时，才按比例增加当前血量
+        if (newMaxHealth > this.maxHealth) {
+            // 血量上限增加，按比例增加当前血量
+            const ratio = newMaxHealth / this.maxHealth;
+            this._health = Math.min(newMaxHealth, this._health * ratio);
+        } else if (newMaxHealth < this.maxHealth) {
+            // 血量上限减少，保持当前血量（但不能超过新上限）
+            if (this._health > newMaxHealth) {
+                this._health = newMaxHealth;
+            }
+        }
+
+        // 6. 应用新的最大血量
+        this.maxHealth = newMaxHealth;
 
         this.updateThirdEye();
 
-        // 5. 触发所有花瓣重新计算 Golden Leaf 效果
+        // 7. 触发所有花瓣重新计算 Golden Leaf 效果
         for (const petal of this.petals) {
             petal.updateReloadTimeWithGoldenLeaf();
         }
@@ -34006,6 +28835,41 @@ class Player {
         this.isDead = true;
         this.health = 0;
 
+    }
+    updateSpongeMaxHealth() {
+        let hasActiveSponge = false;
+
+        for (const petal of this.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
+                hasActiveSponge = true;
+                break;
+            }
+        }
+
+        // ✅ 计算加成后的总血量（基础 + 仙人掌等）
+        let calculatedMaxHealth = this.baseMaxHealth;
+
+        // 添加仙人掌加成
+        for (const slotItem of this.quickSlot.slots) {
+            if (slotItem && slotItem.type === "Cactus") {
+                const stats = slotItem.getStats();
+                if (stats.health_bonus !== undefined) {
+                    calculatedMaxHealth += stats.health_bonus;
+                }
+            }
+        }
+
+        if (hasActiveSponge) {
+            // ✅ 海绵限制为加成后血量的 50%
+            calculatedMaxHealth = calculatedMaxHealth * 1.0;
+        }
+
+        this.maxHealth = calculatedMaxHealth;
+
+        if (this._health > this.maxHealth) {
+            this._health = this.maxHealth;
+        }
     }
     getScreenPosition() {
         /** 获取玩家的屏幕坐标（始终在屏幕中心） */
@@ -34396,49 +29260,54 @@ class Player {
         return false;
     }
 
-    // 更新海绵伤害队列（每帧调用）
     updateSpongeDamage(dt) {
-        // 🟢 如果玩家死亡，清空队列并返回
         if (this.isDead) {
             this.spongeDamageQueue = [];
             return;
         }
 
-        const currentTime = Date.now() / 1000; // 秒为单位
+        const currentTime = Date.now() / 1000;
+        let totalDamageThisFrame = 0;
+
+        // 检查哪些海绵花瓣还在
+        const activeSpongeIndices = new Set();
+        for (const petal of this.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
+                activeSpongeIndices.add(petal._petalIndex);
+            }
+        }
 
         for (let i = this.spongeDamageQueue.length - 1; i >= 0; i--) {
             const item = this.spongeDamageQueue[i];
 
-            // 计算这一帧应该受到的伤害
-            const elapsed = currentTime - item.startTime;
-            if (elapsed >= item.duration) {
-                // 时间到，一次性给剩余伤害
-                this._health -= item.remainingDamage;
-                if (this._health < 0) this._health = 0;
+            // 海绵被移除，立即返还剩余伤害
+            if (!activeSpongeIndices.has(item.petalIndex)) {
+                totalDamageThisFrame += item.remainingDamage;
                 this.spongeDamageQueue.splice(i, 1);
+                continue;
+            }
 
-                // 🟢 检查是否因海绵伤害死亡
-                if (this._health <= 0) {
-                    this._health = 0;
-                    this.isDead = true;
-                    this.spongeDamageQueue = []; // 清空剩余队列
-                    break;
-                }
-            } else {
-                // 计算本帧伤害
-                const damagePerSecond = item.totalDamage / item.duration;
-                const frameDamage = damagePerSecond * dt;
-                item.remainingDamage -= frameDamage;
-                this._health -= frameDamage;
-                if (this._health < 0) this._health = 0;
+            // ✅ 修复：持续均匀返还伤害，不在结束时一次性炸掉
+            const damagePerSecond = item.totalDamage / item.duration;
+            const frameDamage = damagePerSecond * dt;
+            item.remainingDamage -= frameDamage;
+            totalDamageThisFrame += frameDamage;
 
-                // 🟢 检查是否因海绵伤害死亡
-                if (this._health <= 0) {
-                    this._health = 0;
-                    this.isDead = true;
-                    this.spongeDamageQueue = []; // 清空剩余队列
-                    break;
-                }
+            // 如果伤害已经返还完毕，从队列中移除
+            if (item.remainingDamage <= 0.01) {
+                this.spongeDamageQueue.splice(i, 1);
+            }
+        }
+
+        // 一次性扣除本帧所有海绵伤害
+        if (totalDamageThisFrame > 0) {
+            this._health -= totalDamageThisFrame;
+
+            if (this._health <= 0) {
+                this._health = 0;
+                this.isDead = true;
+                this.spongeDamageQueue = [];
             }
         }
     }
@@ -34969,6 +29838,7 @@ class Player {
 
         this.spongeDamageQueue = [];
         // 重置护盾
+        this._baseMaxHealthWithBonuses = this.baseMaxHealth;
         this.shield = 0;
         this.maxShield = 0;
         this.baseMaxHealth = this.levelSystem.getHpForLevel(currentLevel);
@@ -35541,36 +30411,55 @@ class MainMenu {
         this.player = player;
         this.autoSaveSystem = autoSaveSystem;
         this.bonusSystem = bonusSystem;
-        this._questCardRects = []; // ← 加这一行
+        this._questCardRects = [];
         this.MENU_BG = [26, 26, 46];
         this.LIGHT_GRAY = [200, 200, 200];
         this.GRAY = [150, 150, 150];
         this.BUTTON_COLOR = [70, 70, 100];
         this.BUTTON_HOVER_COLOR = [100, 100, 150];
-        this.talentButton = [20, 155, 100, 35];  // 位置在 HUNT 按钮下方
+        this.talentButton = [20, 155, 100, 35];
 
+        // ========== 9个生物群系的颜色配置 ==========
         this.BIOME_COLORS = {
-            "Plain": [102, 187, 106], "Bio": [38, 166, 154],
-            "Desert": [255, 202, 128], "Random": [171, 71, 188],
-            "Ocean": [64, 164, 223], "Sewer": [81, 55, 20],
-            "Arctic": [135, 206, 250], "Jungle": [76, 175, 80],"Hel": [200, 80, 60]
+            "Plain": [102, 187, 106],
+            "Bio": [38, 166, 154],
+            "Desert": [255, 202, 128],
+            "Random": [171, 71, 188],
+            "Ocean": [64, 164, 223],
+            "Sewer": [81, 55, 20],
+            "Arctic": [135, 206, 250],
+            "Jungle": [76, 175, 80],
+            "Hel": [200, 80, 60]
+        };
 
-        };
         this.BIOME_HOVER_COLORS = {
-            "Plain": [67, 160, 71], "Bio": [0, 137, 123],
-            "Desert": [255, 167, 38], "Random": [142, 36, 170],
-            "Ocean": [0, 105, 148], "Sewer": [61, 41, 15],
-            "Arctic": [100, 180, 230], "Jungle": [56, 145, 60],"Hel":[180, 70, 50]
+            "Plain": [67, 160, 71],
+            "Bio": [0, 137, 123],
+            "Desert": [255, 167, 38],
+            "Random": [142, 36, 170],
+            "Ocean": [0, 105, 148],
+            "Sewer": [61, 41, 15],
+            "Arctic": [100, 180, 230],
+            "Jungle": [56, 145, 60],
+            "Hel": [180, 70, 50]
         };
+
         this.OTHER_BUTTON_COLORS = {
-            "inventory": [52, 152, 219], "crafting": [155, 89, 182],
-            "multiplayer": [46, 204, 113], "account": [241, 196, 15],
-            "bonus": [241, 196, 15], "quit": [231, 76, 60]
+            "inventory": [52, 152, 219],
+            "crafting": [155, 89, 182],
+            "multiplayer": [46, 204, 113],
+            "account": [241, 196, 15],
+            "bonus": [241, 196, 15],
+            "quit": [231, 76, 60]
         };
+
         this.OTHER_BUTTON_HOVER_COLORS = {
-            "inventory": [41, 128, 185], "crafting": [142, 68, 173],
-            "multiplayer": [39, 174, 96], "account": [243, 156, 18],
-            "bonus": [243, 156, 18], "quit": [192, 57, 43]
+            "inventory": [41, 128, 185],
+            "crafting": [142, 68, 173],
+            "multiplayer": [39, 174, 96],
+            "account": [243, 156, 18],
+            "bonus": [243, 156, 18],
+            "quit": [192, 57, 43]
         };
 
         this.SHOP_BUTTON_COLOR = [46, 204, 113];
@@ -35605,8 +30494,9 @@ class MainMenu {
         this.shopButton = [20, 65, 100, 35];
         this.huntingQuestButton = [20, 110, 100, 35];
 
+        // ========== 3x3 布局的生物群系按钮 ==========
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
-        const cols = 4;
+        const cols = 3;
         const totalWidth = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
         const startX = this.WIDTH / 2 - totalWidth / 2;
 
@@ -35614,14 +30504,17 @@ class MainMenu {
             "Plain": [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "Bio": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "Desert": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Random": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Ocean": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Sewer": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Arctic": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Jungle": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
+            "Random": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Ocean": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Sewer": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Arctic": [startX, biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Jungle": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Hel": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const otherStartY = biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
+        // ========== 其他按钮位置 ==========
+        const otherStartY = biomeStartY + 3 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
+
         this.otherButtons = {
             "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
@@ -35654,9 +30547,10 @@ class MainMenu {
         this._recalcLoadoutButtonRect();
 
         this.huntingQuestPanelOpen = false;
-        this.huntingQuestPanelRect = null; // 动态计算，见 _getQuestPanelRect()
+        this.huntingQuestPanelRect = null;
     }
 
+    // ==================== 辅助方法 ====================
     _getQuestPanelRect() {
         const W = this.WIDTH;
         const H = this.HEIGHT;
@@ -35767,8 +30661,7 @@ class MainMenu {
         return false;
     }
 
-    // ==================== Loadout ====================
-
+    // ==================== Loadout 系统 ====================
     _recalcLoadoutButtonRect() {
         if (this.player?.quickSlot) {
             const qs = this.player.quickSlot;
@@ -36056,312 +30949,6 @@ class MainMenu {
         }
         return null;
     }
-    // ──────────────────────────────────────────────────────────────
-    // 【MainMenu】完整替换 drawHuntingQuestPanel 方法
-    // ──────────────────────────────────────────────────────────────
-    drawHuntingQuestPanel(ctx) {
-        const questSystem = this.player?.gameInstance?.huntingQuestSystem;
-        if (!questSystem) return;
-
-        questSystem.updateParticles(0.016);
-
-        const [px, py, pw, ph] = this._getQuestPanelRect();
-
-        // ── 面板背景（橙色渐变）──
-        const bgGrad = ctx.createLinearGradient(px, py, px, py + ph);
-        bgGrad.addColorStop(0, '#f5974e');
-        bgGrad.addColorStop(1, '#d96820');
-        ctx.fillStyle = bgGrad;
-        ctx.beginPath();
-        ctx.roundRect(px, py, pw, ph, 20);
-        ctx.fill();
-
-        // 外描边
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // 顶部高光
-        const shine = ctx.createLinearGradient(px, py, px, py + 55);
-        shine.addColorStop(0, 'rgba(255,255,255,0.22)');
-        shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine;
-        ctx.beginPath();
-        ctx.roundRect(px + 3, py + 3, pw - 6, 55, [17, 17, 0, 0]);
-        ctx.fill();
-
-        // ── 标题 ──
-        ctx.font = 'bold 38px "Comic Sans MS", "Chalkboard SE", cursive';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'white';
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = 7;
-        ctx.shadowOffsetY = 3;
-        ctx.fillText('Hunting Quests', px + pw / 2, py + 40);
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-
-        // ── 关闭按钮（右上角红色方块）──
-        const closeSize = 46;
-        const closeX = px + pw - closeSize - 8;
-        const closeY = py + 8;
-        const closeHovered = this.hoveredButton === 'hq_close';
-        ctx.fillStyle = closeHovered ? '#ff3333' : '#cc2222';
-        ctx.beginPath();
-        ctx.roundRect(closeX, closeY, closeSize, closeSize, 10);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.font = 'bold 26px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('✕', closeX + closeSize / 2, closeY + closeSize / 2);
-
-        // ── 分隔线 ──
-        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(px + 20, py + 76);
-        ctx.lineTo(px + pw - 20, py + 76);
-        ctx.stroke();
-
-        // ── 任务卡片 ──
-        const quests = questSystem.getCurrentQuests();
-
-        const RARITY_COLORS = {
-            "Mythic": "#00cccc",
-            "Ultra":  "#cc5490",
-            "Super":  "#44dd77",
-            "Omega":  "#cc44dd"
-        };
-        const ICON_BG = {
-            "Mythic": "#18b0b0",
-            "Ultra":  "#c03070",
-            "Super":  "#28aa50",
-            "Omega":  "#9922bb"
-        };
-
-        // 初始化卡片碰撞数据（每次 draw 重建）
-        this._questCardRects = [];
-
-        const GRID_TOP    = py + 84;
-        const GRID_BOTTOM = py + ph - 50;
-        const GRID_H      = GRID_BOTTOM - GRID_TOP;
-        const CARD_PAD    = 14;
-        const CARD_GAP    = 12;
-
-        if (quests.length === 0) {
-            ctx.font = 'bold 22px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('All quests completed!', px + pw / 2, py + ph / 2 - 16);
-            ctx.font = '15px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText('New quests tomorrow', px + pw / 2, py + ph / 2 + 16);
-        } else {
-            const cols  = 2;
-            const rows  = Math.ceil(quests.length / cols);
-            const cardW = (pw - CARD_PAD * 2 - CARD_GAP * (cols - 1)) / cols;
-            const cardH = Math.min(160, (GRID_H - CARD_GAP * (rows - 1)) / rows);
-
-            quests.forEach((quest, i) => {
-                const col = i % cols;
-                const row = Math.floor(i / cols);
-                const cx  = px + CARD_PAD + col * (cardW + CARD_GAP);
-                const cy  = GRID_TOP + row * (cardH + CARD_GAP);
-
-                // 卡片背景
-                const cardBg = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
-                cardBg.addColorStop(0, 'rgba(255,255,255,0.2)');
-                cardBg.addColorStop(1, 'rgba(180,100,30,0.2)');
-                ctx.fillStyle = cardBg;
-                ctx.beginPath();
-                ctx.roundRect(cx, cy, cardW, cardH, 14);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.38)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // 图标方块
-                const iconSize = Math.min(cardH - 20, 80);
-                const iconX    = cx + 14;
-                const iconY    = cy + (cardH - iconSize) / 2;
-
-                ctx.fillStyle = ICON_BG[quest.rarity] || '#666';
-                ctx.beginPath();
-                ctx.roundRect(iconX, iconY, iconSize, iconSize, 10);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-
-                // 图标文字（取大写字母缩写，最多3个）
-                const raw  = quest.targetMob.replace(/[^A-Za-z]/g, '');
-                const caps = raw.replace(/[a-z]/g, '');
-                const abbr = (caps.length >= 2 ? caps : raw.slice(0,2)).slice(0, 3).toUpperCase();
-                ctx.font = `bold ${Math.floor(iconSize * 0.3)}px "Comic Sans MS", cursive`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.45)';
-                ctx.shadowBlur = 4;
-                ctx.fillText(abbr, iconX + iconSize / 2, iconY + iconSize / 2);
-                ctx.shadowBlur = 0;
-
-                // 文字区域
-                const textX  = cx + iconSize + 26;
-                const textW  = cardW - iconSize - 38;
-                const nameFS = Math.min(20, Math.floor(cardH * 0.2));
-
-                // 怪物名
-                ctx.font = `bold ${nameFS}px "Comic Sans MS", "Chalkboard SE", cursive`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 3;
-                let mobName = quest.targetMob;
-                while (ctx.measureText(mobName).width > textW && mobName.length > 3) {
-                    mobName = mobName.slice(0, -1);
-                }
-                if (mobName !== quest.targetMob) mobName += '…';
-                ctx.fillText(mobName, textX, cy + 14);
-                ctx.shadowBlur = 0;
-
-                // 稀有度
-                const rarityFS = Math.min(17, Math.floor(cardH * 0.17));
-                ctx.font = `bold ${rarityFS}px "Comic Sans MS", cursive`;
-                ctx.fillStyle = RARITY_COLORS[quest.rarity] || '#fff';
-                ctx.fillText(quest.rarity, textX, cy + 14 + nameFS + 4);
-
-                // 进度（未完成）
-                const progressAreaY = cy + cardH - 50;
-                if (!quest.completed) {
-                    const barW = textW;
-                    const barH = 8;
-                    const barY = progressAreaY + 2;
-                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                    ctx.beginPath();
-                    ctx.roundRect(textX, barY, barW, barH, 4);
-                    ctx.fill();
-                    const fill = Math.min(1, quest.currentCount / quest.targetCount);
-                    if (fill > 0) {
-                        const fg = ctx.createLinearGradient(textX, 0, textX + barW, 0);
-                        fg.addColorStop(0, RARITY_COLORS[quest.rarity] || '#fff');
-                        fg.addColorStop(1, 'white');
-                        ctx.fillStyle = fg;
-                        ctx.beginPath();
-                        ctx.roundRect(textX, barY, barW * fill, barH, 4);
-                        ctx.fill();
-                    }
-                    ctx.font = '10px Arial';
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.textBaseline = 'top';
-                    ctx.fillText(`${quest.currentCount} / ${quest.targetCount}`, textX, barY + barH + 3);
-                } else {
-                    // 完成闪烁提示
-                    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 280);
-                    ctx.font = 'bold 13px Arial';
-                    ctx.fillStyle = `rgba(255,230,0,${pulse})`;
-                    ctx.textBaseline = 'top';
-                    ctx.fillText('✓ COMPLETE!', textX, progressAreaY + 2);
-                }
-
-                // ── 星星奖励 / CLAIM 按钮 ──
-                const btnW = Math.min(textW, 120);
-                const btnH = 30;
-                const btnX = textX;
-                const btnY = cy + cardH - btnH - 8;
-                const isClaimable = quest.completed && !quest._claimed;
-                const hKey = `hq_claim_${quest.id}`;
-                const isHov = this.hoveredButton === hKey;
-
-                if (isClaimable) {
-                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
-                    g.addColorStop(0, isHov ? '#55ee99' : '#2ecc71');
-                    g.addColorStop(1, isHov ? '#22bb66' : '#1a9e52');
-                    ctx.fillStyle = g;
-                } else {
-                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
-                    g.addColorStop(0, '#c8c0b0');
-                    g.addColorStop(1, '#a09080');
-                    ctx.fillStyle = g;
-                }
-                ctx.beginPath();
-                ctx.roundRect(btnX, btnY, btnW, btnH, 9);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                ctx.font = `bold ${isClaimable ? 13 : 16}px Arial`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 2;
-                if (isClaimable) {
-                    ctx.fillText(`CLAIM  +${quest.reward} ⭐`, btnX + btnW / 2, btnY + btnH / 2);
-                } else {
-                    ctx.fillText(`⭐  ${quest.reward}`, btnX + btnW / 2, btnY + btnH / 2);
-                }
-                ctx.shadowBlur = 0;
-
-                // 记录碰撞数据
-                this._questCardRects.push({
-                    id:        quest.id,
-                    claimable: isClaimable,
-                    btnRect:   [btnX, btnY, btnW, btnH],
-                    effectX:   btnX + btnW / 2,
-                    effectY:   btnY + btnH / 2
-                });
-            });
-        }
-
-        // ── 底部倒计时 ──
-        const now      = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setHours(24, 0, 0, 0);
-        const msLeft  = Math.max(0, tomorrow - now);
-        const hh      = Math.floor(msLeft / 3600000);
-        const mm      = Math.floor((msLeft % 3600000) / 60000);
-        const ss      = Math.floor((msLeft % 60000) / 1000);
-        const cs      = Math.floor((msLeft % 1000) / 10).toString().padStart(2, '0');
-        const timerStr = `Resets in ${hh}h ${mm}m ${ss}.${cs}s...`;
-
-        ctx.font = 'bold 15px "Comic Sans MS", cursive';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 3;
-        ctx.fillText(timerStr, px + pw / 2, py + ph - 24);
-        ctx.shadowBlur = 0;
-
-        // 粒子
-        questSystem.drawParticles(ctx);
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-    }
-    // ==================== Utility ====================
-
-    isPointInRect(point, rect) {
-        if (!point || !rect) return false;
-        let x, y;
-        if (Array.isArray(point)) { [x, y] = point; }
-        else if (point?.x !== undefined) { x = point.x; y = point.y; }
-        else if (point?.point) { [x, y] = point.point; }
-        else return false;
-        const [rx, ry, rw, rh] = rect;
-        return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
-    }
-
-    // ==================== Event Handling ====================
 
     handleLoadoutScroll(deltaY) {
         if (!this.loadoutPanelOpen) return;
@@ -36374,28 +30961,21 @@ class MainMenu {
         }
     }
 
-
-    // ============================================================
-    // 4. 完整替换 handleMouseMove() 方法
-    // ============================================================
+    // ==================== 事件处理 ====================
     handleMouseMove(event) {
         if (event.type !== 'mousemove') return;
         const pos = [event.x, event.y];
 
-        // ── 天赋面板 hover ──
         const game = window.gameInstance;
         if (game?.talentSystem?.panelOpen) {
             game.talentSystem.handleMouseMove(pos);
-            // 同时更新 hoveredButton（让天赋面板内按钮有 hover 效果，外部无需再处理）
             this.hoveredButton = null;
             return;
         }
 
-        // ── 配装系统 hover ──
         const loadoutHover = this.handleLoadoutHover(pos);
         if (loadoutHover) { this.hoveredButton = loadoutHover; return; }
 
-        // ── 狩猎任务面板 hover ──
         if (this.huntingQuestPanelOpen) {
             const [px, py, pw, ph] = this._getQuestPanelRect();
             const closeSize = 46;
@@ -36455,22 +31035,16 @@ class MainMenu {
         this.hoveredButton = foundHover;
     }
 
-
-    // ============================================================
-    // 3. 完整替换 handleClick() 方法
-    // ============================================================
     handleClick(event) {
         if (event.type !== 'mousedown' || event.button !== 0) return null;
         const pos = [event.x, event.y];
 
-        // ── 天赋面板优先 ──
         const game = window.gameInstance;
         if (game?.talentSystem?.panelOpen) {
             const result = game.talentSystem.handleClick(pos);
             if (result) return result;
         }
 
-        // ── 狩猎任务面板 ──
         if (this.huntingQuestPanelOpen && this.player?.gameInstance?.huntingQuestSystem) {
             const questSystem = this.player.gameInstance.huntingQuestSystem;
             const [px, py, pw, ph] = this._getQuestPanelRect();
@@ -36501,28 +31075,23 @@ class MainMenu {
             }
         }
 
-        // ── 配装系统 ──
         const loadoutResult = this.handleLoadoutClick(pos);
         if (loadoutResult) return loadoutResult;
 
         const currentTime = Date.now();
         this.lastClickTime = currentTime;
 
-        // ── 主要按钮 ──
         if (this.isPointInRect(pos, this.accountButton)) return "account";
         if (this.isPointInRect(pos, this.shopButton)) return "shop";
         if (this.isPointInRect(pos, this.huntingQuestButton)) {
             this.huntingQuestPanelOpen = !this.huntingQuestPanelOpen;
             return "hunting_quest_toggle";
         }
-
-        // ── 新增：Talent 按钮 ──
         if (this.isPointInRect(pos, this.talentButton)) {
             window.gameInstance?.talentSystem?.toggle();
             return "talent_toggle";
         }
 
-        // ── Extra Bonus Tooltip 按钮 ──
         if (this.showBonusTooltip) {
             const shopSystem = window.gameInstance?.shopSystem;
             if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
@@ -36537,7 +31106,6 @@ class MainMenu {
             }
         }
 
-        // ── Extra Bonus 按钮 ──
         if (this.isPointInRect(pos, this.extraBonusButton)) {
             const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
             if (this.extraBonusPermanent) { this.refreshBonus(); return "extra_bonus_refreshed"; }
@@ -36545,14 +31113,12 @@ class MainMenu {
             else { this.showBonusTooltip = true; return "extra_bonus_expired_show_tooltip"; }
         }
 
-        // ── Biome 按钮 ──
         for (const [biome, rect] of Object.entries(this.biomeButtons)) {
             if (this.isPointInRect(pos, rect)) {
                 return `start_${biome.toLowerCase()}_map`;
             }
         }
 
-        // ── Other 按钮 ──
         for (const [name, rect] of Object.entries(this.otherButtons)) {
             if (this.isPointInRect(pos, rect)) {
                 if (name === "bonus") {
@@ -36562,7 +31128,6 @@ class MainMenu {
             }
         }
 
-        // ── 快捷栏 ──
         if (this.player?.quickSlot?.handleClick) {
             if (this.player.quickSlot.handleClick(pos)) {
                 return "quick_slot_click";
@@ -36572,8 +31137,7 @@ class MainMenu {
         return null;
     }
 
-    // ==================== Layout Recalculation ====================
-
+    // ==================== 布局重新计算 ====================
     recalculatePositions() {
         this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
@@ -36588,7 +31152,7 @@ class MainMenu {
         this.huntingQuestButton = [20, 110, 100, 35];
 
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
-        const cols = 4;
+        const cols = 3;
         const totalWidth = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
         const startX = this.WIDTH / 2 - totalWidth / 2;
 
@@ -36596,14 +31160,16 @@ class MainMenu {
             "Plain": [startX, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "Bio": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "Desert": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Random": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Ocean": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Sewer": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Arctic": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "Jungle": [startX + 3 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT]
+            "Random": [startX, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Ocean": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Sewer": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Arctic": [startX, biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Jungle": [startX + BUTTON_WIDTH + BUTTON_SPACING, biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT],
+            "Hel": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const otherStartY = biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
+        const otherStartY = biomeStartY + 3 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
+
         this.otherButtons = {
             "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
             "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
@@ -36620,9 +31186,7 @@ class MainMenu {
         this._recalcLoadoutButtonRect();
     }
 
-    // ============================================================
-    // 2. 完整替换 draw() 方法
-    // ============================================================
+    // ==================== 绘制 ====================
     draw(ctx) {
         if (!ctx) { console.error('MainMenu: No drawing context!'); return; }
 
@@ -36635,7 +31199,8 @@ class MainMenu {
 
         ctx.font = 'bold 64px Arial';
         ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
-        ctx.shadowColor = 'rgba(255,255,255,0.5)'; ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(255,255,255,0.5)';
+        ctx.shadowBlur = 10;
         const tw = ctx.measureText('Flwrr.pro').width;
         ctx.fillText('Flwrr.pro', this.WIDTH / 2 - tw / 2, this.titleY);
         ctx.shadowBlur = 0;
@@ -36646,12 +31211,14 @@ class MainMenu {
         const ag = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
         ag.addColorStop(0, `rgb(${ac[0]},${ac[1]},${ac[2]})`);
         ag.addColorStop(1, `rgb(${Math.floor(ac[0] * 0.8)},${Math.floor(ac[1] * 0.8)},${Math.floor(ac[2] * 0.8)})`);
-        ctx.fillStyle = ag; ctx.beginPath(); ctx.roundRect(ax, ay, aw, ah, 8); ctx.fill();
+        ctx.fillStyle = ag;
+        ctx.beginPath(); ctx.roundRect(ax, ay, aw, ah, 8); ctx.fill();
         ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
         ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
         ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Account', ax + aw / 2, ay + ah / 2); ctx.shadowBlur = 0;
+        ctx.fillText('Account', ax + aw / 2, ay + ah / 2);
+        ctx.shadowBlur = 0;
 
         // Shop 按钮
         const [sx, sy, sw, sh] = this.shopButton;
@@ -36659,12 +31226,10 @@ class MainMenu {
         const sg = ctx.createLinearGradient(sx, sy, sx + sw, sy + sh);
         sg.addColorStop(0, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
         sg.addColorStop(1, `rgb(${Math.floor(sc[0] * 0.8)},${Math.floor(sc[1] * 0.8)},${Math.floor(sc[2] * 0.8)})`);
-        ctx.fillStyle = sg; ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 8); ctx.fill();
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
-        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Shop', sx + sw / 2, sy + sh / 2); ctx.shadowBlur = 0;
+        ctx.fillStyle = sg;
+        ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 8); ctx.fill();
+        ctx.stroke(); ctx.fillStyle = 'white';
+        ctx.fillText('Shop', sx + sw / 2, sy + sh / 2);
 
         // Hunt 按钮
         const [hx, hy, hw, hh] = this.huntingQuestButton;
@@ -36672,27 +31237,56 @@ class MainMenu {
         const hg = ctx.createLinearGradient(hx, hy, hx + hw, hy + hh);
         hg.addColorStop(0, `rgb(${hc[0]},${hc[1]},${hc[2]})`);
         hg.addColorStop(1, `rgb(${Math.floor(hc[0] * 0.8)},${Math.floor(hc[1] * 0.8)},${Math.floor(hc[2] * 0.8)})`);
-        ctx.fillStyle = hg; ctx.beginPath(); ctx.roundRect(hx, hy, hw, hh, 8); ctx.fill();
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = hg;
+        ctx.beginPath(); ctx.roundRect(hx, hy, hw, hh, 8); ctx.fill();
+        ctx.stroke(); ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
         ctx.fillText('HUNT', hx + hw / 2, hy + hh / 2);
-        ctx.shadowBlur = 0;
 
-        // ── 新增 Talent 按钮 ──
+        // Talent 按钮
         const [tbx, tby, tbw, tbh] = this.talentButton;
         const tc = this.hoveredButton === 'talent' ? [142, 68, 173] : [155, 89, 182];
         const tg = ctx.createLinearGradient(tbx, tby, tbx + tbw, tby + tbh);
         tg.addColorStop(0, `rgb(${tc[0]},${tc[1]},${tc[2]})`);
-        tg.addColorStop(1, `rgb(${Math.floor(tc[0]*0.8)},${Math.floor(tc[1]*0.8)},${Math.floor(tc[2]*0.8)})`);
-        ctx.fillStyle = tg; ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        tg.addColorStop(1, `rgb(${Math.floor(tc[0] * 0.8)},${Math.floor(tc[1] * 0.8)},${Math.floor(tc[2] * 0.8)})`);
+        ctx.fillStyle = tg;
+        ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
+        ctx.stroke(); ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.fillText('TALENTS', tbx + tbw / 2, tby + tbh / 2);
-        ctx.shadowBlur = 0;
+
+        // 生物群系按钮
+        for (const [biome, rect] of Object.entries(this.biomeButtons)) {
+            const [x, y, w, h] = rect;
+            const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
+            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
+            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
+            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
+            ctx.fillStyle = gr;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+            ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white';
+            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(biome, x + w / 2, y + h / 2);
+            ctx.shadowBlur = 0;
+        }
+
+        // 其他按钮
+        const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus', quit: 'Quit' };
+        for (const [name, rect] of Object.entries(this.otherButtons)) {
+            const [x, y, w, h] = rect;
+            const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
+            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
+            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
+            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
+            ctx.fillStyle = gr;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+            ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
+            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(labelMap[name] || name, x + w / 2, y + h / 2);
+            ctx.shadowBlur = 0;
+        }
 
         // Extra Bonus 按钮
         const [ex, ey, ew, eh] = this.extraBonusButton;
@@ -36709,7 +31303,8 @@ class MainMenu {
         const bg = ctx.createRadialGradient(ex + ew / 2, ey + eh / 2, 0, ex + ew / 2, ey + eh / 2, ew);
         bg.addColorStop(0, `rgb(${bc[0] + 30},${bc[1] + 30},${bc[2] + 30})`);
         bg.addColorStop(1, `rgb(${bc[0]},${bc[1]},${bc[2]})`);
-        ctx.fillStyle = bg; ctx.fillRect(ex, ey, ew, eh);
+        ctx.fillStyle = bg;
+        ctx.fillRect(ex, ey, ew, eh);
         ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(ex, ey, ew, eh);
         ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -36740,53 +31335,27 @@ class MainMenu {
             ctx.fillText('1T STAR / forever', ex + ew / 2, ey + eh / 2 + 31);
         }
 
-        // Biome 按钮
-        for (const [biome, rect] of Object.entries(this.biomeButtons)) {
-            const [x, y, w, h] = rect;
-            const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
-            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
-            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
-            ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
-            ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white';
-            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(biome, x + w / 2, y + h / 2); ctx.shadowBlur = 0;
-        }
-
-        // Other 按钮
-        const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus', quit: 'Quit' };
-        for (const [name, rect] of Object.entries(this.otherButtons)) {
-            const [x, y, w, h] = rect;
-            const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
-            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
-            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
-            ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
-            ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
-            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(labelMap[name] || name, x + w / 2, y + h / 2); ctx.shadowBlur = 0;
-        }
-
-        ctx.font = '12px Arial'; ctx.fillStyle = `rgb(${this.GRAY.join(',')})`;
-        ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-        ctx.fillText('v0.2.0', this.WIDTH - 10, this.HEIGHT - 10);
+        ctx.font = '12px Arial';
+        ctx.fillStyle = `rgb(${this.GRAY.join(',')})`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('v0.3.0 - Hel Update', this.WIDTH - 10, this.HEIGHT - 10);
 
         ctx.textAlign = 'left';
         if (this.autoSaveSystem?.hasSaveData?.()) {
             const info = this.autoSaveSystem.getSaveInfo?.();
             if (info) {
-                ctx.font = '12px Arial'; ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
+                ctx.font = '12px Arial';
+                ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
                 ctx.fillText(`Last Score: ${info.score || 0}`, 10, 70);
                 ctx.fillText(`Kills: ${info.enemies_killed || 0}`, 10, 90);
             }
         }
 
         if (window.gameInstance?.accountSystem?.isLoggedIn()) {
-            ctx.font = '12px Arial'; ctx.fillStyle = '#27ae60'; ctx.textAlign = 'left';
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#27ae60';
+            ctx.textAlign = 'left';
             ctx.fillText(`User: ${window.gameInstance.accountSystem.getCurrentUser()}`, 10, 45);
         }
 
@@ -36799,15 +31368,14 @@ class MainMenu {
             this.drawHuntingQuestPanel(ctx);
         }
 
-        // ── 新增：天赋面板绘制 ──
         const talentGame = window.gameInstance;
         if (talentGame?.talentSystem?.panelOpen) {
             talentGame.talentSystem.draw(ctx);
         }
 
-        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
     }
-
 
     drawBonusTooltip(ctx) {
         const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
@@ -36861,6 +31429,287 @@ class MainMenu {
             ctx.beginPath(); ctx.arc(x - 20, y + 30, 15, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
+    }
+
+    drawHuntingQuestPanel(ctx) {
+        const questSystem = this.player?.gameInstance?.huntingQuestSystem;
+        if (!questSystem) return;
+
+        questSystem.updateParticles(0.016);
+
+        const [px, py, pw, ph] = this._getQuestPanelRect();
+
+        const bgGrad = ctx.createLinearGradient(px, py, px, py + ph);
+        bgGrad.addColorStop(0, '#f5974e');
+        bgGrad.addColorStop(1, '#d96820');
+        ctx.fillStyle = bgGrad;
+        ctx.beginPath();
+        ctx.roundRect(px, py, pw, ph, 20);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        const shine = ctx.createLinearGradient(px, py, px, py + 55);
+        shine.addColorStop(0, 'rgba(255,255,255,0.22)');
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.beginPath();
+        ctx.roundRect(px + 3, py + 3, pw - 6, 55, [17, 17, 0, 0]);
+        ctx.fill();
+
+        ctx.font = 'bold 38px "Comic Sans MS", "Chalkboard SE", cursive';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 7;
+        ctx.shadowOffsetY = 3;
+        ctx.fillText('Hunting Quests', px + pw / 2, py + 40);
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        const closeSize = 46;
+        const closeX = px + pw - closeSize - 8;
+        const closeY = py + 8;
+        const closeHovered = this.hoveredButton === 'hq_close';
+        ctx.fillStyle = closeHovered ? '#ff3333' : '#cc2222';
+        ctx.beginPath();
+        ctx.roundRect(closeX, closeY, closeSize, closeSize, 10);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = 'bold 26px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✕', closeX + closeSize / 2, closeY + closeSize / 2);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px + 20, py + 76);
+        ctx.lineTo(px + pw - 20, py + 76);
+        ctx.stroke();
+
+        const quests = questSystem.getCurrentQuests();
+
+        const RARITY_COLORS = {
+            "Mythic": "#00cccc",
+            "Ultra": "#cc5490",
+            "Super": "#44dd77",
+            "Omega": "#cc44dd"
+        };
+        const ICON_BG = {
+            "Mythic": "#18b0b0",
+            "Ultra": "#c03070",
+            "Super": "#28aa50",
+            "Omega": "#9922bb"
+        };
+
+        this._questCardRects = [];
+
+        const GRID_TOP = py + 84;
+        const GRID_BOTTOM = py + ph - 50;
+        const GRID_H = GRID_BOTTOM - GRID_TOP;
+        const CARD_PAD = 14;
+        const CARD_GAP = 12;
+
+        if (quests.length === 0) {
+            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('All quests completed!', px + pw / 2, py + ph / 2 - 16);
+            ctx.font = '15px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText('New quests tomorrow', px + pw / 2, py + ph / 2 + 16);
+        } else {
+            const cols = 2;
+            const rows = Math.ceil(quests.length / cols);
+            const cardW = (pw - CARD_PAD * 2 - CARD_GAP * (cols - 1)) / cols;
+            const cardH = Math.min(160, (GRID_H - CARD_GAP * (rows - 1)) / rows);
+
+            quests.forEach((quest, i) => {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const cx = px + CARD_PAD + col * (cardW + CARD_GAP);
+                const cy = GRID_TOP + row * (cardH + CARD_GAP);
+
+                const cardBg = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
+                cardBg.addColorStop(0, 'rgba(255,255,255,0.2)');
+                cardBg.addColorStop(1, 'rgba(180,100,30,0.2)');
+                ctx.fillStyle = cardBg;
+                ctx.beginPath();
+                ctx.roundRect(cx, cy, cardW, cardH, 14);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const iconSize = Math.min(cardH - 20, 80);
+                const iconX = cx + 14;
+                const iconY = cy + (cardH - iconSize) / 2;
+
+                ctx.fillStyle = ICON_BG[quest.rarity] || '#666';
+                ctx.beginPath();
+                ctx.roundRect(iconX, iconY, iconSize, iconSize, 10);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                const raw = quest.targetMob.replace(/[^A-Za-z]/g, '');
+                const caps = raw.replace(/[a-z]/g, '');
+                const abbr = (caps.length >= 2 ? caps : raw.slice(0, 2)).slice(0, 3).toUpperCase();
+                ctx.font = `bold ${Math.floor(iconSize * 0.3)}px "Comic Sans MS", cursive`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(abbr, iconX + iconSize / 2, iconY + iconSize / 2);
+                ctx.shadowBlur = 0;
+
+                const textX = cx + iconSize + 26;
+                const textW = cardW - iconSize - 38;
+                const nameFS = Math.min(20, Math.floor(cardH * 0.2));
+
+                ctx.font = `bold ${nameFS}px "Comic Sans MS", "Chalkboard SE", cursive`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 3;
+                let mobName = quest.targetMob;
+                while (ctx.measureText(mobName).width > textW && mobName.length > 3) {
+                    mobName = mobName.slice(0, -1);
+                }
+                if (mobName !== quest.targetMob) mobName += '…';
+                ctx.fillText(mobName, textX, cy + 14);
+                ctx.shadowBlur = 0;
+
+                const rarityFS = Math.min(17, Math.floor(cardH * 0.17));
+                ctx.font = `bold ${rarityFS}px "Comic Sans MS", cursive`;
+                ctx.fillStyle = RARITY_COLORS[quest.rarity] || '#fff';
+                ctx.fillText(quest.rarity, textX, cy + 14 + nameFS + 4);
+
+                const progressAreaY = cy + cardH - 50;
+                if (!quest.completed) {
+                    const barW = textW;
+                    const barH = 8;
+                    const barY = progressAreaY + 2;
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.beginPath();
+                    ctx.roundRect(textX, barY, barW, barH, 4);
+                    ctx.fill();
+                    const fill = Math.min(1, quest.currentCount / quest.targetCount);
+                    if (fill > 0) {
+                        const fg = ctx.createLinearGradient(textX, 0, textX + barW, 0);
+                        fg.addColorStop(0, RARITY_COLORS[quest.rarity] || '#fff');
+                        fg.addColorStop(1, 'white');
+                        ctx.fillStyle = fg;
+                        ctx.beginPath();
+                        ctx.roundRect(textX, barY, barW * fill, barH, 4);
+                        ctx.fill();
+                    }
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`${quest.currentCount} / ${quest.targetCount}`, textX, barY + barH + 3);
+                } else {
+                    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 280);
+                    ctx.font = 'bold 13px Arial';
+                    ctx.fillStyle = `rgba(255,230,0,${pulse})`;
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('✓ COMPLETE!', textX, progressAreaY + 2);
+                }
+
+                const btnW = Math.min(textW, 120);
+                const btnH = 30;
+                const btnX = textX;
+                const btnY = cy + cardH - btnH - 8;
+                const isClaimable = quest.completed && !quest._claimed;
+                const hKey = `hq_claim_${quest.id}`;
+                const isHov = this.hoveredButton === hKey;
+
+                if (isClaimable) {
+                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+                    g.addColorStop(0, isHov ? '#55ee99' : '#2ecc71');
+                    g.addColorStop(1, isHov ? '#22bb66' : '#1a9e52');
+                    ctx.fillStyle = g;
+                } else {
+                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+                    g.addColorStop(0, '#c8c0b0');
+                    g.addColorStop(1, '#a09080');
+                    ctx.fillStyle = g;
+                }
+                ctx.beginPath();
+                ctx.roundRect(btnX, btnY, btnW, btnH, 9);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.font = `bold ${isClaimable ? 13 : 16}px Arial`;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 2;
+                if (isClaimable) {
+                    ctx.fillText(`CLAIM  +${quest.reward} ⭐`, btnX + btnW / 2, btnY + btnH / 2);
+                } else {
+                    ctx.fillText(`⭐  ${quest.reward}`, btnX + btnW / 2, btnY + btnH / 2);
+                }
+                ctx.shadowBlur = 0;
+
+                this._questCardRects.push({
+                    id: quest.id,
+                    claimable: isClaimable,
+                    btnRect: [btnX, btnY, btnW, btnH],
+                    effectX: btnX + btnW / 2,
+                    effectY: btnY + btnH / 2
+                });
+            });
+        }
+
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(24, 0, 0, 0);
+        const msLeft = Math.max(0, tomorrow - now);
+        const hh = Math.floor(msLeft / 3600000);
+        const mm = Math.floor((msLeft % 3600000) / 60000);
+        const ss = Math.floor((msLeft % 60000) / 1000);
+        const cs = Math.floor((msLeft % 1000) / 10).toString().padStart(2, '0');
+        const timerStr = `Resets in ${hh}h ${mm}m ${ss}.${cs}s...`;
+
+        ctx.font = 'bold 15px "Comic Sans MS", cursive';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 3;
+        ctx.fillText(timerStr, px + pw / 2, py + ph - 24);
+        ctx.shadowBlur = 0;
+
+        questSystem.drawParticles(ctx);
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+    }
+
+    isPointInRect(point, rect) {
+        if (!point || !rect) return false;
+        let x, y;
+        if (Array.isArray(point)) { [x, y] = point; }
+        else if (point?.x !== undefined) { x = point.x; y = point.y; }
+        else if (point?.point) { [x, y] = point.point; }
+        else return false;
+        const [rx, ry, rw, rh] = rect;
+        return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
     }
 }
 
@@ -37012,7 +31861,7 @@ class WorldMapGame {
     }
 
     async precomputeAllBiomeWalls() {
-        const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer", "Arctic", "Jungle"];
+        const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer", "Arctic", "Jungle" ,"Hel"];
 
         for (const biome of biomes) {
             await this.precomputeWallBoxesAsync(biome);
@@ -37132,7 +31981,7 @@ class WorldMapGame {
     }
     // ✅ 新增：后台加载其他 biome
     loadOtherBiomesInBackground() {
-        const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer","Arctic","Jungle"]
+        const biomes = ["Plain", "Bio", "Desert", "Random", "Ocean", "Sewer","Arctic","Hel","Jungle"]
             .filter(b => b !== this.currentBiome);
 
         let index = 0;
@@ -38489,7 +33338,7 @@ class WorldMapGame {
                 // 宠物蛋孵化
                 if (!this.player.isDead) {
                     for (const petal of this.player.petals) {
-                        petal.trySpawnBeetle(this.enemies, this.player.physicsBody.position);
+                        petal.trySpawnBeetleWithDna(this.enemies, this.player.physicsBody.position);
                     }
                 }
 
@@ -38990,13 +33839,6 @@ class WorldMapGame {
                             this.zoneEnemyCounts[zone.name] = Math.max(0, (this.zoneEnemyCounts[zone.name] || 0) - 1);
                         }
                     }
-                }
-            }
-
-            // 宠物蛋孵化
-            if (!this.player.isDead) {
-                for (const petal of this.player.petals) {
-                    petal.trySpawnBeetle(this.enemies, this.player.physicsBody.position);
                 }
             }
 
@@ -40910,8 +35752,10 @@ class WorldMapGame {
             const isSewerEgg = isSewerEnemy && (
                 itemType === "ManHole egg" ||
                 itemType === "Rat_egg" ||
+                itemType === "Sponge" ||
                 itemType === "PooStick" ||
                 itemType === "Bubble Bomb" ||
+                itemType === "Golden Leaf" ||
                 itemType === "ThirdEye" ||
                 itemType === "Mimic" ||
                 itemType === "Roach_egg"
@@ -40921,7 +35765,10 @@ class WorldMapGame {
             const isDiggerEgg = isDigger && (
                 itemType === "TrashDigger egg" ||
                 itemType === "Digger egg" ||
+                itemType === "HelDigger egg" ||
+                itemType === "HelBeekeeper egg" ||
                 itemType === "MudDigger_egg" ||
+                itemType === "Beekeeper egg" ||
                 itemType === "Biologist egg"
             );
 
