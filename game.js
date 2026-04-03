@@ -703,6 +703,23 @@ export const SPECIAL_ZONES = {
             spawnRate: 4.0,                    // 生成速度倍率
             maxEnemies: 30                      // 最大敌人数
         },
+        {
+            name: "Ladybug Ruins",           // 区域名称
+            bounds: {                         // 长方形区域
+                x1: 0, y1: 3000,
+                x2: 200, y2: 4500
+            },
+            // 完全自定义生成规则
+            spawnRules: [
+                // 格式: [敌人类型, 权重, 最小等级, 最大等级, 稀有度列表]
+                ["Ladybug", 10, 1, 5, ["Super","Ultra"]],  // ✅ 修正：10-30级
+                ["Ladybug", 80, 1, 5, ["Ultra"]],
+                ["Bee", 1, 1, 8, ["Ultra", "Mythic", "Super"]],
+                ["Anthill", 1, 1, 5, ["Ultra"]]
+            ],
+            spawnRate: 3.0,                    // 生成速度倍率
+            maxEnemies: 20                      // 最大敌人数
+        },
         // ===== 🌳 新增 Bush Zone =====
         {
             name: "Bee Zone",
@@ -731,15 +748,14 @@ export const SPECIAL_ZONES = {
             },
             // 完全自定义生成规则
             spawnRules: [
-                ["Dragon", 100, 1, 5, ["Ultra"]],
-                ["Dragon", 2, 1, 5, ["Ultra", "Super"]],
-                ["DragonNest", 2, 1, 5, ["Ultra"]],
-                ["HelBeetle", 1, 2, 5, ["Ultra", "Super"]],
+                ["HelWorm", 100, 1, 5, ["Ultra","Super"]],
+                ["HelWorm", 0.01, 1, 5, ["Omega"]],
+                ["Dragon", 5, 2, 5, ["Ultra", "Super"]],
+                ["HelBeetle", 5, 2, 5, ["Ultra", "Super"]]
             ],
-            spawnRate: 4.0,                    // 生成速度倍率
-            maxEnemies: 50                      // 最大敌人数
+            spawnRate: 3.0,                    // 生成速度倍率
+            maxEnemies: 40                     // 最大敌人数
         },
-        // ===== 🌳 新增 Bush Zone =====
         {
             name: "Hel Depth",
             bounds: {
@@ -1388,11 +1404,14 @@ const ITEM_IMAGE_URLS = {
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000},
-    "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1500},
+    "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000},
+    "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000},
     "Leaf": {base_attack:15, base_cooldown:180, healing:1, use_rarity_multiplier: true, base_reload_time:2500},
     "Claw": {base_attack:20, base_cooldown:250, crit_chance:0.1, use_rarity_multiplier: true, base_reload_time:3500},
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000},
     "Pollen": {base_attack:30, base_cooldown:300, healing:0.5, use_rarity_multiplier: true, base_reload_time:2000},
+    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:30.0, poison_initial_multiplier:2.5, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000},
+    "Pincer": {base_attack:15, base_cooldown:500, poison_damage:12, poison_duration:4.0, poison_initial_multiplier:2.0, poison_stable_multiplier:0.5, web_slow:0.5, use_rarity_multiplier:true, base_reload_time:2000},
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
@@ -1400,8 +1419,7 @@ export const ITEM_STATS = {
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
-    "Web": {base_attack:0.1, base_cooldown:1000, web_slow:0.4, use_rarity_multiplier: true, base_reload_time:1000},
-    "Pincer": {base_attack:15, base_cooldown:500, web_slow:0.5, use_rarity_multiplier: true, base_reload_time:1000},
+    "Web": {base_attack:0.1, base_cooldown:1000, web_slow:0.5, use_rarity_multiplier: true, base_reload_time:1000},
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000},
     "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500},
@@ -1424,7 +1442,6 @@ export const ITEM_STATS = {
     "Rock": {base_attack:15, base_cooldown:300, health_bonus:0, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:2000},
     "DNA": {base_attack:0, base_cooldown:10, is_dna:true, use_rarity_multiplier: true, base_reload_time:1000},
     "Clover": {base_attack:10, base_cooldown:1, is_clover:true, use_rarity_multiplier: true, base_reload_time:500},
-    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, use_rarity_multiplier: true, base_reload_time:2000},
     "Lotus": {base_attack:5, base_cooldown:300, poison_resistance:0.8, use_rarity_multiplier: true, base_reload_time:1500},
     "Heavy": {base_attack:6, base_cooldown:400, health_bonus:100, knockback_power:480, use_rarity_multiplier: true, base_reload_time:4500},
     "Controller": {base_attack:100000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000},
@@ -1475,11 +1492,11 @@ export const ITEM_STATS = {
     "FireStick": {base_attack: 1, base_cooldown: 250, spawn_firestorm: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 8000},
     // ========== 🔥 Hel 系列武器物品 ==========
     "Faster": {base_attack: 12, base_cooldown: 80, speed_bonus: 0.15, use_rarity_multiplier: true, base_reload_time: 1000},
-    "Blood Stinger": {base_attack: 380, base_cooldown: 250, lifesteal: 0.15, use_rarity_multiplier: true, base_reload_time: 4000},
-    "Missile": {base_attack: 20, base_cooldown: 300, is_projectile: true, explosion_radius: 80, use_rarity_multiplier: true, base_reload_time: 6000},
+    "Blood Stinger": {base_attack: 380, base_cooldown: 250, lifesteal: 0.15, use_rarity_multiplier: true, base_reload_time: 10000},
+    "Missile": {base_attack: 20, base_cooldown: 300, is_projectile: true, explosion_radius: 80, use_rarity_multiplier: true, base_reload_time: 3000},
     "Glass": {base_attack: 25, base_cooldown: 120, critical_chance: 0.25, critical_multiplier: 2.5, use_rarity_multiplier: true, base_reload_time: 2500},
-    "Hel Honey": {base_attack: 8, base_cooldown: 200, healing: 2, slow_effect: 0.2, use_rarity_multiplier: true, base_reload_time: 2500},
-    "Hel Lighting": {base_attack: 35, base_cooldown: 500, chain_damage: 0.3, chain_targets: 4, use_rarity_multiplier: true, base_reload_time: 5000},
+    "Hel Honey": {base_attack: 8, base_cooldown: 200, healing: 2, slow_effect: 0.2, use_rarity_multiplier: true, base_reload_time: 2000},
+    "Hel Lighting": {base_attack: 35,lightningBounces: 5, base_cooldown: 500, chain_damage: 0.3, chain_targets: 4, use_rarity_multiplier: true, base_reload_time: 3000},
     // ========== 🌊 海洋生物 ==========
     "Sponge": {base_attack: 1,base_cooldown: 0,is_sponge: true,damage_absorption: true,absorption_duration: 4,use_rarity_multiplier: true, base_reload_time: 3000},
     "Salt": {base_attack:5, base_cooldown:100, bonus_vs_soft:3, use_rarity_multiplier: true, base_reload_time:2000},
@@ -1487,7 +1504,7 @@ export const ITEM_STATS = {
     "Starfish": {base_attack:15, base_cooldown:250, healing_starfish:3, heal_threshold:0.6, use_rarity_multiplier: true, base_reload_time:4000},
     "Starfish egg": {base_attack:1, base_cooldown:8000, spawn_starfish:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000},
     "Jelly": {base_attack:10, base_cooldown:180, knockback_power:300, knockback_duration:0.5, slow_effect:0.5, use_rarity_multiplier: true, base_reload_time:2000},
-    "Lightning": {base_attack:30, base_cooldown:500, lightning_bonus:5, chain_damage_reduction:0.2, use_rarity_multiplier: true, base_reload_time:6000},
+    "Lightning": {base_attack:30,lightningBounces: 3, base_cooldown:500, lightning_bonus:5, chain_damage_reduction:0.2, use_rarity_multiplier: true, base_reload_time:6000},
     "Jellyfish egg": {base_attack:1, base_cooldown:9000, spawn_jellyfish:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:15000},
     "Shell": {base_attack:0, base_cooldown:0, is_shell:true, shield_value:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Pearl": {base_attack:20, base_cooldown:350, value_multiplier:1, use_rarity_multiplier: true, base_reload_time:3000},
@@ -4674,6 +4691,7 @@ class CollisionSystem {
         // 四叉树用于宽相位碰撞检测
         this.quadtree = new Quadtree([0, 0, worldWidth, worldHeight], 8);
     }
+
     clear() {
         this.grid.clear();
         this.collisionPairs = [];
@@ -4740,6 +4758,7 @@ class CollisionSystem {
         }
         return nearby;
     }
+
     _shouldSkipCollision(obj1, obj2) {
         // 获取对象类型
         const isPlayer1 = obj1 === this.player || (obj1.constructor && obj1.constructor.name === 'Player');
@@ -4823,6 +4842,9 @@ class CollisionSystem {
         // 解析碰撞
         this.resolveCollisions();
         this._handlePetalCollisions();
+
+        // ===== 🆕 身体节攻击检测（在碰撞解析后执行）=====
+        this._handleSegmentAttacks(player, dt);
     }
 
     _broadPhaseCollisionDetection() {
@@ -5022,33 +5044,46 @@ class CollisionSystem {
             let shouldRemoveProjectile1 = false;
             let shouldRemoveProjectile2 = false;
 
-            // ===== 处理玩家与身体节的碰撞 =====
-            if ((isPlayer1 && isSegment2) || (isPlayer2 && isSegment1)) {
+            // ===== ✅ 身体节只与身体节之间产生推力（防止重叠），但不推动玩家 =====
+            if ((isSegment1 && isSegment2)) {
+                // 两个都是身体节，需要推开防止重叠
+                push1X = dirX * pushStrength * 0.9;
+                push1Y = dirY * pushStrength * 0.9;
+                push2X = -dirX * pushStrength * 0.9;
+                push2Y = -dirY * pushStrength * 0.9;
+            }
+            // ===== 身体节与玩家碰撞：造成伤害（使用攻击方法）=====
+            else if ((isPlayer1 && isSegment2) || (isPlayer2 && isSegment1)) {
                 const player = isPlayer1 ? obj1 : obj2;
                 const segment = isSegment1 ? obj1 : obj2;
+                const parentEnemy = segment.parentEnemy;
 
-                // 玩家受到伤害
-                if (!player.isBouncing) {
-                    const bounceDir = new Vector2(dirX, dirY);
-                    if (typeof player.applyBounce === 'function') {
-                        player.applyBounce(bounceDir, 25);
+                // 🆕 使用 Enemy 类的 attack 方法，传入 isSegment=true
+                if (parentEnemy && !parentEnemy.isDead && parentEnemy.health > 0) {
+                    // 获取身体节索引
+                    let segmentIndex = -1;
+                    if (parentEnemy.segmentColliders) {
+                        segmentIndex = parentEnemy.segmentColliders.indexOf(segment);
+                    }
+
+                    // 调用攻击方法（身体节攻击，30%伤害，独立冷却）
+                    const damage = parentEnemy.attack(player, true, segmentIndex);
+
+                    if (damage > 0 && !player.isBouncing) {
+                        const bounceDir = new Vector2(dirX, dirY);
+                        if (typeof player.applyBounce === 'function') {
+                            player.applyBounce(bounceDir, 10);
+                        }
                     }
                 }
 
-                // 计算推力
-                if (isPlayer1) {
-                    push1X = dirX * (pushStrength * (body2.mass / totalMass));
-                    push1Y = dirY * (pushStrength * (body2.mass / totalMass));
-                    push2X = -dirX * (pushStrength * (body1.mass / totalMass));
-                    push2Y = -dirY * (pushStrength * (body1.mass / totalMass));
-                } else {
-                    push1X = dirX * (pushStrength * (body2.mass / totalMass));
-                    push1Y = dirY * (pushStrength * (body2.mass / totalMass));
-                    push2X = -dirX * (pushStrength * (body1.mass / totalMass));
-                    push2Y = -dirY * (pushStrength * (body1.mass / totalMass));
-                }
+                // 身体节与玩家：不产生推力
+                push1X = 0;
+                push1Y = 0;
+                push2X = 0;
+                push2Y = 0;
             }
-            // ===== 处理投射物与身体节的碰撞 =====
+            // ===== 身体节与投射物碰撞 =====
             else if ((isProjectile1 && isSegment2) || (isProjectile2 && isSegment1)) {
                 const projectile = isProjectile1 ? obj1 : obj2;
                 const segment = isSegment1 ? obj1 : obj2;
@@ -5059,8 +5094,14 @@ class CollisionSystem {
                     if (isProjectile1) shouldRemoveProjectile1 = true;
                     else shouldRemoveProjectile2 = true;
                 }
+
+                // 投射物与身体节：推力减半
+                push1X = dirX * pushStrength * 0.3;
+                push1Y = dirY * pushStrength * 0.3;
+                push2X = -dirX * pushStrength * 0.3;
+                push2Y = -dirY * pushStrength * 0.3;
             }
-            // ===== 处理投射物与玩家/敌人的碰撞（原有逻辑）=====
+            // ===== 处理投射物与玩家/敌人的碰撞 =====
             else if (isProjectile1 && (isPlayer2 || isEnemy2)) {
                 this._handleProjectileHit(obj1, obj2, dirX, dirY);
                 obj1.health -= 1;
@@ -5068,7 +5109,7 @@ class CollisionSystem {
             }
             else if (isProjectile2 && (isPlayer1 || isEnemy1)) {
                 this._handleProjectileHit(obj2, obj1, -dirX, -dirY);
-                obj2.health -= 20 ;
+                obj2.health -= 20;
                 if (obj2.health <= 0) shouldRemoveProjectile2 = true;
             }
             // ===== 玩家与敌人的碰撞 =====
@@ -5121,6 +5162,63 @@ class CollisionSystem {
             // 标记需要移除的投射物
             if (shouldRemoveProjectile1) obj1.health = 0;
             if (shouldRemoveProjectile2) obj2.health = 0;
+        }
+    }
+
+    // 🆕 新增：身体节攻击检测（独立于碰撞解析）
+    _handleSegmentAttacks(player, dt) {
+        if (!player || player.isDead) return;
+
+        // 遍历所有敌人
+        for (const obj of this.grid.values()) {
+            for (const { obj: enemy } of obj) {
+                // 检查是否是多节生物
+                if (!enemy.hasMultiSegmentCollision) continue;
+                if (!enemy.segmentColliders) continue;
+                if (enemy.isDead) continue;
+
+                // 检查每个身体节是否碰到玩家
+                for (let i = 0; i < enemy.segmentColliders.length; i++) {
+                    const segment = enemy.segmentColliders[i];
+                    if (!segment || !segment.physicsBody) continue;
+
+                    // 检查身体节与玩家的距离
+                    const distance = Math.hypot(
+                        segment.physicsBody.position.x - player.physicsBody.position.x,
+                        segment.physicsBody.position.y - player.physicsBody.position.y
+                    );
+
+                    const contactRange = segment.physicsBody.radius + player.physicsBody.radius;
+
+                    if (distance <= contactRange) {
+                        // 检查攻击冷却
+                        if (enemy.segmentAttackCooldown === undefined) enemy.segmentAttackCooldown = 0;
+                        if (enemy.segmentAttackCooldown <= 0) {
+                            // 造成伤害（身体节攻击）
+                            const damage = enemy.attack(player, true, i);
+
+                            if (damage > 0) {
+                                // 设置冷却
+                                enemy.segmentAttackCooldown = 150; // 80ms 冷却
+
+                                // 击退效果
+                                if (!player.isBouncing) {
+                                    const dx = player.physicsBody.position.x - segment.physicsBody.position.x;
+                                    const dy = player.physicsBody.position.y - segment.physicsBody.position.y;
+                                    const dist = Math.hypot(dx, dy);
+                                    if (dist > 0) {
+                                        const bounceDir = new Vector2(dx / dist, dy / dist);
+                                        if (typeof player.applyBounce === 'function') {
+                                            player.applyBounce(bounceDir, 8);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -6086,7 +6184,7 @@ class Coin extends Item {
 
     // 覆盖 calculateMaxDurability
     calculateMaxDurability() {
-        const baseDurability = 100;
+        const baseDurability = 50;
         const rarityMultipliers = {
             "Common": 1.0,
             "Unusual": 3.0,
@@ -6109,7 +6207,7 @@ class Coin extends Item {
         const rarityMultiplier = RARITY_MULTIPLIERS[this.rarity] || 1.0;
 
         return {
-            attack_power: 20 * rarityMultiplier,  // 基础攻击力 20 乘以稀有度乘数
+            attack_power: 15 * rarityMultiplier,  // 基础攻击力 20 乘以稀有度乘数
             attack_cooldown: 100 / rarityMultiplier,  // 冷却时间随稀有度减少
             rarity_color: this.color,
             type: "Coin",
@@ -11498,7 +11596,7 @@ class EnemyDrawer {
             "Mythic": 2.8,
             "Ultra": 5.0,
             "Super": 10.2,
-            "Omega": 18.0,
+            "Omega": 12.0,
             "Eternal": 15.0
         };
 
@@ -11514,8 +11612,8 @@ class EnemyDrawer {
         const legLength = bodyRadius * 2.2;
         const legWidth = Math.max(2, Math.floor(0.15 * bodyRadius));
         const bodyStrokeWidth = Math.max(2, Math.floor(2.5 * rarityMult * viewScale));
-        const waveAmp1 = 1 * waveMult * viewScale;
-        const waveAmp2 = 2 * waveMult * viewScale;
+        const waveAmp1 = 8 * waveMult ;
+        const waveAmp2 = 14 * waveMult ;
 
         context.save();
         context.translate(x, y);
@@ -11560,8 +11658,8 @@ class EnemyDrawer {
             normalAngle += Math.sin(animationTimer * toothSwingSpeed + randomPhase) * toothSwingAmount;
 
             // ✅ 所有牙齿长度一样，不使用长度倍率
-            const tier = Math.sin((i / (teethCount - 1)) * Math.PI) * 10 * viewScale;
-            const breath = Math.sin(animationTimer * 6 + i) * 2.0 * viewScale;
+            const tier = Math.sin((i / (teethCount - 1)) * Math.PI) * 0.06 * scaledSize;
+            const breath = Math.sin(animationTimer * 6 + i) * 0.02 * scaledSize;
             const randomWiggle = Math.sin(animationTimer * 7 + i * 1.5) * 1.5 * viewScale;
             // ✅ 所有牙齿使用相同的长度计算
             const len = (bodyRadius * 0.10) + tier + breath + randomWiggle;
@@ -11570,7 +11668,7 @@ class EnemyDrawer {
             context.translate(tx, ty);
             context.rotate(normalAngle - Math.PI / 2);
 
-            const toothWidth = 4 + Math.sin(animationTimer * 8 + i * 2) * 0.8;
+            const toothWidth = 0.04 * scaledSize + Math.sin(animationTimer * 8 + i * 2) * 0.01;
 
             context.beginPath();
             context.moveTo(-toothWidth * viewScale, 0);
@@ -19189,13 +19287,13 @@ class ShopSystem {
             "Cutter": 10,
             "Bubble Bomb": 18,
             "Bomb": 12,
-            "Missile": 15,
-            "Glass": 20,
+            "Missile": 5,
+            "Glass": 10,
             "Faster": 12,
             "Blood Stinger": 15,
-            "Hel Lighting": 10,
+            "Hel Lighting": 15,
             "Hel Honey": 8,
-            "Lightning": 4,
+            "Lightning": 10,
             "Jelly": 3,
             "Pearl": 5,
             "Coral": 5,
@@ -19337,10 +19435,8 @@ class ShopSystem {
             "Ant Egg": 12,
             "Moon Egg": 10,
             "Stick": 18,
-            "Square Egg": 50,
-
             // ==================== 其他 ====================
-            "Coin": 1
+            "Coin": 2
         };
 
         // Shop items list (only Common rarity configured, others calculated via multipliers)
@@ -23261,7 +23357,7 @@ class Projectile {
                 target.takeDamage(this.damage, this.source);
             }
             // ✅ 命中后立即自毁
-            this.health = -9999;
+            this.health = -10;
         }
         return true;
     }
@@ -23433,12 +23529,14 @@ class Enemy {
         this.frameDamageRate = 100;
         this.slowDuration = 0;
         this.slowMultiplier = 1.0;
+        this.damageFlashTimer = 0;      // 受伤闪烁计时器
+        this.damageFlashDuration = 1000;
         this.killedByOwner = null;
         this.isCancerInfected = false;
         this.infectedByCancer = null;
         this.cancerInfectionTime = 0;
         this.hasBeenCloned = false;
-
+        this.displayHealth = this.maxHealth;
         this.isFriendly = false;
         this.ownerPetal = null;
         this.ownerPlayer = null;
@@ -23763,6 +23861,36 @@ class Enemy {
                 this.rockVertices.push({r, angle});
             }
         }
+        const LIGHTNING_ENEMIES = new Set(["Jellyfish", "HelJellyfish", "Firefly"]);
+        this.isLightningEnemy = LIGHTNING_ENEMIES.has(enemyType);
+        // ===== 毒属性 =====
+        const POISON_STATS = {
+            "ToxicDragon":    { damage: 30, duration: 4000, init: 3.0, stable: 0.4 },
+            "Bacteria":       { damage: 20,  duration: 3000, init: 2.5, stable: 0.3 },
+            "Bacteriophage":  { damage: 15,  duration: 3000, init: 2.5, stable: 0.3 },
+            "WhiteBloodCell": { damage: 20,  duration: 3000, init: 2.0, stable: 0.3 },
+            "Cancer":         { damage: 100, duration: 4000, init: 2.5, stable: 0.4 },
+            "StemCell":       { damage: 70,  duration: 4000, init: 2.2, stable: 0.3 },
+            "Roach":          { damage: 40,  duration: 3000, init: 2.5, stable: 0.3 },
+            "PooStorm":          { damage: 40,  duration: 3000, init: 2.5, stable: 0.3 },
+            "Virus":          { damage: 60,  duration: 3000, init: 2.8, stable: 0.2 },
+            "Rat":            { damage: 120, duration: 4000, init: 2.5, stable: 0.4 },
+            "Spider":         { damage: 8,  duration: 3000, init: 2.5, stable: 0.3 },
+            "Parasite":         { damage: 20,  duration: 3000, init: 2.2, stable: 0.3 },
+            "HelSpider":      { damage: 25, duration: 4000, init: 3.0, stable: 0.4 },
+            "Scorpion":       { damage: 8, duration: 4000, init: 3.0, stable: 0.4 },
+        };
+        const poisonCfg = POISON_STATS[enemyType];
+        if (poisonCfg) {
+            this.isPoisonous = true;
+            this.poisonDamage   = poisonCfg.damage   * (PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0) * 0.05;
+            this.poisonDuration = poisonCfg.duration;
+            this.poisonInitMult = poisonCfg.init;
+            this.poisonStableMult = poisonCfg.stable;
+        } else {
+            this.isPoisonous = false;
+        }
+
 
         this.clampPosition();
     }
@@ -23996,7 +24124,7 @@ class Enemy {
                     velocity: { x: 0, y: 0 },
                     // ✅ physicsBody.radius 也必须等于 segRadius，绘制时会用这个值
                     radius: segRadius,
-                    mass: (this.weight || 10) * 0.6,
+                    mass: 10,
                     lastCollisionTime: 0
                 },
                 parentEnemy: this,
@@ -24016,130 +24144,198 @@ class Enemy {
         if (!this.hasMultiSegmentCollision || !this.segmentColliders || this.segmentColliders.length === 0) return;
 
         const segments = this.segmentColliders;
-        const head = segments[0];
-        if (!head) return;
 
-        // ===== 1. 头部同步 =====
+        // 1. 头部位置绝对同步
+        const head = segments[0];
         head.physicsBody.position.x = this.physicsBody.position.x;
         head.physicsBody.position.y = this.physicsBody.position.y;
-        head.physicsBody.velocity.x = this.physicsBody.velocity.x;
-        head.physicsBody.velocity.y = this.physicsBody.velocity.y;
         head.x = head.physicsBody.position.x;
         head.y = head.physicsBody.position.y;
 
-        // ===== 2. 初始化缓存 =====
-        if (!this._velocities) {
-            this._velocities = segments.map(() => ({ x: 0, y: 0 }));
-        }
-
-        // 调整：稍微降低基础速度，提高稳定性
-        const FOLLOW_SPEED = 12.0;
-        const SPRING_STRENGTH = 0.15;
-        const DAMPING = 0.85; // 稍微调高阻尼，吸收碰撞产生的多余动能
-
-        const headSpeedSq = head.physicsBody.velocity.x ** 2 + head.physicsBody.velocity.y ** 2;
-        const headSpeed = Math.sqrt(headSpeedSq);
-
-        // 💡 动态最高速度：防止被碰撞击退后产生超大瞬时动能
-        const ABSOLUTE_MAX_SPEED = Math.max(20, headSpeed * 1.3);
-        const dynamicFollowSpeed = Math.min(ABSOLUTE_MAX_SPEED, FOLLOW_SPEED + headSpeed * 0.5);
-
+        // 2. 几何约束循环（从头到尾强制锁定）
         for (let i = 1; i < segments.length; i++) {
             const curr = segments[i];
             const prev = segments[i - 1];
-            if (!curr.physicsBody || !prev.physicsBody) continue;
 
-            const prevPos = prev.physicsBody.position;
-            const currPos = curr.physicsBody.position;
+            // 计算当前这一节相对于前一节的向量
+            let dx = curr.physicsBody.position.x - prev.physicsBody.position.x;
+            let dy = curr.physicsBody.position.y - prev.physicsBody.position.y;
+
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 如果两节完全重合（距离为0），给一个随机方向防止计算出错
+            if (distance < 0.1) {
+                dx = 1;
+                dy = 0;
+                distance = 1;
+            }
+
+            // 设定标准间距（直径的 95%，可以调低到 0.8 来让身体看起来更紧凑，但绝对不能重叠）
             const targetDistance = prev.radius * 2 * 0.95;
 
-            const dx = currPos.x - prevPos.x;
-            const dy = currPos.y - prevPos.y;
-            const distance = Math.sqrt(dx * dx + dy * dy) || 0.001;
+            /**
+             * 💡 解决重叠的关键：强制约束
+             * 不管当前 curr 在哪，直接根据 prev 的位置和方向，强行计算它“必须”在的位置
+             */
+            const ratio = targetDistance / distance;
 
-            const targetX = prevPos.x + (dx / distance) * targetDistance;
-            const targetY = prevPos.y + (dy / distance) * targetDistance;
+            // 强制更新坐标：这一步会无视物理引擎的挤压，强行拉开间距
+            curr.physicsBody.position.x = prev.physicsBody.position.x + dx * ratio;
+            curr.physicsBody.position.y = prev.physicsBody.position.y + dy * ratio;
 
-            const errorX = targetX - currPos.x;
-            const errorY = targetY - currPos.y;
-            const errorDist = Math.sqrt(errorX * errorX + errorY * errorY);
-
-            // 死区：如果位移极小（比如微弱的碰撞挤压），不执行物理计算，保持静止
-            if (errorDist < 0.2) {
-                this._velocities[i].x *= 0.5;
-                this._velocities[i].y *= 0.5;
-            } else {
-                // 计算追赶速度
-                let targetVelX = errorX * SPRING_STRENGTH * 60;
-                let targetVelY = errorY * SPRING_STRENGTH * 60;
-
-                const targetSpeed = Math.sqrt(targetVelX * targetVelX + targetVelY * targetVelY);
-
-                // 💡 关键：软限速。超过动态限速后，平滑衰减而不是强行截断
-                if (targetSpeed > dynamicFollowSpeed) {
-                    const ratio = dynamicFollowSpeed / targetSpeed;
-                    targetVelX *= ratio;
-                    targetVelY *= ratio;
-                }
-
-                // 速度混合：DAMPING 越高，动作越稳，越不“飘”
-                this._velocities[i].x = this._velocities[i].x * DAMPING + targetVelX * (1 - DAMPING);
-                this._velocities[i].y = this._velocities[i].y * DAMPING + targetVelY * (1 - DAMPING);
-
-                curr.physicsBody.position.x += this._velocities[i].x * dt;
-                curr.physicsBody.position.y += this._velocities[i].y * dt;
-                curr.physicsBody.velocity.x = this._velocities[i].x;
-                curr.physicsBody.velocity.y = this._velocities[i].y;
-            }
-
+            // 同步逻辑坐标与速度
             curr.x = curr.physicsBody.position.x;
             curr.y = curr.physicsBody.position.y;
+
+            // 速度补偿：防止物理引擎因为坐标突变而产生剧烈抖动
+            curr.physicsBody.velocity.x = (curr.x - (curr.lastX || curr.x)) / dt;
+            curr.physicsBody.velocity.y = (curr.y - (curr.lastY || curr.y)) / dt;
+
+            curr.lastX = curr.x;
+            curr.lastY = curr.y;
         }
 
-        // ===== 3. 强力约束 (防止身体节像橡皮筋一样拉断) =====
-        const STRETCH_LIMIT = 1.1;
-        const TELEPORT_LIMIT = 2.0;
-
-        for (let i = 1; i < segments.length; i++) {
-            const curr = segments[i];
-            const prev = segments[i - 1];
-            const dx = curr.x - prev.x;
-            const dy = curr.y - prev.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const targetDistance = prev.radius * 2 * 0.95;
-
-            // 如果碰撞导致身体节飞得太远（超过2倍距离）
-            if (distance > targetDistance * TELEPORT_LIMIT) {
-                const ratio = (targetDistance * STRETCH_LIMIT) / distance;
-                curr.physicsBody.position.x = prev.x + dx * ratio;
-                curr.physicsBody.position.y = prev.y + dy * ratio;
-
-                // 💡 立即清空速度缓存，防止下一帧产生补偿性反弹
-                this._velocities[i].x = 0;
-                this._velocities[i].y = 0;
-            }
-            else if (distance > targetDistance * STRETCH_LIMIT) {
-                const ratio = (targetDistance * STRETCH_LIMIT) / distance;
-                curr.physicsBody.position.x = prev.x + dx * ratio;
-                curr.physicsBody.position.y = prev.y + dy * ratio;
-            }
-
-            curr.x = curr.physicsBody.position.x;
-            curr.y = curr.physicsBody.position.y;
-        }
-
-        // 更新渲染坐标
+        // 3. 渲染数据同步
         for (let i = 0; i < segments.length; i++) {
             if (!this.segments) this.segments = [];
             this.segments[i] = { x: segments[i].x, y: segments[i].y };
         }
     }
 
+    // 在 Enemy 类中添加远程电击攻击方法
+    performLightningAttack(target) {
+        if (!target || target.isDead) return;
+
+        // 电击基础伤害（较低）
+        let lightningDamage = this.attackDamage * 0.3; // 只有普通攻击的30%
+
+        // 根据稀有度调整伤害
+        const rarityDamageMultiplier = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.3,
+            "Legendary": 1.4, "Mythic": 1.5, "Ultra": 1.6,
+            "Super": 1.7, "Omega": 1.8, "Eternal": 2.0
+        };
+        lightningDamage = lightningDamage * (rarityDamageMultiplier[this.rarity] || 1.0);
+
+        // 跳跃次数（根据稀有度）
+        let bounces = 2;
+        const rarityBounceMultiplier = {
+            "Common": 1, "Unusual": 1, "Rare": 1, "Epic": 2,
+            "Legendary": 2, "Mythic": 2, "Ultra": 3, "Super": 3,
+            "Omega": 4, "Eternal": 5
+        };
+        bounces = bounces * (rarityBounceMultiplier[this.rarity] || 1);
+
+        // 获取所有可能的连锁目标
+        const targets = [];
+
+        // 添加玩家（如果不是攻击目标本身）
+        if (this.gameInstance && this.gameInstance.player && !this.gameInstance.player.isDead) {
+            if (target !== this.gameInstance.player) {
+                targets.push(this.gameInstance.player);
+            }
+        }
+
+        // 添加其他友方单位
+        if (this.gameInstance && this.gameInstance.enemies) {
+            for (const enemy of this.gameInstance.enemies) {
+                if (enemy.isFriendly && !enemy.isDead && enemy !== target && enemy !== this) {
+                    targets.push(enemy);
+                }
+            }
+        }
+
+        // 对主目标造成伤害（100%命中）
+        const mainDamage = lightningDamage;
+        if (target.takeDamage) {
+            target.takeDamage(mainDamage, this);
+        } else {
+            target.health -= mainDamage;
+        }
+
+        // 显示伤害数字
+        if (this.gameInstance) {
+            const targetPos = target.physicsBody ? target.physicsBody.position : target.position;
+            this.gameInstance.addDamageNumber(targetPos.x, targetPos.y, Math.floor(mainDamage), "lightning");
+
+            // 添加闪电视觉效果
+            const attackerPos = this.physicsBody.position;
+            this.gameInstance.lightningArcs.push({
+                x1: attackerPos.x,
+                y1: attackerPos.y,
+                x2: targetPos.x,
+                y2: targetPos.y,
+                life: 1.0
+            });
+        }
+
+        // 连锁攻击
+        if (bounces > 0 && targets.length > 0) {
+            this._chainLightning(target, lightningDamage * 0.5, bounces, targets, [target]);
+        }
+    }
+
+    // 连锁闪电方法
+    _chainLightning(origin, damage, bouncesLeft, allTargets, alreadyHit) {
+        if (bouncesLeft <= 0) return;
+
+        const CHAIN_RANGE = 200; // 连锁范围200像素
+        const originPos = origin.physicsBody ? origin.physicsBody.position : origin.position;
+
+        // 寻找范围内的未击中目标
+        const candidates = allTargets.filter(t => {
+            if (alreadyHit.includes(t)) return false;
+            if (t.isDead) return false;
+            const tPos = t.physicsBody ? t.physicsBody.position : t.position;
+            const dx = tPos.x - originPos.x;
+            const dy = tPos.y - originPos.y;
+            return Math.sqrt(dx * dx + dy * dy) <= CHAIN_RANGE;
+        });
+
+        if (candidates.length === 0) return;
+
+        // 随机选择一个目标（电击随机跳跃）
+        const randomIndex = Math.floor(Math.random() * candidates.length);
+        const target = candidates[randomIndex];
+
+        // 造成连锁伤害（递减）
+        const chainDamage = damage * 0.7;
+        if (target.takeDamage) {
+            target.takeDamage(chainDamage, this);
+        } else {
+            target.health -= chainDamage;
+        }
+
+        // 视觉效果
+        if (this.gameInstance) {
+            const originPosWorld = originPos;
+            const targetPos = target.physicsBody ? target.physicsBody.position : target.position;
+            this.gameInstance.lightningArcs.push({
+                x1: originPosWorld.x,
+                y1: originPosWorld.y,
+                x2: targetPos.x,
+                y2: targetPos.y,
+                life: 1.0
+            });
+
+            this.gameInstance.addDamageNumber(targetPos.x, targetPos.y, Math.floor(chainDamage), "lightning");
+        }
+
+        // 检查目标是否死亡
+        if (target.health <= 0 && !target.isDead) {
+            if (target.markAsDead) target.markAsDead();
+        }
+
+        alreadyHit.push(target);
+
+        // 继续连锁
+        this._chainLightning(target, chainDamage, bouncesLeft - 1, allTargets, alreadyHit);
+    }
     // ===== 辅助方法：计算碰撞半径 =====
     _calculateCollisionRadius(enemyType, baseRadius, sizeFactor) {
         // 基础半径
         let collisionRadius = baseRadius * sizeFactor;
-        collisionRadius = baseRadius * sizeFactor * 0.9;
+        collisionRadius = baseRadius * sizeFactor * 1.0;
 
         return Math.max(3, collisionRadius);
     }
@@ -24168,20 +24364,20 @@ class Enemy {
             case "Crab": return [140, 26, 50 + Math.random() * 20, 300, 25];
             case "Beetle": return [110, 22, 110, 1000, 30];
             case "Soldier Ant": return [100, 24, 70 + Math.random() * 5, 200, 10];
-            case "Worker Ant": return [50, 20, 60 + Math.random() * 10, 200, 12];
-            case "Bush": return [80, 30, 0, 500, 20];
+            case "Worker Ant": return [50, 22, 60 + Math.random() * 10, 200, 12];
+            case "Bush": return [80, 28, 0, 500, 20];
             case "Ladybug": return [100, 25, 70, 300, 10];
-            case "GoldenAnt": return [100, 20, 60 + Math.random() * 10, 200, 25];
-            case "Centipede": return [25, 25, 70 + Math.random() * 10, 200, 20];
+            case "GoldenAnt": return [100, 22, 60 + Math.random() * 10, 200, 25];
+            case "Centipede": return [25, 24, 80 + Math.random() * 10, 200, 20];
             case "Cactus": return [125, 35, 0, 400, 75];
             case "Anthill": return [750, 60, 0, 9000, 20];
             case "Sandstorm": return [120, 25, 50 + Math.random() * 10, 150, 36];
-            case "Rock": return [300, 40, 0, 2000, 65];
+            case "Rock": return [300, 35, 0, 2000, 65];
             case "StemCell": return [340, 30, 60, 1000, 40];
-            case "Bacteria": return [75, 20, 50, 200, 30];
-            case "RedBloodCell": return [120, 18, 80, 300, 40];
+            case "Bacteria": return [75, 22, 50, 200, 30];
+            case "RedBloodCell": return [120, 20, 80, 300, 40];
             case "WhiteBloodCell": return [125, 25, 50, 350, 55];
-            case "Bee": return [50, 20, 90, 200, 50];
+            case "Bee": return [50, 22, 90, 200, 50];
             case "Bacteriophage": return [80, 25, 100, 300, 40];
             case "QueenAnt": return [250, 30, 70, 400, 20];
             case "Squid": return [300, 20, 100, 500, 50];
@@ -24195,13 +24391,13 @@ class Enemy {
             case "Leech": return [90, 15, 110, 100, 20];
             case "Sponge": return [100, 30, 0, 500, 10];
             case "Scallop": return [100, 25, 40, 450, 25];
-            case "Bubble": return [1, 35, 0, 50, 2];
-            case "Hive": return [700, 50, 0, 18000, 45];
+            case "Bubble": return [5, 30, 0, 50, 2];
+            case "Hive": return [700, 45, 0, 18000, 45];
             case "Starfish": return [50, 30, 50, 300, 20];
             case "Jellyfish": return [110, 28, 55, 200, 25];
             case "CrabHole": return [540, 50, 0, 15000, 30];
             case "ManHole": return [900, 50, 0, 15000, 50];
-            case "Fly": return [25, 25, 60, 200, 10];
+            case "Fly": return [25, 24, 60, 200, 10];
             case "Rat": return [500, 30, 100, 900, 220];
             case "Roach": return [350, 28, 130, 500, 120];
             case "QueenBee": return [350, 26, 100, 500, 100];
@@ -24217,7 +24413,7 @@ class Enemy {
             case "Barnacle": return [400, 25, 1, 10000, 20];
             case "Ice Dragon": return [320, 25, 120, 550, 80];
             case "Ice Cube": return [300, 28, 1, 600, 40];
-            case "Snowman": return [100, 20, 50, 700, 30];
+            case "Snowman": return [100, 22, 50, 700, 30];
             case "SnowStorm": return [100, 22, 50, 400, 90];
             case "Tick": return [80, 20, 150, 700, 40];
             case "Igloo": return [1000, 50, 0, 14000, 30];
@@ -24226,7 +24422,7 @@ class Enemy {
             case "ArcticSpiderCave": return [750, 55, 0, 12000, 30];
             case "Shipwreck": return [1000, 48, 0, 150000, 40];
             case "PirateDigger": return [250, 28, 90, 300, 200];
-            case "StickBug": return [60, 20, 100, 200, 20];
+            case "StickBug": return [60, 22, 100, 200, 20];
             case "Soldier Termite": return [100, 25, 100, 600, 40];
             case "Worker Termite": return [100, 25, 100, 400, 20];
             case "TermiteHole": return [800, 25, 0, 15500, 50];
@@ -24243,7 +24439,7 @@ class Enemy {
             case "HelHive": return [1000, 40, 0, 15000, 40];
             case "HelJellyfish": return [175, 25, 100, 600, 25];
             case "ToxicDragon": return [150, 22, 110, 700, 80];
-            case "FireStorm": return [180, 20, 80, 400, 60];
+            case "FireStorm": return [180, 22, 80, 400, 60];
             case "HelQueenBee": return [180, 20, 120, 400, 60];
             default: return [100, 20, 60, 10, 40];
         }
@@ -24277,7 +24473,7 @@ class Enemy {
             "GoldenAnt": 80, "Sandstorm": 70, "Rock": 50, "WhiteBloodCell": 70,
             "Leech": 60, "Parasite": 55, "Squid": 300, "Wasp": 320,"Scorpion":350
         };
-        return attackRanges[enemyType] || 70;
+        return attackRanges[enemyType] || 150;
     }
 
     // ===== 物理方法 =====
@@ -24721,20 +24917,119 @@ class Enemy {
         if (index === -1) return 1;
         return Math.pow(3, index);
     }
-    attack(target) {
+
+    _applyEnemyLightningChain(origin, damage, bouncesLeft, allTargets, alreadyHit) {
+        if (bouncesLeft <= 0) return;
+
+        const CHAIN_RANGE = 150;
+        const originPos = origin.physicsBody ? origin.physicsBody.position : origin.position;
+
+        // 寻找范围内的未击中目标
+        const candidates = allTargets.filter(t => {
+            if (alreadyHit.includes(t)) return false;
+            if (t.isDead) return false;
+            const tPos = t.physicsBody ? t.physicsBody.position : t.position;
+            const dx = tPos.x - originPos.x;
+            const dy = tPos.y - originPos.y;
+            return Math.sqrt(dx * dx + dy * dy) <= CHAIN_RANGE;
+        });
+
+        if (candidates.length === 0) return;
+
+        // 按距离排序，选择最近的
+        candidates.sort((a, b) => {
+            const aPos = a.physicsBody ? a.physicsBody.position : a.position;
+            const bPos = b.physicsBody ? b.physicsBody.position : b.position;
+            const da = Math.hypot(aPos.x - originPos.x, aPos.y - originPos.y);
+            const db = Math.hypot(bPos.x - originPos.x, bPos.y - originPos.y);
+            return da - db;
+        });
+
+        const target = candidates[0];
+
+        // 造成伤害
+        if (target.takeDamage) {
+            target.takeDamage(damage, this);
+        } else {
+            target.health -= damage;
+        }
+
+        // ✅ 记录闪电线段（视觉效果）
+        if (this.gameInstance?.lightningArcs) {
+            const targetPos = target.physicsBody ? target.physicsBody.position : target.position;
+            this.gameInstance.lightningArcs.push({
+                x1: originPos.x,
+                y1: originPos.y,
+                x2: targetPos.x,
+                y2: targetPos.y,
+                life: 1.0
+            });
+        }
+
+        // 显示伤害数字
+        this.gameInstance?.addDamageNumber(
+            target.physicsBody ? target.physicsBody.position.x : target.position.x,
+            target.physicsBody ? target.physicsBody.position.y : target.position.y,
+            damage,
+            "lightning"
+        );
+
+        // 检查目标是否死亡
+        if (target.health <= 0 && !target.isDead) {
+            if (target.markAsDead) target.markAsDead();
+        }
+
+        alreadyHit.push(target);
+
+        // 继续连锁（伤害递减40%）
+        this._applyEnemyLightningChain(target, damage * 0.5, bouncesLeft - 1, allTargets, alreadyHit);
+    }
+    attack(target, isSegment = false, segmentIndex = -1) {
         if (this.isDead || this.isSpawning || this.health <= 0) return 0.0;
 
         let meleeDamage = 0;
 
-        // ===== 🦂 蝎子远程攻击（优先执行，在近战之前）=====
-        if (this.type === "Scorpion") {
+        // ===== 🐛 身体节攻击（伤害减半，独立冷却）=====
+        let actualDamage = this.attackDamage;
+        let attackCooldownValue = 100; // 默认100ms冷却
+
+        if (isSegment) {
+            actualDamage = this.attackDamage * 0.9; // 身体节90%伤害
+            attackCooldownValue = 150; // 身体节攻击冷却150ms
+
+            // 检查身体节独立冷却
+            if (this.segmentAttackCooldown === undefined) this.segmentAttackCooldown = 0;
+            if (this.segmentAttackCooldown > 0) return 0;
+        }
+
+        // ========== ⚡ 远程电击攻击（水母、萤火虫等）==========
+        const lightningEnemies = ["Jellyfish", "HelJellyfish", "Firefly", "Lightning"];
+        if (!isSegment && lightningEnemies.includes(this.type)) {
+            if (this.lightningCooldown === undefined) this.lightningCooldown = 0;
+
+            if (this.lightningCooldown <= 0) {
+                const dx = this.physicsBody.position.x - target.physicsBody.position.x;
+                const dy = this.physicsBody.position.y - target.physicsBody.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const attackRange = this.attackRange || 350;
+
+                if (distance <= attackRange) {
+                    this.lightningCooldown = 2000;
+                    this.performLightningAttack(target);
+                    return 0;
+                }
+            }
+        }
+
+        // ===== 🦂 蝎子远程攻击 =====
+        if (!isSegment && this.type === "Scorpion") {
             if (this.shootCooldown <= 0) {
-                const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
+                const dx = this.physicsBody.position.x - target.physicsBody.position.x;
+                const dy = this.physicsBody.position.y - target.physicsBody.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance <= this.attackRange) {
                     this.shootCooldown = this.shootCooldownMax || 2000;
 
-                    const dx = target.physicsBody.position.x - this.physicsBody.position.x;
-                    const dy = target.physicsBody.position.y - this.physicsBody.position.y;
                     const angle = Math.atan2(dy, dx);
 
                     if (this.gameInstance && this.gameInstance.projectiles) {
@@ -24746,24 +25041,24 @@ class Enemy {
                         );
                         this.gameInstance.projectiles.push(stinger);
                     }
-                    return 0; // 远程攻击不造成近战伤害
+                    return 0;
                 }
             }
         }
 
         // ===== 🐝 黄蜂远程攻击 =====
-        if (this.type === "Wasp") {
+        if (!isSegment && this.type === "Wasp") {
             if (this.attackCooldown <= 0) {
-                const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
+                const dx = this.physicsBody.position.x - target.physicsBody.position.x;
+                const dy = this.physicsBody.position.y - target.physicsBody.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance <= this.attackRange) {
                     this.attackCooldown = 1500;
                     this.isAttacking = true;
                     this.attackStartTime = Date.now();
                     this.attackDuration = 400;
 
-                    const dx = target.physicsBody.position.x - this.physicsBody.position.x;
-                    const dy = target.physicsBody.position.y - this.physicsBody.position.y;
-                    let angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx);
 
                     if (this.gameInstance && this.gameInstance.projectiles) {
                         const stinger = new Projectile(
@@ -24786,15 +25081,15 @@ class Enemy {
         }
 
         // ===== 🦑 鱿鱼远程攻击 =====
-        if (this.type === "Squid") {
+        if (!isSegment && this.type === "Squid") {
             if (this.inkCooldown <= 0) {
-                const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
+                const dx = this.physicsBody.position.x - target.physicsBody.position.x;
+                const dy = this.physicsBody.position.y - target.physicsBody.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance <= this.attackRange) {
                     this.inkCooldown = 4000;
 
-                    const dx = target.physicsBody.position.x - this.physicsBody.position.x;
-                    const dy = target.physicsBody.position.y - this.physicsBody.position.y;
-                    let angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx);
 
                     if (this.gameInstance && this.gameInstance.projectiles) {
                         const ink = new Projectile(
@@ -24835,18 +25130,37 @@ class Enemy {
             }
         }
 
-        // ===== 近战攻击 =====
-        const distance = this.physicsBody.position.distanceTo(target.physicsBody.position);
-        const selfRadius = this.getScaledRadius?.() || this.radius * this.currentViewScale;
-        const targetRadius = target.getScaledRadius?.() || target.physicsBody.radius * this.currentViewScale;
-        const contactRange = selfRadius + targetRadius;
+        // ===== 近战攻击（头部或身体节）=====
+        let selfRadius = this.getScaledRadius?.() || this.radius * (this.currentViewScale || 1);
+        let attackerPos = this.physicsBody.position;
+        let attackerRadius = selfRadius;
+        let attackerArmor = this.armor || 0.0;
 
-        // 检查近战冷却（黄蜂和鱿鱼使用 meleeCooldown，蝎子使用 attackCooldown，其他生物使用 attackCooldown）
+        // 如果是身体节攻击，使用身体节的位置和半径
+        if (isSegment && this.segmentColliders && segmentIndex >= 0) {
+            const segment = this.segmentColliders[segmentIndex];
+            if (segment && segment.physicsBody) {
+                attackerPos = segment.physicsBody.position;
+                attackerRadius = segment.physicsBody.radius;
+                attackerArmor = this.armor * 0.8; // 身体节护甲降低20%
+            }
+        }
+
+        // ✅ 修复：手动计算距离（不使用 distanceTo 方法）
+        const dx = attackerPos.x - target.physicsBody.position.x;
+        const dy = attackerPos.y - target.physicsBody.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const targetRadius = target.getScaledRadius?.() || target.physicsBody.radius * (this.currentViewScale || 1);
+        const contactRange = attackerRadius + targetRadius;
+
+        // 检查近战冷却
         let canMelee = false;
-        if (this.type === "Wasp" || this.type === "Squid") {
+        if (isSegment) {
+            canMelee = this.segmentAttackCooldown <= 0;
+        } else if (this.type === "Wasp" || this.type === "Squid") {
             canMelee = this.meleeCooldown <= 0;
         } else if (this.type === "Scorpion") {
-            // 蝎子近战冷却独立
             canMelee = this.attackCooldown <= 0;
         } else {
             canMelee = this.attackCooldown <= 0;
@@ -24854,24 +25168,25 @@ class Enemy {
 
         if (distance <= contactRange && canMelee) {
             // 设置近战冷却
-            if (this.type === "Wasp" || this.type === "Squid") {
-                this.meleeCooldown = this.meleeCooldownMax || 200;
+            if (isSegment) {
+                this.segmentAttackCooldown = attackCooldownValue;
+            } else if (this.type === "Wasp" || this.type === "Squid") {
+                this.meleeCooldown = this.meleeCooldownMax || 150;
             } else if (this.type === "Scorpion") {
-                this.attackCooldown = 200; // 蝎子近战冷却
+                this.attackCooldown = 150;
             } else {
-                this.attackCooldown = 200;
+                this.attackCooldown = attackCooldownValue;
             }
 
             const selfIsFriendly = this.isFriendly;
             const targetIsFriendly = target.isFriendly;
 
-            const attackerArmor = this.armor || 0.0;
             const defenderArmor = target.armor || 0.0;
 
             let finalDamage;
 
             if (selfIsFriendly && !targetIsFriendly) {
-                finalDamage = applyArmorReduction.call(this, this.attackDamage, defenderArmor, attackerArmor, target);
+                finalDamage = applyArmorReduction.call(this, actualDamage, defenderArmor, attackerArmor, target);
 
                 let defenderArmorClass = "A";
                 for (const [className, enemies] of Object.entries(ENEMY_ARMOR_CLASSES)) {
@@ -24891,19 +25206,19 @@ class Enemy {
                     default: maxReductionPercent = 0.1;
                 }
 
-                const noArmorDamage = applyArmorReduction.call(this, this.attackDamage, 0, attackerArmor, target);
+                const noArmorDamage = applyArmorReduction.call(this, actualDamage, 0, attackerArmor, target);
                 const minDamage = noArmorDamage * (1 - maxReductionPercent);
                 finalDamage = Math.max(finalDamage, minDamage);
             }
             else if (!selfIsFriendly && targetIsFriendly) {
-                finalDamage = applyArmorReduction.call(target, this.attackDamage, defenderArmor, attackerArmor, this);
+                finalDamage = applyArmorReduction.call(target, actualDamage, defenderArmor, attackerArmor, this);
             }
             else {
-                finalDamage = applyArmorReduction.call(this, this.attackDamage, defenderArmor, attackerArmor, target);
+                finalDamage = applyArmorReduction.call(this, actualDamage, defenderArmor, attackerArmor, target);
             }
 
-            // 冰龙和 Frost Digger 减速效果
-            if (this.type === "Ice Dragon" || this.type === "Frost Digger") {
+            // 冰龙和 Frost Digger 减速效果（只有头部）
+            if (!isSegment && (this.type === "Ice Dragon" || this.type === "Frost Digger")) {
                 const attackerRarity = this.rarity || "Common";
                 const rarityBoost = {
                     "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.3,
@@ -24931,6 +25246,19 @@ class Enemy {
             }
 
             meleeDamage = finalDamage;
+
+            // 毒伤触发（只有头部）
+            if (!isSegment && this.isPoisonous && !this.isFriendly && this.gameInstance?.poisonManager) {
+                this.gameInstance.poisonManager.applyPoison(
+                    target,
+                    this,
+                    this.poisonDamage * (isSegment ? 0.5 : 1),
+                    this.poisonDuration,
+                    this.poisonInitMult,
+                    this.poisonStableMult
+                );
+            }
+    
         }
 
         return meleeDamage;
@@ -24941,7 +25269,7 @@ class Enemy {
         if (this.isSpawning || this.isDead) return false;
 
         this.health -= damage;
-
+        this.damageFlashTimer = this.damageFlashDuration;
         // ✅ 添加伤害数字（带冷却）
         const now = Date.now();
         if (this.gameInstance && this.gameInstance.addDamageNumber &&
@@ -24978,7 +25306,7 @@ class Enemy {
             this.deathTime = Date.now();
             this.physicsBody.velocity = new Vector2(0, 0);
             this.attackCooldown = 999999;
-
+            this.gameInstance?.poisonManager?.activePoisons.delete(this);
             // 各种死亡生成逻辑
             if (this.type === "FireAntHole" && this.enemies) {
                 this.spawnDeathFireAnts(this.enemies);
@@ -25482,6 +25810,15 @@ class Enemy {
         if (!this.isSpawning) {
             if (this.attackCooldown > 0) {
                 this.attackCooldown -= dt * 1000;
+            }
+            // 更新身体节攻击冷却
+            if (this.segmentAttackCooldown === undefined) this.segmentAttackCooldown = 0;
+            if (this.segmentAttackCooldown > 0) {
+                this.segmentAttackCooldown -= dt * 1000;
+            }
+            if (this.lightningCooldown === undefined) this.lightningCooldown = 0;
+            if (this.lightningCooldown > 0) {
+                this.lightningCooldown -= dt * 1000;
             }
             // 黄蜂和鱿鱼的近战冷却
             if (this.meleeCooldown > 0) {
@@ -26007,60 +26344,381 @@ class Enemy {
             this.drawRarityBelowHealthBar(context, x, y, scaledRadius, viewScale, visualAngle);
         }
     }
-
-    drawHealthBar(ctx, x, y, scaledRadius, viewScale = 1.0, angleToTarget = 0) {
+    drawHealthBar(ctx, x, y, scaledRadius, viewScale = 1.0) {
         const rarityIndex = RARITY_LIST.includes(this.rarity) ? RARITY_LIST.indexOf(this.rarity) : 0;
-        const healthWidth = (30 + rarityIndex * 3) * viewScale;
-        const healthHeight = 4 * viewScale;
 
+        // 1. 基础尺寸
+        const healthWidth = (40 + rarityIndex * 5) * viewScale;
+        const healthHeight = 5 * viewScale;
+        const pillRadius = healthHeight / 2;
+
+        // 2. 位置：固定在生物下方
         let healthX = x - healthWidth / 2;
-        let healthY;
+        let healthY = y + scaledRadius + 10 * viewScale;
 
-        if (-Math.PI / 2 <= angleToTarget && angleToTarget <= Math.PI / 2) {
-            healthY = y + scaledRadius + 8 * viewScale;
-        } else {
-            healthY = y - scaledRadius - 12 * viewScale;
-        }
+        // 3. 平滑逻辑
+        if (this.displayHealth === undefined) this.displayHealth = this.health;
+        this.displayHealth += (this.health - this.displayHealth) * 0.1;
+
+        const actualPercent = Math.max(0, Math.min(1, this.health / this.maxHealth));
+        const bufferPercent = Math.max(0, Math.min(1, this.displayHealth / this.maxHealth));
 
         ctx.save();
-        ctx.fillStyle = "rgb(100, 100, 100)";
-        ctx.fillRect(healthX, healthY, healthWidth, healthHeight);
 
-        const healthPercent = this.health / this.maxHealth;
-        const rarityColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
-        ctx.fillStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
-        ctx.fillRect(healthX, healthY, healthWidth * healthPercent, healthHeight);
+        // --- A. 绘制黑色外边框 ---
+        // 我们通过 lineWidth 来实现外边框感
+        ctx.beginPath();
+        this.drawCapsule(ctx, healthX, healthY, healthWidth, healthHeight, pillRadius);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // 背景深色
+        ctx.fill();
+
+        ctx.strokeStyle = "black";           // 纯黑边框
+        ctx.lineWidth = 3 * viewScale;       // 边框粗细
+        ctx.lineJoin = "round";
+        ctx.stroke();                        // 绘制边框
+
+        // --- B. 绘制内部条 (使用 clip 确保内容不超出边框) ---
+        ctx.save();
+        this.drawCapsule(ctx, healthX, healthY, healthWidth, healthHeight, pillRadius);
+        ctx.clip();
+
+        // 绘制红色缓冲层
+        if (bufferPercent > 0) {
+            ctx.fillStyle = "#ff4444";
+            ctx.fillRect(healthX, healthY, healthWidth * bufferPercent, healthHeight);
+        }
+
+        // 绘制绿色实际血量层
+        if (actualPercent > 0) {
+            ctx.fillStyle = "#7cfc00";
+            ctx.fillRect(healthX, healthY, healthWidth * actualPercent, healthHeight);
+        }
+        ctx.restore();
+
         ctx.restore();
     }
 
-    drawRarityBelowHealthBar(ctx, x, y, scaledRadius, viewScale = 1.0, angleToTarget = 0) {
-        let healthBarY;
 
-        if (-Math.PI / 2 <= angleToTarget && angleToTarget <= Math.PI / 2) {
-            healthBarY = y + scaledRadius + 8 * viewScale;
+    /**
+     * 完美圆角矩形 (胶囊形状) 路径函数
+     */
+    drawCapsule(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            // 现代浏览器标准方法
+            ctx.roundRect(x, y, width, height, radius);
         } else {
-            healthBarY = y - scaledRadius - 12 * viewScale;
+            // 传统兼容方法
+            ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
+            ctx.lineTo(x + width - radius, y);
+            ctx.arc(x + width - radius, y + radius, radius, Math.PI * 1.5, Math.PI * 2);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.arc(x + width - radius, y + height - radius, radius, 0, Math.PI * 0.5);
+            ctx.lineTo(x + radius, y + height);
+            ctx.arc(x + radius, y + height - radius, radius, Math.PI * 0.5, Math.PI);
         }
+        ctx.closePath();
+    }
+    drawRarityBelowHealthBar(ctx, x, y, scaledRadius, viewScale = 1.0, angleToTarget = 0) {
+        // 1. 获取血条宽度 (必须与 drawHealthBar 中的计算逻辑一致)
+        const rarityIndex = RARITY_LIST.includes(this.rarity) ? RARITY_LIST.indexOf(this.rarity) : 0;
+        const healthWidth = (40 + rarityIndex * 5) * viewScale;
+        const healthHeight = 10 * viewScale;
 
-        const healthHeight = 4 * viewScale;
-        const rarityY = healthBarY + healthHeight + 5 * viewScale;
+        // 2. 位置计算
+        const healthBarY = y + scaledRadius + 8 * viewScale;
+        const rarityY = healthBarY + healthHeight + 1 * viewScale;
+        const rarityX = x; // 此时 x 是血条的中心点
 
         const rarityColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
+        const darkness = 0.5;
+        const strokeColor = `rgb(
+            ${Math.floor(rarityColor[0] * darkness)},
+            ${Math.floor(rarityColor[1] * darkness)},
+            ${Math.floor(rarityColor[2] * darkness)}
+        )`;
+
         const fontSize = Math.floor(12 * viewScale);
 
         ctx.save();
-        ctx.font = `${fontSize}px Arial`;
-        ctx.fillStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
-        ctx.textAlign = "center";
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = "center"; // 改为居中，这样文字会均匀分布在血条下方
         ctx.textBaseline = "top";
-        ctx.fillText(this.rarity, x, rarityY);
+        ctx.lineJoin = "round";
+
+        // --- 核心步骤：防止溢出 ---
+        const textMetrics = ctx.measureText(this.rarity);
+        const textWidth = textMetrics.width;
+
+        // 如果文字宽度超过了血条宽度，则使用 scale 挤压文字
+        if (textWidth > healthWidth) {
+            const scaleFactor = healthWidth / textWidth;
+            // 移动到文字中心点进行缩放
+            ctx.translate(rarityX, rarityY);
+            ctx.scale(scaleFactor, 1);
+            // 缩放后，绘制坐标变为 (0, 0)
+            this.drawTextWithStroke(ctx, this.rarity, 0, 0, strokeColor, rarityColor, viewScale);
+        } else {
+            // 没超过宽度，正常绘制
+            this.drawTextWithStroke(ctx, this.rarity, rarityX, rarityY, strokeColor, rarityColor, viewScale);
+        }
+
         ctx.restore();
+    }
+
+    /**
+     * 提取的绘制文字函数，方便复用
+     */
+    drawTextWithStroke(ctx, text, x, y, strokeColor, fillColor, viewScale) {
+        // 绘制深色描边
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 3 * viewScale;
+        ctx.strokeText(text, x, y);
+
+        // 绘制主体颜色
+        ctx.fillStyle = `rgb(${fillColor[0]}, ${fillColor[1]}, ${fillColor[2]})`;
+        ctx.fillText(text, x, y);
     }
 
     isAlive() {
         return !this.isDead && this.health > 0;
     }
 }
+// ==================== 毒伤系统类 ====================
+class PoisonSystem {
+    constructor(source, baseDamage, duration = 5000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+        this.source = source;                    // 伤害来源
+        this.baseDamage = baseDamage;            // 基础伤害
+        this.duration = duration;                // 总持续时间（毫秒）
+        this.initialMultiplier = initialMultiplier;  // 初始倍率（默认3倍）
+        this.stableMultiplier = stableMultiplier;    // 稳定倍率（默认0.5倍）
+
+        // 毒伤状态
+        this.active = true;
+        this.startTime = Date.now();
+        this.lastTickTime = Date.now();
+        this.tickInterval = 100;
+
+        // 计算各阶段参数
+        this.decayDuration = duration * 0.3;      // 衰减阶段占30%时间
+        this.stableDuration = duration * 0.7;     // 稳定阶段占70%时间
+
+        // 当前伤害值
+        this.currentDamage = baseDamage * initialMultiplier;
+
+        // 衰减参数
+        this.decayPerTick = this._calculateDecayPerTick();
+
+        // 统计
+        this.totalDamageDealt = 0;
+        this.tickCount = 0;
+    }
+
+    // 计算每 tick 的衰减量
+    _calculateDecayPerTick() {
+        const startDamage = this.baseDamage * this.initialMultiplier;
+        const endDamage = this.baseDamage * this.stableMultiplier;
+        const totalTicks = this.decayDuration / this.tickInterval;
+        return (startDamage - endDamage) / totalTicks;
+    }
+
+    // 获取当前应该造成的伤害
+    getCurrentDamage() {
+        const now = Date.now();
+        const elapsed = now - this.startTime;
+
+        // 毒伤结束
+        if (elapsed >= this.duration) {
+            this.active = false;
+            return 0;
+        }
+
+        // 衰减阶段
+        if (elapsed < this.decayDuration) {
+            // 线性衰减
+            const progress = elapsed / this.decayDuration;
+            const damage = this.baseDamage * this.initialMultiplier * (1 - progress) +
+                          this.baseDamage * this.stableMultiplier * progress;
+            this.currentDamage = damage;
+        }
+        // 稳定阶段
+        else {
+            this.currentDamage = this.baseDamage * this.stableMultiplier;
+        }
+
+        return this.currentDamage;
+    }
+
+    // 更新并返回是否应该造成伤害
+    updateAndTick() {
+        if (!this.active) return 0;
+
+        const now = Date.now();
+
+        // 检查是否到达 tick 时间
+        if (now - this.lastTickTime >= this.tickInterval) {
+            const damage = this.getCurrentDamage();
+
+            if (damage > 0) {
+                this.lastTickTime = now;
+                this.tickCount++;
+                this.totalDamageDealt += damage;
+                return damage;
+            } else {
+                this.active = false;
+            }
+        }
+
+        return 0;
+    }
+
+    // 检查是否还有效
+    isActive() {
+        if (!this.active) return false;
+        const elapsed = Date.now() - this.startTime;
+        return elapsed < this.duration;
+    }
+
+    // 获取当前毒伤阶段信息
+    getStageInfo() {
+        const elapsed = Date.now() - this.startTime;
+
+        if (elapsed < this.decayDuration) {
+            return {
+                stage: "decay",
+                progress: elapsed / this.decayDuration,
+                currentDamage: this.currentDamage,
+                remainingTime: this.duration - elapsed
+            };
+        } else if (elapsed < this.duration) {
+            return {
+                stage: "stable",
+                progress: (elapsed - this.decayDuration) / this.stableDuration,
+                currentDamage: this.currentDamage,
+                remainingTime: this.duration - elapsed
+            };
+        } else {
+            return {
+                stage: "ended",
+                progress: 1,
+                currentDamage: 0,
+                remainingTime: 0
+            };
+        }
+    }
+
+    // 重置毒伤（叠加时使用）
+    reset() {
+        this.startTime = Date.now();
+        this.lastTickTime = Date.now();
+        this.currentDamage = this.baseDamage * this.initialMultiplier;
+        this.active = true;
+    }
+
+    // 叠加毒伤（新毒伤与旧毒伤合并）
+    stack(newPoison) {
+        // 取更长的持续时间
+        this.duration = Math.max(this.duration, newPoison.duration);
+        // 取更高的基础伤害
+        this.baseDamage = Math.max(this.baseDamage, newPoison.baseDamage);
+        // 重置计时器
+        this.reset();
+        // 重新计算衰减
+        this.decayPerTick = this._calculateDecayPerTick();
+    }
+
+    // 获取毒伤统计
+    getStats() {
+        return {
+            active: this.active,
+            baseDamage: this.baseDamage,
+            currentDamage: this.currentDamage,
+            totalDamage: this.totalDamageDealt,
+            tickCount: this.tickCount,
+            remainingTime: Math.max(0, this.duration - (Date.now() - this.startTime)),
+            stage: this.getStageInfo().stage
+        };
+    }
+}
+
+// ==================== 毒伤管理器 ====================
+class PoisonManager {
+    constructor() {
+        this.activePoisons = new Map();  // 存储每个目标的毒伤效果
+    }
+
+    applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+        if (!target || target.isDead) return false;
+
+        // 直接用对象引用作为 Map key，不需要 id
+        const newPoison = new PoisonSystem(source, baseDamage, duration, initialMultiplier, stableMultiplier);
+
+        if (this.activePoisons.has(target)) {
+            this.activePoisons.get(target).stack(newPoison);
+        } else {
+            this.activePoisons.set(target, newPoison);
+        }
+        return true;
+    }
+
+    updateAll(gameInstance) {
+        const toRemove = [];
+        for (const [target, poison] of this.activePoisons) {
+            const damage = poison.updateAndTick();
+            if (damage > 0 && !target.isDead) {
+                target.health -= damage;
+
+                if (gameInstance?.addDamageNumber) {
+                    const isPlayer = target.isPlayer === true;
+                    const px = isPlayer
+                        ? WIDTH / 2
+                        : target.physicsBody.position.x;
+                    const py = isPlayer
+                        ? HEIGHT / 2 - 30
+                        : target.physicsBody.position.y;
+                    gameInstance.addDamageNumber(px, py, damage, "poison");
+                }
+
+                if (target.health <= 0 && !target.isDead) {
+                    target.markAsDead?.();
+                }
+            }
+            if (!poison.isActive()) toRemove.push(target);
+        }
+        for (const target of toRemove) {
+            this.activePoisons.delete(target);
+        }
+    }
+
+    // 获取目标的毒伤信息
+    getPoisonInfo(target) {
+        const targetId = target.id || target;
+        const poison = this.activePoisons.get(targetId);
+        return poison ? poison.getStats() : null;
+    }
+
+    // 清除目标的毒伤
+    clearPoison(target) {
+        const targetId = target.id || target;
+        this.activePoisons.delete(targetId);
+    }
+
+    // 获取所有活跃毒伤数量
+    getActiveCount() {
+        return this.activePoisons.size;
+    }
+
+    // 辅助方法：根据ID获取目标
+    _getTargetById(targetId) {
+        // 这个方法需要根据您的游戏实现
+        // 例如：从 game.enemies 中查找
+        if (window.gameInstance && window.gameInstance.enemies) {
+            return window.gameInstance.enemies.find(e => (e.id || e) === targetId);
+        }
+        return null;
+    }
+}
+
 class Petal {
     constructor(player, petalIndex = 0, totalPetals = 10) {
         this.player = player;
@@ -26069,6 +26727,8 @@ class Petal {
         this._petalIndex = petalIndex;
         this.petalIndex = petalIndex;
         this.totalPetals = totalPetals;
+        this.poisonManager = new PoisonManager();
+        this.poisonEffects = [];
         this.squareList = [];
         this.maxSquare = 1;
         this.healSpeedMultiplier = 0;
@@ -26078,8 +26738,8 @@ class Petal {
         this.angle = petalIndex * angleStep;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.09;
-        this.baseRotationSpeed = 0.09;
+        this.rotationSpeed = 0.05;
+        this.baseRotationSpeed = 0.05;
         this.screenX = 0;
         this.screenY = 0;
         this.worldX = 0;
@@ -26093,6 +26753,7 @@ class Petal {
         this.attackPower = 15;
         this.itemType = null;
         this.level = 1;
+        this.isFaster = false;
         this.mimicProcessed = false;
         this.wingRotationAngle = 0;
         this.rarity = "Common";
@@ -26108,6 +26769,7 @@ class Petal {
         this.magnetActive = false;
         this.hasAntennae = false;
         this.currentViewScale = 1.0;
+        this.rotationSpeedBonus = 0;  // 旋转速度加成
         this.armor = 0.0;
         this.originalMimicData = null;
         this.isTransformedMimic = false;
@@ -26254,7 +26916,9 @@ class Petal {
         this.itemType = null;
         this.level = 1;
         this.rarity = "Common";
+        this.isFaster = false;
         this.originalMimicData = null;
+        this.rotationSpeedBonus = 0;
         this.isTransformedMimic = false;
         this.shipwreckJellyfishList = [];
         this.maxShipwreckJellyfish = 10;
@@ -26328,8 +26992,8 @@ class Petal {
         this.armor = 0.0;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.09;
-        this.baseRotationSpeed = 0.09;
+        this.rotationSpeed = 0.05;
+        this.baseRotationSpeed = 0.05;
         if (preserveAngle && currentAngle !== null) {
             this.angle = currentAngle;
         } else {
@@ -26518,7 +27182,41 @@ class Petal {
         this.updateFromQuickSlot(slotIndex);
         return true;
     }
+// 在 Petal 类中修改 applyPoisonToEnemy 方法
+    applyPoisonToEnemy(enemy, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+        if (!enemy || enemy.isDead || enemy.isFriendly) return false;
+        if (!this.player || !this.player.gameInstance) return false;
 
+        const game = this.player.gameInstance;
+        if (!game.poisonManager) return false;
+
+        // 获取当前物品作为伤害来源
+        const currentItem = this.getCurrentItem();
+        const source = {
+            type: currentItem ? currentItem.type : this.itemType,
+            rarity: this.rarity,
+            level: this.level,
+            petal: this,
+            player: this.player
+        };
+
+        // 应用毒伤
+        const applied = game.poisonManager.applyPoison(
+            enemy,
+            source,
+            baseDamage,
+            duration,
+            initialMultiplier,
+            stableMultiplier
+        );
+
+        // 添加视觉效果
+        if (applied && game.addPoisonEffect) {
+            game.addPoisonEffect(enemy, baseDamage * initialMultiplier);
+        }
+
+        return applied;
+    }
     getCurrentItem() {
         if (!this.player || !this.player.quickSlot) return null;
         const petalIndex = this._petalIndex;
@@ -26679,11 +27377,21 @@ class Petal {
             this.reloadTime = item.reloadTime || this.baseReloadTime;
             this.armor = item.armor || 0;
             const itemConfig = ITEM_STATS[item.type] || {};
+            this.lightningBounces = itemConfig.lightningBounces_by_rarity?.[this.rarity]
+                ?? itemConfig.lightningBounces
+                ?? 0;
             if (item.type === "Magnet" || itemConfig.magnet_range) {
                 this.magnetRange = (itemConfig.magnet_range || 100) * this.getRarityMultiplier();
                 this.magnetActive = true;
             } else {
                 this.magnetActive = false;
+            }
+            if (item.type === "Faster") {
+                const rarityIndex = RARITY_LIST.indexOf(this.rarity);
+                // Common: +0.2圈/秒，每增加一稀有度 +0.4圈/秒
+                this.rotationSpeedBonus = 0.2 + (rarityIndex * 0.4);
+            } else {
+                this.rotationSpeedBonus = 0;
             }
             this.hasAntennae = (item.type === "Antennae");
             this.hasHeavy = (item.type === "Heavy");
@@ -27363,6 +28071,8 @@ class Petal {
     getRadius() { return this.size; }
 
     canTakeDamage() {
+        // ✅ 海绵花瓣无敌，不受到伤害
+        if (this.isSponge) return false;
         return !this.isReloading && !this.isBroken && this.health > 0 && this.collisionCooldown <= 0;
     }
 
@@ -27396,7 +28106,8 @@ class Petal {
         return 1.0 - (this.reloadCooldown / this.reloadTime);
     }
 
-    takeDamage(damage) {
+    // 在 Petal 类中添加 takeDamage 方法（如果不存在）
+    takeDamage(damage, isLightning = false) {
         if (!this.canTakeDamage()) return false;
 
         const currentItem = this.getCurrentItem();
@@ -27407,40 +28118,6 @@ class Petal {
             return true;
         }
 
-        // ===== 🧽 海绵处理（吸收所有伤害，缓慢返还）=====
-        if (currentItem && currentItem.type === "Sponge") {
-            if (!this.player || this.player.isDead) return false;
-
-            // 检查是否已有活跃的海绵吸收效果（同一花瓣不叠加）
-            const existingIndex = this.player.spongeDamageQueue.findIndex(
-                item => item.petalIndex === this._petalIndex
-            );
-
-            // ✅ 计算持续时间：基础4秒 + 稀有度等级 * 3秒
-            const rarity = currentItem.rarity;
-            const rarityIndex = RARITY_LIST.indexOf(rarity);
-            const duration = 3 + (rarityIndex * 2);  // Common: 4秒, Unusual: 7秒, Rare: 10秒, ...
-
-            if (existingIndex !== -1) {
-                // 已有海绵效果，累加伤害
-                this.player.spongeDamageQueue[existingIndex].totalDamage += damage;
-                this.player.spongeDamageQueue[existingIndex].remainingDamage += damage;
-            } else {
-                // 新海绵效果，添加到队列
-                this.player.spongeDamageQueue.push({
-                    totalDamage: damage,
-                    remainingDamage: damage,
-                    duration: duration,
-                    startTime: Date.now() / 1000,
-                    rarity: rarity,
-                    petalIndex: this._petalIndex
-                });
-            }
-
-            // 海绵本身不破碎，不扣血
-            return false;
-        }
-
         // ===== 🧽 棉花处理（吸收固定伤害）=====
         if (currentItem && currentItem.type === "Cotton") {
             const rarityIndex = RARITY_LIST.indexOf(currentItem.rarity);
@@ -27449,10 +28126,8 @@ class Petal {
             const absorbAmount = baseAbsorb * Math.pow(multiplier, rarityIndex);
 
             if (damage <= absorbAmount) {
-                // 伤害完全被吸收
                 return false;
             } else {
-                // 超出部分继续计算
                 damage -= absorbAmount;
             }
         }
@@ -27980,21 +28655,25 @@ class Petal {
         return true;
     }
 
-    // =========================================================================
-    // OTHER METHODS
-    // =========================================================================
-
     applyWeb(enemy) {
         if (this.isBroken || this.isReloading) return false;
+
         const currentItem = this.getCurrentItem();
         if (currentItem && currentItem.type === "Web" && enemy.slowDuration <= 0) {
             const slowMap = {
-                "Common":0.70,"Unusual":0.80,"Rare":0.90,"Epic":0.95,"Legendary":0.99
+                "Common": 0.70,
+                "Unusual": 0.80,
+                "Rare": 0.90,
+                "Epic": 0.95,
+                "Legendary": 0.99
             };
             const durationSec = 2.0 + 0.2 * (this.level - 1);
             if (slowMap[currentItem.rarity] !== undefined) {
                 enemy.slowMultiplier = slowMap[currentItem.rarity];
                 enemy.slowDuration = durationSec * 1000;
+
+                // ✅ 使用后进入重载
+                this.startReload();
                 return true;
             }
         }
@@ -28531,7 +29210,69 @@ class Player {
         );
         this.speed = 0;
     }
+    getTotalRotationSpeedBonus() {
+        let totalBonus = 0;
+        for (const petal of this.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Faster" && !petal.isBroken && !petal.isReloading) {
+                totalBonus += petal.rotationSpeedBonus;
+            }
+        }
+        return totalBonus;
+    }
+    _applyLightningChain(origin, damage, bouncesLeft, allEnemies, alreadyHit) {
+        if (bouncesLeft <= 0) return;
 
+        const CHAIN_RANGE = 150;
+        const originPos = origin.physicsBody.position;
+
+        const candidates = allEnemies.filter(e => {
+            if (e.isDead || e.isFriendly || alreadyHit.includes(e)) return false;
+            const dx = e.physicsBody.position.x - originPos.x;
+            const dy = e.physicsBody.position.y - originPos.y;
+            return Math.sqrt(dx * dx + dy * dy) <= CHAIN_RANGE;
+        });
+
+        if (candidates.length === 0) return;
+
+        candidates.sort((a, b) => {
+            const da = Math.hypot(a.physicsBody.position.x - originPos.x, a.physicsBody.position.y - originPos.y);
+            const db = Math.hypot(b.physicsBody.position.x - originPos.x, b.physicsBody.position.y - originPos.y);
+            return da - db;
+        });
+
+        const target = candidates[0];
+        const died = target.takeDamage(damage, null);
+
+        // ✅ 记录闪电线段
+        if (this.gameInstance?.lightningArcs) {
+            this.gameInstance.lightningArcs.push({
+                x1: originPos.x,
+                y1: originPos.y,
+                x2: target.physicsBody.position.x,
+                y2: target.physicsBody.position.y,
+                life: 1.0
+            });
+        }
+
+        this.gameInstance?.addDamageNumber(
+            target.physicsBody.position.x,
+            target.physicsBody.position.y,
+            damage,
+            "lightning"
+        );
+
+        if (died) {
+            this.gameInstance?.dropCard(target);
+            this.gainXpFromKill(target.rarity || "Common", target.type);
+            this.gameInstance.score += 20;
+            this.gameInstance.enemiesKilled++;
+            target.markAsDead?.();
+        }
+
+        alreadyHit.push(target);
+        this._applyLightningChain(target, damage * 0.5, bouncesLeft - 1, allEnemies, alreadyHit);
+    }
     getTotalCloverBonus() {
         /** 返回 [dnaUpgradeAdd, extraDropRate] */
         let totalDnaBonus = 0.0;
@@ -28618,6 +29359,9 @@ class Player {
 
         let hasSponge = false;
 
+        // ✅ Faster 旋转速度加成（无视破碎）
+        let maxRotationBonus = 0;
+
         // 1. 从花瓣获取常规属性
         for (let i = 0; i < this.petals.length; i++) {
             const petal = this.petals[i];
@@ -28625,6 +29369,7 @@ class Player {
 
             if (!item) continue;
 
+            // Cancer 和 Web：只有未破碎/未重载时才生效
             if (item.type === "Cancer" || item.type === "Web") {
                 if (petal.isBroken || petal.isReloading) continue;
             }
@@ -28653,6 +29398,16 @@ class Player {
                     totalHealthBonus += stats.health_bonus;
                 }
             }
+
+            // ✅ Faster 物品：无视破碎，只要物品存在就生效
+            if (item.type === "Faster") {
+                const rarityIndex = RARITY_LIST.indexOf(item.rarity);
+                // Common: +0.2圈/秒，每增加一稀有度 +0.4圈/秒
+                const bonusRingsPerSec = 0.02 + (rarityIndex * 0.04);
+                if (bonusRingsPerSec > maxRotationBonus) {
+                    maxRotationBonus = bonusRingsPerSec;
+                }
+            }
         }
 
         // 2. 从快捷栏获取 Cactus 血量加成
@@ -28661,6 +29416,15 @@ class Player {
                 const stats = slotItem.getStats();
                 if (stats.health_bonus !== undefined) {
                     totalHealthBonus += stats.health_bonus;
+                }
+            }
+
+            // ✅ 快捷栏中的 Faster 也生效（无视破碎）
+            if (slotItem && slotItem.type === "Faster") {
+                const rarityIndex = RARITY_LIST.indexOf(slotItem.rarity);
+                const bonusRingsPerSec = 0.03 + (rarityIndex * 0.05);
+                if (bonusRingsPerSec > maxRotationBonus) {
+                    maxRotationBonus = bonusRingsPerSec;
                 }
             }
         }
@@ -28676,14 +29440,10 @@ class Player {
             this.visionMultiplier = maxVisionMultiplier;
         }
 
-        // 4. ✅ 关键修复：计算新的最大血量
+        // 4. 计算新的最大血量
         let newMaxHealth = this.baseMaxHealth + totalHealthBonus;
 
-        if (hasSponge) {
-            newMaxHealth = newMaxHealth * 1.0;
-        }
-
-        // 5. ✅ 只有当最大血量增加时，才按比例增加当前血量
+        // 5. 只有当最大血量增加时，才按比例增加当前血量
         if (newMaxHealth > this.maxHealth) {
             // 血量上限增加，按比例增加当前血量
             const ratio = newMaxHealth / this.maxHealth;
@@ -28703,6 +29463,20 @@ class Player {
         // 7. 触发所有花瓣重新计算 Golden Leaf 效果
         for (const petal of this.petals) {
             petal.updateReloadTimeWithGoldenLeaf();
+        }
+
+        // ✅ 8. 应用 Faster 旋转速度加成到所有花瓣（无视破碎）
+        const baseRotationSpeed = 0.07;  // 基础旋转速度（弧度/帧，60fps）
+        // 转换：圈/秒 → 弧度/秒 → 弧度/帧
+        const bonusRadPerFrame = (maxRotationBonus * Math.PI * 2) / 60;
+        const newRotationSpeed = baseRotationSpeed + bonusRadPerFrame;
+
+        for (const petal of this.petals) {
+
+            if (!petal.hasAntennae) {
+                petal.rotationSpeed = newRotationSpeed;
+                petal.baseRotationSpeed = newRotationSpeed;
+            }
         }
     }
 
@@ -28746,6 +29520,10 @@ class Player {
         for (const petal of this.petals) {
             if (petal.itemType === "Powder" && !petal.isBroken && !petal.isReloading) {
                 const bonus = 0.10 + 0.05 * (petal.level - 1);
+                multiplier += bonus;
+            }
+            if (petal.itemType === "Controller" && !petal.isBroken && !petal.isReloading) {
+                const bonus = 1.0 + 1.0 * (petal.level - 1);
                 multiplier += bonus;
             }
         }
@@ -28841,7 +29619,7 @@ class Player {
     handleDeath() {
         // 清空海绵伤害队列
         this.spongeDamageQueue = [];
-
+        this.gameInstance?.poisonManager?.activePoisons.delete(this);
         // 设置死亡状态
         this.isDead = true;
         this.health = 0;
@@ -29234,14 +30012,68 @@ class Player {
         return shieldAmount;
     }
 
-
-// 修改原有的 takeDamage 方法，在玩家死亡时清空队列
     takeDamage(damage, source = "unknown") {
         if (this.isDead || this.collisionCooldown > 0) {
             return false;
         }
-
+ // 电击生物击中玩家，同时电击花瓣
+        if (source && source.isLightningEnemy) {
+            const lightningDamage = source.attackDamage * 0.4;
+            for (const petal of this.petals) {
+                if (!petal.isBroken && !petal.isReloading && Math.random() < 0.6) {
+                    petal.takeDamage(lightningDamage, true);
+                }
+            }
+        }
         let remainingDamage = damage;
+
+        // ===== 🧽 海绵吸收伤害 =====
+        // 检查是否有活跃的海绵花瓣
+        let hasActiveSponge = false;
+        let spongePetalIndex = -1;
+        let spongeRarity = "Common";
+
+        for (let i = 0; i < this.petals.length; i++) {
+            const petal = this.petals[i];
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
+                hasActiveSponge = true;
+                spongePetalIndex = petal._petalIndex;
+                spongeRarity = item.rarity;
+                break;
+            }
+        }
+
+        if (hasActiveSponge) {
+            // 检查是否已有活跃的海绵吸收效果
+            const existingIndex = this.spongeDamageQueue.findIndex(
+                item => item.petalIndex === spongePetalIndex
+            );
+
+            // 计算持续时间：基础4秒 + 稀有度等级 * 3秒
+            const rarityIndex = RARITY_LIST.indexOf(spongeRarity);
+            const duration = 3 + (rarityIndex * 3);
+
+            if (existingIndex !== -1) {
+                // 已有海绵效果，累加伤害
+                this.spongeDamageQueue[existingIndex].totalDamage += remainingDamage;
+                this.spongeDamageQueue[existingIndex].remainingDamage += remainingDamage;
+            } else {
+                // 新海绵效果，添加到队列
+                this.spongeDamageQueue.push({
+                    totalDamage: remainingDamage,
+                    remainingDamage: remainingDamage,
+                    duration: duration,
+                    startTime: Date.now() / 1000,
+                    rarity: spongeRarity,
+                    petalIndex: spongePetalIndex
+                });
+            }
+
+            // 海绵吸收所有伤害，玩家不扣血
+            this.collisionCooldown = 500;
+            return false;
+        }
 
         // 先扣除护盾（1护盾抵2伤害）
         if (this.shield > 0) {
@@ -29259,7 +30091,6 @@ class Player {
             if (newHealth <= 0) {
                 this._health = 0;
                 this.isDead = true;
-                // 🟢 死亡时清空海绵伤害队列
                 this.spongeDamageQueue = [];
                 return true;
             }
@@ -29500,7 +30331,38 @@ class Player {
                             }
                         }
 
-                        // 护甲穿透
+                        // Iris / Pincer：毒伤效果
+                        if (petal.itemType === "Iris" || petal.itemType === "Pincer") {
+                            const currentItem = petal.getCurrentItem();
+                            if (currentItem && !enemy.isDead) {
+                                const stats = currentItem.getStats();
+                                let poisonDamage = stats.poison_damage || 8;
+                                let poisonDuration = (stats.poison_duration || 3.0) * 1000;
+                                let initialMultiplier = stats.poison_initial_multiplier || 2.5;
+                                let stableMultiplier = stats.poison_stable_multiplier || 0.3;
+
+                                const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
+                                poisonDamage = Math.floor(poisonDamage * Math.sqrt(rarityMultiplier));
+
+                                petal.applyPoisonToEnemy(
+                                    enemy,
+                                    poisonDamage,
+                                    poisonDuration,
+                                    initialMultiplier,
+                                    stableMultiplier
+                                );
+                            }
+                        }
+
+                        // Web：减速效果
+                        if (petal.itemType === "Web") {
+                            const applied = petal.applyWeb(enemy);
+                            if (applied) {
+                                petal.startReload();
+                            }
+                        }
+
+                        // 护甲穿透计算
                         const attackerArmor = petal.armor || 0.0;
                         const defenderArmor = enemy.armor || 0.0;
                         const finalDamage = applyArmorReduction(baseDamage, defenderArmor, attackerArmor);
@@ -29528,10 +30390,10 @@ class Player {
 
                         // 应用伤害
                         const died = enemy.takeDamage(finalDamage, sourceInfo);
-                        // Fang：吸血
-                        // ✅ 修复：Fang 吸血（无论敌人是否死亡）
+
+                        // Fang：吸血效果
                         if (petal.itemType === "Fang") {
-                            const lifestealRatio = 0.1 + (petal.level - 1) * 0.02; // 每级 +2%
+                            const lifestealRatio = 0.1 + (petal.level - 1) * 0.02;
                             const heal = finalDamage * lifestealRatio;
                             this.health = Math.min(this.maxHealth, this.health + heal);
                             totalHeal += heal;
@@ -29544,13 +30406,7 @@ class Player {
                             }
                         }
 
-
-                        // Web：减速
-                        if (petal.itemType === "Web") {
-                            petal.applyWeb(enemy);
-                        }
-
-                        // Heavy：击退
+                        // Heavy：击退效果
                         if (petal.itemType === "Heavy") {
                             const itemConfig = ITEM_STATS["Heavy"] || {};
                             const knockback = itemConfig["knockback_power"] || 0;
@@ -29572,7 +30428,46 @@ class Player {
                         }
 
                         petal.attackCooldown = petal.attackCooldownMax;
-                        break; // 一个花瓣一次只能击中一个碰撞体
+
+                        // ========== 🔥 闪电链效果（电击）==========
+                        const currentItemForLightning = petal.getCurrentItem();
+                        if (currentItemForLightning &&
+                            (currentItemForLightning.type === "Lightning" ||
+                             currentItemForLightning.type === "Hel Lighting" ||
+                             currentItemForLightning.type === "Hel Lighting")) {
+
+                            // 获取基础跳跃次数
+                            let bounces = 2;
+                            if (currentItemForLightning.type === "Lightning") {
+                                const itemConfig = ITEM_STATS["Lightning"];
+                                bounces = itemConfig.lightningBounces || 3;
+                            } else if (currentItemForLightning.type === "Hel Lighting") {
+                                const itemConfig = ITEM_STATS["Hel Lighting"];
+                                bounces = itemConfig.lightningBounces || 5;
+                            }
+
+                            // 根据稀有度增加跳跃次数
+                            const rarityBonus = {
+                                "Common": 1, "Unusual": 1, "Rare": 1, "Epic": 2,
+                                "Legendary": 2, "Mythic": 3, "Ultra": 3, "Super": 4,
+                                "Omega": 5, "Eternal": 6
+                            };
+                            bounces = bounces * (rarityBonus[currentItemForLightning.rarity] || 1);
+
+                            // 计算链伤害（基础伤害的60%）
+                            const chainDamage = petal.attackPower * 0.6;
+
+                            // 执行闪电链
+                            this._applyLightningChain(
+                                enemy,           // 起始敌人
+                                chainDamage,     // 链伤害
+                                bounces,         // 剩余跳跃次数
+                                enemies,         // 所有敌人列表
+                                [enemy]          // 已击中的敌人
+                            );
+                        }
+
+                        break;
                     }
                 }
             }
@@ -31756,7 +32651,7 @@ class WorldMapGame {
         // 墙壁缓存 - 改为按需加载
         this.wallCache = new Map();
         this.wallsPrecomputed = false;
-
+        this.poisonManager = new PoisonManager();
         // 主机权威模式
         this.isHost = false;
         this.lastFullSync = 0;
@@ -31776,7 +32671,7 @@ class WorldMapGame {
         this.damageNumbers = [];
         // 记录当前区块
         this.currentBlockType = 'A';
-
+        this.lightningArcs = [];
         // 游戏状态
         this.gameState = GameState.MAIN_MENU;
         this.spawnTimer = 0;
@@ -32151,15 +33046,15 @@ class WorldMapGame {
 
         return this._mazeWallMap[py * this._mazeImgWidth + px] === 1;
     }
-    // 在 WorldMapGame 类中添加
-    addDamageNumber(x, y, damage) {
+    addDamageNumber(x, y, damage, type = "normal") {
         if (!this.damageNumbers) this.damageNumbers = [];
         this.damageNumbers.push({
             x: x,
             y: y,
             damage: Math.floor(damage),
             life: 1.0,
-            offsetY: 0
+            offsetY: 0,
+            type: type
         });
     }
     async initMultiplayer(roomCode = null, playerName = 'Player') {
@@ -33051,7 +33946,10 @@ class WorldMapGame {
 
         // 更新有效视野和缩放比例
         this.updateEffectiveView();
-
+    // 更新毒伤系统
+        if (this.poisonManager) {
+            this.poisonManager.updateAll();
+        }
         // 更新所有对象的当前视野缩放
         this.player.currentViewScale = this.viewScale;
 
@@ -33071,7 +33969,6 @@ class WorldMapGame {
         // ==================== 多人模式 vs 单人模式 ====================
         if (this.multiplayerMode && this.ws && this.ws.readyState === WebSocket.OPEN) {
             // ========== 多人模式（服务器权威）==========
-            // ... 保持原有多人模式代码 ...
 
             // 更新发射物（多人模式也要更新）
             this.updateProjectiles(deltaTime);
@@ -33580,6 +34477,7 @@ class WorldMapGame {
 
         // 更新敌人加载/卸载
         this.updateEnemyLoading();
+        this.poisonManager.updateAll();
 
         // 更新掉落卡片（总是更新，开销小）
         for (let i = 0; i < this.droppedCards.length; i++) {
@@ -33763,7 +34661,7 @@ class WorldMapGame {
                 }
             }
 
-            // === 敌对攻击玩家和友方 ===
+            // === 敌对攻击玩家和友方（包含闪电生物）===
             for (const enemy of hostileEnemies) {
                 if (enemiesToRemove.includes(enemy) || enemy.isDead || enemy.health <= 0) continue;
 
@@ -33780,21 +34678,66 @@ class WorldMapGame {
                         target.getScaledRadius() :
                         target.physicsBody.radius * this.viewScale;
 
-                    // ✅ 黄蜂和鱿鱼：同时支持远程攻击和近战碰撞
+                    // ✅ 闪电生物：水母、萤火虫等使用远程电击攻击
+                    const lightningEnemies = ["Jellyfish", "HelJellyfish", "Firefly"];
+                    const isLightningEnemy = lightningEnemies.includes(enemy.type);
+
                     let attackRange;
-                    if (enemy.type === "Squid" || enemy.type === "Wasp"|| enemy.type === "Scorpion") {
+                    if (isLightningEnemy) {
+                        // 闪电生物使用远程攻击范围
+                        attackRange = enemy.lightningRange || 350;
+                    } else if (enemy.type === "Squid" || enemy.type === "Wasp" || enemy.type === "Scorpion") {
                         // 远程攻击范围
                         const remoteRange = enemy.attackRange || 300;
                         // 近战接触范围
                         const meleeRange = enemyScaledRadius + targetScaledRadius;
-                        // 取两者中较大的，确保两种攻击都能触发
                         attackRange = Math.max(remoteRange, meleeRange);
                     } else {
+                        // 近战生物使用接触范围
                         attackRange = enemyScaledRadius + targetScaledRadius;
                     }
 
                     if (distance <= attackRange) {
-                        const damage = enemy.attack(target);
+                        let damage = 0;
+
+                        // 闪电生物使用远程电击攻击（100%命中，低伤害，连锁）
+                        if (isLightningEnemy) {
+                            // 检查电击冷却
+                            if (enemy.lightningCooldown === undefined) enemy.lightningCooldown = 0;
+
+                            if (enemy.lightningCooldown <= 0) {
+                                // 设置冷却（1.5秒）
+                                enemy.lightningCooldown = 1500;
+
+                                // 执行电击攻击
+                                if (typeof enemy.performLightningAttack === 'function') {
+                                    enemy.performLightningAttack(target);
+                                } else {
+                                    // 降级：直接造成伤害
+                                    const lightningDamage = enemy.attackDamage * 0.25;
+                                    if (target === this.player) {
+                                        target.takeDamage(lightningDamage, `${enemy.type} (Lightning)`);
+                                    } else {
+                                        target.health -= lightningDamage;
+                                    }
+                                    // 添加闪电视觉效果
+                                    if (this.lightningArcs) {
+                                        this.lightningArcs.push({
+                                            x1: enemy.physicsBody.position.x,
+                                            y1: enemy.physicsBody.position.y,
+                                            x2: target.physicsBody.position.x,
+                                            y2: target.physicsBody.position.y,
+                                            life: 1.0
+                                        });
+                                    }
+                                }
+                                damage = enemy.attackDamage * 0.25;
+                            }
+                        } else {
+                            // 普通攻击
+                            damage = enemy.attack(target);
+                        }
+
                         if (damage > 0) {
                             if (target === this.player) {
                                 const playerDied = target.takeDamage(damage, `${enemy.type} (${enemy.rarity})`);
@@ -35766,6 +36709,8 @@ class WorldMapGame {
                 itemType === "Sponge" ||
                 itemType === "PooStick" ||
                 itemType === "Bubble Bomb" ||
+                itemType === "Lightning" ||
+                itemType === "Hel Lighting" ||
                 itemType === "Golden Leaf" ||
                 itemType === "ThirdEye" ||
                 itemType === "Mimic" ||
@@ -36364,7 +37309,50 @@ class WorldMapGame {
 
             // 绘制UI
             this.drawUi(context, new Vector2(0, 0), viewScale);
+            // 绘制闪电连锁线
+            if (this.lightningArcs && this.lightningArcs.length > 0) {
+                const cameraOffset = new Vector2(
+                    this.player.physicsBody.position.x - WIDTH / 2,
+                    this.player.physicsBody.position.y - HEIGHT / 2
+                );
 
+                for (let i = this.lightningArcs.length - 1; i >= 0; i--) {
+                    const arc = this.lightningArcs[i];
+                    arc.life -= 0.04;
+
+                    if (arc.life <= 0) {
+                        this.lightningArcs.splice(i, 1);
+                        continue;
+                    }
+
+                    const sx = arc.x1 - cameraOffset.x;
+                    const sy = arc.y1 - cameraOffset.y;
+                    const ex = arc.x2 - cameraOffset.x;
+                    const ey = arc.y2 - cameraOffset.y;
+
+                    // 锯齿抖动，模拟闪电形状
+                    context.save();
+                    context.strokeStyle = `rgba(100, 200, 255, ${arc.life})`;
+                    context.lineWidth = 1.5;
+                    context.shadowColor = `rgba(100, 200, 255, ${arc.life})`;
+                    context.shadowBlur = 6;
+                    context.beginPath();
+
+                    const segments = 6;
+                    const dx = (ex - sx) / segments;
+                    const dy = (ey - sy) / segments;
+                    context.moveTo(sx, sy);
+                    for (let j = 1; j < segments; j++) {
+                        const jitter = (Math.random() - 0.5) * 12;
+                        const px = sx + dx * j + jitter;
+                        const py = sy + dy * j + jitter;
+                        context.lineTo(px, py);
+                    }
+                    context.lineTo(ex, ey);
+                    context.stroke();
+                    context.restore();
+                }
+            }
             // 绘制调试信息（在debugMode开启时显示）
             if (this.debugMode) {
                 this.drawDebugInfo(context);
@@ -36406,6 +37394,14 @@ class WorldMapGame {
                 this.player.physicsBody.position.y - HEIGHT / 2
             );
 
+            const colorMap = {
+                "normal": [255, 100, 100],
+                "poison": [180, 80,  220],
+                "heal":   [100, 220, 100],
+                "lightning": [100, 200, 255],
+                "crit":   [255, 200, 0  ],
+            };
+
             for (let i = this.damageNumbers.length - 1; i >= 0; i--) {
                 const dn = this.damageNumbers[i];
                 const screenX = dn.x - cameraOffset.x;
@@ -36417,13 +37413,18 @@ class WorldMapGame {
                 if (dn.life <= 0) {
                     this.damageNumbers.splice(i, 1);
                 } else {
-                    context.font = `bold ${Math.floor(16)}px Arial`;
-                    context.fillStyle = `rgba(255, 100, 100, ${dn.life})`;
+                    const [r, g, b] = colorMap[dn.type] || colorMap["normal"];
+                    const fontSize = dn.type === "poison" ? 14 : 16;
+                    context.font = `bold ${fontSize}px Arial`;
+                    context.fillStyle = `rgba(${r}, ${g}, ${b}, ${dn.life})`;
                     context.shadowBlur = 0;
-                    context.fillText(`${dn.damage}`, screenX, screenY);
+                    // 毒伤显示带毒图标前缀
+                    const text = dn.type === "poison" ? `☠${dn.damage}` : `${dn.damage}`;
+                    context.fillText(text, screenX, screenY);
                 }
             }
         }
+
         // ===== 绘制FPS - 始终显示 =====
         context.save();
         context.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -38402,6 +39403,7 @@ export {
     Player,
     DroppedCard,
     DNA,
+    PoisonSystem,
     TooltipSystem,
     Coin
 
