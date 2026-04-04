@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flower Game - 多人联机版</title>
+<title>Flwrr</title>
 <!-- 添加 PeerJS 用于 WebRTC 连接 -->
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
@@ -1068,54 +1068,102 @@ html, body {
 
       return addItemToQuickSlot(item, originalIndex);
     }
-
-    // ===== 手动添加物品到快捷栏 =====
+    // ===== 手动添加物品到快捷栏（支持主栏和副栏）=====
     function addItemToQuickSlot(item, itemIndex) {
-      if (!gameInstance?.player?.quickSlot || !gameInstance?.player?.inventory) return false;
+        if (!gameInstance?.player?.quickSlot || !gameInstance?.player?.inventory) return false;
 
-      const quickSlot = gameInstance.player.quickSlot;
-      const inventory = gameInstance.player.inventory;
-      const items = inventory.items;
+        const quickSlot = gameInstance.player.quickSlot;
+        const inventory = gameInstance.player.inventory;
+        const items = inventory.items;
 
-      if (!Array.isArray(items) || itemIndex < 0 || itemIndex >= items.length) return false;
+        if (!Array.isArray(items) || itemIndex < 0 || itemIndex >= items.length) return false;
 
-      const targetItem = items[itemIndex];
-      if (!targetItem) return false;
+        const targetItem = items[itemIndex];
+        if (!targetItem) return false;
 
-      for (let i = 0; i < quickSlot.slots.length; i++) {
-        if (!quickSlot.slots[i]) {
-          if (targetItem.count > 1) {
-            targetItem.count--;
-            const newItem = new Item(item.type, item.level || 1, item.rarity);
-            newItem.count = 1;
-            quickSlot.slots[i] = newItem;
-          } else {
-            const movedItem = items.splice(itemIndex, 1)[0];
-            movedItem.count = 1;
-            quickSlot.slots[i] = movedItem;
-          }
-          quickSlot.updateAllPetals?.();
-          return true;
+        // ===== 1. 先尝试放入主栏空槽 =====
+        for (let i = 0; i < quickSlot.slots.length; i++) {
+            if (!quickSlot.slots[i]) {
+                if (targetItem.count > 1) {
+                    targetItem.count--;
+                    const newItem = new Item(item.type, item.level || 1, item.rarity);
+                    newItem.count = 1;
+                    newItem.durability = item.durability;
+                    newItem.maxDurability = item.maxDurability;
+                    newItem.isBroken = item.isBroken;
+                    newItem.reloadTime = item.reloadTime;
+                    newItem.baseReloadTime = item.baseReloadTime;
+                    newItem.armor = item.armor;
+                    quickSlot.slots[i] = newItem;
+                } else {
+                    const movedItem = items.splice(itemIndex, 1)[0];
+                    movedItem.count = 1;
+                    quickSlot.slots[i] = movedItem;
+                }
+                quickSlot.updatePetalFromSlot?.(i);
+                console.log(`✅ 物品放入主栏槽位 ${i}`);
+                return true;
+            }
         }
-      }
 
-      for (let i = 0; i < quickSlot.slots.length; i++) {
-        const slotItem = quickSlot.slots[i];
-        if (slotItem && slotItem.type === item.type && slotItem.rarity === item.rarity) {
-          if (targetItem.count > 1) {
-            targetItem.count--;
-          } else {
-            items.splice(itemIndex, 1);
-          }
-          slotItem.count = (slotItem.count || 1) + 1;
-          quickSlot.updatePetalFromSlot?.(i);
-          return true;
+        // ===== 3. 主栏满后，尝试放入副栏空槽 =====
+        if (quickSlot.secondarySlots) {
+            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
+                if (!quickSlot.secondarySlots[i]) {
+                    if (targetItem.count > 1) {
+                        targetItem.count--;
+                        const newItem = new Item(item.type, item.level || 1, item.rarity);
+                        newItem.count = 1;
+                        newItem.durability = item.durability;
+                        newItem.maxDurability = item.maxDurability;
+                        newItem.isBroken = item.isBroken;
+                        newItem.reloadTime = item.reloadTime;
+                        newItem.baseReloadTime = item.baseReloadTime;
+                        newItem.armor = item.armor;
+                        quickSlot.secondarySlots[i] = newItem;
+                    } else {
+                        const movedItem = items.splice(itemIndex, 1)[0];
+                        movedItem.count = 1;
+                        quickSlot.secondarySlots[i] = movedItem;
+                    }
+                    console.log(`✅ 主栏已满，物品放入副栏槽位 ${i}`);
+                    return true;
+                }
+            }
+
+        // ===== 2. 主栏满时，尝试放入可堆叠的主栏槽位 =====
+        for (let i = 0; i < quickSlot.slots.length; i++) {
+            const slotItem = quickSlot.slots[i];
+            if (slotItem && slotItem.type === item.type && slotItem.rarity === item.rarity) {
+                if (targetItem.count > 1) {
+                    targetItem.count--;
+                } else {
+                    items.splice(itemIndex, 1);
+                }
+                slotItem.count = (slotItem.count || 1) + 1;
+                quickSlot.updatePetalFromSlot?.(i);
+                console.log(`✅ 物品堆叠到主栏槽位 ${i}`);
+                return true;
+            }
         }
-      }
 
-      return false;
+            // ===== 4. 副栏满时，尝试放入可堆叠的副栏槽位 =====
+            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
+                const slotItem = quickSlot.secondarySlots[i];
+                if (slotItem && slotItem.type === item.type && slotItem.rarity === item.rarity) {
+                    if (targetItem.count > 1) {
+                        targetItem.count--;
+                    } else {
+                        items.splice(itemIndex, 1);
+                    }
+                    slotItem.count = (slotItem.count || 1) + 1;
+                    console.log(`✅ 物品堆叠到副栏槽位 ${i}`);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-
 // ===== 鼠标事件处理 =====
 function handleMouseDown(e) {
     e.preventDefault();
@@ -1385,8 +1433,10 @@ function handleMouseDown(e) {
       controlsInitialized = true;
     }
 
-    // ===== 键盘事件处理 =====
+    // ===== 完整的键盘事件处理 =====
     function handleKeyDown(e) {
+        if (!e || !e.key) return;
+
         // ===== 🎁 优先处理兑换码输入 =====
         if (gameInstance?.shopSystem?.redeemSystem?.inputVisible &&
             gameInstance.shopSystem.redeemSystem.inputActive) {
@@ -1399,9 +1449,21 @@ function handleMouseDown(e) {
             }
         }
 
-        const key = e.key;
+        // ===== 🎮 优先处理聊天输入 =====
+        if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem?.inputActive) {
+            const handled = gameInstance.network.chatSystem.handleKeyDown(e);
+            if (handled) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            return;
+        }
 
-        // T键打开聊天
+        const key = e.key;
+        const code = e.code;
+
+        // ===== T键：打开聊天 =====
         if (key === 't' || key === 'T') {
             if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
                 gameInstance.toggleChat();
@@ -1413,61 +1475,207 @@ function handleMouseDown(e) {
             return;
         }
 
+        // ===== 数字键 1-8：快捷栏选择 =====
         if (key >= '1' && key <= '8') {
             const index = parseInt(key) - 1;
             if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
                 gameInstance.player.quickSlot.selectedIndex = index;
                 gameInstance.player.quickSlot.useItem(index);
+                console.log(`🔢 选择快捷栏槽位 ${index + 1}`);
             }
             e.preventDefault();
             return;
         }
 
-        if (key === ' ') {
+        // ===== 数字键 9 和 0：快捷栏选择（9->槽位8, 0->槽位9）=====
+        if (key === '9') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                gameInstance.player.quickSlot.selectedIndex = 8;
+                gameInstance.player.quickSlot.useItem(8);
+                console.log(`🔢 选择快捷栏槽位 9`);
+            }
+            e.preventDefault();
+            return;
+        }
+        if (key === '0') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                gameInstance.player.quickSlot.selectedIndex = 9;
+                gameInstance.player.quickSlot.useItem(9);
+                console.log(`🔢 选择快捷栏槽位 10`);
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== 空格键：切换花瓣展开模式 =====
+        if (key === ' ' || key === 'Space') {
             if (gameState === 'in_game' && gameInstance?.player) {
                 gameInstance.player.toggleSpreadMode();
+                console.log('🌸 切换花瓣展开模式');
             }
             e.preventDefault();
             return;
         }
 
+        // ===== C键：打开/关闭合成界面 =====
         if (key === 'c' || key === 'C') {
             if (gameState === 'in_game') {
                 openCrafting();
+                console.log('🔧 打开合成界面');
             } else if (gameState === 'crafting') {
                 gameState = 'in_game';
                 if (gameInstance.player?.inventory?.craftingSystem) {
                     gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+                }
+                console.log('🔧 关闭合成界面');
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== I键：打开/关闭背包 =====
+        if (key === 'i' || key === 'I') {
+            if (gameState === 'in_game') {
+                openInventory();
+                console.log('🎒 打开背包');
+            } else if (gameState === 'inventory') {
+                gameState = 'in_game';
+                console.log('🎒 关闭背包');
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== B键：领取每日奖励 =====
+        if (key === 'b' || key === 'B') {
+            if (gameState === 'in_game' && gameInstance?.bonusSystem) {
+                const claimed = gameInstance.bonusSystem.claimBonus();
+                if (claimed) {
+                    console.log('🎁 领取每日奖励成功！');
+                } else {
+                    console.log('⚠️ 今日已领取或无法领取');
                 }
             }
             e.preventDefault();
             return;
         }
 
-        if (key === 'i' || key === 'I') {
-            if (gameState === 'in_game') {
-                openInventory();
-            } else if (gameState === 'inventory') {
-                gameState = 'in_game';
+        // ===== S键：静止模式（Heavy物品专用）=====
+        if (key === 's' || key === 'S') {
+            const game = window.gameInstance;
+            if (game && game.gameState === 'in_game' && !game.paused && game.player) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔒 S键被按下，切换静止模式');
+                let count = 0;
+                for (const petal of game.player.petals) {
+                    if (petal.toggleStillMode) {
+                        petal.toggleStillMode();
+                        count++;
+                    }
+                }
+                console.log(`✅ 静止模式已切换 (${count} 个花瓣)`);
+            }
+            return;
+        }
+
+        // ===== R键：交换所有主副栏物品 =====
+        if (key === 'r' || key === 'R') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                gameInstance.player.quickSlot.swapAllSlots();
+                console.log('🔄 交换所有主副栏物品');
             }
             e.preventDefault();
             return;
         }
 
+        // ===== D键：调试模式开关 =====
+        if (key === 'd' || key === 'D') {
+            if (gameState === 'in_game' && gameInstance) {
+                gameInstance.debugMode = !gameInstance.debugMode;
+                console.log(`🐛 调试模式: ${gameInstance.debugMode ? '开启' : '关闭'}`);
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== P键：暂停游戏 =====
+        if (key === 'p' || key === 'P') {
+            if (gameState === 'in_game' && gameInstance) {
+                gameInstance.paused = !gameInstance.paused;
+                console.log(`⏸️ 游戏暂停: ${gameInstance.paused ? '是' : '否'}`);
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== ESC键：返回主菜单 =====
         if (key === 'Escape') {
             e.preventDefault();
             e.stopPropagation();
             if (gameState !== 'main_menu') {
                 returnToMainMenu();
+            } else if (gameInstance?.shopSystem?.visible) {
+                // 如果在主菜单且商店可见，关闭商店
+                gameInstance.shopSystem.visible = false;
+                console.log('🛒 关闭商店');
             }
+            return;
         }
 
-        if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key.toLowerCase())) {
+        // ===== 方向键/WASD：重置鼠标移动（让玩家用鼠标移动）=====
+        if (['w', 'W', 'a', 'A', 's', 'S', 'd', 'D',
+             'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             resetMouseMove();
+            // 可选：让方向键也能控制移动
+            if (gameState === 'in_game' && gameInstance?.player) {
+                // 这里可以添加方向键移动逻辑
+                console.log('🎮 方向键按下，鼠标移动已重置');
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // ===== Enter键：在某些界面确认 =====
+        if (key === 'Enter') {
+            // 如果在多人游戏面板的加入房间输入框
+            const joinInput = document.getElementById('room-code-input');
+            if (joinInput && document.activeElement === joinInput) {
+                joinRoom();
+                e.preventDefault();
+                return;
+            }
+
+            // 如果在账号面板的登录/注册输入框
+            const loginUsername = document.getElementById('login-username');
+            if (loginUsername && document.activeElement === loginUsername) {
+                handleLogin();
+                e.preventDefault();
+                return;
+            }
+
+            const registerUsername = document.getElementById('register-username');
+            if (registerUsername && document.activeElement === registerUsername) {
+                handleRegister();
+                e.preventDefault();
+                return;
+            }
         }
     }
 
-    function handleKeyUp(e) {}
+    // ===== 键盘弹起事件 =====
+    function handleKeyUp(e) {
+        if (!e || !e.key) return;
+
+        const key = e.key;
+
+        // 可选：处理方向键释放
+        if (['w', 'W', 'a', 'A', 's', 'S', 'd', 'D',
+             'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+            // 可以在这里添加停止移动的逻辑
+        }
+    }
+
 
     // ===== 专门的 S 键监听（静止模式）=====
     document.addEventListener('keydown', function(e) {
