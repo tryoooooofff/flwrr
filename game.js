@@ -825,8 +825,8 @@ export const SPECIAL_ZONES = {
                 x2: 7800, y2: 10000
             },
             spawnRules: [
-                ["StemCell", 0.01, 3, 5, ["Super", "Omega"]],
-                ["Cancer", 0.02, 2, 5, ["Super", "Omega"]],
+                ["StemCell", 0.05, 3, 5, ["Super", "Omega"]],
+                ["Cancer", 0.1, 2, 5, ["Super", "Omega"]],
                 ["Bacteria", 180, 4, 5, ["Super", "Omega"]],
                 ["WhiteBloodCell", 30, 2, 5, ["Super", "Omega"]]
             ],
@@ -840,10 +840,11 @@ export const SPECIAL_ZONES = {
                 x2: 4000, y2: 900
             },
             spawnRules: [
-                ["StemCell", 0.1, 3, 5, ["Mythic", "Ultra"]],
+                ["StemCell", 0.2, 3, 5, ["Mythic", "Ultra"]],
                 ["RedBloodCell", 40, 2, 5, ["Mythic", "Ultra"]],
-                ["Cancer", 0.2, 4, 5, ["Legendary","Mythic", "Ultra"]],
-                ["WhiteBloodCell", 100, 2, 5, ["Mythic", "Ultra"]]
+                ["Cancer", 0.5, 4, 5, ["Legendary","Mythic", "Ultra"]],
+                ["WhiteBloodCell", 100, 2, 5, ["Mythic", "Ultra"]],
+                ["WhiteBloodCell", 0.01, 2, 5, ["Super"]]
             ],
             spawnRate: 12.0,
             maxEnemies: 45
@@ -1424,7 +1425,7 @@ export const ITEM_STATS = {
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
-    "Corn": {base_attack:5, base_cooldown:200, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:10000},
+    "Corn": {base_attack:5, base_cooldown:250, durability_bonus:35, use_rarity_multiplier: true, base_reload_time:10000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
@@ -1503,7 +1504,7 @@ export const ITEM_STATS = {
     "Faster": {base_attack: 12, base_cooldown: 80, speed_bonus: 0.15, use_rarity_multiplier: true, base_reload_time: 1000},
     "Blood Stinger": {base_attack: 380, base_cooldown: 250, lifesteal: 0.15, use_rarity_multiplier: true, base_reload_time: 10000},
     "Missile": {base_attack: 20, base_cooldown: 300, is_projectile: true, explosion_radius: 80, use_rarity_multiplier: true, base_reload_time: 3000},
-    "Glass": {base_attack: 25, base_cooldown: 120, critical_chance: 0.25, critical_multiplier: 2.5, use_rarity_multiplier: true, base_reload_time: 2500},
+    "Glass": {base_attack: 25, base_cooldown: 1000, critical_chance: 0.25, critical_multiplier: 2.5, use_rarity_multiplier: true, base_reload_time: 2500},
     "Hel Honey": {base_attack: 8, base_cooldown: 200, healing: 2, slow_effect: 0.2, use_rarity_multiplier: true, is_flame: true,flame_damage: 20,flame_duration: 4000,flame_init_mult: 0.5,flame_ramp_mult: 2.5 ,base_reload_time: 2000},
     "Hel Lighting": {base_attack: 35,lightningBounces: 5, base_cooldown: 500, chain_damage: 0.3, chain_targets: 4, use_rarity_multiplier: true, base_reload_time: 3000},
     // ========== 🌊 海洋生物 ==========
@@ -1804,7 +1805,7 @@ export const ITEM_ARMOR_MULTIPLIERS = {
 };
 
 export const ARMOR_ELIGIBLE_ITEMS = new Set([
-    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone"
+    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone","Glass"
 ]);
 // 获取物品护甲值（考虑倍率）
 export function getItemArmorValue(itemType, rarity) {
@@ -2045,7 +2046,7 @@ export const STEM_CELL_DNA_DROP_RATES = {
     "Epic": {"Unusual": 0.32, "Rare": 0.60, "Epic": 0.08},
     "Legendary": {"Rare": 0.60, "Epic": 0.36, "Legendary": 0.04},
     "Mythic": {"Epic": 0.72, "Legendary": 0.26, "Mythic": 0.02},
-    "Ultra": {"Legendary": 0.89, "Mythic": 0.10, "Ultra": 0.01},
+    "Ultra": {"Legendary": 0.89, "Mythic": 0.10, "Ultra": 0.05},
     "Super": {"Legendary": 0.20, "Mythic": 0.70, "Ultra": 0.10},
     "Omega": {"Mythic": 0.10, "Ultra": 0.897, "Super": 0.003},
     "Eternal": {"Mythic": 0.1, "Ultra": 0.84, "Super": 0.06}
@@ -2077,8 +2078,8 @@ export const CANCER_DNA_DROP_RATES = {
     "Rare": {"Common": 0.29, "Unusual": 0.21, "Rare": 0.04},
     "Epic": {"Unusual": 0.59, "Rare": 0.36, "Epic": 0.04},
     "Legendary": {"Rare": 0.53, "Epic": 0.46, "Legendary": 0.01},
-    "Mythic": {"Epic": 0.56, "Legendary": 0.43, "Mythic": 0.01},
-    "Ultra": {"Legendary": 0.75, "Mythic": 0.22, "Ultra": 0.03},
+    "Mythic": {"Epic": 0.27, "Legendary": 0.72, "Mythic": 0.1},
+    "Ultra": {"Legendary": 0.48, "Mythic": 0.51, "Ultra": 0.1},
     "Super": {"Legendary": 0.25, "Mythic": 0.70, "Ultra": 0.05},
     "Omega": {"Mythic": 0.20, "Ultra": 0.7985, "Super": 0.0015},
     "Eternal": {"Mythic": 0.1, "Ultra": 0.87, "Super": 0.03}
@@ -2092,7 +2093,7 @@ export const CANCER_DROP_RATES = {
     "Epic": {"Common": 0.17, "Unusual": 0.62, "Rare": 0.30, "Epic": 0.01},
     "Legendary": {"Rare": 0.26, "Epic": 0.73, "Legendary": 0.01},
     "Mythic": {"Epic": 0.75, "Legendary": 0.245, "Mythic": 0.005},
-    "Ultra": {"Legendary": 0.2, "Mythic": 0.97, "Ultra": 0.02},
+    "Ultra": {"Legendary": 0.70, "Mythic": 0.295, "Ultra": 0.005},
     "Super": {"Legendary": 0.25, "Mythic": 0.70, "Ultra": 0.05},
     "Omega": {"Mythic": 0.44, "Ultra": 0.553, "Super": 0.007}
 };
@@ -5127,21 +5128,26 @@ class CollisionSystem {
             petal.startReload();
             return;
         }
-
-        // ===== Cancer 感染逻辑 =====
         if (currentItem && currentItem.type === "Cancer") {
-            actualEnemy.isCancerInfected = true;
-            actualEnemy.infectedByCancer = {
-                type: "Cancer",
-                rarity: currentItem.rarity,
-                level: currentItem.level,
-                gameInstance: petal.player?.gameInstance,
-                sourcePetal: petal,
-                sourcePlayer: petal.player
-            };
-            actualEnemy.cancerInfectionTime = Date.now();
-        }
+            const cancerRarity = currentItem.rarity;
+            const targetRarity = actualEnemy.rarity || "Common";
 
+            const cancerPriority = RARITY_LIST.indexOf(cancerRarity);
+            const targetPriority = RARITY_LIST.indexOf(targetRarity);
+
+            if (cancerPriority >= targetPriority) {
+                actualEnemy.isCancerInfected = true;
+                actualEnemy.infectedByCancer = {
+                    type: "Cancer",
+                    rarity: currentItem.rarity,
+                    level: currentItem.level,
+                    gameInstance: petal.player?.gameInstance,
+                    sourcePetal: petal,
+                    sourcePlayer: petal.player
+                };
+                actualEnemy.cancerInfectionTime = Date.now();
+            }
+        }
         // ===== 先造成伤害 =====
         let damageToEnemy = 0;
         if (petal.attackPower > 0 && petal.canAttack()) {
@@ -5817,25 +5823,25 @@ class Item {
             "Heavy": 12.5,      // Heavy耐久2.5倍
             "Shell": 1.5,      // 贝壳耐久1.5倍
             "Sponge": 1.8,     // 海绵耐久1.8倍
-            "Corn": 10.2,
-            "Wing": 1.2,       // 翅膀耐久1.2倍
+            "Corn": 15.2,
+            "Wing": 1.0,       // 翅膀耐久1.2倍
             "Leaf": 1.1,       // 叶子耐久1.1倍
             "Claw": 1.3,       // 爪子耐久1.3倍
-            "Fang": 1.1,
+            "Fang": 0.9,
             "Bomb":0.7,
             "Bubble Bomb":0.5,
-            "Stinger": 0.6,
+            "Stinger": 0.3,
             "Lightning": 0.7,  // 闪电耐久较低
             "Jelly": 0.9,      // 果冻耐久较低
             "Magnet": 1.5,
             "Controller":10000.0,
             "Antennae": 0.8,   // 触角耐久较低
-            "Iris": 1.1,       // 虹膜耐久略高
-            "Lotus": 1.2,      // 莲花耐久较高
+            "Iris": 0.9,       // 虹膜耐久略高
+            "Lotus": 1.0,      // 莲花耐久较高
             "Powder": 0.9,     // 粉末耐久略低
-            "Root": 1.3,       // 根耐久较高
-            "Web": 0.8,        // 网耐久较低
-            "Pearl": 5.5,      // 珍珠耐久较高
+            "Root": 1.5,       // 根耐久较高
+            "Web": 0.5,        // 网耐久较低
+            "Pearl": 5.0,      // 珍珠耐久较高
             "Coral": 1.4,      // 珊瑚耐久较高
             "Sand": 0.7,       // 沙子耐久很低
             "Salt": 0.8,       // 盐耐久较低
@@ -5845,7 +5851,8 @@ class Item {
             "PooStick": 0.6,   // 粪棒耐久很低
             "Golden Leaf": 2.0, // 金叶子耐久翻倍
             "Cutter": 1.1,
-            "Blood Stinger": 0.6,
+            "Bone": 2.0,
+            "Blood Stinger": 0.3,
         };
 
         if (durabilityBonuses[this.type]) {
@@ -15353,8 +15360,8 @@ class EnemyDrawer {
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
 
         // 颜色配置
-        const bodyColor = isFriendly ? [200, 160, 0] : [90, 90, 90];
-        const innerBodyColor = isFriendly ? [255, 215, 0] : [128, 128, 128];
+        const bodyColor = isFriendly ? [200, 160, 0] : [60, 60, 60];
+        const innerBodyColor = isFriendly ? [255, 215, 0] : [90, 90, 90];
         const antennaColor = isFriendly ? [255, 215, 0] : [50, 50, 50];
         // 翅膀使用半透明颜色，Alpha 设为 0.3 左右效果最佳
         const wingColor = isFriendly ? [255, 215, 0, 0.3] : [200, 200, 255, 0.3];
@@ -15421,8 +15428,8 @@ class EnemyDrawer {
         if (scaledSize <= 0) return;
 
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
-        const bodyColor = isFriendly ? [200, 160, 0] : [90, 90, 90];
-        const innerBodyColor = isFriendly ? [255, 215, 0] : [128, 128, 128];
+        const bodyColor = isFriendly ? [200, 160, 0] : [60, 60, 60];
+        const innerBodyColor = isFriendly ? [255, 215, 0] : [90,90,90];
         const antennaColor = isFriendly ? [255, 215, 0] : [50, 50, 50];
         const headRadius = Math.floor(scaledSize / 3);
         const headX = x + Math.cos(angleToPlayer) * headRadius * 0.3;
@@ -19052,9 +19059,7 @@ class RedeemSystem {
             const saved = localStorage.getItem('redeem_used_records');
             if (saved) {
                 const data = JSON.parse(saved);
-                // 将普通对象转回 Map
                 this.usedRecords = new Map(Object.entries(data));
-                console.log('📦 加载兑换码使用记录:', this.usedRecords);
             } else {
                 this.usedRecords = new Map();
             }
@@ -19496,7 +19501,7 @@ class ShopSystem {
             "Snowflake": 5,
             "Relic": 3,
             "Plank": 4,
-            "Pea": 4,
+            "Peas": 4,
             "Soil": 5,
             "Tomato": 7,
             "Rubber": 6,
@@ -25132,7 +25137,7 @@ class Enemy {
 
     getRarityHealMultiplier() {
         const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary",
-                             "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+                             "Mythic", "Ultra", "Super", "Omega", "Eternal","Unique"];
         const index = rarityOrder.indexOf(this.rarity);
         if (index === -1) return 1;
         return Math.pow(3, index);
@@ -25411,7 +25416,7 @@ class Enemy {
             }
 
             // 冰龙和 Frost Digger 减速效果（只有头部）
-            if (!isSegment && (this.type === "Ice Dragon" || this.type === "Frost Digger")) {
+            if (!isSegment && (this.type === "Ice Dragon" || this.type === "Frost Digger"|| this.type === "Ice Cube")) {
                 const attackerRarity = this.rarity || "Common";
                 const rarityBoost = {
                     "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.3,
@@ -25419,7 +25424,7 @@ class Enemy {
                     "Super": 1.7, "Omega": 1.8, "Eternal": 2.0
                 };
                 const boost = rarityBoost[attackerRarity] || 1.0;
-                let slowPercent = 0.1 * boost;
+                let slowPercent = 0.2 * boost;
                 slowPercent = Math.min(0.9, slowPercent);
 
                 const targetRarity = target.rarity || "Common";
@@ -25436,6 +25441,9 @@ class Enemy {
                 target.slowStartTime = Date.now();
                 target.slowEndTime = Date.now() + 3000;
                 target.isIceSlowed = true;
+                if (target.isPlayer === true && target.statusBar) {
+                    target.statusBar.addEffect("slow", 3.0);
+                }
             }
 
             meleeDamage = finalDamage;
@@ -25491,9 +25499,13 @@ class Enemy {
         }
 
         if (source && source.type === "Cancer") {
-            this.markAsCancerInfected(source);
+            // 只有 Cancer 稀有度 >= 被攻击生物稀有度才标记
+            const cancerRarityIndex = RARITY_LIST.indexOf(source.rarity);
+            const targetRarityIndex = RARITY_LIST.indexOf(this.rarity);
+            if (cancerRarityIndex >= targetRarityIndex) {
+                this.markAsCancerInfected(source);
+            }
         }
-
         if (this.health <= 0) {
             this.health = 0;
             this.killedByOwner = this.lastHitByOwner;
@@ -27223,10 +27235,9 @@ class FlameSystem {
     }
 }
 
-// ==================== 火焰伤害管理器 ====================
 class FlameManager {
     constructor() {
-        this.activeFlames = new Map();  // 存储每个目标的火焰效果
+        this.activeFlames = new Map();
     }
 
     applyFlame(target, source, baseDamage, duration = 3000, initialMultiplier = 0.5, rampUpMultiplier = 2.0) {
@@ -27239,6 +27250,13 @@ class FlameManager {
         } else {
             this.activeFlames.set(target, newFlame);
         }
+
+        // ✅ 添加：如果是玩家燃烧，更新状态栏
+        if (target.isPlayer === true && target.statusBar) {
+            const durationSec = duration / 1000;
+            target.statusBar.addEffect("burn", durationSec);
+        }
+
         return true;
     }
 
@@ -27268,21 +27286,27 @@ class FlameManager {
         }
         for (const target of toRemove) {
             this.activeFlames.delete(target);
+
+            // ✅ 添加：如果是玩家，燃烧结束时移除状态栏效果
+            if (target.isPlayer === true && target.statusBar) {
+                target.statusBar.removeEffect("burn");
+            }
         }
     }
 
-    // 获取目标的火焰信息
     getFlameInfo(target) {
         const flame = this.activeFlames.get(target);
         return flame ? flame.getStats() : null;
     }
 
-    // 清除目标的火焰
     clearFlame(target) {
         this.activeFlames.delete(target);
+
+        if (target.isPlayer === true && target.statusBar) {
+            target.statusBar.removeEffect("burn");
+        }
     }
 
-    // 获取所有活跃火焰数量
     getActiveCount() {
         return this.activeFlames.size;
     }
@@ -27304,6 +27328,13 @@ class PoisonManager {
         } else {
             this.activePoisons.set(target, newPoison);
         }
+
+        // ✅ 添加：如果是玩家中毒，更新状态栏
+        if (target.isPlayer === true && target.statusBar) {
+            const durationSec = duration / 1000;
+            target.statusBar.addEffect("poison", durationSec);
+        }
+
         return true;
     }
 
@@ -27322,7 +27353,7 @@ class PoisonManager {
                     const py = isPlayer
                         ? HEIGHT / 2 - 30
                         : target.physicsBody.position.y;
-                    gameInstance.addDamageNumber(px, py, damage, "poison");
+                    gameInstance.addDamageNumber(px, py, Math.floor(damage), "poison");
                 }
 
                 if (target.health <= 0 && !target.isDead) {
@@ -27333,20 +27364,28 @@ class PoisonManager {
         }
         for (const target of toRemove) {
             this.activePoisons.delete(target);
+
+            // ✅ 添加：如果是玩家，毒伤结束时移除状态栏效果
+            if (target.isPlayer === true && target.statusBar) {
+                target.statusBar.removeEffect("poison");
+            }
         }
     }
 
     // 获取目标的毒伤信息
     getPoisonInfo(target) {
-        const targetId = target.id || target;
-        const poison = this.activePoisons.get(targetId);
+        const poison = this.activePoisons.get(target);
         return poison ? poison.getStats() : null;
     }
 
     // 清除目标的毒伤
     clearPoison(target) {
-        const targetId = target.id || target;
-        this.activePoisons.delete(targetId);
+        this.activePoisons.delete(target);
+
+        // ✅ 添加：清除时也移除状态栏效果
+        if (target.isPlayer === true && target.statusBar) {
+            target.statusBar.removeEffect("poison");
+        }
     }
 
     // 获取所有活跃毒伤数量
@@ -27356,8 +27395,6 @@ class PoisonManager {
 
     // 辅助方法：根据ID获取目标
     _getTargetById(targetId) {
-        // 这个方法需要根据您的游戏实现
-        // 例如：从 game.enemies 中查找
         if (window.gameInstance && window.gameInstance.enemies) {
             return window.gameInstance.enemies.find(e => (e.id || e) === targetId);
         }
@@ -29913,6 +29950,301 @@ class Petal {
         } catch (e) { return originalRarity; }
     }
 }
+
+// ============================================================
+// 状态效果配置
+// ============================================================
+const STATUS_EFFECT_CONFIG = {
+    poison: {
+        label: "poison",
+        // 外圈进度环颜色
+        circleColor: "rgb(180, 100, 220)",
+        // 圆圈底色
+        bgColor: "rgb(140, 70, 180)",
+        // 图标绘制：小圆圈（和截图中紫色圆一致）
+        drawIcon: (ctx, cx, cy, r) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(220, 160, 255, 0.9)";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        },
+    },
+    slow: {
+        label: "slow",
+        circleColor: "rgb(140, 210, 255)",
+        bgColor: "rgb(100, 170, 220)",
+        drawIcon: (ctx, cx, cy, r) => {
+            // 雪花
+            const s = r * 0.52;
+            ctx.strokeStyle = "rgba(220, 245, 255, 0.95)";
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+            for (let a = 0; a < 3; a++) {
+                const angle = (a * Math.PI) / 3;
+                ctx.beginPath();
+                ctx.moveTo(cx - Math.cos(angle) * s, cy - Math.sin(angle) * s);
+                ctx.lineTo(cx + Math.cos(angle) * s, cy + Math.sin(angle) * s);
+                ctx.stroke();
+            }
+            for (let a = 0; a < 6; a++) {
+                const angle = (a * Math.PI) / 3;
+                const bx = cx + Math.cos(angle) * s * 0.52;
+                const by = cy + Math.sin(angle) * s * 0.52;
+                const perpAngle = angle + Math.PI / 2;
+                const bs = s * 0.28;
+                ctx.beginPath();
+                ctx.moveTo(bx - Math.cos(perpAngle) * bs, by - Math.sin(perpAngle) * bs);
+                ctx.lineTo(bx + Math.cos(perpAngle) * bs, by + Math.sin(perpAngle) * bs);
+                ctx.stroke();
+            }
+        },
+    },
+    burn: {
+        label: "burn",
+        circleColor: "rgb(240, 160, 40)",
+        bgColor: "rgb(200, 110, 30)",
+        drawIcon: (ctx, cx, cy, r) => {
+            // 和截图里一致：一个扁椭圆（像饼干/火焰底部）
+            ctx.fillStyle = "rgba(255, 220, 120, 0.95)";
+            ctx.beginPath();
+            ctx.ellipse(cx, cy + r * 0.05, r * 0.38, r * 0.28, 0, 0, Math.PI * 2);
+            ctx.fill();
+        },
+    },
+    stun: {
+        label: "stun",
+        circleColor: "rgb(240, 210, 50)",
+        bgColor: "rgb(180, 150, 20)",
+        drawIcon: (ctx, cx, cy, r) => {
+            ctx.fillStyle = "rgba(255, 240, 120, 0.95)";
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                const x = cx + Math.cos(angle) * r * 0.42;
+                const y = cy + Math.sin(angle) * r * 0.42;
+                ctx.beginPath();
+                ctx.arc(x, y, r * 0.11, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        },
+    },
+};
+
+class StatusEffect {
+    constructor(type, duration) {
+        this.type = type;
+        this.duration = duration;
+        this.maxDuration = duration;
+    }
+}
+
+class StatusBar {
+    constructor(player) {
+        this.player = player;
+        this.effects = new Map();
+        this.ICON_RADIUS = 20;   // 稍小，和截图一致
+        this.ICON_SPACING = 6;
+        this.BAR_OFFSET_Y = 16;  // 距快捷栏顶部的距离
+
+        this.spongeDamage = 0;
+        this.spongeDamageDuration = 0;
+        this.spongeDamageMaxDuration = 0;
+    }
+
+    addSpongeDamage(damage, duration) {
+        this.spongeDamage = damage;
+        this.spongeDamageDuration = duration;
+        this.spongeDamageMaxDuration = duration;
+    }
+
+    updateSpongeDamage(deltaTime) {
+        if (this.spongeDamageDuration > 0) {
+            this.spongeDamageDuration -= deltaTime;
+            if (this.spongeDamageDuration <= 0) {
+                this.spongeDamage = 0;
+            }
+        }
+    }
+
+    addEffect(type, duration) {
+        if (this.effects.has(type)) {
+            const existing = this.effects.get(type);
+            existing.duration = Math.max(existing.duration, duration);
+            existing.maxDuration = Math.max(existing.maxDuration, duration);
+        } else {
+            this.effects.set(type, new StatusEffect(type, duration));
+        }
+    }
+
+    removeEffect(type) {
+        this.effects.delete(type);
+    }
+
+    hasEffect(type) {
+        return this.effects.has(type);
+    }
+
+    update(deltaTime) {
+        for (const [type, effect] of this.effects) {
+            effect.duration -= deltaTime;
+            if (effect.duration <= 0) {
+                this.effects.delete(type);
+                this._onEffectEnd(type);
+            }
+        }
+        this.updateSpongeDamage(deltaTime);
+    }
+
+    _onEffectEnd(type) {
+        switch (type) {
+            case 'slow':
+                if (this.player) this.player.slowMultiplier = 1.0;
+                break;
+            case 'freeze':
+                if (this.player) {
+                    this.player.slowMultiplier = 1.0;
+                    this.player.isFrozen = false;
+                }
+                break;
+        }
+    }
+
+    // ── 单个图标绘制核心 ──────────────────────────────────────
+    _drawIcon(ctx, cx, cy, r, bgColor, circleColor, ratio, drawIconFn, timeText) {
+        // 1. 纯色底圆（无渐变，扁平风格）
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = bgColor;
+        ctx.fill();
+
+        // 2. 彩色进度环（顺时针，从顶部开始，剩余时间比例）
+        //    用完整暗环做底，彩色环做进度
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(0,0,0,0.25)";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+        ctx.strokeStyle = circleColor;
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // 3. 图标内容（裁剪在圆内）
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 3, 0, Math.PI * 2);
+        ctx.clip();
+        drawIconFn(ctx, cx, cy, r);
+        ctx.restore();
+
+        // 4. 时间数字（圆圈正上方，白色+黑描边，粗体）
+        ctx.font = "bold 13px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "rgba(0,0,0,0.85)";
+        ctx.lineWidth = 4;
+        ctx.strokeText(timeText, cx, cy - r);
+
+        ctx.fillStyle = "white";
+        ctx.fillText(timeText, cx, cy - r);
+    }
+
+    draw(ctx) {
+        const r = this.ICON_RADIUS;
+        const spacing = this.ICON_SPACING;
+        const diameter = r * 2;
+
+        const hasSponge = this.spongeDamage > 0 && this.spongeDamageDuration > 0;
+        let totalIcons = this.effects.size + (hasSponge ? 1 : 0);
+
+        if (totalIcons === 0) return;
+
+        const totalWidth = totalIcons * diameter + (totalIcons - 1) * spacing;
+
+        // 快捷栏位置（与 QuickSlot.draw 保持一致）
+        const slotSize = this.player?.quickSlot?.SLOT_SIZE || 60;
+        const slotMargin = this.player?.quickSlot?.SLOT_SPACING || 5;
+        const quickSlotTotalWidth = 10 * slotSize + 9 * slotMargin;
+        const quickSlotStartX = (window.WIDTH || WIDTH) / 2 - quickSlotTotalWidth / 2;
+        const quickSlotStartY = (window.HEIGHT || HEIGHT) - 100;
+
+        const barCenterX = quickSlotStartX + quickSlotTotalWidth / 2;
+        // 图标圆心 Y：快捷栏顶部往上 BAR_OFFSET_Y + r
+        const cy = quickSlotStartY - this.BAR_OFFSET_Y - r;
+        const startX = barCenterX - totalWidth / 2 + r;
+
+        ctx.save();
+
+        let idx = 0;
+
+        // 海绵伤害图标
+        if (hasSponge) {
+            const cx = startX + idx * (diameter + spacing);
+            const ratio = Math.min(1, this.spongeDamageDuration / this.spongeDamageMaxDuration);
+            const damageText = this.spongeDamage >= 1000
+                ? Math.floor(this.spongeDamage / 1000) + "k"
+                : Math.floor(this.spongeDamage).toString();
+
+            this._drawIcon(
+                ctx, cx, cy, r,
+                "rgb(60, 110, 80)",
+                "rgb(80, 200, 120)",
+                ratio,
+                (ctx, cx, cy, r) => {
+                    // 海绵：扁椭圆+小孔
+                    ctx.fillStyle = "rgb(100, 200, 140)";
+                    ctx.beginPath();
+                    ctx.ellipse(cx, cy, r * 0.42, r * 0.32, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = "rgb(50, 130, 80)";
+                    const holes = [[-0.18, -0.12], [0.18, -0.12], [0, 0.1]];
+                    for (const [dx, dy] of holes) {
+                        ctx.beginPath();
+                        ctx.arc(cx + dx * r * 2, cy + dy * r * 2, r * 0.09, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                },
+                damageText
+            );
+            idx++;
+        }
+
+        // 状态效果图标
+        for (const effect of this.effects.values()) {
+            const cfg = STATUS_EFFECT_CONFIG[effect.type] || {
+                circleColor: "rgb(180, 180, 180)",
+                bgColor: "rgb(100, 100, 100)",
+                drawIcon: () => {},
+            };
+
+            const cx = startX + idx * (diameter + spacing);
+            const ratio = Math.min(1, effect.duration / effect.maxDuration);
+
+            const timeText = effect.duration >= 10
+                ? Math.ceil(effect.duration).toString()
+                : effect.duration.toFixed(1);
+
+            this._drawIcon(
+                ctx, cx, cy, r,
+                cfg.bgColor,
+                cfg.circleColor,
+                ratio,
+                cfg.drawIcon,
+                timeText
+            );
+
+            idx++;
+        }
+
+        ctx.restore();
+    }
+}
+
 // 在 WorldMapGame 类中添加多人游戏菜单
 class MultiplayerMenu {
     constructor() {
@@ -30083,6 +30415,7 @@ class Player {
             this.isAngry = false;
             this.baseSpeed = 80;
             this.speed = this.baseSpeed;
+            this.statusBar = new StatusBar(this);
             this.spreadMode = false;
             this.mousePosition = new Vector2(WIDTH / 2, HEIGHT / 2);
             this.quickSlot = new QuickSlot(this);
@@ -30656,7 +30989,9 @@ class Player {
 
         // 🟢 更新海绵伤害（如果玩家存活）
         this.updateSpongeDamage(dt);
-
+        if (this.statusBar) {
+                this.statusBar.update(dt);
+        }
         // === 新增：检查是否持有任意 DNA 物品 ===
         const hasDna = this.petals.some(petal => {
             const currentItem = petal.getCurrentItem();
@@ -31073,13 +31408,16 @@ class Player {
     updateSpongeDamage(dt) {
         if (this.isDead) {
             this.spongeDamageQueue = [];
+            if (this.statusBar) {
+                this.statusBar.spongeDamage = 0;
+                this.statusBar.spongeDamageDuration = 0;
+            }
             return;
         }
 
         const currentTime = Date.now() / 1000;
         let totalDamageThisFrame = 0;
 
-        // 检查哪些海绵花瓣还在
         const activeSpongeIndices = new Set();
         for (const petal of this.petals) {
             const item = petal.getCurrentItem();
@@ -31091,28 +31429,41 @@ class Player {
         for (let i = this.spongeDamageQueue.length - 1; i >= 0; i--) {
             const item = this.spongeDamageQueue[i];
 
-            // 海绵被移除，立即返还剩余伤害
             if (!activeSpongeIndices.has(item.petalIndex)) {
                 totalDamageThisFrame += item.remainingDamage;
                 this.spongeDamageQueue.splice(i, 1);
                 continue;
             }
 
-            // ✅ 修复：持续均匀返还伤害，不在结束时一次性炸掉
             const damagePerSecond = item.totalDamage / item.duration;
             const frameDamage = damagePerSecond * dt;
             item.remainingDamage -= frameDamage;
             totalDamageThisFrame += frameDamage;
 
-            // 如果伤害已经返还完毕，从队列中移除
             if (item.remainingDamage <= 0.01) {
                 this.spongeDamageQueue.splice(i, 1);
             }
         }
 
-        // 一次性扣除本帧所有海绵伤害
         if (totalDamageThisFrame > 0) {
             this._health -= totalDamageThisFrame;
+
+            // ✅ 同步海绵伤害到状态栏
+            if (this.statusBar) {
+                // 计算总剩余伤害
+                let totalRemaining = 0;
+                for (const item of this.spongeDamageQueue) {
+                    totalRemaining += item.remainingDamage;
+                }
+                // 找到最长持续时间
+                let maxDuration = 0;
+                for (const item of this.spongeDamageQueue) {
+                    if (item.duration > maxDuration) {
+                        maxDuration = item.duration;
+                    }
+                }
+                this.statusBar.addSpongeDamage(totalRemaining, maxDuration);
+            }
 
             if (this._health <= 0) {
                 this._health = 0;
@@ -34934,8 +35285,8 @@ class WorldMapGame {
         if (this.poisonManager) {
             this.poisonManager.updateAll();
         }
-        if (this.poisonManager) {
-            this.poisonManager.updateAll(this);
+        if (this.flameManager) {
+            this.flameManager.updateAll();
         }
         // 更新所有对象的当前视野缩放
         this.player.currentViewScale = this.viewScale;
@@ -38331,7 +38682,9 @@ class WorldMapGame {
 
             // 绘制世界背景
             this.drawWorldBackground(context, cameraOffset);
-
+            if (this.player && this.player.statusBar) {
+                this.player.statusBar.draw(context);
+            }
             // 绘制敌人
             for (const enemy of this.enemies) {
                 if (enemy.isDead) continue;
