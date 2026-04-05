@@ -834,6 +834,21 @@ export const SPECIAL_ZONES = {
             maxEnemies: 45
         },
         {
+            name: "Virus zone",
+            bounds: {
+                x1: 0, y1: 0,
+                x2: 600, y2: 600
+            },
+            spawnRules: [
+                ["Virus", 100, 3, 5, ["Super"]],
+                ["Virus", 1, 2, 5, ["Omega"]],
+                ["Bacteriophage", 5, 4, 5, ["Super"]],
+                ["Cancer", 0.08, 2, 5, ["Super"]]
+            ],
+            spawnRate: 5.0,
+            maxEnemies: 10
+        },
+        {
             name: "CellZone",
             bounds: {
                 x1: 1400, y1: 0,
@@ -848,7 +863,7 @@ export const SPECIAL_ZONES = {
             ],
             spawnRate: 12.0,
             maxEnemies: 45
-        }
+        },
     ],
 
     "Desert": [
@@ -1425,7 +1440,7 @@ export const ITEM_STATS = {
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
-    "Corn": {base_attack:5, base_cooldown:250, durability_bonus:35, use_rarity_multiplier: true, base_reload_time:10000},
+    "Corn": {base_attack:4, base_cooldown:250, durability_bonus:45, use_rarity_multiplier: true, base_reload_time:10000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
@@ -1794,12 +1809,12 @@ export const ITEM_ARMOR_VALUES = {
 
 
 export const ITEM_ARMOR_MULTIPLIERS = {
-    "Wing": 2,      // Wing 是基础护甲的 3 倍
-    "Bone": 5,      // Bone 是基础护甲的 6 倍
-    "Heavy": 1,     // Heavy 是基础护甲的 4 倍
-    "Pearl": 1,     // Pearl 是基础护甲的 2 倍
+    "Wing": 2,
+    "Bone": 4,
+    "Heavy": 1,
+    "Pearl": 1,
     "Rock": 1,
-    "Glass": 999,
+    "Glass": 9,
     "Jelly": 0.5,     // Jelly 是基础护甲的 1 倍
     "Controller": 10 // Controller 是基础护甲的 10 倍
 };
@@ -1847,10 +1862,9 @@ function applyArmorReduction(damage, defenderArmor, attackerArmor = 0) {
 // ========== 🛡️ 花瓣专用护甲减伤（最高99.5%减伤）==========
 const applyPetalArmorReduction = (damage, petalArmor) => {
 
-    const reduction = 1 - Math.pow(0.55, petalArmor / 1000);
+    const reduction = 1 - Math.pow(0.85, petalArmor / 1000);
 
-    // 限制最高99.5%减伤
-    const reductionPercent = Math.min(1.0, reduction);
+    const reductionPercent = Math.min(0.98, reduction);
 
     return damage * (1 - reductionPercent);
 };
@@ -19035,7 +19049,7 @@ class RedeemSystem {
 
 
         this.addCode("1321", [
-            { type: "Poo", rarity: "Omega", count: 1 }
+            { type: "Poo", rarity: "Super", count: 1 }
         ], 2);
 
         // ===== 星星兑换码 =====
@@ -27484,7 +27498,7 @@ class Petal {
         this.isReloading = false;
         this.maxHealth = 100;
         this.health = this.maxHealth;
-        this.damageResistance = 1.0;
+        this.damageResistance = 0.0;
         this.isBroken = false;
         this.workerFireAntList = [];
         this.maxWorkerFireAnts = 4;
@@ -27672,7 +27686,7 @@ class Petal {
         this.reloadTime = 5000;
         this.reloadCooldown = 0;
         this.isReloading = false;
-        this.damageResistance = 0.4;
+        this.damageResistance = 0.0;
         this.armor = 0.0;
         this.radius = 35;
         this.targetRadius = 35;
@@ -31316,95 +31330,115 @@ class Player {
     }
 
     takeDamage(damage, source = "unknown") {
-        if (this.isDead || this.collisionCooldown > 0) {
-            return false;
-        }
- // 电击生物击中玩家，同时电击花瓣
-        if (source && source.isLightningEnemy) {
-            const lightningDamage = source.attackDamage * 0.4;
-            for (const petal of this.petals) {
-                if (!petal.isBroken && !petal.isReloading && Math.random() < 0.6) {
-                    petal.takeDamage(lightningDamage, true);
-                }
+    if (this.isDead || this.collisionCooldown > 0) {
+        return false;
+    }
+
+    // 电击生物击中玩家，同时电击花瓣
+    if (source && source.isLightningEnemy) {
+        const lightningDamage = source.attackDamage * 0.4;
+        for (const petal of this.petals) {
+            if (!petal.isBroken && !petal.isReloading && Math.random() < 0.6) {
+                petal.takeDamage(lightningDamage, true);
             }
         }
-        let remainingDamage = damage;
+    }
 
-        // ===== 🧽 海绵吸收伤害 =====
-        // 检查是否有活跃的海绵花瓣
-        let hasActiveSponge = false;
-        let spongePetalIndex = -1;
-        let spongeRarity = "Common";
+    let remainingDamage = damage;
 
-        for (let i = 0; i < this.petals.length; i++) {
-            const petal = this.petals[i];
-            const item = petal.getCurrentItem();
-            if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
-                hasActiveSponge = true;
-                spongePetalIndex = petal._petalIndex;
-                spongeRarity = item.rarity;
-                break;
-            }
+    // ===== 🧽 海绵吸收伤害（优先）=====
+    let hasActiveSponge = false;
+    let spongePetalIndex = -1;
+    let spongeRarity = "Common";
+
+    for (let i = 0; i < this.petals.length; i++) {
+        const petal = this.petals[i];
+        const item = petal.getCurrentItem();
+        if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
+            hasActiveSponge = true;
+            spongePetalIndex = petal._petalIndex;
+            spongeRarity = item.rarity;
+            break;
+        }
+    }
+
+    if (hasActiveSponge) {
+        const existingIndex = this.spongeDamageQueue.findIndex(
+            item => item.petalIndex === spongePetalIndex
+        );
+
+        const rarityIndex = RARITY_LIST.indexOf(spongeRarity);
+        const duration = 3 + (rarityIndex * 3);
+
+        if (existingIndex !== -1) {
+            this.spongeDamageQueue[existingIndex].totalDamage += remainingDamage;
+            this.spongeDamageQueue[existingIndex].remainingDamage += remainingDamage;
+        } else {
+            this.spongeDamageQueue.push({
+                totalDamage: remainingDamage,
+                remainingDamage: remainingDamage,
+                duration: duration,
+                startTime: Date.now() / 1000,
+                rarity: spongeRarity,
+                petalIndex: spongePetalIndex
+            });
         }
 
-        if (hasActiveSponge) {
-            // 检查是否已有活跃的海绵吸收效果
-            const existingIndex = this.spongeDamageQueue.findIndex(
-                item => item.petalIndex === spongePetalIndex
-            );
-
-            // 计算持续时间：基础4秒 + 稀有度等级 * 3秒
-            const rarityIndex = RARITY_LIST.indexOf(spongeRarity);
-            const duration = 3 + (rarityIndex * 3);
-
-            if (existingIndex !== -1) {
-                // 已有海绵效果，累加伤害
-                this.spongeDamageQueue[existingIndex].totalDamage += remainingDamage;
-                this.spongeDamageQueue[existingIndex].remainingDamage += remainingDamage;
-            } else {
-                // 新海绵效果，添加到队列
-                this.spongeDamageQueue.push({
-                    totalDamage: remainingDamage,
-                    remainingDamage: remainingDamage,
-                    duration: duration,
-                    startTime: Date.now() / 1000,
-                    rarity: spongeRarity,
-                    petalIndex: spongePetalIndex
-                });
-            }
-
-            // 海绵吸收所有伤害，玩家不扣血
-            this.collisionCooldown = 500;
-            return false;
-        }
-
-        // 先扣除护盾（1护盾抵2伤害）
-        if (this.shield > 0) {
-            const shieldAbsorb = Math.min(this.shield * 2, remainingDamage);
-            remainingDamage -= shieldAbsorb;
-            this.shield -= Math.ceil(shieldAbsorb / 2);
-            if (this.shield < 0) this.shield = 0;
-        }
-
-        // 剩余伤害扣除生命
-        if (remainingDamage > 0) {
-            const actualDamage = remainingDamage * (1 - this.frameDamageResistance);
-            const newHealth = this._health - actualDamage;
-
-            if (newHealth <= 0) {
-                this._health = 0;
-                this.isDead = true;
-                this.spongeDamageQueue = [];
-                return true;
-            }
-
-            this._health = newHealth;
-        }
-
+        // 海绵吸收所有伤害，玩家不扣血
         this.collisionCooldown = 500;
         return false;
     }
 
+    // ===== 🛡️ Cotton 吸收伤害（在海绵之后，护盾之前）=====
+    for (const petal of this.petals) {
+        if (petal.isBroken || petal.isReloading) continue;
+
+        const item = petal.getCurrentItem();
+        if (item && item.type === "Cotton" && petal.durability > 0) {
+            const absorbed = Math.min(remainingDamage, petal.durability);
+            petal.durability -= absorbed;
+            petal.health = petal.durability;
+            remainingDamage -= absorbed;
+
+            if (item) item.durability = petal.durability;
+
+            if (petal.durability <= 0) {
+                petal.breakPetal();
+            }
+
+            if (remainingDamage <= 0) {
+                this.collisionCooldown = 500;
+                return false;
+            }
+        }
+    }
+
+    // 先扣除护盾（1护盾抵2伤害）
+    if (this.shield > 0) {
+        const shieldAbsorb = Math.min(this.shield * 2, remainingDamage);
+        remainingDamage -= shieldAbsorb;
+        this.shield -= Math.ceil(shieldAbsorb / 2);
+        if (this.shield < 0) this.shield = 0;
+    }
+
+    // 剩余伤害扣除生命
+    if (remainingDamage > 0) {
+        const actualDamage = remainingDamage * (1 - this.frameDamageResistance);
+        const newHealth = this._health - actualDamage;
+
+        if (newHealth <= 0) {
+            this._health = 0;
+            this.isDead = true;
+            this.spongeDamageQueue = [];
+            return true;
+        }
+
+        this._health = newHealth;
+    }
+
+    this.collisionCooldown = 500;
+    return false;
+}
     updateSpongeDamage(dt) {
         if (this.isDead) {
             this.spongeDamageQueue = [];
@@ -31445,17 +31479,37 @@ class Player {
             }
         }
 
+        // ✅ 修改：返还伤害先经过 Cotton 吸收
         if (totalDamageThisFrame > 0) {
-            this._health -= totalDamageThisFrame;
+            let remainingDamage = totalDamageThisFrame;
 
-            // ✅ 同步海绵伤害到状态栏
+            // Cotton 优先吸收返还伤害
+            for (const petal of this.petals) {
+                if (petal.isBroken || petal.isReloading) continue;
+
+                const item = petal.getCurrentItem();
+                if (item && item.type === "Cotton" && petal.durability > 0) {
+                    const absorbed = Math.min(remainingDamage, petal.durability);
+                    petal.durability -= absorbed;
+                    petal.health = petal.durability;
+                    remainingDamage -= absorbed;
+
+                    if (item) item.durability = petal.durability;
+
+                    if (petal.durability <= 0) {
+                        petal.breakPetal();
+                    }
+
+                    if (remainingDamage <= 0) break;
+                }
+            }
+
+            // 同步海绵伤害到状态栏
             if (this.statusBar) {
-                // 计算总剩余伤害
                 let totalRemaining = 0;
                 for (const item of this.spongeDamageQueue) {
                     totalRemaining += item.remainingDamage;
                 }
-                // 找到最长持续时间
                 let maxDuration = 0;
                 for (const item of this.spongeDamageQueue) {
                     if (item.duration > maxDuration) {
@@ -31465,10 +31519,14 @@ class Player {
                 this.statusBar.addSpongeDamage(totalRemaining, maxDuration);
             }
 
-            if (this._health <= 0) {
-                this._health = 0;
-                this.isDead = true;
-                this.spongeDamageQueue = [];
+            // 剩余伤害扣除生命
+            if (remainingDamage > 0) {
+                this._health -= remainingDamage;
+                if (this._health <= 0) {
+                    this._health = 0;
+                    this.isDead = true;
+                    this.spongeDamageQueue = [];
+                }
             }
         }
     }
@@ -34063,6 +34121,14 @@ class WorldMapGame {
 
         // 后台加载图片和墙壁（不阻塞）
         this.loadAssetsInBackground();
+        if (this.isMobile) {
+            this.LOAD_DISTANCE = 450;
+            this.WEAK_LOAD_DISTANCE = 750;
+            this.MAX_ENEMIES_WORLD = 180;
+            this.spawnIntervalBase = 1.2;
+            this.damageNumbers = [];  // 限制伤害数字
+            this.maxDamageNumbers = 30;
+        }
     }
     async loadAssetsInBackground() {
         console.log('🔄 开始后台加载资源...');
@@ -35217,6 +35283,13 @@ class WorldMapGame {
         // 在 WorldMapGame 类中，替换整个 update 方法
     update(deltaTime) {
         // 游戏状态检查
+        if (this.isMobile) {
+        const now = Date.now();
+        if (now - this.lastRenderTime < this.targetFrameTime) {
+            return; // 跳过这一帧
+        }
+        this.lastRenderTime = now;
+    }
         if (!this.gameRunning || this.gameOver || this.gameState !== GameState.IN_GAME || this.paused) {
             return;
         }
