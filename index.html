@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Flwrr - 花瓣游戏</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Flwrr</title>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
 * {
@@ -31,6 +32,41 @@ html, body {
   z-index: 1000;
   cursor: default;
   touch-action: none;
+}
+
+/* ========== 手机版自适应样式 ========== */
+@media (max-width: 768px) {
+  .touch-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 14px;
+  }
+  #joystick-area {
+    width: 110px;
+    height: 110px;
+  }
+  #joystick-base {
+    width: 110px;
+    height: 110px;
+  }
+  #joystick-knob {
+    width: 42px;
+    height: 42px;
+    top: 34px;
+    left: 34px;
+  }
+  #toggle-joystick, #toggle-panel {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+  #touch-hint {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  #btn-area {
+    gap: 8px;
+  }
 }
 
 /* ========== 触屏控制样式 ========== */
@@ -169,8 +205,23 @@ html, body {
   color: white;
   z-index: 2000;
   display: none;
-  min-width: 400px;
+  min-width: 350px;
   text-align: center;
+}
+@media (max-width: 480px) {
+  #multiplayer-panel, #account-panel {
+    min-width: 280px;
+    padding: 20px;
+  }
+  #multiplayer-panel input, #account-panel input {
+    font-size: 14px;
+    padding: 8px;
+  }
+  #multiplayer-panel button, #account-panel button {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: 120px;
+  }
 }
 #multiplayer-panel { border: 2px solid #00a8ff; }
 #account-panel { border: 2px solid #f1c40f; }
@@ -227,6 +278,15 @@ html, body {
   pointer-events: none;
   display: none;
 }
+</style>
+<style>
+  canvas {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    /* 关键：锁定canvas的CSS尺寸，让浏览器缩放，而不是渲染完整1550x850 */
+  }
 </style>
 </head>
 <body>
@@ -340,8 +400,72 @@ html, body {
     window.imageLoader = imageLoader;
     window.RARITY_LIST = RARITY_LIST;
     window.RARITY_COLORS = RARITY_COLORS;
-    window.WIDTH = window.innerWidth;
-    window.HEIGHT = window.innerHeight;
+    function initDOMElements() {
+  screen = document.getElementById('gameCanvas');
+  if (!screen) throw new Error("Canvas not found!");
+
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // 手机端：使用窗口的实际尺寸
+    screen.width = window.innerWidth;
+    screen.height = window.innerHeight;
+  } else {
+    screen.width = window.innerWidth;
+    screen.height = window.innerHeight;
+  }
+
+  // 关键：让 Canvas 填满屏幕
+  screen.style.width = '100%';
+  screen.style.height = '100%';
+  screen.style.position = 'fixed';
+  screen.style.top = '0';
+  screen.style.left = '0';
+
+  ctx = screen.getContext('2d');
+  window.WIDTH = screen.width;
+  window.HEIGHT = screen.height;
+
+  if (gameInstance) {
+    gameInstance.WIDTH = window.WIDTH;
+    gameInstance.HEIGHT = window.HEIGHT;
+  }
+}
+    // 在 window 上添加 keyup 事件
+    window.addEventListener('keyup', (e) => {
+        if (e.key === 'Shift' && gameInstance && !gameInstance.paused) {
+            gameInstance.player.contractMode = false;
+            // 恢复半径
+            for (const petal of gameInstance.player.petals) {
+                petal.targetRadius = 35;
+            }
+        }
+    });
+    // 窗口大小改变时重新适配
+    window.addEventListener('resize', () => {
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        const maxWidth = Math.min(window.innerWidth, 800);
+        const maxHeight = Math.min(window.innerHeight, 600);
+        screen.width = maxWidth;
+        screen.height = maxHeight;
+      } else {
+        screen.width = window.innerWidth;
+        screen.height = window.innerHeight;
+      }
+
+      screen.style.width = '100%';
+      screen.style.height = '100%';
+
+      window.WIDTH = screen.width;
+      window.HEIGHT = screen.height;
+
+      if (gameInstance) {
+        gameInstance.WIDTH = window.WIDTH;
+        gameInstance.HEIGHT = window.HEIGHT;
+      }
+    });
 
     window.URL_PARAMS = (() => {
       try { return { roomCode: new URLSearchParams(location.search).get('room') }; }
@@ -365,7 +489,6 @@ html, body {
       let joystickActive = false, joystickId = null, joyX = 0, joyY = 0;
       let joystickEnabled = true, panelVisible = true;
 
-      // 加载保存的状态
       const savedJoy = localStorage.getItem('joystickEnabled');
       if (savedJoy !== null) joystickEnabled = savedJoy === 'true';
       const savedPanel = localStorage.getItem('touchControlsVisible');
@@ -513,17 +636,7 @@ html, body {
       }
     })();
 
-    // ===== 初始化 =====
-    function initDOMElements() {
-      screen = document.getElementById('gameCanvas');
-      if (!screen) throw new Error("Canvas not found!");
-      screen.width = window.innerWidth;
-      screen.height = window.innerHeight;
-      ctx = screen.getContext('2d');
-      window.WIDTH = screen.width;
-      window.HEIGHT = screen.height;
-    }
-
+    // ===== 游戏初始化 =====
     function createGameInstance() {
       try {
         const game = new WorldMapGame();
@@ -589,155 +702,137 @@ html, body {
     }
     function closeInventory() { gameState = 'in_game'; }
 
-    function handleInventoryClick(x, y) {
-      if (!gameInstance?.player?.inventory) return false;
-      const inv = gameInstance.player.inventory;
-      const items = inv.items;
-      if (!items?.length) return false;
-      const ax = 20, ay = 80, sz = 70, mg = 10, cols = 3, rows = 6, th = 50;
-      if (x < ax || x > ax+340 || y < ay || y > ay+window.innerHeight-150) return false;
-      const order = ["Omega","Super","Ultra","Mythic","Legendary","Epic","Rare","Unusual","Common"];
-      const sorted = [...items].sort((a,b) => (order.indexOf(a.rarity)||999) - (order.indexOf(b.rarity)||999));
-      const start = inv.scrollOffset * cols;
-      const visible = sorted.slice(start, start + rows * cols);
-      const rx = x - ax - mg, ry = y - ay - th;
-      const col = Math.floor(rx / (sz+mg)), row = Math.floor(ry / (sz+mg));
-      const idx = row * cols + col;
-      if (col<0 || col>=cols || row<0 || row>=rows || idx>=visible.length) return false;
-      const item = visible[idx];
-      if (!item) return false;
-      const origIdx = items.findIndex(oi => oi === item || (oi.type===item.type && oi.rarity===item.rarity && oi.level===item.level && oi.count>=item.count));
-      if (origIdx === -1) return false;
-      return addItemToQuickSlot(item, origIdx);
-    }
 
-    function addItemToQuickSlot(item, idx) {
-      if (!gameInstance?.player?.quickSlot) return false;
-      const qs = gameInstance.player.quickSlot;
-      const inv = gameInstance.player.inventory;
-      const items = inv.items;
-      if (!items?.length || idx<0 || idx>=items.length) return false;
-      const target = items[idx];
-      if (!target) return false;
-      for (let i = 0; i < qs.slots.length; i++) {
-        if (!qs.slots[i]) {
-          if (target.count > 1) {
-            target.count--;
-            const ni = new Item(item.type, item.level||1, item.rarity);
-            ni.count = 1;
-            Object.assign(ni, { durability: item.durability, maxDurability: item.maxDurability, isBroken: item.isBroken, reloadTime: item.reloadTime, baseReloadTime: item.baseReloadTime, armor: item.armor });
-            qs.slots[i] = ni;
-          } else {
-            const mi = items.splice(idx,1)[0];
-            mi.count = 1;
-            qs.slots[i] = mi;
-          }
-          qs.updatePetalFromSlot?.(i);
-          return true;
-        }
-      }
-      if (qs.secondarySlots) {
-        for (let i = 0; i < qs.secondarySlots.length; i++) {
-          if (!qs.secondarySlots[i]) {
-            if (target.count > 1) {
-              target.count--;
-              const ni = new Item(item.type, item.level||1, item.rarity);
-              ni.count = 1;
-              Object.assign(ni, { durability: item.durability, maxDurability: item.maxDurability, isBroken: item.isBroken, reloadTime: item.reloadTime, baseReloadTime: item.baseReloadTime, armor: item.armor });
-              qs.secondarySlots[i] = ni;
-            } else {
-              const mi = items.splice(idx,1)[0];
-              mi.count = 1;
-              qs.secondarySlots[i] = mi;
-            }
-            return true;
-          }
-        }
-      }
-      return false;
-    }
 
     function handleMouseDown(e) {
-      e.preventDefault();
-      const { x, y } = getCanvasCoordinates(e);
-      if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
-      const ev = { type: 'mousedown', button: e.button, x, y };
-      if (gameState === 'main_menu' && gameInstance) {
+    e.preventDefault();
+    const { x, y } = getCanvasCoordinates(e);
+
+    // ========== 🆕 获取正确的画布尺寸 ==========
+    const canvas = document.getElementById('gameCanvas');
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
+    const ev = { type: 'mousedown', button: e.button, x, y };
+
+    // ========== 🆕 图鉴界面处理 ==========
+    if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+        if (gameInstance.mobGallery.handleClick(x, y)) {
+            gameState = 'main_menu';
+        }
+        return;
+    }
+    if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+        gameInstance.mobGallery.handleClick(x, y);
+        return;
+    }
+    if (gameState === 'main_menu' && gameInstance) {
         if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
+
+        // ========== 🆕 检查图鉴按钮（使用 canvas 尺寸）==========
+        const mgx = canvasWidth - 220;
+        const mgy = canvasHeight - 80;
+        const mgw = 200;
+        const mgh = 60;
+
+        console.log(`图鉴按钮区域: x=${mgx}, y=${mgy}, w=${mgw}, h=${mgh}`);
+        console.log(`点击位置: x=${x}, y=${y}`);
+
+        if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
+            console.log("点击了图鉴按钮");
+            if (gameInstance.mobGallery) {
+                gameInstance.mobGallery.open();
+                gameState = 'mob_gallery';
+            }
+            return;
+        }
+
         const res = gameInstance.mainMenu.handleClick(ev);
         if (res) {
-          switch(res) {
-            case "shop": if(gameInstance.shopSystem) gameInstance.shopSystem.visible = true; break;
-            case "crafting": if(gameInstance.player?.inventory?.craftingSystem) { gameInstance.player.inventory.craftingSystem.craftingVisible = true; gameState='crafting'; } break;
-            case "inventory": openInventory(); break;
-            case "multiplayer": showMultiplayerPanel(); break;
-            case "account": showAccountPanel(); break;
-            case "bonus": gameInstance.bonusSystem?.claimBonus(); break;
-            default:
-              if(res && res.startsWith('start_') && res.endsWith('_map')) {
-                let bio = res.replace('start_','').replace('_map','');
-                bio = bio.charAt(0).toUpperCase() + bio.slice(1);
-                startGame(bio);
-              } else if(res === 'start_maze') startMazeMode();
-          }
+            switch(res) {
+                case "shop": if(gameInstance.shopSystem) gameInstance.shopSystem.visible = true; break;
+                case "crafting": if(gameInstance.player?.inventory?.craftingSystem) { gameInstance.player.inventory.craftingSystem.craftingVisible = true; gameState='crafting'; } break;
+                case "inventory": openInventory(); break;
+                case "multiplayer": showMultiplayerPanel(); break;
+                case "account": showAccountPanel(); break;
+                case "bonus": gameInstance.bonusSystem?.claimBonus(); break;
+                default:
+                    if(res && res.startsWith('start_') && res.endsWith('_map')) {
+                        let bio = res.replace('start_','').replace('_map','');
+                        bio = bio.charAt(0).toUpperCase() + bio.slice(1);
+                        startGame(bio);
+                    } else if(res === 'start_maze') startMazeMode();
+            }
         }
-      } else if (gameState === 'in_game' && gameInstance) {
+    } else if (gameState === 'in_game' && gameInstance) {
         if (gameInstance.player?.quickSlot?.handleClick([x,y])) return;
         gameInstance.handleEvents?.(ev);
-      } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+    } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
         gameInstance.player.inventory.craftingSystem.handleMouseDown?.([x,y]);
-      } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+    } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
         if (isPointInCloseButton(x,y)) closeInventory();
         else if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseDown?.([x,y]);
-      }
     }
+}
     function handleMouseUp(e) {
-      e.preventDefault();
-      const { x, y } = getCanvasCoordinates(e);
-      const ev = { type: 'mouseup', button: e.button, x, y };
-      if (gameState === 'in_game' && gameInstance?.handleEvents) {
-        gameInstance.handleEvents(ev);
-        gameInstance.handleEvents({ type: 'click', x, y });
-      } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-        const c = gameInstance.player.inventory.craftingSystem;
-        c.handleMouseUp?.([x,y]);
-        c.handleClick?.([x,y]);
-      } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
-        if (isPointInCloseButton(x,y)) closeInventory();
-        else if (isPointInInventoryArea(x,y)) {
-          gameInstance.player.inventory.handleMouseUp?.([x,y]);
-          handleInventoryClick(x,y);
+        e.preventDefault();
+        const { x, y } = getCanvasCoordinates(e);
+        const ev = { type: 'mouseup', button: e.button, x, y };
+        if (gameState === 'in_game' && gameInstance?.handleEvents) {
+            gameInstance.handleEvents(ev);
+            gameInstance.handleEvents({ type: 'click', x, y });
+        } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+            const c = gameInstance.player.inventory.craftingSystem;
+            c.handleMouseUp?.([x,y]);
+            c.handleClick?.([x,y]);
+        } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+            if (isPointInCloseButton(x,y)) closeInventory();
+            else if (isPointInInventoryArea(x,y)) {
+                gameInstance.player.inventory.handleMouseUp?.([x,y]);
+                gameInstance.player.inventory.handleClick([x,y]);  // ✅ 修改这里
+            }
         }
-      }
     }
-    function handleMouseMove(e) {
-      e.preventDefault();
-      const { x, y } = getCanvasCoordinates(e);
-      window.mouseX = x; window.mouseY = y;
-      if (gameState === 'main_menu' && gameInstance?.mainMenu?.handleMouseMove) {
-        gameInstance.mainMenu.handleMouseMove({ type: 'mousemove', x, y });
-        if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
-      } else if (gameState === 'in_game' && gameInstance?.handleEvents) {
-        gameInstance.handleEvents({ type: 'mousemove', x, y });
-        gameInstance.player?.updateMousePosition?.(x,y);
-        if (gameInstance.player) {
-          if (gameInstance.player.inventory) { gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y; }
-          if (gameInstance.player.quickSlot) { gameInstance.player.quickSlot.mouseX = x; gameInstance.player.quickSlot.mouseY = y; }
+   function handleMouseMove(e) {
+        e.preventDefault();
+        const { x, y } = getCanvasCoordinates(e);
+        window.mouseX = x; window.mouseY = y;
+
+        // ========== 🆕 图鉴状态优先处理 ==========
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+            gameInstance.mobGallery.handleMouseMove(x, y);
+            return;
         }
-        if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
-      } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-        const c = gameInstance.player.inventory.craftingSystem;
-        c.handleMouseMove?.([x,y]);
-        c.mouseX = x; c.mouseY = y;
-      } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
-        gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y;
-        if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseMove?.([x,y]);
-      }
+
+        if (gameState === 'main_menu' && gameInstance?.mainMenu?.handleMouseMove) {
+            gameInstance.mainMenu.handleMouseMove({ type: 'mousemove', x, y });
+            if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
+        } else if (gameState === 'in_game' && gameInstance?.handleEvents) {
+            gameInstance.handleEvents({ type: 'mousemove', x, y });
+            gameInstance.player?.updateMousePosition?.(x,y);
+            if (gameInstance.player) {
+                if (gameInstance.player.inventory) { gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y; }
+                if (gameInstance.player.quickSlot) { gameInstance.player.quickSlot.mouseX = x; gameInstance.player.quickSlot.mouseY = y; }
+            }
+            if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
+        } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+            const c = gameInstance.player.inventory.craftingSystem;
+            c.handleMouseMove?.([x,y]);
+            c.mouseX = x; c.mouseY = y;
+        } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+            gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y;
+            if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseMove?.([x,y]);
+        }
     }
     function handleWheel(e) {
       e.preventDefault(); e.stopPropagation();
       const { x, y } = getCanvasCoordinates(e);
       const we = { type: 'wheel', deltaY: e.deltaY, x, y };
+      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+            gameInstance.mobGallery.handleWheel(e.deltaY);
+            return;
+        }
       if (gameState === 'main_menu' && gameInstance?.shopSystem?.visible) gameInstance.shopSystem.handleClick?.(we);
       else if (gameState === 'in_game' && gameInstance?.handleEvents) gameInstance.handleEvents(we);
       else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.handleScrollWheel?.(e);
@@ -774,21 +869,35 @@ html, body {
         }
         e.preventDefault(); return;
       }
-      if (k >= '1' && k <= '9') {
-        let idx = parseInt(k) - 1;
-        if (k === '9') idx = 8;
-        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          gameInstance.player.quickSlot.selectedIndex = idx;
-          gameInstance.player.quickSlot.useItem(idx);
+      if (k === 'Shift') {
+    if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
+          gameInstance.player.contractMode = true;
+          for (const petal of gameInstance.player.petals) {
+            petal.targetRadius = 15;  // 收缩到最小
+          }
         }
-        e.preventDefault(); return;
+        e.preventDefault();
+        return;
       }
+      if (k >= '1' && k <= '9') {
+        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+          let slotIndex = parseInt(k) - 1;
+          if (k === '9') slotIndex = 8;
+          console.log(`按数字键 ${k}，交换槽位 ${slotIndex + 1}`);
+          gameInstance.player.quickSlot.swapSlot(slotIndex);
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // 🆕 数字键 0：切换槽位 10
       if (k === '0') {
         if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          gameInstance.player.quickSlot.selectedIndex = 9;
-          gameInstance.player.quickSlot.useItem(9);
+          console.log(`按数字键 0，交换槽位 10`);
+          gameInstance.player.quickSlot.swapSlot(9);
         }
-        e.preventDefault(); return;
+        e.preventDefault();
+        return;
       }
       if (k === ' ' || k === 'Space') {
         if (gameState === 'in_game' && gameInstance?.player) gameInstance.player.toggleSpreadMode();
@@ -999,20 +1108,16 @@ html, body {
       drawTextWithBorder(ctx, txt, x+w/2, y+h/2, { font: opt.font || 'bold 20px Arial', align: 'center', baseline: 'middle', border: opt.borderColor || 'black', bw: opt.borderWidth || 3, fill: opt.fillColor || 'white' });
     }
 
-    window.addEventListener('resize', () => {
-      window.WIDTH = window.innerWidth; window.HEIGHT = window.innerHeight;
-      screen.width = window.WIDTH; screen.height = window.HEIGHT;
-      if (gameInstance) gameInstance.screen = ctx;
-    });
-    window.addEventListener('load', () => {
-      initDOMElements();
-      gameInstance = createGameInstance();
-      gameLoop();
-      initializePlayerControls();
-    });
+    // 启动游戏
+    initDOMElements();
+    gameInstance = createGameInstance();
+    gameLoop();
+    initializePlayerControls();
+
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
+    // UI 函数
     window.showMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'block'; document.getElementById('mp-menu').style.display = 'block'; document.getElementById('mp-create').style.display = 'none'; document.getElementById('mp-join').style.display = 'none'; };
     window.hideMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'none'; };
     window.showCreateRoom = async () => {
