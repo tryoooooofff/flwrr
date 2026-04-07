@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
 <title>Flwrr</title>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
@@ -21,7 +20,7 @@ html, body {
   font-family: 'Arial', sans-serif;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   color: white;
-  touch-action: none;
+  touch-action: pan-x pan-y; /* 允许滚动，但游戏区域会处理 */
 }
 #gameCanvas {
   position: fixed;
@@ -37,27 +36,27 @@ html, body {
 /* ========== 手机版自适应样式 ========== */
 @media (max-width: 768px) {
   .touch-btn {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     font-size: 14px;
   }
   #joystick-area {
-    width: 110px;
-    height: 110px;
+    width: 120px;
+    height: 120px;
   }
   #joystick-base {
-    width: 110px;
-    height: 110px;
+    width: 120px;
+    height: 120px;
   }
   #joystick-knob {
-    width: 42px;
-    height: 42px;
-    top: 34px;
-    left: 34px;
+    width: 46px;
+    height: 46px;
+    top: 37px;
+    left: 37px;
   }
   #toggle-joystick, #toggle-panel {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     font-size: 18px;
   }
   #touch-hint {
@@ -65,7 +64,7 @@ html, body {
     white-space: nowrap;
   }
   #btn-area {
-    gap: 8px;
+    gap: 10px;
   }
 }
 
@@ -74,7 +73,7 @@ html, body {
   display: block;
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: 220px;
+  height: 200px;
   z-index: 3000;
   pointer-events: none;
   user-select: none;
@@ -107,10 +106,11 @@ html, body {
   pointer-events: none;
 }
 
-/* 右侧按钮区域 */
+/* 右侧按钮区域 - 调整位置避免被遮挡 */
 #btn-area {
   position: absolute;
-  bottom: 20px; right: 20px;
+  bottom: 80px;  /* 向上移动，避免被键盘遮挡 */
+  right: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -137,6 +137,7 @@ html, body {
 #btn-space { background: rgba(100,200,100,0.55); }
 #btn-r     { background: rgba(180,80,180,0.55); }
 #btn-esc   { background: rgba(200,60,60,0.55); }
+#btn-b     { background: rgba(50,150,200,0.55); }  /* 新增 B 按钮（收缩模式） */
 
 /* 切换按钮 */
 #toggle-joystick {
@@ -177,10 +178,10 @@ html, body {
   z-index: 3100;
 }
 
-/* 提示信息 */
+/* 提示信息 - 移到顶部避免被键盘遮挡 */
 #touch-hint {
   position: fixed;
-  bottom: 10px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.6);
@@ -207,19 +208,22 @@ html, body {
   display: none;
   min-width: 350px;
   text-align: center;
+  max-height: 80vh;
+  overflow-y: auto;  /* 允许滚动 */
 }
 @media (max-width: 480px) {
   #multiplayer-panel, #account-panel {
     min-width: 280px;
     padding: 20px;
+    max-height: 70vh;
   }
   #multiplayer-panel input, #account-panel input {
-    font-size: 14px;
-    padding: 8px;
+    font-size: 16px;  /* 更大的字体，防止 iOS 缩放 */
+    padding: 12px;
   }
   #multiplayer-panel button, #account-panel button {
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 10px 20px;
+    font-size: 16px;
     min-width: 120px;
   }
 }
@@ -278,6 +282,11 @@ html, body {
   pointer-events: none;
   display: none;
 }
+/* 输入框获得焦点时，确保不被键盘完全遮挡 */
+input:focus, textarea:focus {
+  outline: none;
+  scroll-margin-bottom: 20px;
+}
 </style>
 <style>
   canvas {
@@ -285,7 +294,6 @@ html, body {
     height: auto;
     max-width: 100%;
     display: block;
-    /* 关键：锁定canvas的CSS尺寸，让浏览器缩放，而不是渲染完整1550x850 */
   }
 </style>
 </head>
@@ -305,11 +313,12 @@ html, body {
       <div id="btn-area">
         <div class="touch-btn" id="btn-space">SP</div>
         <div class="touch-btn" id="btn-r">SW</div>
+        <div class="touch-btn" id="btn-b">B</div>
         <div class="touch-btn" id="btn-esc">MN</div>
       </div>
     </div>
     <div id="toggle-panel">🎮</div>
-    <div id="touch-hint">💡 左键摇杆移动 | 点击地面移动 | SP=展开 | SW=交换 | MN=菜单</div>
+    <div id="touch-hint">💡 左键摇杆移动 | 点击地面移动 | SP=展开 | SW=交换 | B=收缩 | MN=菜单</div>
 
     <!-- 多人游戏面板 -->
     <div id="multiplayer-panel">
@@ -328,7 +337,7 @@ html, body {
         </div>
         <div id="mp-join" style="display: none;">
             <h3>加入房间</h3>
-            <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6">
+            <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6" inputmode="text">
             <button onclick="joinRoom()">✅ 加入</button>
             <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
             <p id="join-error" style="color: #ff6b6b; margin-top: 10px;"></p>
@@ -346,10 +355,10 @@ html, body {
         <div id="account-login" style="display: none;">
             <h3>登录</h3>
             <div class="input-label">用户名</div>
-            <input type="text" id="login-username" placeholder="输入用户名" maxlength="20">
+            <input type="text" id="login-username" placeholder="输入用户名" maxlength="20" inputmode="text">
             <div class="input-label">密码</div>
             <div style="position: relative;">
-                <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
                 <span onclick="togglePasswordVisibility('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <button onclick="handleLogin()">✅ 登录</button>
@@ -359,15 +368,15 @@ html, body {
         <div id="account-register" style="display: none;">
             <h3>注册新账号</h3>
             <div class="input-label">用户名 (3-20字符)</div>
-            <input type="text" id="register-username" placeholder="输入用户名" maxlength="20">
+            <input type="text" id="register-username" placeholder="输入用户名" maxlength="20" inputmode="text">
             <div class="input-label">密码 (3-20字符)</div>
             <div style="position: relative;">
-                <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
                 <span onclick="togglePasswordVisibility('register-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <div class="input-label">确认密码</div>
             <div style="position: relative;">
-                <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
                 <span onclick="togglePasswordVisibility('register-confirm')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <button onclick="handleRegister()">📝 注册</button>
@@ -400,56 +409,54 @@ html, body {
     window.imageLoader = imageLoader;
     window.RARITY_LIST = RARITY_LIST;
     window.RARITY_COLORS = RARITY_COLORS;
+
     function initDOMElements() {
-  screen = document.getElementById('gameCanvas');
-  if (!screen) throw new Error("Canvas not found!");
+      screen = document.getElementById('gameCanvas');
+      if (!screen) throw new Error("Canvas not found!");
 
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-  if (isMobile) {
-    // 手机端：使用窗口的实际尺寸
-    screen.width = window.innerWidth;
-    screen.height = window.innerHeight;
-  } else {
-    screen.width = window.innerWidth;
-    screen.height = window.innerHeight;
-  }
+      if (isMobile) {
+        screen.width = window.innerWidth;
+        screen.height = window.innerHeight;
+      } else {
+        screen.width = window.innerWidth;
+        screen.height = window.innerHeight;
+      }
 
-  // 关键：让 Canvas 填满屏幕
-  screen.style.width = '100%';
-  screen.style.height = '100%';
-  screen.style.position = 'fixed';
-  screen.style.top = '0';
-  screen.style.left = '0';
+      screen.style.width = '100%';
+      screen.style.height = '100%';
+      screen.style.position = 'fixed';
+      screen.style.top = '0';
+      screen.style.left = '0';
 
-  ctx = screen.getContext('2d');
-  window.WIDTH = screen.width;
-  window.HEIGHT = screen.height;
+      ctx = screen.getContext('2d');
+      window.WIDTH = screen.width;
+      window.HEIGHT = screen.height;
 
-  if (gameInstance) {
-    gameInstance.WIDTH = window.WIDTH;
-    gameInstance.HEIGHT = window.HEIGHT;
-  }
-}
+      if (gameInstance) {
+        gameInstance.WIDTH = window.WIDTH;
+        gameInstance.HEIGHT = window.HEIGHT;
+      }
+    }
+
     // 在 window 上添加 keyup 事件
     window.addEventListener('keyup', (e) => {
         if (e.key === 'Shift' && gameInstance && !gameInstance.paused) {
             gameInstance.player.contractMode = false;
-            // 恢复半径
             for (const petal of gameInstance.player.petals) {
                 petal.targetRadius = 35;
             }
         }
     });
+
     // 窗口大小改变时重新适配
     window.addEventListener('resize', () => {
       const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
       if (isMobile) {
-        const maxWidth = Math.min(window.innerWidth, 800);
-        const maxHeight = Math.min(window.innerHeight, 600);
-        screen.width = maxWidth;
-        screen.height = maxHeight;
+        screen.width = window.innerWidth;
+        screen.height = window.innerHeight;
       } else {
         screen.width = window.innerWidth;
         screen.height = window.innerHeight;
@@ -607,6 +614,25 @@ html, body {
         if (g && g.player && g.player.quickSlot && g.player.quickSlot.swapAllSlots) g.player.quickSlot.swapAllSlots();
         else fakeKey('r');
       });
+      // 🆕 B 按钮：收缩模式（Shift 键功能）
+      bindBtn('btn-b', () => {
+        const g = window.gameInstance;
+        if (g && g.player && !g.paused) {
+          g.player.contractMode = true;
+          for (const petal of g.player.petals) {
+            petal.targetRadius = 15;
+          }
+          // 0.5秒后自动恢复
+          setTimeout(() => {
+            if (g.player && !g.player.isDead && !g.paused) {
+              g.player.contractMode = false;
+              for (const petal of g.player.petals) {
+                petal.targetRadius = 35;
+              }
+            }
+          }, 500);
+        }
+      });
       bindBtn('btn-esc', () => {
         const g = window.gameInstance;
         if (g && g.returnToMainMenu) g.returnToMainMenu();
@@ -702,50 +728,41 @@ html, body {
     }
     function closeInventory() { gameState = 'in_game'; }
 
-
-
     function handleMouseDown(e) {
-    e.preventDefault();
-    const { x, y } = getCanvasCoordinates(e);
+      e.preventDefault();
+      const { x, y } = getCanvasCoordinates(e);
 
-    // ========== 🆕 获取正确的画布尺寸 ==========
-    const canvas = document.getElementById('gameCanvas');
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+      const canvas = document.getElementById('gameCanvas');
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
 
-    if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
-    const ev = { type: 'mousedown', button: e.button, x, y };
+      if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
+      const ev = { type: 'mousedown', button: e.button, x, y };
 
-    // ========== 🆕 图鉴界面处理 ==========
-    if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
         if (gameInstance.mobGallery.handleClick(x, y)) {
-            gameState = 'main_menu';
+          gameState = 'main_menu';
         }
         return;
-    }
-    if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+      }
+      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
         gameInstance.mobGallery.handleClick(x, y);
         return;
-    }
-    if (gameState === 'main_menu' && gameInstance) {
+      }
+      if (gameState === 'main_menu' && gameInstance) {
         if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
 
-        // ========== 🆕 检查图鉴按钮（使用 canvas 尺寸）==========
         const mgx = canvasWidth - 220;
         const mgy = canvasHeight - 80;
         const mgw = 200;
         const mgh = 60;
 
-        console.log(`图鉴按钮区域: x=${mgx}, y=${mgy}, w=${mgw}, h=${mgh}`);
-        console.log(`点击位置: x=${x}, y=${y}`);
-
         if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
-            console.log("点击了图鉴按钮");
-            if (gameInstance.mobGallery) {
-                gameInstance.mobGallery.open();
-                gameState = 'mob_gallery';
-            }
-            return;
+          if (gameInstance.mobGallery) {
+            gameInstance.mobGallery.open();
+            gameState = 'mob_gallery';
+          }
+          return;
         }
 
         const res = gameInstance.mainMenu.handleClick(ev);
@@ -765,16 +782,17 @@ html, body {
                     } else if(res === 'start_maze') startMazeMode();
             }
         }
-    } else if (gameState === 'in_game' && gameInstance) {
+      } else if (gameState === 'in_game' && gameInstance) {
         if (gameInstance.player?.quickSlot?.handleClick([x,y])) return;
         gameInstance.handleEvents?.(ev);
-    } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+      } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
         gameInstance.player.inventory.craftingSystem.handleMouseDown?.([x,y]);
-    } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+      } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
         if (isPointInCloseButton(x,y)) closeInventory();
         else if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseDown?.([x,y]);
+      }
     }
-}
+
     function handleMouseUp(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
@@ -790,16 +808,16 @@ html, body {
             if (isPointInCloseButton(x,y)) closeInventory();
             else if (isPointInInventoryArea(x,y)) {
                 gameInstance.player.inventory.handleMouseUp?.([x,y]);
-                gameInstance.player.inventory.handleClick([x,y]);  // ✅ 修改这里
+                gameInstance.player.inventory.handleClick([x,y]);
             }
         }
     }
-   function handleMouseMove(e) {
+
+    function handleMouseMove(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
         window.mouseX = x; window.mouseY = y;
 
-        // ========== 🆕 图鉴状态优先处理 ==========
         if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
             gameInstance.mobGallery.handleMouseMove(x, y);
             return;
@@ -825,6 +843,7 @@ html, body {
             if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseMove?.([x,y]);
         }
     }
+
     function handleWheel(e) {
       e.preventDefault(); e.stopPropagation();
       const { x, y } = getCanvasCoordinates(e);
@@ -870,10 +889,10 @@ html, body {
         e.preventDefault(); return;
       }
       if (k === 'Shift') {
-    if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
+        if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
           gameInstance.player.contractMode = true;
           for (const petal of gameInstance.player.petals) {
-            petal.targetRadius = 15;  // 收缩到最小
+            petal.targetRadius = 15;
           }
         }
         e.preventDefault();
@@ -883,17 +902,13 @@ html, body {
         if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
           let slotIndex = parseInt(k) - 1;
           if (k === '9') slotIndex = 8;
-          console.log(`按数字键 ${k}，交换槽位 ${slotIndex + 1}`);
           gameInstance.player.quickSlot.swapSlot(slotIndex);
         }
         e.preventDefault();
         return;
       }
-
-      // 🆕 数字键 0：切换槽位 10
       if (k === '0') {
         if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          console.log(`按数字键 0，交换槽位 10`);
           gameInstance.player.quickSlot.swapSlot(9);
         }
         e.preventDefault();
@@ -914,7 +929,20 @@ html, body {
         e.preventDefault(); return;
       }
       if (k === 'b' || k === 'B') {
-        if (gameState === 'in_game' && gameInstance?.bonusSystem) gameInstance.bonusSystem.claimBonus();
+        if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
+          gameInstance.player.contractMode = true;
+          for (const petal of gameInstance.player.petals) {
+            petal.targetRadius = 15;
+          }
+          setTimeout(() => {
+            if (gameInstance?.player && !gameInstance.player.isDead && !gameInstance.paused) {
+              gameInstance.player.contractMode = false;
+              for (const petal of gameInstance.player.petals) {
+                petal.targetRadius = 35;
+              }
+            }
+          }, 500);
+        }
         e.preventDefault(); return;
       }
       if (k === 's' || k === 'S') {
@@ -1032,7 +1060,7 @@ html, body {
       } else if (gameState === 'in_game') {
         ctx.clearRect(0,0,screen.width,screen.height);
         gameInstance.draw(ctx);
-        let hints = '右键点击地面移动 | C:合成 | I:背包 | ESC:菜单 | S:静止 | T:聊天';
+        let hints = '右键点击地面移动 | C:合成 | I:背包 | ESC:菜单 | S:静止 | T:聊天 | B:收缩';
         if (gameInstance.useMaze) hints = '🗺️ 迷宫模式 | E:编辑器 | S:保存地图 | L:加载地图 | M:控制面板 | ' + hints;
         drawTextWithBorder(ctx, hints, 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
         if (gameInstance.editorMode) drawTextWithBorder(ctx, '🔨 编辑器模式 - 点击清除墙壁 | Shift+点击放置墙壁', screen.width/2, 50, { font: '16px "Arial", sans-serif', textAlign: 'center', textBaseline: 'top', borderWidth: 2, fillColor: '#FFA500' });
