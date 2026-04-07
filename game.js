@@ -638,13 +638,15 @@ export const BIOME_SPAWN_RATES = {
     // ========== 🆕 宇宙世界生物 ==========
     "Void": {
         // 天体类
-        "BlackHole": { weight: 10, minLevel: 1, maxLevel: 5},
-        "WhiteHole": { weight: 10, minLevel: 1, maxLevel: 5},
+        "BlackHole": { weight: 15, minLevel: 1, maxLevel: 5},
+        "WhiteHole": { weight: 15, minLevel: 1, maxLevel: 5},
         "NeutronStar": { weight: 8, minLevel: 1, maxLevel: 5 },
         "Star": { weight: 20, minLevel: 1, maxLevel: 5 },
         "Asteroid": { weight: 60, minLevel: 1, maxLevel: 4 },
-        "Alien": { weight: 20, minLevel: 1, maxLevel: 5 },
-        "UFO": { weight: 1000, minLevel: 1, maxLevel: 5 },
+        "Alien": { weight: 30, minLevel: 1, maxLevel: 5 },
+        "UFO": { weight: 0.1, minLevel: 1, maxLevel: 5 },
+        "GraveStone": { weight: 1, minLevel: 1, maxLevel: 5},
+        "Ghost": { weight: 30, minLevel: 1, maxLevel: 5 },
     },
     "Bio": {
         "StemCell": { weight: 0.005, minLevel: 1, maxLevel: 5 },
@@ -21388,7 +21390,7 @@ class ShopSystem {
             "Orb": 30,
             "Slime": 12,
             "Dvd": 20,
-            "FireBomb": 30,
+            "FireBomb": 100,
             "Stardust": 18,
             "Opal": 50,
             "Gamma Ray": 40,
@@ -21793,6 +21795,19 @@ class ShopSystem {
         this.showMessage(`✅ Purchased: ${rarity} ${shopItem.type}`);
         this.selectedItem = null; // Return to list
         return true;
+        if (success) {
+        // ✅ 购买成功后立即保存
+        if (this.inventory?.player?.gameInstance?.autoSave) {
+            this.inventory.player.gameInstance.autoSave();
+        }
+
+        // ✅ 刷新快捷栏显示
+        if (this.quickSlot?.updateAllPetals) {
+            this.quickSlot.updateAllPetals();
+        }
+
+        this.showMessage(`✅ 购买成功！已保存`);
+    }
     }
 
     // Add item to sell slot
@@ -21858,7 +21873,6 @@ class ShopSystem {
         return true;
     }
 
-    // Sell all items in slot
     sellAll() {
         if (!this.sellSlot) {
             this.showMessage("❌ No items to sell");
@@ -21876,6 +21890,13 @@ class ShopSystem {
         this.sellSlotCount = 0;
 
         this.showMessage(`✅ Sold! Got ${formattedTotal} Stars`);
+
+        // ✅ 卖完后立即保存
+        if (this.inventory?.player?.gameInstance?.autoSave) {
+            this.inventory.player.gameInstance.autoSave();
+            console.log("💾 卖东西后已自动保存");
+        }
+
         return true;
     }
 
@@ -25691,6 +25712,20 @@ class Enemy {
             this.triggered10 = false;
             this.spawnedCreatures = [];
         }
+        // 在 Enemy 构造函数中，找到其他 triggered 变量初始化的地方
+        if (enemyType === "UFO") {
+            this.triggered80 = false;
+            this.triggered60 = false;
+            this.triggered40 = false;
+            this.triggered20 = false;
+        }
+
+        if (enemyType === "GraveStone") {
+            this.triggered80 = false;
+            this.triggered60 = false;
+            this.triggered40 = false;
+            this.triggered20 = false;
+        }
         if (enemyType === "ManHole") {
             this.triggered70 = false;
             this.triggered50 = false;
@@ -26547,7 +26582,7 @@ class Enemy {
             case "WhiteHole":    return [3000, 30, 0,  40000, 70];
             case "NeutronStar":  return [8000, 45, 0,  80000, 200];
             case "Alien":        return [400,  28, 120, 1000, 80];
-            case "UFO":          return [600,  30, 150, 2000, 120];
+            case "UFO":          return [600,  30, 150, 2000, 40];
             case "Star":         return [2000, 50, 0,  30000, 50];
             case "Asteroid":     return [300,  25, 80,  700,  60];
             case "Ghost":         return [100, 25, 0,  100, 10];
@@ -27860,7 +27895,48 @@ class Enemy {
 
         gameInstance.enemies.push(digger);
     }
+    // UFO 生成 Alien
+    spawnAlien(enemies) {
+        if (this.isDead || !enemies) return;
 
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 40;
+        const alienX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+        const alienY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+
+        const alien = new Enemy("Alien", alienX, alienY, this.level, this.rarity);
+        alien.spawnTime = Date.now();
+        alien.spawnProtection = 1000;
+        alien.isSpawning = true;
+        alien.isFriendly = this.isFriendly;
+
+        enemies.push(alien);
+    }
+
+    // GraveStone 生成 Ghost
+    spawnGhosts(enemies, count = 2) {
+        if (this.isDead || !enemies) return;
+
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const ghostX = Math.max(100, Math.min(WORLD_WIDTH - 100, baseX + Math.cos(angle) * distance));
+            const ghostY = Math.max(100, Math.min(WORLD_HEIGHT - 100, baseY + Math.sin(angle) * distance));
+
+            const ghost = new Enemy("Ghost", ghostX, ghostY, this.level, this.rarity);
+            ghost.spawnTime = Date.now();
+            ghost.spawnProtection = 1000;
+            ghost.isSpawning = true;
+            ghost.isFriendly = this.isFriendly;
+
+            enemies.push(ghost);
+        }
+    }
     trySpawnMudDiggerFromDeath(gameInstance) {
         if (!gameInstance || Math.random() >= 0.1) return;
 
@@ -28138,7 +28214,49 @@ class Enemy {
                 this.spawnRat(enemies);
             }
         }
+        // UFO 逻辑 - 80%,60%,40%,20% 生成 Alien
+        if (this.type === "UFO" && !this.isSpawning && !this.isDead) {
+            const healthPercent = this.health / this.maxHealth;
 
+            if (healthPercent <= 0.8 && !this.triggered80) {
+                this.triggered80 = true;
+                this.spawnAlien(enemies);
+            }
+            if (healthPercent <= 0.6 && !this.triggered60) {
+                this.triggered60 = true;
+                this.spawnAlien(enemies);
+            }
+            if (healthPercent <= 0.4 && !this.triggered40) {
+                this.triggered40 = true;
+                this.spawnAlien(enemies);
+            }
+            if (healthPercent <= 0.2 && !this.triggered20) {
+                this.triggered20 = true;
+                this.spawnAlien(enemies);
+            }
+        }
+
+        // GraveStone 逻辑 - 80%,60%,40%,20% 生成 Ghost
+        if (this.type === "GraveStone" && !this.isSpawning && !this.isDead) {
+            const healthPercent = this.health / this.maxHealth;
+
+            if (healthPercent <= 0.8 && !this.triggered80) {
+                this.triggered80 = true;
+                this.spawnGhosts(enemies, 2);
+            }
+            if (healthPercent <= 0.6 && !this.triggered60) {
+                this.triggered60 = true;
+                this.spawnGhosts(enemies, 2);
+            }
+            if (healthPercent <= 0.4 && !this.triggered40) {
+                this.triggered40 = true;
+                this.spawnGhosts(enemies, 2);
+            }
+            if (healthPercent <= 0.2 && !this.triggered20) {
+                this.triggered20 = true;
+                this.spawnGhosts(enemies, 2);
+            }
+        }
         // 蜂巢逻辑
         if (this.type === "Hive" && !this.isSpawning && !this.isDead) {
             const healthPercent = this.health / this.maxHealth;
