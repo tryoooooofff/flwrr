@@ -18,7 +18,19 @@ export const SCREEN_CONFIG = {
 };
 // 删除原来的 String.prototype.hashCode 代码
 // 改为普通的辅助函数
-
+// Opal 暴击倍率随稀有度变化
+const OPAL_CRIT_MULTIPLIERS = {
+    "Common": 1.1,
+    "Unusual": 1.2,
+    "Rare": 1.3,
+    "Epic": 1.4,
+    "Legendary": 1.6,
+    "Mythic": 1.9,
+    "Ultra": 2.0,
+    "Super": 2.3,
+    "Omega": 2.5,
+    "Eternal": 2.7
+};
 // ========== 辅助函数：字符串哈希（用于生成玩家ID）==========
 function hashCode(str) {
     let hash = 0;
@@ -146,6 +158,20 @@ const ENEMY_XP_TABLE = {
     "Ladybug":{ baseXp: 11, typeBonus: 1.3 },
     "Hive":{ baseXp: 30, typeBonus: 1.9 },
     // 细胞类生物
+    // ========== 微观世界 ==========
+    "Atom": { baseXp: 50, typeBonus: 1.5 },
+    "Electron": { baseXp: 30, typeBonus: 1.2 },
+    "Proton": { baseXp: 45, typeBonus: 1.4 },
+    "ElectronCloud": { baseXp: 80, typeBonus: 1.8 },
+    "Photon": { baseXp: 25, typeBonus: 1.1 },
+    // ========== 宇宙世界 ==========
+    "BlackHole": { baseXp: 500, typeBonus: 3.0 },
+    "WhiteHole": { baseXp: 450, typeBonus: 2.8 },
+    "NeutronStar": { baseXp: 400, typeBonus: 2.5 },
+    "Star": { baseXp: 200, typeBonus: 2.0 },
+    "Asteroid": { baseXp: 80, typeBonus: 1.5 },
+    "Alien": { baseXp: 120, typeBonus: 1.8 },
+    "UFO": { baseXp: 150, typeBonus: 1.9 },
     "StemCell": { baseXp: 40, typeBonus: 1.8 },
     "RedBloodCell": { baseXp: 15, typeBonus: 1.1 },
     "WhiteBloodCell": { baseXp: 12, typeBonus: 1.3 },
@@ -471,6 +497,50 @@ export const BIOME_BACKGROUNDS = {
             background_color: [80, 40, 30]
         }
     },
+    // ========== 🆕 微观世界（程序化生成）==========
+    "Micro": {
+        base_color: [5, 15, 35],
+        ground_color: [8, 20, 45],
+        wall_color: [30, 50, 80],
+        region_colors: {
+            "Quantum Foam": [10, 30, 60],
+            "Particle Cloud": [20, 40, 80],
+            "Electron Orbit": [40, 60, 120],
+            "Nucleus Zone": [60, 80, 150],
+            "Quantum Vacuum": [5, 10, 25]
+        },
+        has_grid: true,
+        grid_color: [40, 60, 100],
+        particle_effect: "quantum",
+        // 🆕 使用生成函数而不是图片
+        map: {
+            generator: "micro",  // 指定生成器类型
+            grid_size: 80,
+            show_grid: true,
+            background_color: [5, 15, 35]
+        }
+    },
+
+    // ========== 🆕 宇宙世界（程序化生成）==========
+    "Void": {
+        base_color: [3, 3, 15],
+        ground_color: [5, 5, 20],
+        wall_color: [20, 20, 40],
+        region_colors: {
+            "Nebula": [30, 10, 50],
+            "Star Field": [10, 10, 30],
+            "Dark Matter": [5, 5, 15],
+            "Galaxy Core": [60, 40, 20],
+            "Void Space": [2, 2, 8]
+        },
+        has_grid: true,
+        map: {
+            generator: "void",   // 指定生成器类型
+            grid_size: 120,
+            show_grid: false,
+            background_color: [3, 3, 15]
+        }
+    },
 
 };
 // ==================== 区块类型定义 ====================
@@ -555,7 +625,27 @@ export const BIOME_SPAWN_RATES = {
         "Ladybug":{ weight: 30, minLevel: 1, maxLevel: 5},
         "Hive": { weight: 0.2, minLevel: 2, maxLevel: 5 },
     },
+// ========== 🆕 微观世界生物 ==========
+    "Micro": {
+        // 微观粒子类
+        "Atom": { weight: 30, minLevel: 1, maxLevel: 5 },
+        "Electron": { weight: 80, minLevel: 1, maxLevel: 5 },
+        "Proton": { weight: 40, minLevel: 1, maxLevel: 5 },
+        "ElectronCloud": { weight: 1, minLevel: 1, maxLevel: 5 },
+        "Photon": { weight: 60, minLevel: 1, maxLevel: 5 },
+    },
 
+    // ========== 🆕 宇宙世界生物 ==========
+    "Void": {
+        // 天体类
+        "BlackHole": { weight: 10, minLevel: 1, maxLevel: 5},
+        "WhiteHole": { weight: 10, minLevel: 1, maxLevel: 5},
+        "NeutronStar": { weight: 8, minLevel: 1, maxLevel: 5 },
+        "Star": { weight: 20, minLevel: 1, maxLevel: 5 },
+        "Asteroid": { weight: 60, minLevel: 1, maxLevel: 4 },
+        "Alien": { weight: 20, minLevel: 1, maxLevel: 5 },
+        "UFO": { weight: 1000, minLevel: 1, maxLevel: 5 },
+    },
     "Bio": {
         "StemCell": { weight: 0.005, minLevel: 1, maxLevel: 5 },
         "RedBloodCell": { weight: 10, minLevel: 1, maxLevel: 5 },
@@ -791,8 +881,8 @@ export const SPECIAL_ZONES = {
             // 完全自定义生成规则
             spawnRules: [
                 // 格式: [敌人类型, 权重, 最小等级, 最大等级, 稀有度列表]
-                ["ArcticSpider", 100, 10, 6, ["Super", "Omega"]],  // ✅ 修正：10-30级
-                ["ArcticSpiderCave", 0.5, 5, 8,["Super","Omega"]],
+                ["ArcticSpider", 100, 1, 6, ["Super", "Omega"]],
+                ["ArcticSpiderCave", 0.5, 1, 8,["Super","Omega"]],
                 ["ArcticSpiderCave", 10, 1, 5, ["Ultra", "Super"]],
                 ["Snowman", 20, 1, 5, ["Super", "Omega"]],
             ],
@@ -800,20 +890,21 @@ export const SPECIAL_ZONES = {
             maxEnemies: 30                      // 最大敌人数
         },
         {
-            name: "SnowStorm Zone",
+            name: "random Zone",
             bounds: {
                 x1: 5659, y1: 863,
                 x2: 8094, y2: 2576
             },
             spawnRules: [
-                ["Igloo", 0.1, 1, 5, ["Super","Omega"]],
-                ["Ice Dragon", 1, 5, 10, ["Super"]],
-                ["SnowStorm", 100, 1, 5, ["Super","Omega"]],
-                ["Igloo", 1, 5, 10, ["Ultra"]],
-                ["Tick", 1, 5, 10, ["Omega"]],
+                ["Igloo", 0.1, 1, 5, ["Ultra","Super"]],
+                ["Ice Dragon", 1, 1, 8, ["Ultra","Super"]],
+                ["Ice Cube", 100, 1, 5, ["Super"]],
+                ["SlagMight", 1, 1, 5, ["Ultra"]],
+                ["Ice Cube", 1, 1, 5, ["Omega"]],
+                ["Igloo", 0.01, 1, 5, ["Omega","Super"]],
 
             ],
-            spawnRate: 6.0,              // 生成速度快
+            spawnRate: 3.0,              // 生成速度快
             maxEnemies: 30                // 最多40只 Bush
         }
     ],
@@ -845,7 +936,7 @@ export const SPECIAL_ZONES = {
                 ["Bacteriophage", 5, 4, 5, ["Super"]],
                 ["Cancer", 0.08, 2, 5, ["Super"]]
             ],
-            spawnRate: 5.0,
+            spawnRate: 1.0,
             maxEnemies: 10
         },
         {
@@ -1423,6 +1514,40 @@ const ITEM_IMAGE_URLS = {
     "Hel Digger egg": "images/HelDigger_egg.png",
     "Hel Beekeeper egg": "images/HelBeekeeper_egg.png",
     "ToxicDragon egg": "images/ToxicDragon_egg.png",
+     // 微观世界
+    "Photon": "images/Photon.png",
+    "Photon egg": "images/Photon_egg.png",
+    "Electron": "images/Electron.png",
+    "Electron egg": "images/Electron_egg.png",
+    "ElectronCloud egg": "images/ElectronCloud_egg.png",
+    "Proton egg": "images/Proton_egg.png",
+    "Atom egg": "images/Atom_egg.png",
+    "Quark": "images/Quark.png",
+    "Quantum": "images/Quantum.png",
+    "Charge": "images/Charge.png",
+    "Nucleus": "images/Nucleus.png",
+
+    // 宇宙世界
+    "BlackHole egg": "images/BlackHole_egg.png",
+    "WhiteHole egg": "images/WhiteHole_egg.png",
+    "NeutronStar egg": "images/NeutronStar_egg.png",
+    "Star egg": "images/Star_egg.png",
+    "Asteroid egg": "images/Asteroid_egg.png",
+    "Alien egg": "images/Alien_egg.png",
+    "UFO egg": "images/UFO_egg.png",
+    "Ghost egg": "images/Ghost_egg.png",
+    "GraveStone egg": "images/GraveStone_egg.png",
+    "Plasma": "images/Plasma.png",
+    "Orb": "images/Orb.png",
+    "Slime": "images/Slime.png",
+    "Dvd": "images/Dvd.png",
+    "FireBomb": "images/FireBomb.png",
+    "Stardust": "images/Stardust.png",
+    "Opal": "images/Opal.png",
+    "Gamma Ray": "images/Gamma Ray.png",
+    "Dust": "images/Dust.png",
+    "Singularity": "images/Singularity.png",
+    "DarkMatter": "images/DarkMatter.png",
 
 };
 
@@ -1591,6 +1716,72 @@ export const ITEM_STATS = {
     "Soil": {base_attack:5, base_cooldown:150, slow_effect:0.2, slow_duration:1.5, use_rarity_multiplier: true, base_reload_time:1000},
     "Tomato": {base_attack:40, base_cooldown:300, healing:1, use_rarity_multiplier: true, base_reload_time:3000},
     "Rubber": {base_attack:10, base_cooldown:120, damage_reduction:0.15, use_rarity_multiplier: true, base_reload_time:2000},
+    // ========== 微观世界物品 ==========
+    "Photon egg": { base_attack: 1, base_cooldown: 8000, spawn_photon: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000 },
+    "Electron": { base_attack: 12, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 600 },
+    "Electron egg": { base_attack: 1, base_cooldown: 7000, spawn_electron: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 6000 },
+    "ElectronCloud egg": { base_attack: 1, base_cooldown: 12000, spawn_cloud_electron: true, spawn_count: 8, use_rarity_multiplier: true, base_reload_time: 20000 },
+    "Proton egg": { base_attack: 1, base_cooldown: 9000, spawn_proton: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 8000 },
+    "Atom egg": { base_attack: 1, base_cooldown: 15000, spawn_atom: true, spawn_count: 5, use_rarity_multiplier: true, base_reload_time: 18000 },
+    "Quark": { base_attack: 25, base_cooldown: 60, use_rarity_multiplier: true, base_reload_time: 500 },
+    // ========== 宇宙世界物品 ==========
+    "BlackHole egg": { base_attack: 1, base_cooldown: 20000, spawn_blackhole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000 },
+    "WhiteHole egg": { base_attack: 1, base_cooldown: 18000, spawn_whitehole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000 },
+    "NeutronStar egg": { base_attack: 1, base_cooldown: 16000, spawn_neutronstar: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 28000 },
+    "Star egg": { base_attack: 1, base_cooldown: 12000, spawn_star: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000 },
+    "Asteroid egg": { base_attack: 1, base_cooldown: 8000, spawn_asteroid: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000 },
+    "Alien egg": { base_attack: 1, base_cooldown: 10000, spawn_alien: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000 },
+    "UFO egg": { base_attack: 1, base_cooldown: 14000, spawn_ufo_alien: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 28000 },
+    "Ghost egg": { base_attack: 1, base_cooldown: 9000, spawn_ghost: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 15000 },
+    "GraveStone egg": { base_attack: 1, base_cooldown: 12000, spawn_grave_ghost: true, spawn_count: 15, use_rarity_multiplier: true, base_reload_time: 24000 },
+
+    // ========== 宇宙世界武器 ==========
+    "Plasma": { base_attack: 35, base_cooldown: 120,fire_damage: 20, fire_duration: 3.5, use_rarity_multiplier: true, base_reload_time: 1200 },
+    "Orb": { base_attack: 20, base_cooldown: 180, use_rarity_multiplier: true, base_reload_time: 2000 },
+    "Slime": { base_attack: 8, base_cooldown: 80, slow_effect: 0.3, slow_duration: 1.5, use_rarity_multiplier: true, base_reload_time: 800 },
+    "Dvd": { base_attack: 30, base_cooldown: 100,fire_damage: 20, fire_duration: 3, use_rarity_multiplier: true, base_reload_time: 3000 },
+    "FireBomb": { base_attack: 10, base_cooldown: 500, is_bomb: true, fire_damage: 30, fire_duration: 3, use_rarity_multiplier: true, base_reload_time: 4000 },
+    "Stardust": { base_attack: 15, base_cooldown: 60, use_rarity_multiplier: true, base_reload_time: 1000 },
+    "Gamma Ray": { base_attack: 50, base_cooldown: 300,fire_damage: 30, fire_duration: 3, penetration: true, use_rarity_multiplier: true, base_reload_time: 3000 },
+    "Dust": { base_attack: 15, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 500 },
+    "Singularity": { base_attack: 100, base_cooldown: 500, pull_effect: true, use_rarity_multiplier: true, base_reload_time: 6000 },
+    "Photon": {
+        base_attack: 15, base_cooldown: 80,
+        friendly_speed_bonus: 0.15,  // 增加友方生物15%移动速度
+        use_rarity_multiplier: true,
+        base_reload_time: 800
+    },
+
+    "Charge": {
+        base_attack: 20, base_cooldown: 90,
+        friendly_damage_reduction: 0.25,  // 减少友方生物25%受到的伤害
+        use_rarity_multiplier: true,
+        base_reload_time: 700
+    },
+
+    "Quantum": {
+        base_attack: 30, base_cooldown: 120,
+        vision_bonus: 0.3,  // 增加玩家30%视野范围（类似ThirdEye）
+        use_rarity_multiplier: true,
+        base_reload_time: 1500
+    },
+
+    "Nucleus": {
+        base_attack: 40, base_cooldown: 200,
+        can_heal_friendly: true,  // 可以治疗友方生物
+        heal_amount: 50,
+        use_rarity_multiplier: true,
+        base_reload_time: 2500
+    },
+
+    "Opal": {
+        base_attack: 15, base_cooldown: 150,
+        crit_multiplier: 1.1,  // 基础暴击倍率1.1倍
+        crit_chance: 0.3,       // 30%暴击率
+        broken_crit_multiplier: 2.7,  // 破碎时暴击倍率2.7倍
+        use_rarity_multiplier: true,
+        base_reload_time: 1800
+    },
     // ========== 🆕 Leech & Parasite 蛋 ==========
     "Leech Egg": {base_attack:1, base_cooldown:8000, spawn_leech:true, spawn_count:2, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000},
     "Parasite Egg": {base_attack:1, base_cooldown:7000, spawn_parasite:true, spawn_count:2, durability_bonus:25, use_rarity_multiplier: true, base_reload_time:7000},
@@ -1786,6 +1977,22 @@ export const ENEMY_DROP_TABLE = {
     "ArcticSpider": ["Web", "Snowball", "ArcticSpider egg"],
     "Snowman": ["Carrot", "Snowball", "Stick", "Snowman egg"],
     "SnowStorm": ["SnowStick", "Snowflake","Icicle"],
+        // ========== 微观世界掉落 ==========
+    "Atom": ["Atom egg", "Bomb", "Electron"],
+    "Electron": ["Electron egg", "Electron", "Quantum","Charge"],
+    "Proton": ["Proton egg", "Quark","Quantum"],
+    "ElectronCloud": ["ElectronCloud egg", "Electron", "Quantum","Charge"],
+    "Photon": ["Photon egg", "Singularity", "Faster", "Photon"],
+     // ========== 宇宙世界掉落 ==========
+    "BlackHole": ["BlackHole egg", "DarkMatter", "Gamma Ray","Opal"],
+    "WhiteHole": ["WhiteHole egg", "DarkMatter", "Gamma Ray","Stardust","Singularity"],
+    "NeutronStar": ["NeutronStar egg", "Singularity", "Nucleus"],
+    "Star": ["Stardust", "Star egg", "Dust","FireBomb"],
+    "Asteroid": ["Asteroid egg", "Dust","Rock"],
+    "Alien": ["Alien egg", "Dvd","Slime","Bomb"],
+    "UFO": ["UFO egg",  "Plasma","Orb", "FireBomb"],
+    "Ghost": ["Ghost egg", "Air", "Slime"],
+    "GraveStone": ["GraveStone egg", "Opal", "Rock","Air"],
 };
 
 export const PROGRESSIVE_RARITY_MULTIPLIERS = {
@@ -1815,12 +2022,14 @@ export const ITEM_ARMOR_MULTIPLIERS = {
     "Pearl": 1,
     "Rock": 1,
     "Glass": 9,
+    "Dvd": 4,
+    "Orb": 9,
     "Jelly": 0.5,     // Jelly 是基础护甲的 1 倍
     "Controller": 10 // Controller 是基础护甲的 10 倍
 };
 
 export const ARMOR_ELIGIBLE_ITEMS = new Set([
-    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone","Glass"
+    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone","Glass","Dvd","Orb"
 ]);
 // 获取物品护甲值（考虑倍率）
 export function getItemArmorValue(itemType, rarity) {
@@ -1830,11 +2039,11 @@ export function getItemArmorValue(itemType, rarity) {
 }
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
-    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper"],
-    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger"],
-    "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest"] // E级 - 最难打的Boss级生物
+    "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy","Ghost","ElectronCloud"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","UFO","Photon","Electron","Atom"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton"],
+    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole"],
+    "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest","NeutronStar"] // E级 - 最难打的Boss级生物
 };
 // E级护甲的倍率（比D级更高）
 export const ARMOR_CLASS_MULTIPLIERS = {
@@ -1931,7 +2140,17 @@ export const THIRD_EYE_RANGE_BONUS = {
     "Ultra": 80,
     "Super": 100,
     "Omega": 140,
-    "Eternal": 200
+    "Eternal": 200,
+        "Quantum_Common": 10,
+    "Quantum_Unusual": 20,
+    "Quantum_Rare": 30,
+    "Quantum_Epic": 50,
+    "Quantum_Legendary": 60,
+    "Quantum_Mythic": 70,
+    "Quantum_Ultra": 90,
+    "Quantum_Super": 110,
+    "Quantum_Omega": 180,
+    "Quantum_Eternal": 250
 };
 
 // Allow ThirdEye to provide armor (if desired)
@@ -1967,7 +2186,7 @@ export const RARITY_DROP_RATES = {
     },
     "Super": {
         "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
-        "Legendary": 0.0, "Mythic": 0.9, "Ultra": 0.1, "Super": 0.00
+        "Legendary": 0.0, "Mythic": 0.9, "Ultra": 0.0999, "Super": 0.0001
     },
     "Omega": {
         "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
@@ -1979,7 +2198,49 @@ export const RARITY_DROP_RATES = {
     }
 };
 // Rarity drop rates
-
+export const RARE_RARITY_DROP_RATES = {
+    "Common": {
+        "Common": 0.95, "Unusual": 0.05, "Rare": 0.0, "Epic": 0.0,
+        "Legendary": 0.0, "Mythic": 0.0, "Ultra": 0.0, "Super": 0.0
+    },
+    "Unusual": {
+        "Common": 0.76, "Unusual": 0.24, "Rare": 0.00, "Epic": 0.0,
+        "Legendary": 0.0, "Mythic": 0.0, "Ultra": 0.0, "Super": 0.0
+    },
+    "Rare": {
+        "Common": 0.3, "Unusual": 0.6, "Rare": 0.1, "Epic": 0.0,
+        "Legendary": 0.0, "Mythic": 0.0, "Ultra": 0.0, "Super": 0.0
+    },
+    "Epic": {
+        "Common": 0.0, "Unusual": 0.7, "Rare": 0.26, "Epic": 0.04,
+        "Legendary": 0.0, "Mythic": 0.0, "Ultra": 0.0, "Super": 0.0
+    },
+    "Legendary": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.7, "Epic": 0.29,
+        "Legendary": 0.01, "Mythic": 0.0, "Ultra": 0.0, "Super": 0.0
+    },
+    "Mythic": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.59,
+        "Legendary": 0.40, "Mythic": 0.01, "Ultra": 0.0, "Super": 0.0
+    },
+    "Ultra": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
+        "Legendary": 0.94, "Mythic": 0.06, "Ultra": 0.0, "Super": 0.0
+    },
+    "Super": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
+        "Legendary": 0.1, "Mythic": 0.88, "Ultra": 0.02, "Super": 0.00
+    },
+    "Omega": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
+        "Legendary": 0.0, "Mythic": 0.39, "Ultra": 0.6092, "Super": 0.0008
+    },
+    // ===== 🆕 Eternal 生物掉落规则 =====
+    "Eternal": {
+        "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
+        "Legendary": 0.0, "Mythic": 0.22, "Ultra": 0.775, "Super": 0.005
+    }
+};
 export const SEWEREGG_RARITY_DROP_RATES = {
     "Common": {
         "Common": 0.92, "Unusual": 0.08, "Rare": 0.0, "Epic": 0.0,
@@ -2931,6 +3192,707 @@ class TalentSystem {
     close() { this.panelOpen = false; }
     toggle() { this.panelOpen = !this.panelOpen; }
 }
+// ==================== 生物图鉴系统 ====================
+// ==================== Mob Gallery System ====================
+class MobGallery {
+    constructor(gameInstance) {
+        this.game = gameInstance;
+        this.visible = false;
+        this.scrollOffset = 0;
+        this.maxVisibleRows = 9;
+        this.cols = 10;
+        this.slotSize = 72;
+        this.slotMargin = 8;
+        this.headerHeight = 70;
+        this.padding = 20;
+
+        // Column colors for each rarity
+        this.columnColors = [
+            'rgb(0, 204, 0)',      // Common
+            'rgb(204, 204, 0)',    // Unusual
+            'rgb(0, 100, 204)',    // Rare
+            'rgb(153, 50, 204)',   // Epic
+            'rgb(204, 0, 0)',      // Legendary
+            'rgb(0, 204, 204)',    // Mythic
+            'rgb(204, 84, 144)',   // Ultra
+            'rgb(116, 191, 116)',  // Super
+            'rgb(179, 31, 163)',   // Omega
+            'rgb(255, 255, 255)'   // Eternal
+        ];
+
+        this.mobs = [];
+        this.spriteCache = new Map();
+        this.dropItemCache = new Map();
+
+        // Scroll related
+        this.scrollBarRect = null;
+        this.draggingScrollBar = false;
+        this.scrollBarDragStartY = 0;
+        this.scrollOffsetAtDragStart = 0;
+
+        // Tooltip related
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.hoveredMob = null;
+
+        this.initMobs();
+    }
+
+    getRarityByIndex(index) {
+        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        return rarities[index] || "Common";
+    }
+
+    initMobs() {
+        const allMobs = Object.keys(ENEMY_DROP_TABLE || {});
+        const extraMobs = [
+            "Atom", "Electron", "Proton", "ElectronCloud", "Photon",
+            "BlackHole", "WhiteHole", "NeutronStar", "Star", "Asteroid",
+            "Alien", "UFO", "Ghost", "GraveStone"
+        ];
+        const uniqueMobs = [...new Set([...allMobs, ...extraMobs])];
+
+        for (const mobType of uniqueMobs) {
+            if (!mobType || mobType === "SpacetimeTunnel") continue;
+
+            for (let c = 0; c < this.cols; c++) {
+                const rarity = this.getRarityByIndex(c);
+                const killCount = this.getKillCount(mobType, rarity);
+
+                this.mobs.push({
+                    type: mobType,
+                    name: mobType,
+                    rarity: rarity,
+                    count: killCount
+                });
+            }
+        }
+
+        this.mobs.sort((a, b) => {
+            if (a.name !== b.name) return a.name.localeCompare(b.name);
+            const aIdx = this.getRarityIndex(a.rarity);
+            const bIdx = this.getRarityIndex(b.rarity);
+            return aIdx - bIdx;
+        });
+    }
+
+    getRarityIndex(rarity) {
+        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        return rarities.indexOf(rarity);
+    }
+
+    getKillCount(mobType, rarity) {
+        try {
+            const stats = localStorage.getItem(`mob_kill_${mobType}_${rarity}`);
+            return stats ? parseInt(stats) : 0;
+        } catch(e) {
+            return 0;
+        }
+    }
+
+    recordKill(mobType, rarity) {
+        const key = `mob_kill_${mobType}_${rarity}`;
+        try {
+            const current = parseInt(localStorage.getItem(key)) || 0;
+            localStorage.setItem(key, current + 1);
+        } catch(e) {}
+    }
+
+    getMobStats(mobType) {
+        let health = 100;
+        let damage = 20;
+        let armor = 0;
+
+        for (const [className, enemies] of Object.entries(ENEMY_ARMOR_CLASSES || {})) {
+            if (enemies.includes(mobType)) {
+                const baseArmor = BASE_B_ARMOR?.Common || 0.4;
+                const multiplier = ARMOR_CLASS_MULTIPLIERS?.[className] || 1;
+                armor = Math.floor(baseArmor * multiplier);
+                break;
+            }
+        }
+
+        const xpConfig = ENEMY_XP_TABLE?.[mobType];
+        if (xpConfig) {
+            health = 100 + xpConfig.baseXp * 2;
+            damage = 20 + Math.floor(xpConfig.baseXp / 2);
+        }
+
+        return { health, damage, armor };
+    }
+
+    getDropItems(mobType, mobRarity) {
+        const dropItems = ENEMY_DROP_TABLE[mobType] || ["Leaf"];
+        const result = [];
+
+        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+
+        // 判断生物类型
+        const isSewerEnemy = ["ManHole", "Rat", "Roach", "PooStorm"].includes(mobType);
+        const isDigger = ["TrashDigger", "Digger", "MudDigger", "Biologist"].includes(mobType);
+        const isCancer = mobType === "Cancer" || mobType === "CancerCell";
+        const isStemCell = mobType === "StemCell";
+
+        for (const itemType of dropItems.slice(0, 6)) {
+            const dropChances = {};
+
+            // 根据物品类型和生物类型选择不同的掉落表
+            for (const rarity of rarities) {
+                let chance = 0;
+
+                // DNA 掉落
+                if (itemType === "DNA") {
+                    if (isStemCell) {
+                        const dnaRarity = getStemCellDNARarity?.(mobRarity) || "Common";
+                        chance = dnaRarity === rarity ? 100 : 0;
+                    } else if (isCancer) {
+                        const dnaRarity = getCancerDNARarity?.(mobRarity) || "Common";
+                        chance = dnaRarity === rarity ? 100 : 0;
+                    }
+                }
+                // 下水道蛋特殊掉落
+                else if (isSewerEnemy && (itemType.includes("egg") || itemType === "Sponge" ||
+                         itemType === "PooStick" || itemType === "Bubble Bomb")) {
+                    const rates = SEWEREGG_RARITY_DROP_RATES?.[mobRarity] || RARITY_DROP_RATES?.[mobRarity];
+                    chance = (rates?.[rarity] || 0) * 100;
+                }
+                // 普通掉落
+                else {
+                    const rates = RARITY_DROP_RATES?.[mobRarity];
+                    chance = (rates?.[rarity] || 0) * 100;
+                }
+
+                if (chance > 0.01) {
+                    dropChances[rarity] = chance.toFixed(2) + '%';
+                }
+            }
+
+            result.push({
+                name: itemType,
+                chances: dropChances
+            });
+        }
+
+        return result;
+    }
+
+    getMobSprite(mobType, rarity, targetSize) {
+        // 强制使用 Common 稀有度，忽略传入的 rarity
+        const forcedRarity = "Common";
+        const cacheKey = `${mobType}_${forcedRarity}_${targetSize}`;
+        if (this.spriteCache.has(cacheKey)) {
+            return this.spriteCache.get(cacheKey);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const offCtx = canvas.getContext('2d');
+        offCtx.clearRect(0, 0, targetSize, targetSize);
+
+        const drawSize = targetSize - 8;
+        const enemyObj = { rarity: forcedRarity, type: mobType, isFriendly: false };
+        const viewScale = drawSize / 80;
+
+        if (window.enemyDrawer || this.game?.enemyDrawer) {
+            const drawer = this.game?.enemyDrawer || window.enemyDrawer;
+            drawer.drawEnemy(offCtx, mobType, targetSize/2, targetSize/2, drawSize, 0, 0, 1, enemyObj, viewScale);
+        } else {
+            offCtx.fillStyle = '#666';
+            offCtx.fillRect(0, 0, targetSize, targetSize);
+            offCtx.fillStyle = 'white';
+            offCtx.font = `${Math.floor(targetSize/4)}px Arial`;
+            offCtx.textAlign = 'center';
+            offCtx.textBaseline = 'middle';
+            offCtx.fillText(mobType.substring(0, 3), targetSize/2, targetSize/2);
+        }
+
+        this.spriteCache.set(cacheKey, canvas);
+        return canvas;
+    }
+
+    getDropItemSprite(itemType, size) {
+        const cacheKey = `drop_${itemType}_${size}`;
+        if (this.dropItemCache.has(cacheKey)) {
+            return this.dropItemCache.get(cacheKey);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        const itemImg = window.imageLoader?.getImage(itemType, "Common", [size - 4, size - 4]);
+        if (itemImg) {
+            ctx.drawImage(itemImg, 2, 2, size - 4, size - 4);
+        } else {
+            ctx.fillStyle = '#666';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = 'white';
+            ctx.font = `${Math.floor(size/4)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(itemType.substring(0, 2), size/2, size/2);
+        }
+
+        this.dropItemCache.set(cacheKey, canvas);
+        return canvas;
+    }
+
+    drawRoundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    formatCount(count) {
+        if (count <= 0) return "";
+        if (count >= 1000000) return (count / 1000000).toFixed(2) + 'M';
+        if (count >= 1000) return (count / 1000).toFixed(2) + 'K';
+        return 'x' + count;
+    }
+
+    drawCountTag(ctx, x, y, count) {
+        if (count <= 0) return;
+        const text = this.formatCount(count);
+        ctx.save();
+        ctx.translate(x + this.slotSize - 5, y + 12);
+        ctx.rotate(0.15);
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'right';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.strokeText(text, 0, 0);
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+    }
+
+    drawTopUI(ctx, W) {
+        // Search box
+        ctx.fillStyle = 'white';
+        this.drawRoundedRect(ctx, 10, 15, 180, 35, 5);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#666';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('Search...', 20, 38);
+
+        // Filter dropdown
+        const dropX = W - 210;
+        ctx.fillStyle = 'white';
+        this.drawRoundedRect(ctx, dropX, 15, 120, 35, 5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('Normal', dropX + 10, 38);
+
+        // Close button
+        ctx.fillStyle = '#EB4D4B';
+        this.drawRoundedRect(ctx, W - 45, 15, 35, 35, 5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText('×', W - 27, 40);
+    }
+
+    drawScrollBar(ctx, W, H) {
+        const totalRows = Math.ceil(this.mobs.length / this.cols);
+        if (totalRows <= this.maxVisibleRows) return;
+
+        const trackX = W - 12;
+        const trackY = this.headerHeight;
+        const trackH = H - this.headerHeight - 20;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        this.drawRoundedRect(ctx, trackX, trackY, 8, trackH, 4);
+        ctx.fill();
+
+        const handleH = Math.max(30, (this.maxVisibleRows / totalRows) * trackH);
+        const handleY = trackY + (this.scrollOffset / (totalRows - this.maxVisibleRows)) * (trackH - handleH);
+        this.scrollBarRect = [trackX, handleY, 8, handleH];
+
+        ctx.fillStyle = '#888';
+        this.drawRoundedRect(ctx, trackX, handleY, 8, handleH, 4);
+        ctx.fill();
+    }
+
+    formatValue(val) {
+        if (val === undefined || val === null || isNaN(val)) return "0";
+        if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+        if (val >= 1000) return (val / 1000).toFixed(1) + 'k';
+        return val.toString();
+    }
+
+    /**
+     * 获取生物属性（包含稀有度乘数）
+     */
+    getMobStats(mobType, rarity = "Common") {
+        let health = 100;
+        let damage = 20;
+        let armor = 0;
+
+        // 获取基础属性（从 _getBaseStats）
+        let baseStats = [100, 20, 60, 10, 40]; // 默认值 [health, radius, speed, weight, damage]
+
+        // 尝试从 Enemy 类获取基础属性
+        if (typeof Enemy !== 'undefined' && Enemy.prototype._getBaseStats) {
+            const tempEnemy = new Enemy(mobType, 0, 0, 1, rarity);
+            baseStats = tempEnemy._getBaseStats(mobType);
+        } else if (this.game?.enemyDrawer?._getBaseStats) {
+            baseStats = this.game.enemyDrawer._getBaseStats(mobType);
+        }
+
+        health = baseStats[0] || 100;
+        damage = baseStats[4] || 20;
+
+        // 应用稀有度乘数
+        const rarityMultipliers = {
+            "Common": 1,
+            "Unusual": 3.75,
+            "Rare": 13.5,
+            "Epic": 54,
+            "Legendary": 405,
+            "Mythic": 2430,
+            "Ultra": 4452,
+            "Super": 20574,
+            "Omega": 82510,
+            "Eternal": 129830
+        };
+        const healthMultiplier = rarityMultipliers[rarity] || 1;
+        health = Math.floor(health * healthMultiplier);
+
+        // 攻击力乘数
+        const damageMultipliers = {
+            "Common": 1.0,
+            "Unusual": 3.0,
+            "Rare": 9.0,
+            "Epic": 27.0,
+            "Legendary": 81.0,
+            "Mythic": 243.0,
+            "Ultra": 729.0,
+            "Super": 2187.0,
+            "Omega": 7561.0,
+            "Eternal": 19683.0
+        };
+        const damageMultiplier = damageMultipliers[rarity] || 1;
+        damage = Math.floor(damage * damageMultiplier);
+
+        // 获取护甲
+        for (const [className, enemies] of Object.entries(ENEMY_ARMOR_CLASSES || {})) {
+            if (enemies.includes(mobType)) {
+                const baseArmor = BASE_B_ARMOR?.[rarity] || BASE_B_ARMOR?.Common || 0.4;
+                const multiplier = ARMOR_CLASS_MULTIPLIERS?.[className] || 1;
+                armor = Math.floor(baseArmor * multiplier);
+                break;
+            }
+        }
+
+        return { health, damage, armor };
+    }
+    drawTooltip(ctx) {
+        if (!this.hoveredMob) return;
+
+        const mob = this.hoveredMob;
+
+
+        const stats = this.getMobStats(mob.type, mob.rarity);
+        const drops = this.getDropItems(mob.type, mob.rarity);  // 传入 mob.rarity
+        // 布局常量
+        const tooltipWidth = 260;
+        const padding = 15;
+        const dropItemHeight = 48;
+        const headerHeight = 90;
+        const statsHeight = 80;
+        const tooltipHeight = headerHeight + statsHeight + (drops.length * dropItemHeight) + 10;
+
+        // 坐标计算
+        let tx = this.mouseX + 20;
+        let ty = this.mouseY + 20;
+        if (tx + tooltipWidth > ctx.canvas.width) tx = this.mouseX - tooltipWidth - 20;
+        if (ty + tooltipHeight > ctx.canvas.height) ty = this.mouseY - tooltipHeight - 20;
+
+        ctx.save();
+
+        // 1. 背景
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.fillStyle = 'rgba(15, 15, 25, 0.92)';
+        this.drawRoundedRect(ctx, tx, ty, tooltipWidth, tooltipHeight, 12);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // 2. 生物名称
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#ff4d4d';
+        ctx.fillText(mob.name || mob.type, tx + padding, ty + padding);
+
+        // 3. 描述文字
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#ffffff';
+        const descText = `There are some ${mob.type.toLowerCase()}s inside of it.`;
+        ctx.fillText(descText, tx + padding, ty + padding + 32, tooltipWidth - (padding * 2));
+
+        // 4. 三围属性
+        const sy = ty + headerHeight;
+        ctx.font = 'bold 17px Arial';
+
+        ctx.fillStyle = '#ff5e5e';
+        ctx.fillText(`Health: ${this.formatValue(stats.health)}`, tx + padding, sy);
+
+        ctx.fillStyle = '#54a0ff';
+        ctx.fillText(`Damage: ${this.formatValue(stats.damage)}`, tx + padding, sy + 25);
+
+        ctx.fillStyle = '#ff9f43';
+        ctx.fillText(`Armor: ${this.formatValue(stats.armor)}`, tx + padding, sy + 50);
+
+        // 5. 掉落物列表
+        // 5. 掉落物列表
+        let dy = sy + 75;
+        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+
+        for (const drop of drops) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            this.drawRoundedRect(ctx, tx + padding, dy, tooltipWidth - (padding * 2), 55, 8);
+            ctx.fill();
+
+            // 物品图标
+            const dropIcon = this.getDropItemSprite(drop.name, 28);
+            if (dropIcon) {
+                ctx.drawImage(dropIcon, tx + padding + 8, dy + 13, 28, 28);
+            } else {
+                ctx.fillStyle = '#555';
+                ctx.beginPath();
+                ctx.arc(tx + padding + 22, dy + 27, 14, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 物品名称
+            ctx.fillStyle = '#ddd';
+            ctx.font = 'bold 9px Arial';
+            ctx.textAlign = 'center';
+            let shortName = drop.name.length > 8 ? drop.name.substring(0, 6) + '..' : drop.name;
+            ctx.fillText(shortName, tx + padding + 22, dy + 50);
+
+            // 显示掉落概率（横向排列）
+            let chanceX = tx + padding + 55;
+            let shown = 0;
+            for (const rarity of rarities) {
+                const chance = drop.chances[rarity];
+                if (chance && shown < 5) {
+                    const rarityColor = RARITY_COLORS[rarity] || [255, 255, 255];
+                    ctx.fillStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
+                    ctx.font = '9px Arial';
+                    ctx.textAlign = 'left';
+                    // 显示缩写和概率
+                    let shortRarity = rarity.substring(0, 2);
+                    if (rarity === "Legendary") shortRarity = "Leg";
+                    if (rarity === "Mythic") shortRarity = "Myt";
+                    if (rarity === "Eternal") shortRarity = "Ete";
+                    ctx.fillText(`${shortRarity}:${chance}`, chanceX, dy + 18);
+                    chanceX += 48;
+                    shown++;
+                }
+            }
+
+            dy += 60;
+        }
+
+        ctx.restore();
+    }
+
+    draw(ctx) {
+        if (!this.visible) return;
+
+        const W = ctx.canvas.width;
+        const H = ctx.canvas.height;
+
+        ctx.fillStyle = '#E6E281';
+        ctx.fillRect(0, 0, W, H);
+
+        this.drawTopUI(ctx, W);
+
+        ctx.save();
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const titleX = W / 2;
+        const titleY = 35;
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 5;
+        ctx.strokeText('Mob Gallery', titleX, titleY);
+        ctx.fillStyle = 'white';
+        ctx.fillText('Mob Gallery', titleX, titleY);
+        ctx.restore();
+
+        const gridStartX = this.padding;
+        const gridStartY = this.headerHeight;
+
+        for (let r = 0; r < this.maxVisibleRows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                const index = (this.scrollOffset + r) * this.cols + c;
+                const mob = this.mobs[index];
+
+                const x = gridStartX + c * (this.slotSize + this.slotMargin);
+                const y = gridStartY + r * (this.slotSize + this.slotMargin);
+
+                ctx.fillStyle = '#D1CC6B';
+                this.drawRoundedRect(ctx, x, y, this.slotSize, this.slotSize, 10);
+                ctx.fill();
+
+                if (mob && mob.count > 0) {
+                    ctx.fillStyle = this.columnColors[c % this.columnColors.length];
+                    this.drawRoundedRect(ctx, x, y, this.slotSize, this.slotSize, 10);
+                    ctx.fill();
+
+                    const sprite = this.getMobSprite(mob.type, mob.rarity, this.slotSize - 15);
+                    if (sprite) {
+                        ctx.drawImage(sprite, x + 7.5, y + 10, this.slotSize - 15, this.slotSize - 15);
+                    }
+
+                    this.drawCountTag(ctx, x, y, mob.count);
+                }
+            }
+        }
+
+        this.drawScrollBar(ctx, W, H);
+
+        if (this.hoveredMob && !this.draggingScrollBar) {
+            this.drawTooltip(ctx);
+        }
+    }
+
+    handleClick(x, y) {
+        if (!this.visible) return false;
+        const W = this.game?.screen?.width || window.innerWidth || 800;
+
+        if (Math.hypot(x - (W - 27), y - 32) < 20) {
+            this.visible = false;
+            return true;
+        }
+
+        if (this.scrollBarRect) {
+            const [sx, sy, sw, sh] = this.scrollBarRect;
+            if (x >= sx && x <= sx + sw && y >= sy && y <= sy + sh) {
+                this.draggingScrollBar = true;
+                this.scrollBarDragStartY = y;
+                this.scrollOffsetAtDragStart = this.scrollOffset;
+                return true;
+            }
+        }
+        return true;
+    }
+
+    handleMouseMove(x, y) {
+        this.mouseX = x;
+        this.mouseY = y;
+
+        if (!this.visible) return;
+
+        // 处理滚动条拖拽
+        if (this.draggingScrollBar && this.scrollBarRect) {
+            const dragDelta = y - this.scrollBarDragStartY;
+            const trackTop = this.headerHeight;
+            const trackBottom = this.game?.screen?.height || 800;
+            const scrollBarHeight = this.scrollBarRect[3];
+            const maxDrag = (trackBottom - trackTop) - scrollBarHeight;
+            if (maxDrag > 0) {
+                const totalRows = Math.ceil(this.mobs.length / this.cols);
+                const maxOffset = totalRows - this.maxVisibleRows;
+                const offsetChange = (dragDelta / maxDrag) * maxOffset;
+                this.scrollOffset = Math.max(0, Math.min(maxOffset,
+                    Math.round(this.scrollOffsetAtDragStart + offsetChange)));
+                this.forceRedraw();
+            }
+            return;
+        }
+
+        // ========== 🆕 检测鼠标悬停在哪个格子上 ==========
+        const gridStartX = this.padding;
+        const gridStartY = this.headerHeight;
+
+        let foundMob = null;
+        for (let r = 0; r < this.maxVisibleRows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                const index = (this.scrollOffset + r) * this.cols + c;
+                const mob = this.mobs[index];
+
+                const slotX = gridStartX + c * (this.slotSize + this.slotMargin);
+                const slotY = gridStartY + r * (this.slotSize + this.slotMargin);
+
+                if (x >= slotX && x <= slotX + this.slotSize &&
+                    y >= slotY && y <= slotY + this.slotSize &&
+                    mob && mob.count > 0) {
+                    foundMob = mob;
+                    break;
+                }
+            }
+            if (foundMob) break;
+        }
+
+        this.hoveredMob = foundMob;
+        this.forceRedraw();
+    }
+
+    handleMouseUp() {
+        this.draggingScrollBar = false;
+    }
+
+    handleWheel(deltaY) {
+        if (!this.visible) return;
+        const totalRows = Math.ceil(this.mobs.length / this.cols);
+        const maxOffset = Math.max(0, totalRows - this.maxVisibleRows);
+        if (deltaY > 0) {
+            this.scrollOffset = Math.min(maxOffset, this.scrollOffset + 1);
+        } else {
+            this.scrollOffset = Math.max(0, this.scrollOffset - 1);
+        }
+        this.forceRedraw();
+    }
+
+    forceRedraw() {
+        if (!this.visible) return;
+        const canvas = this.game?.screen;
+        if (canvas && canvas.getContext) {
+            this.draw(canvas.getContext('2d'));
+        }
+    }
+
+    open() {
+        this.visible = true;
+        this.scrollOffset = 0;
+        this.draggingScrollBar = false;
+        this.hoveredMob = null;
+        this.forceRedraw();
+    }
+
+    close() {
+        this.visible = false;
+        this.draggingScrollBar = false;
+        if (this.game?.mainMenu && this.game.screen) {
+            this.game.mainMenu.draw(this.game.screen.getContext('2d'));
+        }
+    }
+}
 // ==================== 账号系统 ====================
 class AccountSystem {
     constructor() {
@@ -3715,7 +4677,7 @@ class BlockManager {
                 ['F', 'F', 'F', 'F', 'E', 'E', 'F', 'E', 'F', 'E', 'F', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'],
                 ['F', 'F', 'F', 'F', 'F', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F']
             ],
-                        "Random":[
+            "Random":[
                 ['D', 'C', 'C', 'D', 'D', 'D', 'C', 'C', 'B', 'B', 'B', 'B', 'C', 'C', 'D', 'D', 'C', 'D', 'C', 'D'],
                 ['D', 'D', 'C', 'C', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'B', 'B', 'C', 'B', 'D', 'C', 'D', 'D', 'C'],
                 ['D', 'D', 'D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'C', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'C', 'D'],
@@ -3737,6 +4699,28 @@ class BlockManager {
                 ['F', 'F', 'F', 'F', 'E', 'E', 'F', 'E', 'F', 'E', 'F', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'],
                 ['F', 'F', 'F', 'F', 'F', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F']
             ],
+        "Void": [
+            ['F', 'F', 'E', 'E', 'D', 'D', 'C', 'C', 'B', 'B', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F', 'F'],
+            ['F', 'E', 'E', 'D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F'],
+            ['E', 'E', 'D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E'],
+            ['E', 'D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E'],
+            ['D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'],
+            ['D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D'],
+            ['C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C'],
+            ['C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C'],
+            ['B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B'],
+            ['B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B'],
+            ['B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B'],
+            ['C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C'],
+            ['C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C'],
+            ['D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D'],
+            ['D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'],
+            ['E', 'D', 'D', 'C', 'C', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E'],
+            ['E', 'E', 'D', 'D', 'C', 'C', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E'],
+            ['F', 'E', 'E', 'D', 'D', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'D', 'D', 'E', 'E', 'F'],
+            ['F', 'F', 'E', 'E', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'E', 'E', 'F', 'F', 'F', 'F'],
+            ['F', 'F', 'F', 'F', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'F', 'F', 'F']
+        ],
         };
 
         return distributions[biome] || distributions["Plain"];
@@ -4196,6 +5180,9 @@ class Vector2 {
         if (index === 0) return this.x;
         if (index === 1) return this.y;
         throw new Error("Vector2 index out of range");
+    }
+    clone() {
+        return new Vector2(this.x, this.y);
     }
 }
 
@@ -6002,7 +6989,30 @@ class Item {
         }
         return this.isBroken;
     }
+    getOpalCritMultiplier() {
+        if (this.type !== "Opal") return 1;
 
+        if (this.isBroken) {
+            // 破碎时暴击倍率 2.7 倍
+            return 2.7;
+        } else {
+            // 正常时根据稀有度 1.1 - 2.0 倍
+            const rarityMultiplier = RARITY_MULTIPLIERS[this.rarity] || 1;
+            return 1.1 + Math.log(rarityMultiplier) * 0.15;
+        }
+    }
+
+// 在 Petal 类的 attack 方法中应用暴击
+    applyOpalCrit(damage, item) {
+        if (item.type !== "Opal") return damage;
+
+        const critChance = 0.3; // 30%基础暴击率
+        if (Math.random() < critChance) {
+            const critMultiplier = item.getOpalCritMultiplier();
+            return damage * critMultiplier;
+        }
+        return damage;
+    }
     // 修复物品
     repair(amount = null) {
         if (amount === null) {
@@ -6570,14 +7580,19 @@ class QuickSlot {
         }
         return null;
     }
-    // ✅ 交换单个槽位（备用）
+    // 在 QuickSlot 类中
     swapSlot(slotIndex) {
         if (slotIndex < 0 || slotIndex >= this.slots.length) return;
+
+        // 交换主栏和副栏
         const temp = this.slots[slotIndex];
         this.slots[slotIndex] = this.secondarySlots[slotIndex];
         this.secondarySlots[slotIndex] = temp;
+
+        // 更新花瓣
         this.updatePetalFromSlot(slotIndex);
-        console.log(`🔄 交换槽位 ${slotIndex} 主副栏`);
+
+        console.log(`🔄 交换槽位 ${slotIndex}: 主栏->副栏, 副栏->主栏`);
     }
 
 // 在 QuickSlot 类中修改 addItem 方法
@@ -7280,7 +8295,7 @@ class Inventory {
         this.draggingScrollButton = false;
         this.scrollButtonDragStartY = 0;
         this.scrollOffsetAtButtonDragStart = 0;
-
+        this.contractMode = false;    // 🆕 收缩模式（Shift）
         // ✅ 强制使用全局变量 (确保与文件顶部定义一致)
         this.RARITY_ORDER = window.RARITY_ORDER || RARITY_ORDER;
         this.RARITY_PRIORITY = window.RARITY_PRIORITY || RARITY_PRIORITY;
@@ -7460,7 +8475,7 @@ class Inventory {
             return [-1, null];
         }
 
-        // 2. ✅ 获取排序后的列表 (必须调用这个，保证和绘制顺序一致)
+        // 2. 获取排序后的列表
         const sortedItems = this.getSortedItems();
 
         // 3. 计算当前可见的物品切片
@@ -7488,11 +8503,13 @@ class Inventory {
         ) {
             const item = visibleItems[clickedIndex];
 
-            // ✅ 在原始未排序数组中查找该物品的索引 (用于移除或操作)
+            if (!item) return [-1, null];
+
+            // 在原始未排序数组中查找该物品的索引
             const originalIndex = this.items.findIndex(orig => orig === item);
 
-            // 调试日志 (确认点击的是否是 Eternal)
-            // console.log(`点击检测: 视觉物品=${item.type}(${item.rarity}), 原始索引=${originalIndex}`);
+            // 调试日志
+            console.log(`[背包点击] 视觉索引=${clickedIndex}, 物品=${item.type}(${item.rarity}), 原始索引=${originalIndex}`);
 
             return [originalIndex, item];
         }
@@ -7712,14 +8729,16 @@ class Inventory {
         this.scrollButtonRect[3] = buttonHeight;
     }
 
-    // 在 Inventory 类中修改 addItemToQuickSlot 方法
     addItemToQuickSlot(item, itemIndex) {
         const quickSlot = this.quickSlot;
         const items = this.items;
 
         if (!quickSlot) return false;
 
-        // ===== 1. 先尝试放入主栏空槽 =====
+        // 调试日志
+        console.log(`[添加到快捷栏] 物品=${item.type}(${item.rarity}), 索引=${itemIndex}, 数量=${item.count}`);
+
+        // 1. 先尝试放入主栏空槽
         for (let i = 0; i < quickSlot.slots.length; i++) {
             if (!quickSlot.slots[i]) {
                 if (items[itemIndex].count > 1) {
@@ -7745,7 +8764,7 @@ class Inventory {
             }
         }
 
-        // ===== 3. 主栏满后，尝试放入副栏空槽 =====
+        // 2. 主栏满后，尝试放入副栏空槽
         if (quickSlot.secondarySlots) {
             for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
                 if (!quickSlot.secondarySlots[i]) {
@@ -7766,43 +8785,13 @@ class Inventory {
                         quickSlot.secondarySlots[i] = movedItem;
                     }
                     this.cacheDirty = true;
-                    return true;
-                }
-            }
-
-            // ===== 4. 副栏满时，尝试放入可堆叠的副栏槽位 =====
-            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
-                const slotItem = quickSlot.secondarySlots[i];
-                if (slotItem && slotItem.canStackWith && slotItem.canStackWith(item)) {
-                    if (items[itemIndex].count > 1) {
-                        items[itemIndex].count--;
-                    } else {
-                        items.splice(itemIndex, 1);
-                    }
-                    slotItem.count++;
-                    this.cacheDirty = true;
+                    console.log(`✅ 物品放入副栏槽位 ${i}`);
                     return true;
                 }
             }
         }
 
-        // ===== 2. 主栏满时，尝试放入可堆叠的主栏槽位 =====
-        for (let i = 0; i < quickSlot.slots.length; i++) {
-            const slotItem = quickSlot.slots[i];
-            if (slotItem && slotItem.canStackWith && slotItem.canStackWith(item)) {
-                if (items[itemIndex].count > 1) {
-                    items[itemIndex].count--;
-                } else {
-                    items.splice(itemIndex, 1);
-                }
-                slotItem.count++;
-                quickSlot.updatePetalFromSlot(i);
-                this.cacheDirty = true;
-                console.log(`✅ 物品堆叠到主栏槽位 ${i}`);
-                return true;
-            }
-        }
-
+        console.log(`❌ 无法添加物品，所有槽位已满`);
         return false;
     }
 
@@ -15003,8 +15992,8 @@ class EnemyDrawer {
         const rarityIndex = RARITY_LIST.indexOf(rarity);
 
         // 稀有度缩放因子
-        const rarityScale = 1 + rarityIndex * 0.8;
-        const totalScale = viewScale * rarityScale * 0.4;
+        const rarityScale = 1 * rarityIndex;
+        const totalScale = viewScale * rarityScale ;
 
         // 稀有度描边乘数
         const STROKE_MULTIPLIERS = {
@@ -15907,67 +16896,85 @@ class EnemyDrawer {
         context.drawImage(canvas, x - Math.floor(scaledSize / 2), y - Math.floor(scaledSize / 2));
     }
 
-    // ==================== 干细胞 ====================
     drawStemCell(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
-
         const OUTER_CELL_COLOR = isFriendly ? [200, 160, 0] : [15, 94, 86];
         const MEMBRANE_COLOR = isFriendly ? [255, 215, 0] : [0, 64, 58];
         const INNER_MEMBRANE_COLOR = isFriendly ? [255, 215, 0] : [30, 80, 180];
         const NUCLEUS_COLOR = isFriendly ? [255, 255, 0] : [15, 151, 137];
-
         const MAIN_PULSE_FREQ = 2.0 * Math.PI / 3.0;
-        const baseRadius = Math.floor(scaledSize / 2);
-        const numPoints = 80;
+        const baseRadius = scaledSize / 2;
+        const numPoints = 60; // 圆润形状不需要过密点，60个配合贝塞尔曲线效果最佳
 
-        const outerMembranePoints = [];
-        const innerMembranePoints = [];
-        const nucleusPoints = [];
-
+        // 1. 预计算所有半径比例，确保内外层同步
+        const radiusMultipliers = [];
         for (let i = 0; i < numPoints; i++) {
             const angle = (i * 2 * Math.PI) / numPoints;
-            const bump1 = 0.05 * Math.sin(6 * angle + animationTimer * 1.2);
-            const bump2 = 0.04 * Math.sin(11 * angle - animationTimer * 4.5);
-            const bump3 = 0.03 * Math.sin(7 * angle + animationTimer * 0.7);
-            const bump4 = 0.07 * Math.sin(13 * angle + animationTimer * 2.4);
-            const irregularBump = bump1 + bump2 + bump3 + bump4;
-            const mainPulse = 0.08 * Math.sin(animationTimer * MAIN_PULSE_FREQ);
 
-            const outerTotalRadius = baseRadius * (1 + irregularBump + mainPulse);
-            const px = x + outerTotalRadius * Math.cos(angle);
-            const py = y + outerTotalRadius * Math.sin(angle);
-            outerMembranePoints.push([px, py]);
+            // 降低了高频抖动的幅度，使其更圆润
+            const bump1 = 0.04 * Math.sin(6 * angle + animationTimer * 1.2);
+            const bump2 = 0.03 * Math.sin(11 * angle - animationTimer * 2.5); // 降低了速度和频率
+            const bump3 = 0.015 * Math.sin(4 * angle + animationTimer * 0.7); // 增加一个低频波
 
-            const innerTotalRadius = outerTotalRadius * 0.92;
-            const pxInner = x + innerTotalRadius * Math.cos(angle);
-            const pyInner = y + innerTotalRadius * Math.sin(angle);
-            innerMembranePoints.push([pxInner, pyInner]);
+            const irregularBump = bump1 + bump2 + bump3;
+            const mainPulse = 0.05 * Math.sin(animationTimer * MAIN_PULSE_FREQ);
 
-            const nucleusRadius = outerTotalRadius * 0.4;
-            const pxNucleus = x + nucleusRadius * Math.cos(angle);
-            const pyNucleus = y + nucleusRadius * Math.sin(angle);
-            nucleusPoints.push([pxNucleus, pyNucleus]);
+            radiusMultipliers.push(1 + irregularBump + mainPulse);
         }
 
-        if (outerMembranePoints.length >= 3) {
-            this.drawPolygon(context, outerMembranePoints, OUTER_CELL_COLOR);
-        }
+        // 2. 定义平滑绘制闭合路径的辅助函数
+        const drawSmoothPath = (ctx, radiusFactor) => {
+            const points = [];
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i * 2 * Math.PI) / numPoints;
+                const r = baseRadius * radiusMultipliers[i] * radiusFactor;
+                points.push({ x: x + r * Math.cos(angle), y: y + r * Math.sin(angle) });
+            }
 
+            ctx.beginPath();
+            // 移动到第一个点和最后一个点的中点
+            const lastPoint = points[points.length - 1];
+            const firstPoint = points[0];
+            ctx.moveTo((lastPoint.x + firstPoint.x) / 2, (lastPoint.y + firstPoint.y) / 2);
+
+            // 使用二次贝塞尔曲线连接点
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i];
+                const nextP = points[(i + 1) % points.length];
+                const xc = (p.x + nextP.x) / 2;
+                const yc = (p.y + nextP.y) / 2;
+                ctx.quadraticCurveTo(p.x, p.y, xc, yc);
+            }
+            ctx.closePath();
+        };
+
+        // --- 开始绘制 ---
+
+        // 绘制最外层填充
+        drawSmoothPath(context, 1.0);
+        context.fillStyle = `rgb(${OUTER_CELL_COLOR.join(',')})`;
+        context.fill();
+
+        // 绘制外膜线条
         const thicknessPulse = 1 + 0.2 * Math.sin(animationTimer * MAIN_PULSE_FREQ);
-        const lineThickness = Math.max(1, Math.floor(2 * thicknessPulse));
-        this.drawPolygon(context, outerMembranePoints, null, MEMBRANE_COLOR, lineThickness);
+        context.lineWidth = Math.max(1, 2 * thicknessPulse);
+        context.strokeStyle = `rgb(${MEMBRANE_COLOR.join(',')})`;
+        context.stroke();
 
-        const lineThicknessInner = Math.max(1, Math.floor(1.5 * thicknessPulse));
-        this.drawPolygon(context, innerMembranePoints, null, INNER_MEMBRANE_COLOR, lineThicknessInner);
+        // 绘制内膜线条
+        drawSmoothPath(context, 0.92);
+        context.lineWidth = Math.max(1, 1.5 * thicknessPulse);
+        context.strokeStyle = `rgb(${INNER_MEMBRANE_COLOR.join(',')})`;
+        context.stroke();
 
-        if (nucleusPoints.length >= 3) {
-            this.drawPolygon(context, nucleusPoints, NUCLEUS_COLOR);
-        }
+        // 绘制核心填充
+        drawSmoothPath(context, 0.4);
+        context.fillStyle = `rgb(${NUCLEUS_COLOR.join(',')})`;
+        context.fill();
     }
-
     drawCancer(ctx, x, y, size, animationTimer, enemyObj = null) {
         const baseSize = size / 2;
         const time = animationTimer;
@@ -17817,6 +18824,813 @@ class EnemyDrawer {
         context.restore(); // 恢复倾斜
         context.restore(); // 恢复整体
     }
+    // ==================== UFO 绘制 ====================
+    drawUFO(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly === true;
+
+        // 颜色定义（友方金色，敌方灰蓝色）
+        let underbellyColor, diskRimColor, diskFaceColor, domeColor, domeStrokeColor, lightColor, lightStrokeColor;
+
+        if (isFriendly) {
+            underbellyColor = '#c8a030';
+            diskRimColor = '#d4a840';
+            diskFaceColor = '#e8c060';
+            domeColor = '#ffd700';
+            domeStrokeColor = '#cc9900';
+            lightColor = '#ffaa00';
+            lightStrokeColor = '#cc8800';
+        } else {
+            underbellyColor = '#2e3140';
+            diskRimColor = '#3d4255';
+            diskFaceColor = '#6e7385';
+            domeColor = '#29b3cc';
+            domeStrokeColor = '#1a8fa8';
+            lightColor = '#f0b429';
+            lightStrokeColor = '#b8820a';
+        }
+
+        // 计算缩放比例
+        const scale = scaledSize / 220;
+        const cx = x;
+        const cy = y;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(scale, scale);
+
+        // 1. 底部腹板 (Bottom underbelly)
+        ctx.beginPath();
+        ctx.ellipse(0, 35, 70, 22, 0, 0, Math.PI * 2);
+        ctx.fillStyle = underbellyColor;
+        ctx.fill();
+        ctx.strokeStyle = '#1e2030';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // 2. 主盘边缘 (Main disk rim)
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 126, 36, 0, 0, Math.PI * 2);
+        ctx.fillStyle = diskRimColor;
+        ctx.fill();
+        ctx.strokeStyle = '#2a2d3e';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 3. 主盘面 (Main disk face)
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 116, 29, 0, 0, Math.PI * 2);
+        ctx.fillStyle = diskFaceColor;
+        ctx.fill();
+        ctx.strokeStyle = '#3d4255';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 4. 蓝色穹顶 (Blue dome)
+        ctx.beginPath();
+        ctx.moveTo(-74, 0);
+        ctx.quadraticCurveTo(-74, -65, 0, -70);
+        ctx.quadraticCurveTo(74, -65, 74, 0);
+        ctx.quadraticCurveTo(48, 10, 0, 13);
+        ctx.quadraticCurveTo(-48, 10, -74, 0);
+        ctx.closePath();
+        ctx.fillStyle = domeColor;
+        ctx.fill();
+        ctx.strokeStyle = domeStrokeColor;
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // 5. 四个灯光 (Lights)
+        const lights = [
+            [-78, 2],
+            [78, 2],
+            [-34, 12],
+            [34, 12],
+        ];
+
+        for (const [lx, ly] of lights) {
+            ctx.beginPath();
+            ctx.arc(lx, ly, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = lightColor;
+            ctx.fill();
+            ctx.strokeStyle = lightStrokeColor;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+    drawBlackHole(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        const raritySizeFactors = {
+            "Common":1.0,"Unusual":1.1,"Rare":1.1,"Epic":1.1,
+            "Legendary":1.1,"Mythic":1.1,"Ultra":1.1,"Super":1.2,"Omega":1.3
+        };
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (scaledSize / 200) * rarityFactor;
+
+        // 你HTML里的原始参数（基于 ox=50, oy=-100 的坐标系）
+        const ox = 50, oy = -100;
+        const e1 = { cx: ox + 300-150 + 25, cy: oy + 350-30 + 85, rx: 30, ry: 80 };
+        const e2 = { cx: ox + 330-150 + 25, cy: oy + 390-30 + 45, rx: 20, ry: 30 };
+
+        // 图形中心（用于 translate 对齐）
+        const originX = (e1.cx + e2.cx) / 2;
+        const originY = (e1.cy + e2.cy) / 2;
+
+        context.save();
+        context.translate(x, y);
+        context.scale(scale, scale);
+        // 把原始坐标系的图形中心对齐到原点
+        context.translate(-originX, -originY);
+
+        // ── 你HTML里的 drawOutline 函数 ──
+        function drawOutline(s1, s2) {
+            const k = 0.56;
+            const smoothness = 0.9;
+
+            context.beginPath();
+            context.moveTo(s1.cx - s1.rx, s1.cy);
+
+            context.bezierCurveTo(
+                s1.cx - s1.rx, s1.cy - s1.ry * k + 10,
+                s1.cx - s1.rx * k, s1.cy - s1.ry - 10,
+                s1.cx, s1.cy - s1.ry + 10
+            );
+            context.bezierCurveTo(
+                s1.cx + s1.rx * k * smoothness - 10, s1.cy - s1.ry + 20,
+                s2.cx - s2.rx * k * smoothness - 10, s2.cy - s2.ry - 20,
+                s2.cx, s2.cy - s2.ry - 10
+            );
+            context.bezierCurveTo(
+                s2.cx + s2.rx * k, s2.cy - s2.ry,
+                s2.cx + s2.rx, s2.cy - s2.ry * k,
+                s2.cx + s2.rx, s2.cy
+            );
+            context.bezierCurveTo(
+                s2.cx + s2.rx, s2.cy + s2.ry * k,
+                s2.cx + s2.rx * k, s2.cy + s2.ry,
+                s2.cx, s2.cy + s2.ry + 10
+            );
+            context.bezierCurveTo(
+                s2.cx - s2.rx * k * smoothness - 10, s2.cy + s2.ry + 20,
+                s1.cx + s1.rx * k * smoothness - 10, s1.cy + s1.ry - 20,
+                s1.cx - 10, s1.cy + s1.ry - 10
+            );
+            context.bezierCurveTo(
+                s1.cx - s1.rx * k, s1.cy + s1.ry,
+                s1.cx - s1.rx, s1.cy + s1.ry * k,
+                s1.cx - s1.rx, s1.cy
+            );
+            context.closePath();
+        }
+
+        // ── 你HTML里的四层吸积盘 ──
+        const scales = [
+            { s1:{rx:1.5,ry:1.5}, s2:{rx:1.4,ry:1.4}, color:'rgb(153,0,153)' },
+            { s1:{rx:1.3,ry:1.3}, s2:{rx:1.2,ry:1.1}, color:'rgb(196,72,0)'  },
+            { s1:{rx:1.1,ry:1.1}, s2:{rx:0.8,ry:0.9}, color:'rgba(255,255,0,1)' },
+            { s1:{rx:0.8,ry:0.9}, s2:{rx:0.7,ry:0.7}, color:'#FFFFFF' },
+        ];
+
+        for (const sc of scales) {
+            drawOutline(
+                { cx:e1.cx, cy:e1.cy, rx:e1.rx*sc.s1.rx, ry:e1.ry*sc.s1.ry },
+                { cx:e2.cx, cy:e2.cy, rx:e2.rx*sc.s2.rx, ry:e2.ry*sc.s2.ry }
+            );
+            context.fillStyle = sc.color;
+            context.fill();
+        }
+
+        // ── 你HTML里的黑洞核心 ──
+        const centerX = (e1.cx + e2.cx - 10) / 2;
+        const centerY = (e1.cy + e2.cy) / 2;
+
+        context.save();
+        context.translate(centerX, centerY);
+
+        const R = 40;
+
+        // 填充闭合形状
+        context.beginPath();
+        context.moveTo(0, -R);
+        context.arc(0, 0, R, -Math.PI / 2, Math.PI / 2, false);
+        context.bezierCurveTo(-20, 20, -20, -20, 0, -R - 5);
+        context.closePath();
+        context.fillStyle = '#000000';
+        context.fill();
+
+        // 只描边圆弧
+        context.beginPath();
+        context.arc(0, 0, R, -Math.PI / 2, Math.PI / 2, false);
+        context.strokeStyle = '#660066';
+        context.lineWidth = 8;
+        context.stroke();
+
+
+        context.restore();
+        context.restore();
+    }
+    drawWhiteHole(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        const raritySizeFactors = {
+            "Common":1.0,"Unusual":1.1,"Rare":1.1,"Epic":1.1,
+            "Legendary":1.1,"Mythic":1.1,"Ultra":1.1,"Super":1.2,"Omega":1.3
+        };
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (scaledSize / 200) * rarityFactor;
+
+        const ox = 50, oy = -100;
+        const e1 = { cx: ox + 300-150 + 25, cy: oy + 350-30 + 85, rx: 30, ry: 80 };
+        const e2 = { cx: ox + 330-150 + 25, cy: oy + 390-30 + 45, rx: 20, ry: 30 };
+
+        const originX = (e1.cx + e2.cx) / 2;
+        const originY = (e1.cy + e2.cy) / 2;
+
+        context.save();
+        context.translate(x, y);
+        context.scale(scale, scale);
+        context.translate(-originX, -originY);
+
+        function drawOutline(s1, s2) {
+            const k = 0.56;
+            const smoothness = 0.9;
+            const l1 = s1.cx - s1.rx, t1 = s1.cy - s1.ry;
+            const l2 = s2.cx - s2.rx, t2 = s2.cy - s2.ry;
+            const r2 = s2.cx + s2.rx, b2 = s2.cy + s2.ry;
+            const b1 = s1.cy + s1.ry;
+
+            context.beginPath();
+            context.moveTo(l1, s1.cy);
+            context.bezierCurveTo(l1, s1.cy - s1.ry * k + 10, s1.cx - s1.rx * k, t1 - 10, s1.cx, t1 + 10);
+            context.bezierCurveTo(
+                s1.cx + s1.rx * k * smoothness - 10, t1 + 20,
+                s2.cx - s2.rx * k * smoothness - 10, t2 - 20,
+                s2.cx, t2 - 10
+            );
+            context.bezierCurveTo(s2.cx + s2.rx * k, t2, r2, s2.cy - s2.ry * k, r2, s2.cy);
+            context.bezierCurveTo(r2, s2.cy + s2.ry * k, s2.cx + s2.rx * k, b2, s2.cx, b2 + 10);
+            context.bezierCurveTo(
+                s2.cx - s2.rx * k * smoothness - 10, b2 + 20,
+                s1.cx + s1.rx * k * smoothness - 10, b1 - 20,
+                s1.cx - 10, b1 - 10
+            );
+            context.bezierCurveTo(s1.cx - s1.rx * k, b1, l1, s1.cy + s1.ry * k, l1, s1.cy);
+            context.closePath();
+        }
+
+        // ── 吸积盘（白洞：蓝色调）──
+        const scales = [
+            { s1:{rx:1.5,ry:1.5}, s2:{rx:1.4,ry:1.4}, color:'rgb(0,5,230)'     },
+            { s1:{rx:1.3,ry:1.3}, s2:{rx:1.2,ry:1.1}, color:'rgb(0,120,230)'   },
+            { s1:{rx:1.1,ry:1.1}, s2:{rx:0.8,ry:0.9}, color:'rgba(0,255,255,1)' },
+            { s1:{rx:0.8,ry:0.9}, s2:{rx:0.7,ry:0.7}, color:'#FFFFFF'           },
+        ];
+
+        for (const sc of scales) {
+            drawOutline(
+                { cx:e1.cx, cy:e1.cy, rx:e1.rx*sc.s1.rx, ry:e1.ry*sc.s1.ry },
+                { cx:e2.cx, cy:e2.cy, rx:e2.rx*sc.s2.rx, ry:e2.ry*sc.s2.ry }
+            );
+            context.fillStyle = sc.color;
+            context.fill();
+        }
+
+        // ── 白洞核心 ──
+        const centerX = (e1.cx + e2.cx - 10) / 2;
+        const centerY = (e1.cy + e2.cy) / 2;
+
+        context.save();
+        context.translate(centerX, centerY);
+
+        const R = 40;
+
+        // 银白色闭合形状
+        context.beginPath();
+        context.moveTo(0, -R);
+        context.arc(0, 0, R, -Math.PI / 3, Math.PI / 2, false);
+        context.bezierCurveTo(-20, 20, -20, -20, 0, -R - 5);
+        context.closePath();
+        context.fillStyle = '#c0c0c0';
+        context.fill();
+
+        // 描边圆弧
+        context.beginPath();
+        context.arc(0, 0, R, -Math.PI / 2, Math.PI / 2, false);
+        context.strokeStyle = '#DCDCDC';
+        context.lineWidth = 8;
+        context.stroke();
+
+        context.restore();
+        context.restore();
+    }
+    // ==================== 时空隧道绘制（微观/宇宙世界入口）====================
+    drawSpacetimeTunnel(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const radius = scaledSize / 2;
+        const now = Date.now() / 1000;
+
+        ctx.save();
+
+        // 1. 外圈光晕
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, 'rgba(100, 50, 150, 0.4)');
+        gradient.addColorStop(0.4, 'rgba(80, 40, 120, 0.25)');
+        gradient.addColorStop(0.7, 'rgba(150, 50, 200, 0.15)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. 旋转的螺旋臂
+        ctx.strokeStyle = 'rgba(200, 100, 255, 0.6)';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+            const armAngle = now * 1.5 + i * Math.PI * 2 / 3;
+            ctx.beginPath();
+            for (let r = 5; r < radius; r += 8) {
+                const a = armAngle + r * 0.1;
+                const px = x + Math.cos(a) * r;
+                const py = y + Math.sin(a) * r;
+                if (r === 5) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // 3. 粒子螺旋效果（发光拖尾）
+        ctx.globalCompositeOperation = 'lighter';
+
+        const particleCount = 150;
+        for (let i = 0; i < particleCount; i++) {
+            const t = (now * 0.6 + i / particleCount) % 1;
+            const r = radius * (0.1 + t * 0.85);
+            const angle = t * Math.PI * 6 + now * 1.8;
+
+            const px = x + Math.cos(angle) * r;
+            const py = y + Math.sin(angle) * r;
+
+            // 前一个点（拖尾）
+            const prevT = (t - 0.02 + 1) % 1;
+            const prevR = radius * (0.1 + prevT * 0.85);
+            const prevAngle = prevT * Math.PI * 6 + now * 1.8;
+            const ppx = x + Math.cos(prevAngle) * prevR;
+            const ppy = y + Math.sin(prevAngle) * prevR;
+
+            const alpha = 0.4 * (1 - t);
+            const hue = 270 + t * 100;
+
+            ctx.beginPath();
+            ctx.strokeStyle = `hsla(${hue}, 100%, 65%, ${alpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(ppx, ppy);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        // 4. 内圈能量环
+        for (let i = 0; i < 2; i++) {
+            const ringRadius = radius * (0.25 + i * 0.1);
+            const ringAlpha = 0.4 + Math.sin(now * 3) * 0.2;
+
+            ctx.beginPath();
+            ctx.arc(x, y, ringRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(180, 100, 255, ${ringAlpha})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 5. 中心奇点
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.06, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.restore();
+    }
+    // ==================== 原子绘制（微观世界）====================
+    drawAtom(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly;
+
+        // 颜色定义
+        const nucleusOuterColor = isFriendly ? '#FFD700' : '#CC6600';
+        const nucleusInnerColor = isFriendly ? '#FFA500' : '#E67E22';
+        const orbitColor = isFriendly ? '#FF8C00' : '#FF8C00';
+        const electronColor = isFriendly ? '#00FFFF' : '#00FFFF';
+
+        const centerX = x;
+        const centerY = y;
+
+        // 轨道参数（根据敌人大小缩放）
+        const radiusX = scaledSize * 0.15;
+        const radiusY = scaledSize * 0.35;  // 拉长轨道
+        const electronRadius = scaledSize * 0.04;
+        const nucleusRadius = scaledSize * 0.1;
+
+        // 三个轨道的旋转角度（间隔120度）
+        const orbitAngles = [
+            -Math.PI / 2,
+            -Math.PI / 2 + Math.PI * 2 / 3,
+            -Math.PI / 2 - Math.PI * 2 / 3
+        ];
+
+        // 电子运动速度
+        const electronSpeed = 2.5;
+        const currentAngle = animationTimer * electronSpeed;
+
+        // 辅助函数：计算椭圆上的点
+        const getEllipsePoint = (orbitAngle, t) => {
+            const xBasic = radiusX * Math.cos(t);
+            const yBasic = radiusY * Math.sin(t);
+            const xRotated = xBasic * Math.cos(orbitAngle) - yBasic * Math.sin(orbitAngle);
+            const yRotated = xBasic * Math.sin(orbitAngle) + yBasic * Math.cos(orbitAngle);
+            return { x: centerX + xRotated, y: centerY + yRotated };
+        };
+
+        ctx.save();
+
+        // 1. 绘制三个轨道（静态）
+        ctx.strokeStyle = orbitColor;
+        ctx.lineWidth = 2 * viewScale;
+        orbitAngles.forEach(orbitAngle => {
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, radiusX, radiusY, orbitAngle, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+
+        // 2. 绘制原子核（外层）
+        ctx.fillStyle = nucleusOuterColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, nucleusRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. 绘制原子核（内层核心）
+        ctx.fillStyle = nucleusInnerColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, nucleusRadius * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. 绘制三个电子（动画）
+        ctx.fillStyle = electronColor;
+        ctx.strokeStyle = '#009999';
+        ctx.lineWidth = 1.5 * viewScale;
+
+        orbitAngles.forEach((orbitAngle, index) => {
+            // 每个电子有相位偏移，使它们分开
+            const phaseOffset = index * Math.PI * 2 / 3;
+            const pos = getEllipsePoint(orbitAngle, currentAngle + phaseOffset);
+
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, electronRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        });
+
+
+        ctx.restore();
+    }
+    // ==================== 质子绘制（微观世界 - 优化版）====================
+    drawProton(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly;
+
+        // 颜色定义（友方金色，敌方质子色）
+        const upQuarkColor = isFriendly ? '#FFD700' : '#ff4466';
+        const upQuarkGlow = isFriendly ? '#FFA500' : '#ff0033';
+        const downQuarkColor = isFriendly ? '#FFA500' : '#44aaff';
+        const downQuarkGlow = isFriendly ? '#FF8C00' : '#0077ff';
+        const coreGlowColor = isFriendly ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 120, 0, 0.4)';
+
+        const centerX = x;
+        const centerY = y;
+        const baseRadius = scaledSize * 0.4;
+
+        // 获取或创建预渲染的能场贴图
+        const glowTexture = this.getProtonGlowTexture(coreGlowColor);
+
+        // 三个夸克的位置
+        const quarks = [
+            { type: 'u', angle: -Math.PI / 2,      dist: baseRadius * 0.5, color: upQuarkColor, glow: upQuarkGlow },
+            { type: 'u', angle: -Math.PI / 2 + Math.PI * 2 / 3, dist: baseRadius * 0.5, color: upQuarkColor, glow: upQuarkGlow },
+            { type: 'd', angle: -Math.PI / 2 - Math.PI * 2 / 3, dist: baseRadius * 0.5, color: downQuarkColor, glow: downQuarkGlow },
+        ];
+
+        ctx.save();
+
+        // 1. 绘制核心能场（使用离屏贴图，硬件加速）
+        const pulse = Math.sin(animationTimer * 3) * 5 * viewScale;
+        const glowSize = (baseRadius * 1.8 + pulse) * 2;
+        ctx.globalAlpha = 0.7 + Math.sin(animationTimer * 2) * 0.2;
+        ctx.drawImage(glowTexture, centerX - glowSize/2, centerY - glowSize/2, glowSize, glowSize);
+        ctx.globalAlpha = 1.0;
+
+        // 2. 绘制三个夸克
+        for (let i = 0; i < quarks.length; i++) {
+            const q = quarks[i];
+            const wobble = Math.sin(animationTimer * 2.5 + i * 1.2) * 5 * viewScale;
+            const angle = q.angle + animationTimer * 0.3 + wobble * 0.02;
+            const dist = q.dist + wobble * 0.3;
+
+            const qx = centerX + Math.cos(angle) * dist;
+            const qy = centerY + Math.sin(angle) * dist;
+
+            // 夸克脉冲效果
+            const quarkPulse = 1 + Math.sin(animationTimer * 4 + i * 2) * 0.15;
+            const quarkRadius = baseRadius * 0.22 * quarkPulse;
+
+            // 夸克光晕
+            const quarkGlow = ctx.createRadialGradient(qx, qy, 0, qx, qy, quarkRadius * 2.5);
+            quarkGlow.addColorStop(0, q.color);
+            quarkGlow.addColorStop(0.4, q.glow);
+            quarkGlow.addColorStop(1, 'transparent');
+
+            ctx.beginPath();
+            ctx.arc(qx, qy, quarkRadius * 2.0, 0, Math.PI * 2);
+            ctx.fillStyle = quarkGlow;
+            ctx.fill();
+
+            // 夸克核心
+            ctx.beginPath();
+            ctx.arc(qx, qy, quarkRadius, 0, Math.PI * 2);
+            ctx.fillStyle = q.color;
+            ctx.fill();
+
+        }
+
+        ctx.restore();
+    }
+
+    // 获取或创建质子能场贴图（缓存复用）
+    getProtonGlowTexture(color) {
+        const cacheKey = `proton_glow_${color}`;
+        if (this._protonGlowCache?.has(cacheKey)) {
+            return this._protonGlowCache.get(cacheKey);
+        }
+
+        if (!this._protonGlowCache) this._protonGlowCache = new Map();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        const offCtx = canvas.getContext('2d');
+        const r = 100;
+
+        const gradient = offCtx.createRadialGradient(r, r, 0, r, r, r);
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(0.4, 'rgba(255, 100, 0, 0.2)');
+        gradient.addColorStop(1, 'transparent');
+
+        offCtx.fillStyle = gradient;
+        offCtx.fillRect(0, 0, 200, 200);
+
+        this._protonGlowCache.set(cacheKey, canvas);
+        return canvas;
+    }
+    // ==================== 电子云绘制（微观世界）====================
+    drawElectronCloud(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly;
+
+        // 颜色定义（友方金色，敌方量子蓝）
+        const cloudColors = isFriendly
+            ? { main: [255, 215, 0], glow: [255, 200, 50], alpha: 0.35 }
+            : { main: [60, 160, 255], glow: [30, 80, 255], alpha: 0.35 };
+
+        const centerX = x;
+        const centerY = y;
+        const baseRadius = scaledSize * 0.45;
+        const numClouds = 4 + Math.floor(Math.random() * 3); // 4-6个云团
+
+        // 预生成云团纹理（每个敌人独立，但可以共享缓存）
+        const cloudTexture = this.getCloudTexture(scaledSize, cloudColors);
+
+        ctx.save();
+
+        for (let i = 0; i < numClouds; i++) {
+            const orbitRadius = baseRadius * (0.1 + i * 0.15);
+            const speed = 0.2 + i * 0.15;
+            const angle = (animationTimer * speed) + (i * Math.PI * 0.5);
+
+            // 量子抖动（让云团看起来不稳定）
+            const jitterX = Math.sin(animationTimer * (7 + i)) * 6 * viewScale;
+            const jitterY = Math.cos(animationTimer * (11 + i)) * 6 * viewScale;
+
+            const qx = centerX + Math.cos(angle) * orbitRadius + jitterX;
+            const qy = centerY + Math.sin(angle) * orbitRadius + jitterY;
+
+            ctx.save();
+            ctx.translate(qx, qy);
+
+            // 每个云团旋转不同的角度
+            ctx.rotate(i * Math.PI / 2 + animationTimer * 0.5 * (i % 2 ? 1 : -1));
+
+            // 随机镜像翻转
+            if (i % 3 === 0) ctx.scale(-1, 1);
+
+            // 透明度闪烁
+            ctx.globalAlpha = 0.5 + Math.sin(animationTimer * (8 + i)) * 0.25;
+
+            // 绘制云团
+            const cloudSize = scaledSize * 0.35;
+            ctx.drawImage(cloudTexture, -cloudSize / 2, -cloudSize / 2, cloudSize, cloudSize);
+
+            ctx.restore();
+        }
+        ctx.restore();
+    }
+
+    // 获取或创建云团纹理（缓存复用）
+    getCloudTexture(size, colors) {
+        const cacheKey = `cloud_${size}_${colors.main[0]}_${colors.main[1]}_${colors.main[2]}`;
+        if (this._cloudTextureCache?.has(cacheKey)) {
+            return this._cloudTextureCache.get(cacheKey);
+        }
+
+        if (!this._cloudTextureCache) this._cloudTextureCache = new Map();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const offCtx = canvas.getContext('2d');
+        const center = size / 2;
+
+        offCtx.clearRect(0, 0, size, size);
+        offCtx.globalCompositeOperation = 'lighter';
+
+        // 生成不规则云团
+        for (let i = 0; i < 45; i++) {
+            const x = center + (Math.random() - 0.5) * size * 0.6;
+            const y = center + (Math.random() - 0.5) * size * 0.4;
+            const r = Math.random() * size * 0.25;
+
+            const gradient = offCtx.createRadialGradient(x, y, 0, x, y, r);
+            gradient.addColorStop(0, `rgba(${colors.main[0]}, ${colors.main[1]}, ${colors.main[2]}, ${colors.alpha})`);
+            gradient.addColorStop(1, `rgba(${colors.glow[0]}, ${colors.glow[1]}, ${colors.glow[2]}, 0)`);
+
+            offCtx.fillStyle = gradient;
+            offCtx.beginPath();
+            offCtx.arc(x, y, r, 0, Math.PI * 2);
+            offCtx.fill();
+        }
+
+        this._cloudTextureCache.set(cacheKey, canvas);
+        return canvas;
+    }
+    // ==================== 电子绘制（微观世界）====================
+    drawElectron(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly;
+
+        // 颜色定义
+        const electronMainColor = isFriendly ? '#FFD700' : '#00cccc';
+        const electronOuterColor = isFriendly ? '#FFA500' : '#009999';
+        const rippleColor = isFriendly ? 'rgba(255, 215, 0, ' : 'rgba(0, 255, 255, ';
+
+        const centerX = x;
+        const centerY = y;
+
+        // 电子大小
+        const baseRadius = scaledSize * 0.9;
+        const pulseSpeed = 3;
+
+        // --- 修改这里：调低速度系数（例如从 4 改为 1.5） ---
+        const rippleSpeed = 2;
+
+        // 脉冲动画（呼吸效果）
+        const pulse = (Math.sin(animationTimer * pulseSpeed) + 1) / 2;
+        const currentRadius = baseRadius * (0.8 + pulse * 0.3);
+
+        ctx.save();
+
+        // 1. 只绘制一层波纹（去掉了循环，速度变慢）
+        const progress = (animationTimer * rippleSpeed) % 1;
+        const radius = currentRadius + 30 * viewScale * progress; // 扩散范围稍微加大一点视觉更好
+        const opacity = 0.6 * (1 - progress);
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `${rippleColor}${opacity})`;
+        ctx.lineWidth = 2 * viewScale;
+        ctx.stroke();
+
+        // 2. 绘制电子外圈（光晕）
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, currentRadius);
+        gradient.addColorStop(0, electronMainColor);
+        gradient.addColorStop(0.6, electronOuterColor);
+        gradient.addColorStop(1, 'rgba(0, 100, 100, 0.3)');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. 绘制电子主体
+        ctx.fillStyle = electronMainColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentRadius * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. 绘制内层亮核
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentRadius * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+// ==================== 光子绘制（微观世界 - 优化版）====================
+    drawPhoton(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj?.isFriendly;
+
+        // 1. 颜色与样式定义 (采用你指定的金色方案)
+        const mainColor = isFriendly ? '#FFE664' : '#C9AA32';
+        const rippleColor = isFriendly ? 'rgba(255, 230, 100, ' : 'rgba(201, 170, 50, ';
+        const innerColor = '#FFFFFF';
+
+        // 2. 动画控制
+        const pulseSpeed = 3;
+        const rippleSpeed = 0.6; // 慢速波纹系数
+
+        // 基础半径与呼吸效果
+        const baseRadius = scaledSize * 0.5;
+        const currentRadius = baseRadius;
+
+        ctx.save();
+
+        // 4. 绘制运动拖尾 (基于 angleToPlayer 反向)
+        const trailLength = currentRadius * 3.5;
+        const tailX = x - Math.cos(angleToPlayer) * trailLength;
+        const tailY = y - Math.sin(angleToPlayer) * trailLength;
+
+        const trailGradient = ctx.createLinearGradient(x, y, tailX, tailY);
+        trailGradient.addColorStop(0, `${rippleColor}0.8)`);
+        trailGradient.addColorStop(1, 'transparent');
+
+        ctx.beginPath();
+        ctx.strokeStyle = trailGradient;
+        ctx.lineWidth = currentRadius * 1.2;
+        ctx.lineCap = 'round';
+        ctx.moveTo(x, y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+
+        // 5. 绘制光子核心光晕 (径向渐变)
+        const glowRadius = currentRadius * 1.1;
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(0.2, mainColor);
+        gradient.addColorStop(1, 'transparent');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 6. 绘制高亮亮核
+        ctx.fillStyle = innerColor;
+        ctx.beginPath();
+        ctx.arc(x, y, currentRadius * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+
+        ctx.restore();
+    }
     // 在 EnemyDrawer 类中添加 drawTick 方法
     drawTick(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
@@ -19011,7 +20825,26 @@ class EnemyDrawer {
             this.drawTermiteHole(context, x, y, size, viewScale, enemyObj);
         } else if (enemyType === "TermiteOvermind") {
             this.drawTermiteOvermind(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Atom") {
+            this.drawAtom(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Electron") {
+            this.drawElectron(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Photon") {
+            this.drawPhoton(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "ElectronCloud") {
+            this.drawElectronCloud(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Proton") {
+            this.drawProton(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "BlackHole") {
+            this.drawBlackHole(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "WhiteHole") {
+            this.drawWhiteHole(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "SpacetimeTunnel") {
+            this.drawSpacetimeTunnel(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "UFO") {
+            this.drawUFO(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
+
         // ========== 未知类型使用默认绘制 ==========
         else {
             const scaledRadius = Math.floor(size / 2 * viewScale);
@@ -19036,10 +20869,10 @@ class RedeemSystem {
         // 从 localStorage 加载已使用的记录
         this.loadUsedRecords();
 
-        this.addCode("WAGES", [
-            { type: "Igloo egg", rarity: "Super", count: 1 },
-            { type: "Ice Cube egg", rarity: "Super", count: 1 },
-            { type: "Trashcan egg", rarity: "Ultra", count: 91 },
+        this.addCode("WAGES2", [
+            { type: "Alien egg", rarity: "Super", count: 1 },
+            { type: "Photon egg", rarity: "Super", count: 1 },
+             { stars: 500000 }
         ], 10);
 
         this.addCode("123TRY", [
@@ -19474,6 +21307,7 @@ class ShopSystem {
             "Leaf": 3,
             "Wing": 5,
             "Claw": 7,
+            "Bubble": 10,
             "Fang": 5,
             "Web": 3,
             "Stinger": 8,
@@ -19524,7 +21358,42 @@ class ShopSystem {
             "Clover": 5,
             "Iris": 2,
             "Lotus": 3,
+            "Photon egg": 35,
+            "Electron egg": 28,
+            "ElectronCloud egg": 40,
+            "Proton egg": 30,
+            "Atom egg": 20,
 
+            // ========== 微观世界武器 ==========
+            "Photon": 25,
+            "Electron": 30,
+            "Quark": 35,
+            "Quantum": 45,
+            "Charge": 20,
+            "Nucleus": 60,
+
+            // ========== 宇宙世界蛋 ==========
+            "BlackHole egg": 110,
+            "WhiteHole egg": 99,
+            "NeutronStar egg": 100,
+            "Star egg": 60,
+            "Asteroid egg": 30,
+            "Alien egg": 30,
+            "UFO egg": 80,
+            "Ghost egg": 15,
+            "GraveStone egg": 45,
+
+            // ========== 宇宙世界武器 ==========
+            "Plasma": 30,
+            "Orb": 30,
+            "Slime": 12,
+            "Dvd": 20,
+            "FireBomb": 30,
+            "Stardust": 18,
+            "Opal": 50,
+            "Gamma Ray": 40,
+            "Dust": 10,
+            "Singularity": 90,
             // ==================== 特殊功能类 ====================
             "Antennae": 12,
             "ThirdEye": 15,
@@ -23741,14 +25610,15 @@ class Enemy {
         this.ownerPetal = null;
         this.ownerPlayer = null;
         this.spawnTime = Date.now();
-        this.repulsionForce = 500;  // 斥力强度
+        this.repulsionForce = 800;  // 斥力强度
         this.repulsionRadius = this.radius * 0.9;
         // 减速效果
         this.isIceSlowed = false;
         this.slowSourceRarity = null;
         this.slowStartTime = 0;
         this.slowEndTime = 0;
-
+         this.friendlySpeedBonus = 0;
+        this.friendlyDamageReduction = 0;
         if (this.isFriendly) {
             this.spawnProtection = 0;
             this.isSpawning = false;
@@ -23769,6 +25639,9 @@ class Enemy {
         // 在 Enemy 构造函数中添加
          this.lastAttackTime = 0;
         this.attackInterval = 100;
+        this.lastAttackTimePerTarget = new Map();
+        this.globalAttackCooldown = 0;
+        this.globalAttackCooldownMax = 100;
         this.lastDamageDisplayTime = 0;
         this.damageDisplayCooldown = 300; // 0.3秒冷却
         this.lastSpawnTime = 0;
@@ -23937,8 +25810,14 @@ class Enemy {
 
         // 获取基础属性
         const [baseHealth, baseRadius, baseSpeed, baseWeight, baseAttackDamage] = this._getBaseStats(enemyType);
+        const safeBaseHealth = isNaN(baseHealth) ? 100 : baseHealth;
+        const safeBaseRadius = isNaN(baseRadius) ? 20 : baseRadius;
+        const safeBaseSpeed = isNaN(baseSpeed) ? 60 : baseSpeed;
+        const safeBaseWeight = isNaN(baseWeight) ? 10 : baseWeight;
+        const safeBaseDamage = isNaN(baseAttackDamage) ? 40 : baseAttackDamage;
+        this.mass = this.weight;  // 确保 mass 存在
+        this.physicsBody = new PhysicsBody(new Vector2(x, y), this.radius, this.mass, "circle");
 
-        // 血量倍率
         const ENEMY_HEALTH_MULTIPLIERS = {
             "Common": 1,
             "Unusual": 3.75,
@@ -24015,10 +25894,26 @@ class Enemy {
             sizeFactor = raritySizeFactors[this.rarity] || 1.0;
         }
 
-        // 计算碰撞半径
+
         let collisionRadius = this._calculateCollisionRadius(enemyType, baseRadius, sizeFactor);
         this.radius = Math.max(3, collisionRadius);
+        // 血量倍率
+        // 各生物类型的碰撞箱系数（内接圆半径 = 视觉半径 × 系数）
+        const ENEMY_COLLISION_FACTORS = {
+            "UFO": 0.65,      // UFO 碰撞箱是视觉的 65%
+            "BlackHole": 0.8,
+            "WhiteHole": 0.8,
+            "Roach": 0.9,
+            "Rat": 0.9,
+            "default": 1.0   // 默认 85%
+        };
+        // ✅ 计算碰撞箱（内接圆）
+        const factor = ENEMY_COLLISION_FACTORS[enemyType] || ENEMY_COLLISION_FACTORS.default;
+        let physicsRadius = this.radius * factor;
 
+        physicsRadius = Math.max(5, physicsRadius);
+
+        this.physicsBody.radius = physicsRadius;
         // 设置其他属性
         this.speed = baseSpeed;
         this.weight = baseWeight * sizeFactor;
@@ -24565,13 +26460,27 @@ class Enemy {
     }
     // ===== 辅助方法：计算碰撞半径 =====
     _calculateCollisionRadius(enemyType, baseRadius, sizeFactor) {
-        // 基础半径
-        let collisionRadius = baseRadius * sizeFactor;
-        collisionRadius = baseRadius * sizeFactor * 1.0;
+        // 视觉半径（用于绘制）
+        let visualRadius = baseRadius * sizeFactor;
+
+        // 碰撞半径（用于物理碰撞）- 内接圆，比视觉小
+        let collisionRadius = visualRadius;
+
+        // 特殊生物使用更小的碰撞箱
+        const collisionFactors = {
+            "UFO": 0.5,
+            "BlackHole": 0.85,
+            "WhiteHole": 0.85,
+        };
+
+        if (collisionFactors[enemyType]) {
+            collisionRadius = visualRadius * collisionFactors[enemyType];
+        } else {
+            collisionRadius = visualRadius * 0.95;  // 默认 85%
+        }
 
         return Math.max(3, collisionRadius);
     }
-
         // ===== 辅助方法：计算护甲 =====
     _calculateArmor(enemyType) {
         // 使用全局定义的 ENEMY_ARMOR_CLASSES 和 ARMOR_CLASS_MULTIPLIERS
@@ -24624,10 +26533,26 @@ class Enemy {
             case "Sponge": return [100, 30, 0, 500, 10];
             case "Scallop": return [100, 25, 40, 450, 25];
             case "Bubble": return [5, 30, 0, 50, 2];
+            case "Trashcan": return [300, 40, 0, 2000, 65];
             case "Hive": return [700, 45, 0, 18000, 45];
             case "Starfish": return [50, 30, 50, 300, 20];
             case "Jellyfish": return [110, 28, 55, 200, 25];
             case "CrabHole": return [540, 50, 0, 15000, 30];
+            case "Atom":         return [200, 25, 40,  800,  30];
+            case "Electron":     return [100,  12, 200, 50,   10];
+            case "Proton":       return [180, 20, 60,  500,  35];
+            case "ElectronCloud":return [500,  40, 20,  200,  30];
+            case "Photon":       return [100,  8,  600, 10,   20];
+            case "BlackHole":    return [5000, 30, 0,  50000, 100];
+            case "WhiteHole":    return [3000, 30, 0,  40000, 70];
+            case "NeutronStar":  return [8000, 45, 0,  80000, 200];
+            case "Alien":        return [400,  28, 120, 1000, 80];
+            case "UFO":          return [600,  30, 150, 2000, 120];
+            case "Star":         return [2000, 50, 0,  30000, 50];
+            case "Asteroid":     return [300,  25, 80,  700,  60];
+            case "Ghost":         return [100, 25, 0,  100, 10];
+            case "GraveStone":     return [1000,  25, 80,  17000, 15];
+            case "SpacetimeTunnel": return [1, 60, 0, 0, 0];
             case "ManHole": return [900, 50, 0, 15000, 50];
             case "Fly": return [25, 24, 60, 200, 10];
             case "Rat": return [500, 30, 100, 900, 220];
@@ -24715,10 +26640,14 @@ class Enemy {
         return Math.floor(baseRange * multiplier);
     }
 
-    // ===== 物理方法 =====
+    // 在 Enemy 类中
     getScaledRadius() {
-        return this.radius * (this.currentViewScale || 1.0);
+        // ✅ 视野缩放只影响视觉，不影响碰撞检测
+        // 碰撞检测应该使用原始碰撞半径，不受 viewScale 影响
+       return this.radius * 0.95 * this.currentViewScale;
     }
+
+
 
     getVisualRadius() {
         return this.radius * this.currentViewScale;
@@ -25223,22 +27152,31 @@ class Enemy {
         // 继续连锁（伤害递减40%）
         this._applyEnemyLightningChain(target, damage * 0.5, bouncesLeft - 1, allTargets, alreadyHit);
     }
+
+        // 在 Enemy 类中
     attack(target, isSegment = false, segmentIndex = -1) {
         if (this.isDead || this.isSpawning || this.health <= 0) return 0.0;
 
-        // ✅ 时间戳冷却：每秒最多5次攻击（200ms间隔）
+        // ✅ 每个目标的独立冷却（无全局限制）
+        if (this.lastAttackTimePerTarget === undefined) this.lastAttackTimePerTarget = new Map();
+        const targetId = target.id || target;
+        const lastAttackTime = this.lastAttackTimePerTarget.get(targetId) || 0;
+        const targetCooldown = 100; // 每个目标独立冷却300ms
+
         const now = Date.now();
-        if (this.lastAttackTime === undefined) this.lastAttackTime = 0;
+        if (now - lastAttackTime < targetCooldown) {
+            return 0; // 这个目标还在冷却中
+        }
 
         let meleeDamage = 0;
 
         // ===== 🐛 身体节攻击（伤害减半，独立冷却）=====
         let actualDamage = this.attackDamage;
-        let attackCooldownValue = 200; // 200ms冷却（每秒5次）
+        let attackCooldownValue = 200;
 
         if (isSegment) {
-            actualDamage = this.attackDamage * 0.9; // 身体节90%伤害
-            attackCooldownValue = 200; // 身体节也是200ms
+            actualDamage = this.attackDamage * 0.9;
+            attackCooldownValue = 200;
         }
 
         // ===== ⚡ 闪电生物远程攻击 =====
@@ -25255,7 +27193,6 @@ class Enemy {
                     if (distance <= attackRange) {
                         this.lightningCooldown = 2000;
                         this.performLightningAttack(target);
-                        this.lastAttackTime = now;
                         return 0;
                     }
                 }
@@ -25280,7 +27217,6 @@ class Enemy {
                         );
                         this.gameInstance.projectiles.push(stinger);
                     }
-                    this.lastAttackTime = now;
                     return 0;
                 }
             }
@@ -25314,7 +27250,6 @@ class Enemy {
                         stinger.isPhysical = true;
                         this.gameInstance.projectiles.push(stinger);
                     }
-                    this.lastAttackTime = now;
                     return 0;
                 }
             }
@@ -25362,7 +27297,6 @@ class Enemy {
                             this.gameInstance.projectiles.push(smallInk);
                         }
                     }
-                    this.lastAttackTime = now;
                     return 0;
                 }
             }
@@ -25389,8 +27323,7 @@ class Enemy {
         const targetRadius = target.getScaledRadius?.() || target.physicsBody.radius * (this.currentViewScale || 1);
         const contactRange = attackerRadius + targetRadius;
 
-        // ✅ 近战攻击检查（受冷却限制）
-        if (distance <= contactRange && (now - this.lastAttackTime >= 200)) {
+        if (distance <= contactRange) {
             const selfIsFriendly = this.isFriendly;
             const targetIsFriendly = target.isFriendly;
             const defenderArmor = target.armor || 0.0;
@@ -25430,7 +27363,7 @@ class Enemy {
             }
 
             // 冰龙和 Frost Digger 减速效果（只有头部）
-            if (!isSegment && (this.type === "Ice Dragon" || this.type === "Frost Digger"|| this.type === "Ice Cube")) {
+            if (!isSegment && (this.type === "Ice Dragon" || this.type === "Frost Digger")) {
                 const attackerRarity = this.rarity || "Common";
                 const rarityBoost = {
                     "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.3,
@@ -25438,7 +27371,7 @@ class Enemy {
                     "Super": 1.7, "Omega": 1.8, "Eternal": 2.0
                 };
                 const boost = rarityBoost[attackerRarity] || 1.0;
-                let slowPercent = 0.2 * boost;
+                let slowPercent = 0.1 * boost;
                 slowPercent = Math.min(0.9, slowPercent);
 
                 const targetRarity = target.rarity || "Common";
@@ -25455,41 +27388,36 @@ class Enemy {
                 target.slowStartTime = Date.now();
                 target.slowEndTime = Date.now() + 3000;
                 target.isIceSlowed = true;
-                if (target.isPlayer === true && target.statusBar) {
-                    target.statusBar.addEffect("slow", 3.0);
-                }
             }
 
             meleeDamage = finalDamage;
-        }
 
-        // ✅ 毒伤触发（只有头部）- 不受攻击冷却限制，每次接触都触发
-        if (!isSegment && this.isPoisonous && !this.isFriendly && this.gameInstance?.poisonManager) {
-            this.gameInstance.poisonManager.applyPoison(
-                target,
-                this,
-                this.poisonDamage * (isSegment ? 0.5 : 1),
-                this.poisonDuration,
-                this.poisonInitMult,
-                this.poisonStableMult
-            );
-        }
+            // 毒伤触发（只有头部）
+            if (!isSegment && this.isPoisonous && !this.isFriendly && this.gameInstance?.poisonManager) {
+                this.gameInstance.poisonManager.applyPoison(
+                    target,
+                    this,
+                    this.poisonDamage * (isSegment ? 0.5 : 1),
+                    this.poisonDuration,
+                    this.poisonInitMult,
+                    this.poisonStableMult
+                );
+            }
 
-        // ✅ 火焰触发（只有头部）- 不受攻击冷却限制，每次接触都触发
-        if (!isSegment && this.isFlame && !this.isFriendly && this.gameInstance?.flameManager) {
-            this.gameInstance.flameManager.applyFlame(
-                target,
-                this,
-                this.flameDamage * (isSegment ? 0.5 : 1),
-                this.flameDuration,
-                this.flameInitMult,
-                this.flameRampMult
-            );
-        }
+            // 火焰触发（只有头部）
+            if (!isSegment && this.isFlame && !this.isFriendly && this.gameInstance?.flameManager) {
+                this.gameInstance.flameManager.applyFlame(
+                    target,
+                    this,
+                    this.flameDamage * (isSegment ? 0.5 : 1),
+                    this.flameDuration,
+                    this.flameInitMult,
+                    this.flameRampMult
+                );
+            }
 
-        // ✅ 只有近战伤害才更新攻击时间（毒伤和火伤不触发冷却）
-        if (meleeDamage > 0) {
-            this.lastAttackTime = now;
+            // ✅ 只记录这个目标的攻击时间（无全局冷却）
+            this.lastAttackTimePerTarget.set(targetId, now);
         }
 
         return meleeDamage;
@@ -25497,7 +27425,9 @@ class Enemy {
     takeDamage(damage, source = null) {
         if (this.type === "Fly" && Math.random() < 0.95) return false;
         if (this.isSpawning || this.isDead) return false;
-
+        if (this.isFriendly && this.friendlyDamageReduction > 0) {
+                damage = damage * (1 - Math.min(0.7, this.friendlyDamageReduction));
+            }
         this.health -= damage;
         this.damageFlashTimer = this.damageFlashDuration;
         // ✅ 添加伤害数字（带冷却）
@@ -25616,7 +27546,7 @@ class Enemy {
 
                 // 10% 概率额外生成 MudDigger
                 if (Math.random() < 0.1) {
-                    setTimeout(() => this.spawnMudDiggerFromDeath(this.gameInstance), 50);
+                    setTimeout(() => this.trySpawnMudDiggerFromDeath(this.gameInstance), 50);
                 }
             }
             // ===== SpiderCave 死亡生成 Digger =====
@@ -26431,7 +28361,7 @@ class Enemy {
                 const stationaryCreatures = ["Bush", "Cactus", "Anthill", "Rock", "FireAntHole",
                                             "Sponge", "Bubble", "CrabHole", "ManHole", "Virus", "Hive",
                                             "Ice Cube", "Igloo", "ArcticSpiderCave", "Trashcan", "Shipwreck",
-                                            "TermiteHole", "SpiderCave"];
+                                            "TermiteHole", "SpiderCave","BlackHole","WhiteHole","NeutronStar","Star"];
                 if (stationaryCreatures.includes(this.type)) {
                     this.physicsBody.velocity = new Vector2(0, 0);
                     this.facingAngle = 0.0;
@@ -26536,7 +28466,21 @@ class Enemy {
 
             return false;
         }
-
+        // ========== 🆕 引力/斥力效果（放在 update 方法末尾）==========
+        if (!this.isDead && !this.isSpawning) {
+            // 黑洞：吸引所有物体（包括玩家、敌人、掉落物）
+            if (this.type === "BlackHole") {
+                this.applyGravityToAll(gameInstance, dt, true);
+            }
+            // 白洞：推开所有物体
+            else if (this.type === "WhiteHole") {
+                this.applyGravityToAll(gameInstance, dt, false);
+            }
+            // UFO：吸引玩家和掉落物
+            else if (this.type === "UFO") {
+                this.applyUFOBeam(gameInstance, dt);
+            }
+        }
         // 非多节生物走原来的逻辑
         this.physicsBody.update(dt);
         this.clampPosition();
@@ -26577,16 +28521,44 @@ class Enemy {
             this.drawHealthBar(context, x, y, scaledRadius, viewScale, visualAngle);
             this.drawRarityBelowHealthBar(context, x, y, scaledRadius, viewScale, visualAngle);
         }
+        if (this.gameInstance && this.gameInstance.debugMode) {
+            const screenX = this.physicsBody.position.x - cameraOffset.x;
+            const screenY = this.physicsBody.position.y - cameraOffset.y;
+            const collisionRadius = this.physicsBody.radius * viewScale;
+
+            context.save();
+
+            // 重置变换（如果有）
+            context.setTransform(1, 0, 0, 1, 0, 0);
+
+            // 绘制碰撞箱
+            context.beginPath();
+            context.arc(screenX, screenY, collisionRadius, 0, Math.PI * 2);
+            context.strokeStyle = "rgba(255, 0, 0, 0.8)";
+            context.lineWidth = 2;
+            context.stroke();
+
+            // 绘制视觉范围
+            context.beginPath();
+            context.arc(screenX, screenY, this.radius * viewScale, 0, Math.PI * 2);
+            context.strokeStyle = "rgba(255, 255, 255, 0.5)";
+            context.setLineDash([5, 5]);
+            context.stroke();
+            context.setLineDash([]);
+
+            context.restore();
+        }
+
     }
     drawHealthBar(ctx, x, y, scaledRadius, viewScale = 1.0) {
         const rarityIndex = RARITY_LIST.includes(this.rarity) ? RARITY_LIST.indexOf(this.rarity) : 0;
 
         // 1. 基础尺寸
-        const healthWidth = (40 + rarityIndex * 5) * viewScale;
-        const healthHeight = 5 * viewScale;
+        const healthWidth = (60 + rarityIndex * 5) * viewScale;
+        const healthHeight = 6 * viewScale;
         const pillRadius = healthHeight / 2;
 
-        // 2. 位置：固定在生物下方
+        // 2. 血条位置：固定在生物下方
         let healthX = x - healthWidth / 2;
         let healthY = y + scaledRadius + 10 * viewScale;
 
@@ -26599,31 +28571,68 @@ class Enemy {
 
         ctx.save();
 
-        // --- A. 绘制黑色外边框 ---
-        // 我们通过 lineWidth 来实现外边框感
+        // ========== 🆕 名字在血条正上方（左对齐版）==========
+        const fullName = this.name || this.type;
+        ctx.save(); // 保存状态，避免影响后续绘制
+
+        // 1. 设置初始字体大小
+        let baseFontSize = 12;
+        let nameFontSize = baseFontSize * viewScale;
+        ctx.font = `bold ${Math.floor(nameFontSize)}px Arial`;
+        ctx.textAlign = "left"; // 设置为左对齐
+        ctx.textBaseline = "bottom"; // 设置基线为底部，方便计算上方间距
+
+        // 2. 自动缩小字体逻辑 (确保不超出血条宽度)
+        const maxNameWidth = healthWidth;
+        let nameWidth = ctx.measureText(fullName).width;
+
+        if (nameWidth > maxNameWidth) {
+            // 计算缩放比例，最小不低于 7px 的缩放值
+            const ratio = maxNameWidth / nameWidth;
+            nameFontSize = Math.max(7 * viewScale, nameFontSize * ratio);
+            ctx.font = `bold ${Math.floor(nameFontSize)}px Arial`;
+        }
+
+        // 3. 确定坐标
+        // nameX 设为 healthX，即从血条左边缘开始
+        const nameX = healthX;
+        // nameY 设在血条上方，留出 2 个单位的间隙
+        const nameY = healthY - (2 * viewScale);
+
+        // 4. 绘制描边
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2 * viewScale;
+        ctx.strokeText(fullName, nameX, nameY);
+
+        // 5. 绘制填充
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(fullName, nameX, nameY);
+
+        ctx.restore(); // 恢复状态
+        // --- A. 绘制黑色外边框血条 ---
         ctx.beginPath();
         this.drawCapsule(ctx, healthX, healthY, healthWidth, healthHeight, pillRadius);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // 背景深色
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
         ctx.fill();
 
-        ctx.strokeStyle = "black";           // 纯黑边框
-        ctx.lineWidth = 3 * viewScale;       // 边框粗细
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2 * viewScale;
         ctx.lineJoin = "round";
-        ctx.stroke();                        // 绘制边框
+        ctx.stroke();
 
-        // --- B. 绘制内部条 (使用 clip 确保内容不超出边框) ---
+        // --- B. 绘制内部条 ---
         ctx.save();
         this.drawCapsule(ctx, healthX, healthY, healthWidth, healthHeight, pillRadius);
         ctx.clip();
 
-        // 绘制红色缓冲层
+        // 红色缓冲层
         if (bufferPercent > 0) {
             ctx.fillStyle = "#ff4444";
             ctx.fillRect(healthX, healthY, healthWidth * bufferPercent, healthHeight);
         }
 
+        // 实际血量（友方金色，敌方草绿色）
         if (actualPercent > 0) {
-            // 如果是友方用金色，否则用原来的草绿色
             ctx.fillStyle = this.isFriendly ? "#FFD700" : "#7cfc00";
             ctx.fillRect(healthX, healthY, healthWidth * actualPercent, healthHeight);
         }
@@ -26631,7 +28640,6 @@ class Enemy {
 
         ctx.restore();
     }
-
     drawCapsule(ctx, x, y, width, height, radius) {
         ctx.beginPath();
         if (ctx.roundRect) {
@@ -26658,7 +28666,7 @@ class Enemy {
         // 2. 位置计算
         const healthBarY = y + scaledRadius + 8 * viewScale;
         const rarityY = healthBarY + healthHeight + 1 * viewScale;
-        const rarityX = x; // 此时 x 是血条的中心点
+        const rarityX = x + 10 * viewScale;
 
         const rarityColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
         const darkness = 0.5;
@@ -26695,7 +28703,162 @@ class Enemy {
 
         ctx.restore();
     }
+    getRarityForceMultiplier() {
+        const rarityMultipliers = {
+            "Common":   1.0,
+            "Unusual":  1.2,
+            "Rare":     1.5,
+            "Epic":     2.0,
+            "Legendary":2.5,
+            "Mythic":   3.2,
+            "Ultra":    4.0,
+            "Super":    5.0,
+            "Omega":    6.5,
+            "Eternal":  8.0
+        };
+        return rarityMultipliers[this.rarity] || 1.0;
+    }
 
+    applyGravityToAll(gameInstance, dt, isAttract) {
+        if (!gameInstance || !this.physicsBody || isNaN(this.physicsBody.position.x)) return;
+
+        const safeDt = Math.min(dt, 0.033);
+        const rarityMultiplier = this.getRarityForceMultiplier() || 1.0;
+        const viewScale = gameInstance.viewScale || 1.0;
+
+        // ✅ 修复：视野放大时（viewScale 变小），力场应该减弱
+        // 当 viewScale = 0.5（视野放大2倍）时，forceScale = 0.5
+        // 当 viewScale = 2.0（视野缩小2倍）时，forceScale = 2.0
+        const forceScale = viewScale;  // 直接使用 viewScale，而不是 1/viewScale
+
+        const baseStrength = isAttract ? 100 : -110;
+        const strength = baseStrength * rarityMultiplier * forceScale;
+
+        // 范围也随视野缩放：视野放大时范围变小（因为看到的范围变大了）
+        const maxRadius = 300 * Math.sqrt(rarityMultiplier) * viewScale;
+
+        const myPos = this.physicsBody.position;
+
+        // 黑洞：吸引对立阵营
+        if (isAttract) {
+            const isFriendlyBH = this.isFriendly === true;
+
+            if (gameInstance.player && !gameInstance.player.isDead && gameInstance.player.physicsBody) {
+                if (!isFriendlyBH) {
+                    this.applyForceToTarget(gameInstance.player.physicsBody, myPos, strength, maxRadius, safeDt);
+                }
+            }
+
+            for (const enemy of gameInstance.enemies) {
+                if (enemy === this) continue;
+                if (enemy.isDead) continue;
+                if (!enemy.physicsBody) continue;
+
+                const shouldAttract = isFriendlyBH
+                    ? (enemy.isFriendly === false)
+                    : (enemy.isFriendly === true);
+
+                if (shouldAttract) {
+                    this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, safeDt);
+                }
+            }
+        }
+        // 白洞：推开所有生物（友方白洞不推玩家）
+        else {
+            const isFriendlyWH = this.isFriendly === true;
+
+            if (gameInstance.player && !gameInstance.player.isDead && gameInstance.player.physicsBody) {
+                if (!isFriendlyWH) {
+                    this.applyForceToTarget(gameInstance.player.physicsBody, myPos, strength, maxRadius, safeDt);
+                }
+            }
+
+            for (const enemy of gameInstance.enemies) {
+                if (enemy === this) continue;
+                if (enemy.isDead) continue;
+                if (!enemy.physicsBody) continue;
+
+                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, safeDt);
+            }
+        }
+    }
+
+    applyForceToTarget(targetBody, sourcePos, strength, maxRadius, dt) {
+        if (!dt || isNaN(dt)) dt = 1/60;
+
+        const dx = sourcePos.x - targetBody.position.x;
+        const dy = sourcePos.y - targetBody.position.y;
+        const distSq = dx * dx + dy * dy;
+
+        // ✅ 修复：提高最小距离到50，防止极近距离数值爆炸
+        const minDist = 50;
+        if (distSq < minDist * minDist || distSq > maxRadius * maxRadius) return;
+
+        const dist = Math.sqrt(distSq);
+
+        // ✅ 修复：用平方反比（更真实），远处也有足够力
+        // 原来线性衰减在边缘几乎为0，Common根本推不动
+        const distanceFactor = Math.min(1.0, (maxRadius * 0.3) / dist);
+
+        const force = strength * distanceFactor * dt;
+
+        const dirX = dx / dist;
+        const dirY = dy / dist;
+        const moveX = dirX * force;
+        const moveY = dirY * force;
+
+        if (!isNaN(moveX) && !isNaN(moveY) &&
+            Math.abs(moveX) < 100 && Math.abs(moveY) < 100) { // ✅ 防止单帧位移过大
+            targetBody.position.x += moveX;
+            targetBody.position.y += moveY;
+
+            const accelX = dirX * force * 0.3;
+            const accelY = dirY * force * 0.3;
+            if (!isNaN(accelX)) {
+                targetBody.velocity.x += accelX;
+                targetBody.velocity.y += accelY;
+            }
+        }
+    }
+
+    applyUFOBeam(gameInstance, dt) {
+        if (!gameInstance) return;
+
+        const rarityMultiplier = this.getRarityForceMultiplier();
+        const viewScale = gameInstance.viewScale || 1;
+
+        // ✅ 修复：视野放大时力减弱
+        const forceScale = viewScale;
+
+        const baseStrength = 80;
+        const strength = baseStrength * rarityMultiplier * forceScale;
+        const maxRadius = 250 * Math.sqrt(rarityMultiplier) * viewScale;
+
+        const myPos = this.physicsBody.position;
+        const isFriendlyUFO = this.isFriendly === true;
+
+        // 1. 处理玩家
+        if (gameInstance.player && !gameInstance.player.isDead && gameInstance.player.physicsBody) {
+            if (!isFriendlyUFO) {
+                this.applyForceToTarget(gameInstance.player.physicsBody, myPos, strength, maxRadius, dt);
+            }
+        }
+
+        // 2. 处理所有生物
+        for (const enemy of gameInstance.enemies) {
+            if (enemy === this) continue;
+            if (enemy.isDead) continue;
+            if (!enemy.physicsBody) continue;
+
+            const shouldAttract = isFriendlyUFO
+                ? (enemy.isFriendly === false)
+                : (enemy.isFriendly === true);
+
+            if (shouldAttract) {
+                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, dt);
+            }
+        }
+    }
     drawTextWithStroke(ctx, text, x, y, strokeColor, fillColor, viewScale) {
         // 绘制深色描边
         ctx.strokeStyle = strokeColor;
@@ -27100,7 +29263,7 @@ class FlameSystem {
         this.duration = duration;                // 总持续时间（毫秒）
         this.initialMultiplier = initialMultiplier;  // 初始倍率（默认0.5倍，较低）
         this.rampUpMultiplier = rampUpMultiplier;    // 最终倍率（默认2倍，较高）
-
+        this.gameInstance = null;
         // 火焰状态
         this.active = true;
         this.startTime = Date.now();
@@ -27255,25 +29418,36 @@ class FlameManager {
     }
 
     applyFlame(target, source, baseDamage, duration = 3000, initialMultiplier = 0.5, rampUpMultiplier = 2.0) {
-        if (!target || target.isDead) return false;
+    if (!target || target.isDead) return false;
 
-        const newFlame = new FlameSystem(source, baseDamage, duration, initialMultiplier, rampUpMultiplier);
-
-        if (this.activeFlames.has(target)) {
-            this.activeFlames.get(target).stack(newFlame);
-        } else {
-            this.activeFlames.set(target, newFlame);
-        }
-
-        // ✅ 添加：如果是玩家燃烧，更新状态栏
-        if (target.isPlayer === true && target.statusBar) {
-            const durationSec = duration / 1000;
-            target.statusBar.addEffect("burn", durationSec);
-        }
-
-        return true;
+    // 获取 gameInstance（关键修复）
+    let gameInstance = null;
+    if (source && source.gameInstance) {
+        gameInstance = source.gameInstance;
+    } else if (source && source.player && source.player.gameInstance) {
+        gameInstance = source.player.gameInstance;
+    } else if (window.gameInstance) {
+        gameInstance = window.gameInstance;
     }
 
+    const newFlame = new FlameSystem(source, baseDamage, duration, initialMultiplier, rampUpMultiplier);
+
+    // 存储 gameInstance 到火焰系统中
+    newFlame.gameInstance = gameInstance;
+
+    if (this.activeFlames.has(target)) {
+        this.activeFlames.get(target).stack(newFlame);
+    } else {
+        this.activeFlames.set(target, newFlame);
+    }
+
+    if (target.isPlayer === true && target.statusBar) {
+        const durationSec = duration / 1000;
+        target.statusBar.addEffect("burn", durationSec);
+    }
+
+    return true;
+}
     updateAll(gameInstance) {
         const toRemove = [];
         for (const [target, flame] of this.activeFlames) {
@@ -27281,27 +29455,52 @@ class FlameManager {
             if (damage > 0 && !target.isDead) {
                 target.health -= damage;
 
-                if (gameInstance?.addDamageNumber) {
+                // 使用 flame 中存储的 gameInstance
+                const gi = flame.gameInstance || gameInstance || window.gameInstance;
+
+                if (gi?.addDamageNumber) {
                     const isPlayer = target.isPlayer === true;
-                    const px = isPlayer
-                        ? WIDTH / 2
-                        : target.physicsBody.position.x;
-                    const py = isPlayer
-                        ? HEIGHT / 2 - 30
-                        : target.physicsBody.position.y;
-                    gameInstance.addDamageNumber(px, py, Math.floor(damage), "fire");
+                    const px = isPlayer ? WIDTH / 2 : target.physicsBody.position.x;
+                    const py = isPlayer ? HEIGHT / 2 - 30 : target.physicsBody.position.y;
+                    gi.addDamageNumber(px, py, Math.floor(damage), "fire");
                 }
 
                 if (target.health <= 0 && !target.isDead) {
-                    target.markAsDead?.();
+
+                    target.isDead = true;
+                    target.deathTime = Date.now();
+
+                    // 使用 gi 调用 dropCard
+                    if (gi && typeof gi.dropCard === 'function') {
+                        gi.dropCard(target);
+                    } else {
+                        console.warn("dropCard 方法不存在, gi:", gi);
+                    }
+
+                    if (gi?.player && typeof gi.player.gainXpFromKill === 'function') {
+                        gi.player.gainXpFromKill(target.rarity || 'Common', target.type);
+                    }
+
+                    if (gi) {
+                        gi.score = (gi.score || 0) + 20;
+                        gi.enemiesKilled = (gi.enemiesKilled || 0) + 1;
+                    }
+
+                    if (gi?.huntingQuestSystem && target.type && target.rarity) {
+                        gi.huntingQuestSystem.updateProgress(target.type, target.rarity);
+                    }
+
+                    if (gi?.enemies) {
+                        const index = gi.enemies.indexOf(target);
+                        if (index !== -1) gi.enemies.splice(index, 1);
+                    }
                 }
             }
             if (!flame.isActive()) toRemove.push(target);
         }
+
         for (const target of toRemove) {
             this.activeFlames.delete(target);
-
-            // ✅ 添加：如果是玩家，燃烧结束时移除状态栏效果
             if (target.isPlayer === true && target.statusBar) {
                 target.statusBar.removeEffect("burn");
             }
@@ -27370,16 +29569,36 @@ class PoisonManager {
                     gameInstance.addDamageNumber(px, py, Math.floor(damage), "poison");
                 }
 
+                // ========== 🆕 检查是否死亡，触发掉落 ==========
                 if (target.health <= 0 && !target.isDead) {
-                    target.markAsDead?.();
+                    target.isDead = true;
+
+                    if (gameInstance && typeof gameInstance.dropCard === 'function') {
+                        gameInstance.dropCard(target);
+                    }
+
+                    if (gameInstance?.player && typeof gameInstance.player.gainXpFromKill === 'function') {
+                        gameInstance.player.gainXpFromKill(target.rarity || 'Common', target.type);
+                    }
+
+                    if (gameInstance) {
+                        gameInstance.score += 20;
+                        gameInstance.enemiesKilled++;
+                    }
+
+                    if (gameInstance?.huntingQuestSystem && target.type && target.rarity) {
+                        gameInstance.huntingQuestSystem.updateProgress(target.type, target.rarity);
+                    }
+
+                    if (gameInstance?.mobGallery && target.type && target.rarity) {
+                        gameInstance.mobGallery.recordKill(target.type, target.rarity);
+                    }
                 }
             }
             if (!poison.isActive()) toRemove.push(target);
         }
         for (const target of toRemove) {
             this.activePoisons.delete(target);
-
-            // ✅ 添加：如果是玩家，毒伤结束时移除状态栏效果
             if (target.isPlayer === true && target.statusBar) {
                 target.statusBar.removeEffect("poison");
             }
@@ -27436,8 +29655,8 @@ class Petal {
         this.angle = petalIndex * angleStep;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.05;
-        this.baseRotationSpeed = 0.05;
+        this.rotationSpeed = 0.02;
+        this.baseRotationSpeed = 0.02;
         this.screenX = 0;
         this.screenY = 0;
         this.worldX = 0;
@@ -27690,8 +29909,8 @@ class Petal {
         this.armor = 0.0;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.05;
-        this.baseRotationSpeed = 0.05;
+        this.rotationSpeed = 0.02;
+        this.baseRotationSpeed = 0.02;
         if (preserveAngle && currentAngle !== null) {
             this.angle = currentAngle;
         } else {
@@ -27847,6 +30066,124 @@ class Petal {
             console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
         }
     }
+            // 在 Petal 类中添加
+    tryBreakBubble(dt) {
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Bubble") return;
+        if (this.isBroken || this.isReloading) return;
+
+        // 检查玩家是否按住了 Shift 键
+        if (this.player && this.player.contractMode && !this._isBreaking) {
+            // 防止重复触发
+            this._isBreaking = true;
+
+            // 根据稀有度计算移动距离
+            const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
+            const baseDistance = 40;
+            const totalDistance = baseDistance + Math.log(rarityMultiplier) * 30;
+
+            // 计算方向：从 Bubble 指向玩家（玩家被弹开的方向）
+            const dx = this.worldX - this.player.physicsBody.position.x;
+            const dy = this.worldY - this.player.physicsBody.position.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist > 0.01) {
+                const dirX = -dx / dist;  // 远离 Bubble 的方向
+                const dirY = -dy / dist;
+
+                // 目标位置
+                const startX = this.player.physicsBody.position.x;
+                const startY = this.player.physicsBody.position.y;
+                const targetX = startX + dirX * totalDistance;
+                const targetY = startY + dirY * totalDistance;
+
+                // 边界限制
+                const finalX = Math.max(50, Math.min(WORLD_WIDTH - 50, targetX));
+                const finalY = Math.max(50, Math.min(WORLD_HEIGHT - 50, targetY));
+
+                // 平滑移动动画
+                const startTime = Date.now();
+                const duration = 150; // 毫秒
+                const player = this.player;
+                const gameInst = this.player.gameInstance;
+
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(1, elapsed / duration);
+                    // 缓动函数 easeOutCubic
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                    player.physicsBody.position.x = startX + (finalX - startX) * easeProgress;
+                    player.physicsBody.position.y = startY + (finalY - startY) * easeProgress;
+
+                    if (gameInst) {
+                        gameInst.cameraOffset.x = player.physicsBody.position.x - WIDTH / 2;
+                        gameInst.cameraOffset.y = player.physicsBody.position.y - HEIGHT / 2;
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // 动画完成，破碎花瓣
+                        this.health = 0;
+                        this.durability = 0;
+                        this.isBroken = true;
+                        this.startReload();
+                        this._isBreaking = false;
+                    }
+                };
+
+                requestAnimationFrame(animate);
+            } else {
+                // 距离为0的情况，直接破碎
+                this.health = 0;
+                this.durability = 0;
+                this.isBroken = true;
+                this.startReload();
+                this._isBreaking = false;
+            }
+        }
+    }
+
+    _triggerBubbleBreak(item) {
+        if (!this.player?.gameInstance) return;
+        const game = this.player.gameInstance;
+        const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
+
+        const cx = this.worldX, cy = this.worldY;
+
+        // 计算方向（从玩家指向 Bubble）
+        const dx = cx - this.player.physicsBody.position.x;
+        const dy = cy - this.player.physicsBody.position.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 0.01) {
+            const pushForce = 400 * mult;
+            // 反方向推力（玩家被弹开）
+            this.player.physicsBody.velocity.x -= (dx / dist) * pushForce;
+            this.player.physicsBody.velocity.y -= (dy / dist) * pushForce;
+        } else {
+            // 随机方向
+            const angle = Math.random() * Math.PI * 2;
+            const pushForce = 400 * mult;
+            this.player.physicsBody.velocity.x -= Math.cos(angle) * pushForce;
+            this.player.physicsBody.velocity.y -= Math.sin(angle) * pushForce;
+        }
+
+        this.player.isBouncing = true;
+        this.player.bounceCooldown = 200;
+
+        // 花瓣破碎
+        this.health = 0;
+        this.durability = 0;
+        this.isBroken = true;
+        this.startReload();
+
+        // 显示效果
+        if (game) {
+            game.addDamageNumber(cx, cy, "💨", "heal");
+        }
+    }
     // 在 Petal 类中添加
     applyFlameToEnemy(enemy, baseDamage, duration = 3000, initialMultiplier = 0.5, rampUpMultiplier = 2.0) {
         if (!enemy || enemy.isDead || enemy.isFriendly) return false;
@@ -27912,7 +30249,31 @@ class Petal {
         this.updateFromQuickSlot(slotIndex);
         return true;
     }
-// 在 Petal 类中修改 applyPoisonToEnemy 方法
+    // 在 Petal 类的 update 方法中添加
+    updateNucleusHeal(dt) {
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Nucleus") return;
+        if (this.isBroken || this.isReloading) return;
+        if (!this.player || this.player.health < this.player.maxHealth) return; // 玩家血量不满时不治疗
+
+        const healAmount = (currentItem.stats?.heal_amount || 50) * this.getRarityMultiplier() * dt;
+
+        // 寻找受伤的友方生物
+        for (const enemy of this.player.gameInstance?.enemies || []) {
+            if (enemy.isFriendly && !enemy.isDead && enemy.health < enemy.maxHealth) {
+                enemy.health = Math.min(enemy.maxHealth, enemy.health + healAmount);
+
+                // 显示治疗数字
+                this.player.gameInstance?.addDamageNumber(
+                    enemy.physicsBody.position.x,
+                    enemy.physicsBody.position.y,
+                    Math.floor(healAmount),
+                    "heal"
+                );
+                break; // 一次只治疗一个
+            }
+        }
+    }
     applyPoisonToEnemy(enemy, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
         if (!enemy || enemy.isDead || enemy.isFriendly) return false;
         if (!this.player || !this.player.gameInstance) return false;
@@ -28020,18 +30381,64 @@ class Petal {
         if (!this.player?.gameInstance) return;
         const game = this.player.gameInstance;
         const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
+
+        // ========== 判断炸弹类型 ==========
         const isBubbleBomb = item.type === "Bubble Bomb";
-        const radius = isBubbleBomb ? 120 + mult * 0.5 : 100 + mult * 0.4;
-        const damage = isBubbleBomb ? 15 * mult : 25 * mult;
-        const knockback = isBubbleBomb ? 500 + mult * 0.3 : 400 + mult * 0.3;
+        const isFireBomb = item.type === "FireBomb";
+        const isBubble = item.type === "Bubble";
+        let radius, damage, knockback;
+
+        if (isBubbleBomb) {
+            // 泡泡炸弹：范围大，伤害低，击退强
+            radius = 120 + mult * 0.5;
+            damage = 15 * mult;
+            knockback = 500 + mult * 0.3;
+        } else if (isFireBomb) {
+            // 火焰炸弹：范围中，伤害中，附加燃烧效果
+            radius = 110 + mult * 0.5;
+            damage = 20 * mult;
+            knockback = 180 + mult * 0.2;
+        } else if (isBubble) {
+            radius = 100 + mult * 0.5;
+            damage = 0.0 * mult;
+            knockback = 500 + mult * 0.2;
+        }else {
+            // 普通炸弹：范围小，伤害高，击退中
+            radius = 100 + mult * 0.4;
+            damage = 25 * mult;
+            knockback = 400 + mult * 0.3;
+        }
+
         const cx = this.worldX, cy = this.worldY;
+
         for (const enemy of game.enemies) {
             if (enemy.isDead || enemy.isFriendly) continue;
             const dx = enemy.physicsBody.position.x - cx;
             const dy = enemy.physicsBody.position.y - cy;
             const dist = Math.sqrt(dx * dx + dy * dy);
+
             if (dist < radius) {
+                // 造成直接伤害
                 enemy.health -= damage;
+
+                // ========== 🆕 FireBomb 附加燃烧效果 ==========
+                if (isFireBomb && !enemy.isDead) {
+                    const fireDamage = 30 * mult;  // 每秒燃烧伤害
+                    const fireDuration = 3000;      // 持续3秒
+
+                    if (game.flameManager) {
+                        game.flameManager.applyFlame(
+                            enemy,
+                            this,
+                            fireDamage,
+                            fireDuration,
+                            0.5,   // 初始倍率
+                            2.0    // 最终倍率（燃烧升温）
+                        );
+                    }
+                }
+
+                // 击退效果
                 if (dist > 0.1) {
                     const nx = dx / dist, ny = dy / dist;
                     enemy.physicsBody.velocity.x += nx * knockback;
@@ -28042,6 +30449,8 @@ class Petal {
                     enemy.physicsBody.velocity.y += Math.sin(angle) * knockback;
                 }
                 enemy.knockbackTimer = 0.4;
+
+                // 死亡处理
                 if (enemy.health <= 0 && !enemy.isDead) {
                     enemy.markAsDead();
                     game.dropCard(enemy);
@@ -28051,6 +30460,22 @@ class Petal {
                 }
             }
         }
+    // ========== 🆕 Bubble 破碎产生反推力 ==========
+        if (isBubble && this.player) {
+            // 计算反推方向（从爆炸中心向外）
+            const angle = Math.atan2(cy - this.player.physicsBody.position.y,
+                                      cx - this.player.physicsBody.position.x);
+            const pushForce = 400 * mult;
+            this.player.physicsBody.velocity.x -= Math.cos(angle) * pushForce;
+            this.player.physicsBody.velocity.y -= Math.sin(angle) * pushForce;
+            this.player.isBouncing = true;
+            this.player.bounceCooldown = 200;
+
+            // 显示反推效果
+            game.addDamageNumber(cx, cy, "heal");
+        }
+
+        // 炸弹自毁
         this.health = 0;
         this.durability = 0;
         this.isBroken = true;
@@ -28282,7 +30707,23 @@ class Petal {
                 } else {
                     this.rotationSpeedBonus = 0;
                 }
-
+                // 在 Petal 类的 updateFromQuickSlot 方法中，针对 Bubble 特殊处理
+                if (item.type === "Bubble") {
+                    const rarityReloadMap = {
+                        "Common": 1800,
+                        "Unusual": 1700,
+                        "Rare": 1600,
+                        "Epic": 1500,
+                        "Legendary": 1400,
+                        "Mythic": 1300,
+                        "Ultra": 1200,
+                        "Super": 1000,
+                        "Omega": 800,
+                        "Eternal": 200
+                    };
+                    this.baseReloadTime = rarityReloadMap[this.rarity] || 5000;
+                    this.reloadTime = this.baseReloadTime;
+                }
                 if (item.type === "Antennae") {
                     this.hasAntennae = true;
                     const visionBonuses = {
@@ -28305,19 +30746,25 @@ class Petal {
                 this.isChromosome = (item.type === "Chromosome");
                 this.isSponge = (item.type === "Sponge");
 
-                const EGG_ITEMS = new Set([
-                    "Egg", "Ant Egg", "Moon Egg",
-                    "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
-                    "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                    "FireAntOvermind egg", "FireAntHole egg",
-                    "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-                    "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-                    "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-                    "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-                    "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
-                    "Bee egg", "Hive egg", "Beetle egg"
-                ]);
-                this.isEggItem = EGG_ITEMS.has(item.type);
+            const EGG_ITEMS = new Set([
+                // 原有蛋
+                "Egg", "Ant Egg", "Moon Egg",
+                "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
+                "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
+                "FireAntOvermind egg", "FireAntHole egg",
+                "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
+                "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
+                "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
+                "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
+                "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
+                "Bee egg", "Hive egg", "Beetle egg",
+                // 微观世界蛋
+                "Photon egg", "Electron egg", "ElectronCloud egg", "Proton egg", "Atom egg",
+                // 宇宙世界蛋
+                "BlackHole egg", "WhiteHole egg", "NeutronStar egg", "Star egg", "Asteroid egg",
+                "Alien egg", "UFO egg", "Ghost egg", "GraveStone egg",
+            ]);
+            this.isEggItem = EGG_ITEMS.has(item.type);
 
                 item.durability = this.durability;
                 item.maxDurability = this.maxDurability;
@@ -28432,6 +30879,22 @@ class Petal {
             { listName:"ratList",           maxName:"maxRats",              maxDefault:2,  spawnCount:2,  enemyType:"Rat",            eggType:"Rat_egg",              cooldown:20000, spawnMethod:"RatWithDna",          cleanMethod:"Rats",                updateMethod:"Rats" },
             { listName:"roachList",         maxName:"maxRoaches",           maxDefault:1,  spawnCount:1,  enemyType:"Roach",          eggType:"Roach_egg",            cooldown:6000,  spawnMethod:"RoachWithDna",        cleanMethod:"Roaches",             updateMethod:"Roaches" },
             { listName:"pooStormList",      maxName:"maxPooStorms",         maxDefault:3,  spawnCount:3,  enemyType:"PooStorm",       eggType:"PooStick",             cooldown:8000,  spawnMethod:"PooStormWithDna",     cleanMethod:"PooStorms",           updateMethod:"PooStorms" },
+            { listName: "photonList", maxName: "maxPhotons", maxDefault: 2, spawnCount: 2, enemyType: "Photon", eggType: "Photon egg", cooldown: 10000, spawnMethod: "Photon", cleanMethod: "Photon", updateMethod: "Photon" },
+            { listName: "electronList", maxName: "maxElectrons", maxDefault: 1, spawnCount: 1, enemyType: "Electron", eggType: "Electron egg", cooldown: 6000, spawnMethod: "Electron", cleanMethod: "Electron", updateMethod: "Electron" },
+            { listName: "electronCloudList", maxName: "maxElectronClouds", maxDefault: 8, spawnCount: 8, enemyType: "ElectronCloud", eggType: "ElectronCloud egg", cooldown: 20000, spawnMethod: "ElectronCloud", cleanMethod: "ElectronCloud", updateMethod: "ElectronCloud" },
+            { listName: "protonList", maxName: "maxProtons", maxDefault: 1, spawnCount: 1, enemyType: "Proton", eggType: "Proton egg", cooldown: 8000, spawnMethod: "Proton", cleanMethod: "Proton", updateMethod: "Proton" },
+            { listName: "atomList", maxName: "maxAtoms", maxDefault: 5, spawnCount: 5, enemyType: "Atom", eggType: "Atom egg", cooldown: 18000, spawnMethod: "Atom", cleanMethod: "Atom", updateMethod: "Atom" },
+
+            // ========== 宇宙世界蛋 ==========
+            { listName: "blackHoleList", maxName: "maxBlackHoles", maxDefault: 1, spawnCount: 1, enemyType: "BlackHole", eggType: "BlackHole egg", cooldown: 25000, spawnMethod: "BlackHole", cleanMethod: "BlackHole", updateMethod: "BlackHole" },
+            { listName: "whiteHoleList", maxName: "maxWhiteHoles", maxDefault: 1, spawnCount: 1, enemyType: "WhiteHole", eggType: "WhiteHole egg", cooldown: 22000, spawnMethod: "WhiteHole", cleanMethod: "WhiteHole", updateMethod: "WhiteHole" },
+            { listName: "neutronStarList", maxName: "maxNeutronStars", maxDefault: 1, spawnCount: 1, enemyType: "NeutronStar", eggType: "NeutronStar egg", cooldown: 28000, spawnMethod: "NeutronStar", cleanMethod: "NeutronStar", updateMethod: "NeutronStar" },
+            { listName: "starList", maxName: "maxStars", maxDefault: 1, spawnCount: 1, enemyType: "Star", eggType: "Star egg", cooldown: 15000, spawnMethod: "Star", cleanMethod: "Star", updateMethod: "Star" },
+            { listName: "asteroidList", maxName: "maxAsteroids", maxDefault: 1, spawnCount: 1, enemyType: "Asteroid", eggType: "Asteroid egg", cooldown: 10000, spawnMethod: "Asteroid", cleanMethod: "Asteroid", updateMethod: "Asteroid" },
+            { listName: "alienList", maxName: "maxAliens", maxDefault: 1, spawnCount: 1, enemyType: "Alien", eggType: "Alien egg", cooldown: 12000, spawnMethod: "Alien", cleanMethod: "Alien", updateMethod: "Alien" },
+            { listName: "ufoAlienList", maxName: "maxUFOAliens", maxDefault: 10, spawnCount: 10, enemyType: "Alien", eggType: "UFO egg", cooldown: 28000, spawnMethod: "UFOAlien", cleanMethod: "UFOAlien", updateMethod: "UFOAlien" },
+            { listName: "graveGhostList", maxName: "maxGraveGhosts", maxDefault: 15, spawnCount: 15, enemyType: "Ghost", eggType: "GraveStone egg", cooldown: 24000, spawnMethod: "GraveGhost", cleanMethod: "GraveGhost", updateMethod: "GraveGhost" },
+            { listName: "ghostList", maxName: "maxGhosts", maxDefault: 3, spawnCount: 3, enemyType: "Ghost", eggType: "Ghost egg", cooldown: 15000, spawnMethod: "Ghost", cleanMethod: "Ghost", updateMethod: "Ghost" },
         ];
 
         for (const cfg of SPAWN_CONFIGS) {
@@ -28549,7 +31012,7 @@ class Petal {
             this.screenX = WIDTH / 2 + (this.worldX - playerPos.x);
             this.screenY = HEIGHT / 2 + (this.worldY - playerPos.y);
         } else {
-            // ✅ 只计算位置，不更新角度（角度已经在外面更新了）
+
             this.worldX = playerPos.x + Math.cos(this.angle) * this.radius;
             this.worldY = playerPos.y + Math.sin(this.angle) * this.radius;
             this.screenX = WIDTH / 2 + Math.cos(this.angle) * this.radius;
@@ -28591,11 +31054,14 @@ class Petal {
 
     update(dt, spreadMode = false, playerWorldPos = null) {
         const currentItem = this.getCurrentItem();
+
+        // 玫瑰/贝壳/冰玫瑰的吸收延迟处理
         if (currentItem && (currentItem.type === "Rose" || currentItem.type === "Shell" || currentItem.type === "Ice Rose")) {
             if (!this.autoAbsorb && !this.isReloading && this.absorbDelay <= 0) {
                 this.absorbDelay = this.absorbDelayTime;
             }
         }
+
         if (this.absorbDelay > 0) {
             this.absorbDelay -= dt;
             if (this.absorbDelay <= 0) {
@@ -28614,6 +31080,7 @@ class Petal {
                 }
             }
         }
+
         if (this.autoAbsorb) {
             this.absorbProgress += dt * 0.67;
             if (this.absorbProgress >= 1) {
@@ -28635,46 +31102,58 @@ class Petal {
                 this.absorbDelay = 0;
             }
         }
+
         this.updateReloadTimeWithGoldenLeaf();
         this.updateSpawnCooldownWithGoldenLeaf();
-        // 1. 原有的旋转/移动逻辑 (计算出新的 this.x, this.y)
-        this.calculateOrbitPosition(dt);
 
-        // 2. ⚡ 零开销斥力：只检测当前正在碰撞的敌人
+        // ===== ✅ 关键修改：强制更新角度（无论是否有物品）=====
+        // 所有花瓣都持续旋转，不受任何条件限制
+            const ANGLE_INCREMENT = 0.04; // 固定增量，确保旋转可见
+        this.angle += ANGLE_INCREMENT;
+
+        // 确保角度在有效范围内
+        while (this.angle > Math.PI * 2) {
+            this.angle -= Math.PI * 2;
+        }
+        while (this.angle < 0) {
+            this.angle += Math.PI * 2;
+        }
+
+        // 计算轨道位置
+        this.calculateOrbitPosition(dt);
+        this.updateNucleusHeal(dt);
+
+        // 零开销斥力：只检测当前正在碰撞的敌人
         if (this.touchingEnemy) {
             const enemy = this.touchingEnemy;
             if (!enemy.isDead && enemy.physicsBody) {
                 const eBody = enemy.physicsBody;
-
                 const dx = this.worldX - eBody.position.x;
                 const dy = this.worldY - eBody.position.y;
                 const distSq = dx * dx + dy * dy;
                 const minDist = eBody.radius + this.getRadius();
 
-                // 如果插进去了，强行推出来
                 if (distSq < minDist * minDist && distSq > 0.01) {
                     const dist = Math.sqrt(distSq);
-                    // 强行重置到边缘
                     const ratio = minDist / dist;
                     this.worldX = eBody.position.x + dx * ratio;
                     this.worldY = eBody.position.y + dy * ratio;
 
-                    // 同步屏幕坐标和固定位置
                     if (this.player && this.player.physicsBody) {
                         this.screenX = WIDTH / 2 + (this.worldX - this.player.physicsBody.position.x);
                         this.screenY = HEIGHT / 2 + (this.worldY - this.player.physicsBody.position.y);
                     }
 
-                    // 如果是固定位置模式，同步更新
                     if (this.fixedPosition) {
                         this.fixedPosition.x = this.worldX;
                         this.fixedPosition.y = this.worldY;
                     }
                 }
             }
-            // 重置标记，下一帧重新检测
             this.touchingEnemy = null;
         }
+
+        // 同步物品属性
         if (currentItem) {
             if (this.durability !== currentItem.durability) this.durability = currentItem.durability;
             if (this.maxDurability !== currentItem.maxDurability) this.maxDurability = currentItem.maxDurability;
@@ -28682,8 +31161,12 @@ class Petal {
             if (this.reloadTime !== currentItem.reloadTime) this.reloadTime = currentItem.reloadTime;
             if (this.baseReloadTime !== currentItem.baseReloadTime) this.baseReloadTime = currentItem.baseReloadTime;
         }
+
         this.checkQuickSlotChange();
+
         if (this.collisionCooldown > 0) this.collisionCooldown -= dt * 1000;
+
+        // 重载状态处理
         if (this.isReloading) {
             this.reloadCooldown -= dt * 1000;
             if (this.reloadCooldown <= 0) {
@@ -28692,20 +31175,29 @@ class Petal {
                 this.isBroken = false;
                 this.health = this.maxHealth;
                 this.durability = this.maxDurability;
-                if (currentItem) { currentItem.isBroken = false; currentItem.durability = this.maxDurability; }
+                if (currentItem) {
+                    currentItem.isBroken = false;
+                    currentItem.durability = this.maxDurability;
+                }
                 this.eggSpawned = false;
             }
             this._updateExistingSummonedCreatures(dt);
             return;
         }
+
+        // 破碎状态处理
         if (this.isBroken) {
             if (currentItem && (currentItem.type === "Cancer" || currentItem.type === "Web")) return;
             this._updateExistingSummonedCreatures(dt);
             return;
         }
+
         const screenCenterX = WIDTH / 2;
         const screenCenterY = HEIGHT / 2;
+
+        // 静止模式 vs 正常模式
         if (this.stillMode) {
+            // 静止模式：位置固定，但角度继续旋转（角度已经在上面更新过了）
             if (this.player && this.player.physicsBody) {
                 const playerX = this.player.physicsBody.position.x;
                 const playerY = this.player.physicsBody.position.y;
@@ -28716,12 +31208,13 @@ class Petal {
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             }
         } else {
-            if (!this.hasAntennae) this.angle += this.rotationSpeed * dt * 60;
+            // 正常模式 - 计算半径和屏幕位置
             let thirdEyeBonus = 0;
             if (this.player && typeof this.player.updateThirdEye === 'function') {
                 this.player.updateThirdEye();
                 thirdEyeBonus = this.player.thirdEyeRangeBonus || 0;
             }
+
             const EGG_ITEMS = new Set([
                 "Egg","Ant Egg","Moon Egg","Squid egg","WhiteBloodCell egg","StemCell egg","Spider egg",
                 "RedBloodCell egg","Bacteria_egg","Stick","PooStick","queen ant egg","Hive Egg",
@@ -28738,8 +31231,11 @@ class Petal {
                 "SpiderCave egg","Beetle egg","HelWorm egg","HelSpider egg","Hel Bee egg",
                 "HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg","HelHive egg",
                 "HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg","Hel Digger egg",
-                "Hel Beekeeper egg","FireStick"
+                "Hel Beekeeper egg","FireStick","Photon egg","Electron egg","ElectronCloud egg",
+                "Proton egg","Atom egg","BlackHole egg","WhiteHole egg","NeutronStar egg",
+                "Star egg","Asteroid egg","Alien egg","UFO egg","Ghost egg","GraveStone egg"
             ]);
+
             if (this.hasAntennae) {
                 this.radius = 0;
                 this.targetRadius = 0;
@@ -28747,24 +31243,34 @@ class Petal {
                 const isEggItem = currentItem && EGG_ITEMS.has(currentItem.type);
                 const fixedItems = new Set(["Magnet","Stick","PooStick","Plank"]);
                 const isFixed = currentItem && fixedItems.has(currentItem.type);
+
                 if (isEggItem) {
                     this.targetRadius = 35;
                 } else if (isFixed) {
                     this.targetRadius = 35;
                 } else if (this.itemType === "Heavy") {
                     this.targetRadius = 65;
+                }else if (this.itemType === "Bubble") {
+                    this.targetRadius = 35;
+                }else if (this.itemType === "Cotton") {
+                    this.targetRadius = 35;
+                }else if (this.itemType === "Sponge") {
+                    this.targetRadius = 35;
                 } else if (spreadMode) {
                     this.targetRadius = 100 + thirdEyeBonus;
                 } else {
                     this.targetRadius = 35;
                 }
+
                 if (currentItem && currentItem.type === "Wing" && !isEggItem && !isFixed && this.itemType !== "Heavy") {
                     this.targetRadius *= 1.4;
                 }
                 this.radius += (this.targetRadius - this.radius) * 0.1;
             }
+
             this.screenX = screenCenterX + Math.cos(this.angle) * this.radius;
             this.screenY = screenCenterY + Math.sin(this.angle) * this.radius;
+
             if (playerWorldPos) {
                 this.worldX = playerWorldPos.x + Math.cos(this.angle) * this.radius;
                 this.worldY = playerWorldPos.y + Math.sin(this.angle) * this.radius;
@@ -28775,7 +31281,11 @@ class Petal {
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             }
         }
+
+        // 攻击冷却更新
         if (this.attackCooldown > 0) this.attackCooldown -= dt * 1000;
+
+        // 生成冷却更新
         if (this.spawnCooldown > 0) {
             const ci = this.getCurrentItem();
             let speedMultiplier = 1.0;
@@ -28790,19 +31300,29 @@ class Petal {
             this.spawnCooldown -= dt * 1000 * speedMultiplier;
             if (this.spawnCooldown < 0) this.spawnCooldown = 0;
         }
+
+        // 翅膀旋转动画
         if (currentItem && currentItem.type === "Wing") {
             this.wingRotationAngle = (this.wingRotationAngle + 180 * dt) % 360;
         }
+
+        // 染色体修复
         this.repairPetalsWithChromosome(dt);
+
+        // DNA 检查
         const hasDNA = this.player && this.player.petals && this.player.petals.some(petal => {
             const item = petal.getCurrentItem();
             return item && item.type === "DNA" && !petal.isBroken;
         });
+
+        // Mimic 自动复制
         if (this.player?.gameInstance?.gameState === GameState.IN_GAME &&
             currentItem && currentItem.type === "Mimic" && !this.mimicProcessed) {
             this.autoCopyWithMimic(this._petalIndex);
             this.mimicProcessed = true;
         }
+
+        // 蛋类物品生成逻辑
         if (currentItem) {
             if ((currentItem.type === "Cancer" || currentItem.type === "Web") && this.isBroken) return;
 
@@ -28824,100 +31344,108 @@ class Petal {
                 }
             };
 
-            // ── Auto-generated spawn methods (called by name) ────────────────
+            // 自动生成映射表（精简版，保持原有逻辑）
             const autoEggMap = {
-                "WhiteBloodCell egg": ["WhiteBloodCellsWithDna", 5000,  "updateWhiteBloodCells"],
-                "Spider egg":         ["SpidersWithDna",         6000,  "updateSpiders"],
-                "RedBloodCell egg":   ["RedBloodCellsWithDna",   8000,  "updateRedBloodCells"],
-                "StemCell egg":       ["StemCellsWithDna",       15000, "updateStemCells"],
-                "Stick":              ["SandstormsWithDna",      8000,  "updateSandstorms"],
-                "HelWorm egg":        ["HelWorm",                10000, "updateHelWorm"],
-                "HelSpider egg":      ["HelSpider",              12000, "updateHelSpider"],
-                "Hel Bee egg":        ["HelBee",                 10000, "updateHelBee"],
-                "HelHornet egg":      ["HelHornet",              12000, "updateHelHornet"],
-                "HelBeetle egg":      ["HelBeetle",              15000, "updateHelBeetle"],
-                "Dragon egg":         ["Dragon",                 20000, "updateDragon"],
+                "WhiteBloodCell egg": ["WhiteBloodCellsWithDna", 5000, "updateWhiteBloodCells"],
+                "Spider egg": ["SpidersWithDna", 6000, "updateSpiders"],
+                "RedBloodCell egg": ["RedBloodCellsWithDna", 8000, "updateRedBloodCells"],
+                "StemCell egg": ["StemCellsWithDna", 15000, "updateStemCells"],
+                "Stick": ["SandstormsWithDna", 8000, "updateSandstorms"],
+                "HelWorm egg": ["HelWorm", 10000, "updateHelWorm"],
+                "HelSpider egg": ["HelSpider", 12000, "updateHelSpider"],
+                "Hel Bee egg": ["HelBee", 10000, "updateHelBee"],
+                "HelHornet egg": ["HelHornet", 12000, "updateHelHornet"],
+                "HelBeetle egg": ["HelBeetle", 15000, "updateHelBeetle"],
+                "Dragon egg": ["Dragon", 20000, "updateDragon"],
                 "DragonNest egg": ["NestDragon", 28000, "updateNestDragon"],
                 "HelHive egg": ["HiveHelBee", 25000, "updateHiveHelBee"],
-                "HelJellyfish egg":   ["HelJellyfish",           15000, "updateHelJellyfish"],
-                "Hel Queen Bee egg":  ["HelQueenBee",            25000, "updateHelQueenBee"],
-                "ToxicDragon egg":    ["ToxicDragon",            22000, "updateToxicDragon"],
-                "Hel Digger egg":     ["HelDigger",              18000, "updateHelDigger"],
-                "Hel Beekeeper egg":  ["HelBeekeeper",           20000, "updateHelBeekeeper"],
-                "FireStick":          ["Firestorm",              8000,  "updateFirestorm"],
-                "Shell egg":          ["ScallopsWithDna",        7000,  "updateScallops"],
-                "Starfish egg":       ["StarfishWithDna",        8000,  "updateStarfish"],
-                "Bubble egg":         ["BubblesWithDna",         5000,  "updateBubbles"],
-                "Crab egg":           ["CrabsWithDna",           6000,  "updateCrabs"],
-                "Jellyfish egg":      ["JellyfishWithDna",       10000, "updateJellyfish"],
-                "CrabHole egg":       ["CrabHoleWithDna",        15000, "updateCrabHoles"],
-                "Cancer egg":         ["CancerWithDNA",          12000, "updateCancer"],
-                "ManHole egg":        ["ManHoleWithDna",         20000, "updateManHoles"],
-                "Fly_egg":            ["FlyWithDna",             10000, "updateFlies"],
-                "Rat_egg":            ["RatWithDna",             20000, "updateRats"],
-                "Roach_egg":          ["RoachWithDna",           6000,  "updateRoaches"],
-                "PooStick":           ["PooStormWithDna",        8000,  "updatePooStorms"],
-                "Wasp egg":           ["Wasp",                   10000, "updateWasps"],
-                "Worker Termite egg": ["WorkerTermite",          12000, "updateWorkerTermites"],
-                "Soldier Termite egg":["SoldierTermite",         12000, "updateSoldierTermites"],
-                "StickBug egg":       ["StickBug",               6000,  "updateStickBugs"],
-                "Mantis egg":         ["Mantis",                 10000, "updateMantises"],
-                "Firefly egg":        ["Firefly",                14000, "updateFireflies"],
-                "TermiteHole egg":    ["TermiteHoleSoldiers",    18000, "updateTermiteSoldiers"],
-                "TermiteOvermind egg":["TermiteOvermind",        20000, "updateTermiteOverminds"],
-                "SpiderCave egg":     ["SpiderCave",             19000, "updateSpiderCaveSpiders"],
-                "Square Egg":         ["SquareWithDNA",          15000, "updateSquare"],
-                "Leech Egg":          ["LeechWithDNA",           10000, "updateLeeches"],
-                "Parasite Egg":       ["ParasiteWithDNA",        9000,  "updateParasites"],
-                "Bacteriophage egg":  ["BacteriophageWithDNA",   15000, "updateBacteriophages"],
-                "Virus egg":          ["VirusWithDNA",           5000,  "updateVirus"],
-                "SlagMight egg":      ["SlagMight",              8000,  "updateSlagMight"],
-                "Ice Cube egg":       ["IceCube",                6000,  "updateIceCube"],
-                "Ice Dragon egg":     ["IceDragon",              10000, "updateIceDragon"],
-                "Igloo egg":          ["IglooSnowmen",           20000, "updateIglooSnowmen"],
-                "Beetle egg":         ["BeetleWithDna",          8000,  "updateBeetles"],
-                "Tick egg":           ["Tick",                   6000,  "updateTick"],
-                "Shipwreck egg":      ["ShipwreckJellyfish",     19000, "updateShipwreckJellyfish"],
-                "ArcticSpider egg":   ["ArcticSpiders",          12000, "updateArcticSpiders"],
-                "Scorpion egg":       ["ScorpionsWithDNA",       20000, "updateScorpions"],
-                "ArcticSpiderCave egg":["ArcticCaveSpiders",     18000, "updateArcticCaveSpiders"],
-                "Snowman egg":        ["Snowman",                6000,  "updateSnowman"],
-                "SnowStick":          ["Snowstorm",              8000,  "updateSnowstorm"],
-                "Soldier Ant egg":    ["SoldierAntsWithDNA",     10000, "updateSoldierAnts"],
-                "Worker Ant egg":     ["WorkerAntsWithDNA",      8000,  "updateWorkerAnts"],
-                "Barnacle egg":       ["BarnaclesWithDNA",       12000, "updateBarnacles"],
-                "Centipede egg":      ["CentipedeWithDNA",       15000, "updateCentipedes"],
-                "Frost Digger egg":   ["FrostDiggerWithDNA",     15000, "updateFrostDiggers"],
-                "PirateDigger egg":   ["PirateDiggerWithDNA",    18000, "updatePirateDiggers"],
-                "Queen Bee egg":      ["QueenBeeWithDNA",        15000, "updateQueenBees"],
-                "Bee egg":            ["BeesWithDNA",            10000, "updateBees"],
-                "Ladybug egg":        ["LadybugsWithDNA",        12000, "updateLadybugs"],
-                "Squid egg":          ["SquidWithDNA",           10000, "updateSquid"],
-                "Bacteria_egg":       ["BacteriaWithDna",        10000, "updateBacteria"],
-                "Hive egg":           ["HiveBeesWithDNA",        20000, "updateHiveBees"],
-                "Beekeeper egg":      ["BeekeeperWithDNA",       20000, "updateBeekeepers"],
+                "HelJellyfish egg": ["HelJellyfish", 15000, "updateHelJellyfish"],
+                "Hel Queen Bee egg": ["HelQueenBee", 25000, "updateHelQueenBee"],
+                "ToxicDragon egg": ["ToxicDragon", 22000, "updateToxicDragon"],
+                "Hel Digger egg": ["HelDigger", 18000, "updateHelDigger"],
+                "Hel Beekeeper egg": ["HelBeekeeper", 20000, "updateHelBeekeeper"],
+                "FireStick": ["Firestorm", 8000, "updateFirestorm"],
+                "Shell egg": ["ScallopsWithDna", 7000, "updateScallops"],
+                "Starfish egg": ["StarfishWithDna", 8000, "updateStarfish"],
+                "Bubble egg": ["BubblesWithDna", 5000, "updateBubbles"],
+                "Crab egg": ["CrabsWithDna", 6000, "updateCrabs"],
+                "Jellyfish egg": ["JellyfishWithDna", 10000, "updateJellyfish"],
+                "CrabHole egg": ["CrabHoleWithDna", 15000, "updateCrabHoles"],
+                "Cancer egg": ["CancerWithDNA", 12000, "updateCancer"],
+                "ManHole egg": ["ManHoleWithDna", 20000, "updateManHoles"],
+                "Fly_egg": ["FlyWithDna", 10000, "updateFlies"],
+                "Rat_egg": ["RatWithDna", 20000, "updateRats"],
+                "Roach_egg": ["RoachWithDna", 6000, "updateRoaches"],
+                "PooStick": ["PooStormWithDna", 8000, "updatePooStorms"],
+                "Wasp egg": ["Wasp", 10000, "updateWasps"],
+                "Worker Termite egg": ["WorkerTermite", 12000, "updateWorkerTermites"],
+                "Soldier Termite egg": ["SoldierTermite", 12000, "updateSoldierTermites"],
+                "StickBug egg": ["StickBug", 6000, "updateStickBugs"],
+                "Mantis egg": ["Mantis", 10000, "updateMantises"],
+                "Firefly egg": ["Firefly", 14000, "updateFireflies"],
+                "TermiteHole egg": ["TermiteHoleSoldiers", 18000, "updateTermiteSoldiers"],
+                "TermiteOvermind egg": ["TermiteOvermind", 20000, "updateTermiteOverminds"],
+                "SpiderCave egg": ["SpiderCave", 19000, "updateSpiderCaveSpiders"],
+                "Square Egg": ["SquareWithDNA", 15000, "updateSquare"],
+                "Leech Egg": ["LeechWithDNA", 10000, "updateLeeches"],
+                "Parasite Egg": ["ParasiteWithDNA", 9000, "updateParasites"],
+                "Bacteriophage egg": ["BacteriophageWithDNA", 15000, "updateBacteriophages"],
+                "Virus egg": ["VirusWithDNA", 5000, "updateVirus"],
+                "SlagMight egg": ["SlagMight", 8000, "updateSlagMight"],
+                "Ice Cube egg": ["IceCube", 6000, "updateIceCube"],
+                "Ice Dragon egg": ["IceDragon", 10000, "updateIceDragon"],
+                "Igloo egg": ["IglooSnowmen", 20000, "updateIglooSnowmen"],
+                "Beetle egg": ["BeetleWithDna", 8000, "updateBeetles"],
+                "Tick egg": ["Tick", 6000, "updateTick"],
+                "Shipwreck egg": ["ShipwreckJellyfish", 19000, "updateShipwreckJellyfish"],
+                "ArcticSpider egg": ["ArcticSpiders", 12000, "updateArcticSpiders"],
+                "Scorpion egg": ["ScorpionsWithDNA", 20000, "updateScorpions"],
+                "ArcticSpiderCave egg": ["ArcticCaveSpiders", 18000, "updateArcticCaveSpiders"],
+                "Snowman egg": ["Snowman", 6000, "updateSnowman"],
+                "SnowStick": ["Snowstorm", 8000, "updateSnowstorm"],
+                "Soldier Ant egg": ["SoldierAntsWithDNA", 10000, "updateSoldierAnts"],
+                "Worker Ant egg": ["WorkerAntsWithDNA", 8000, "updateWorkerAnts"],
+                "Barnacle egg": ["BarnaclesWithDNA", 12000, "updateBarnacles"],
+                "Centipede egg": ["CentipedeWithDNA", 15000, "updateCentipedes"],
+                "Frost Digger egg": ["FrostDiggerWithDNA", 15000, "updateFrostDiggers"],
+                "PirateDigger egg": ["PirateDiggerWithDNA", 18000, "updatePirateDiggers"],
+                "Queen Bee egg": ["QueenBeeWithDNA", 15000, "updateQueenBees"],
+                "Bee egg": ["BeesWithDNA", 10000, "updateBees"],
+                "Ladybug egg": ["LadybugsWithDNA", 12000, "updateLadybugs"],
+                "Squid egg": ["SquidWithDNA", 10000, "updateSquid"],
+                "Bacteria_egg": ["BacteriaWithDna", 10000, "updateBacteria"],
+                "Hive egg": ["HiveBeesWithDNA", 20000, "updateHiveBees"],
+                "Beekeeper egg": ["BeekeeperWithDNA", 20000, "updateBeekeepers"],
+                "Photon egg": ["Photon", 10000, "updatePhoton"],
+                "Electron egg": ["Electron", 6000, "updateElectron"],
+                "ElectronCloud egg": ["ElectronCloud", 20000, "updateElectronCloud"],
+                "Proton egg": ["Proton", 8000, "updateProton"],
+                "Atom egg": ["Atom", 18000, "updateAtom"],
+                "BlackHole egg": ["BlackHole", 25000, "updateBlackHole"],
+                "WhiteHole egg": ["WhiteHole", 22000, "updateWhiteHole"],
+                "NeutronStar egg": ["NeutronStar", 28000, "updateNeutronStar"],
+                "Star egg": ["Star", 15000, "updateStar"],
+                "Asteroid egg": ["Asteroid", 10000, "updateAsteroid"],
+                "Alien egg": ["Alien", 12000, "updateAlien"],
+                "Ghost egg": ["Ghost", 15000, "updateGhost"],
+                "UFO egg": ["UFOAlien", 28000, "updateUFOAlien"],
+                "GraveStone egg": ["GraveGhost", 24000, "updateGraveGhost"]
             };
 
             if (autoEggMap[currentItem.type]) {
                 const [spawnSuffix, defaultCooldown, updateMethod] = autoEggMap[currentItem.type];
                 handleEggSpawn(this["trySpawn" + spawnSuffix], defaultCooldown);
                 this[updateMethod]?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            // ── Special cases with non-standard logic ────────────────────────
-            else if (currentItem.type === "Egg") {
+            } else if (currentItem.type === "Egg") {
                 handleEggSpawn(this.trySpawnGoldenAntsWithDna, 15000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Ant Egg") {
+            } else if (currentItem.type === "Ant Egg") {
                 handleEggSpawn(this.trySpawnGoldenAnts, 5000);
                 this.updateGoldenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Moon Egg") {
+            } else if (currentItem.type === "Moon Egg") {
                 handleEggSpawn(this.trySpawnRockWithDna, 15000);
                 this.updateRocks?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (["WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg",
-                      "FireAntOvermind egg","FireAntHole egg"].includes(currentItem.type)) {
+            } else if (["WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg","FireAntOvermind egg","FireAntHole egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         let spawned = false;
@@ -28946,24 +31474,17 @@ class Petal {
                     }
                 }
                 this.updateFireAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "queen ant egg") {
+            } else if (currentItem.type === "queen ant egg") {
                 handleEggSpawn(this.trySpawnQueenAntsWithDna, 20000);
                 this.updateQueenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (["TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg"].includes(currentItem.type)) {
+            } else if (["TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         const eggToDigger = {
                             "TrashDigger egg":"TrashDigger","MudDigger_egg":"MudDigger",
                             "Digger egg":"Digger","Biologist egg":"Biologist"
                         };
-                        const spawned = this.trySpawnDiggers?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA,
-                            eggToDigger[currentItem.type]
-                        );
+                        const spawned = this.trySpawnDiggers?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA, eggToDigger[currentItem.type]);
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
@@ -28972,15 +31493,10 @@ class Petal {
                     }
                 }
                 this.updateDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            }
-            else if (currentItem.type === "Trashcan egg") {
+            } else if (currentItem.type === "Trashcan egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
-                        const spawned = this.trySpawnFliesFromEgg?.(
-                            this.player.gameInstance.enemies,
-                            this.player.getWorldPosition(),
-                            hasDNA
-                        );
+                        const spawned = this.trySpawnFliesFromEgg?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                         if (spawned) {
                             this.eggSpawned = true;
                             this.breakPetal();
@@ -29076,6 +31592,9 @@ class Petal {
     breakPetal() {
         if (this.isBroken || this.isReloading) return;
         this.isBroken = true;
+        // 破碎时不保存位置
+        this.stillMode = false;
+        this.stillPosition = { x: 0, y: 0 };
         this.startReload();
     }
 
@@ -29083,6 +31602,8 @@ class Petal {
         if (this.isReloading) return;
         this.isReloading = true;
         this.reloadCooldown = this.reloadTime;
+        // 重载时也不保存位置
+        this.stillMode = false;
     }
 
     getPetalIndex() {
@@ -29109,7 +31630,7 @@ class Petal {
         const currentItem = this.getCurrentItem();
 
         // 1. 炸弹逻辑 (保持原样)
-        if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb")) {
+        if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb"|| currentItem.type === "FireBomb")) {
             this._triggerBombExplosion(currentItem);
             return true;
         }
@@ -29829,16 +32350,7 @@ class Petal {
             this.drawOmegaParticles(ctx, drawX, drawY, scaledSize);
         }
         if (!currentItem) {
-            const rarityColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
-            ctx.save();
-            ctx.strokeStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
-            ctx.lineWidth = 3;
-            ctx.globalAlpha = 0.8;
-            ctx.beginPath();
-            ctx.arc(drawX, drawY, scaledSize/2, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
-            if (this.absorbDelay > 0) ctx.restore();
+
             return;
         }
         const itemImg = window.imageLoader?.getImage(currentItem.type, this.rarity, [scaledSize, scaledSize]);
@@ -30258,7 +32770,344 @@ class StatusBar {
         ctx.restore();
     }
 }
+// ==================== Spacetime Tunnel System ====================
+class SpacetimeTunnelSystem {
+    constructor(gameInstance) {
+        this.game = gameInstance;
+        this.isInTunnel = false;
+        this.currentWorld = "macro"; // macro, micro, void
+        this.tunnelEntryTime = 0;
+        this.tunnelDuration = 0;
+        this.savedState = null;
+        this.currentTunnel = null;
+        this.exitWarningGiven = false;
 
+    }
+
+    // Try to spawn a spacetime tunnel (1/10000 chance)
+    trySpawnTunnel(enemies, worldWidth, worldHeight) {
+        // 1/10000 chance (0.0001 = 0.01%)
+        if (Math.random() > 0.0001) return null;
+
+        const player = this.game.player;
+        if (!player || player.isDead) return null;
+
+        // Spawn near player (200-400 pixels away)
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 200 + Math.random() * 200;
+        const x = player.physicsBody.position.x + Math.cos(angle) * distance;
+        const y = player.physicsBody.position.y + Math.sin(angle) * distance;
+
+        // Boundary check
+        if (x < 50 || x > worldWidth - 50 || y < 50 || y > worldHeight - 50) return null;
+
+        // Create tunnel entity
+        const tunnel = new Enemy("SpacetimeTunnel", x, y, 1, "Legendary");
+        tunnel.isTunnel = true;
+        tunnel.radius = 100;
+        tunnel.maxHealth = 999999;
+        tunnel.health = 999999;
+        tunnel.name = "Spacetime Tunnel";
+        tunnel.physicsBody.radius = 100;
+        // Custom draw method
+        tunnel.draw = (ctx, enemyDrawer, playerPos, cameraOffset, viewScale) => {
+            this.drawTunnel(ctx, tunnel.physicsBody.position.x - cameraOffset.x,
+                                  tunnel.physicsBody.position.y - cameraOffset.y,
+                                  tunnel.radius * 2 * viewScale);
+        };
+
+        enemies.push(tunnel);
+        this.currentTunnel = tunnel;
+
+        console.log(`🌌 Spacetime Tunnel spawned at: (${x.toFixed(0)}, ${y.toFixed(0)})`);
+        this.showMessage("✨ A mysterious portal appears nearby...");
+
+        return tunnel;
+    }
+
+    drawTunnel(ctx, x, y, size) {
+        const radius = size / 2;
+        const now = Date.now() / 1000;
+
+        ctx.save();
+
+        // 外圈光晕
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, 'rgba(100, 50, 150, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(80, 40, 120, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 粒子螺旋效果
+        ctx.globalCompositeOperation = 'lighter';
+
+        const particleCount = 200;
+        for (let i = 0; i < particleCount; i++) {
+            const t = (now * 0.5 + i / particleCount) % 1;
+            const r = radius * (0.1 + t * 0.9);
+            const angle = t * Math.PI * 8 + now * 2;
+
+            const px = x + Math.cos(angle) * r;
+            const py = y + Math.sin(angle) * r;
+            const prevR = radius * (0.1 + (t - 0.02) * 0.9);
+            const prevAngle = (t - 0.02) * Math.PI * 8 + now * 2;
+            const ppx = x + Math.cos(prevAngle) * prevR;
+            const ppy = y + Math.sin(prevAngle) * prevR;
+
+            const alpha = 0.3 * (1 - t);
+            ctx.beginPath();
+            ctx.strokeStyle = `hsla(${270 + t * 100}, 100%, 60%, ${alpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(ppx, ppy);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        // 中心点
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#000';
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Enter spacetime tunnel
+    enterTunnel(tunnel) {
+        if (this.isInTunnel) return;
+
+        console.log(`🌀 Entering Spacetime Tunnel! Current world: ${this.currentWorld}`);
+        this.showMessage("🌀 You step into the swirling portal...");
+
+        // Save current world state
+        this.savedState = {
+            world: this.currentWorld,
+            playerPos: this.game.player.physicsBody.position.clone(),
+            cameraOffset: this.game.cameraOffset.clone(),
+            enemies: this.game.enemies.filter(e => !e.isTunnel),
+            droppedCards: [...this.game.droppedCards],
+            score: this.game.score,
+            enemiesKilled: this.game.enemiesKilled,
+            biome: this.game.currentBiome
+        };
+
+        // Determine next world based on current world
+        if (this.currentWorld === "macro") {
+            this.enterMicroWorld();
+        } else if (this.currentWorld === "micro") {
+            this.enterVoidWorld();
+        } else if (this.currentWorld === "void") {
+            this.exitTunnel();
+        }
+
+        // Remove tunnel entity
+        const tunnelIndex = this.game.enemies.indexOf(tunnel);
+        if (tunnelIndex !== -1) this.game.enemies.splice(tunnelIndex, 1);
+        this.currentTunnel = null;
+    }
+
+    // Enter Micro World (atoms, electrons, protons, photons)
+    enterMicroWorld() {
+        this.isInTunnel = true;
+        this.currentWorld = "micro";
+        this.tunnelEntryTime = Date.now();
+        this.tunnelDuration = 10 * 60 * 1000; // 10 minutes
+        this.exitWarningGiven = false;
+
+        // Switch to Micro World biome
+        const microBiome = "Micro";
+
+        // Start the micro world game
+        this.game.startGame(microBiome);
+
+        // Spawn micro world particles
+        this.showMessage("WELCOME TO THE MICROVERSE!");
+        this.showMessage("⚛Atoms, electrons, protons, and photons surround you...");
+        this.showMessage("You have 10 minutes before traveling to the Void");
+
+        // Auto-enter Void after 10 minutes
+        setTimeout(() => {
+            if (this.isInTunnel && this.currentWorld === "micro") {
+                this.showMessage("The microverse is collapsing...");
+                setTimeout(() => this.enterVoidWorld(), 2000);
+            }
+        }, this.tunnelDuration);
+    }
+
+    // Enter Void World (black holes, white holes, neutron stars, aliens, UFOs)
+    enterVoidWorld() {
+        this.currentWorld = "void";
+        this.tunnelEntryTime = Date.now();
+        this.tunnelDuration = 60 * 60 * 1000; // 1 hour
+        this.exitWarningGiven = false;
+
+        // Switch to Void World biome
+        const voidBiome = "Void";
+
+        this.game.startGame(voidBiome);
+
+        this.showMessage("WELCOME TO THE VOID!");
+        this.showMessage("You have 1 hour before returning home");
+
+        // Auto-return after 1 hour
+        setTimeout(() => {
+            if (this.isInTunnel && this.currentWorld === "void") {
+                this.showMessage("⚠️ The void is destabilizing...");
+                setTimeout(() => this.exitTunnel(), 3000);
+            }
+        }, this.tunnelDuration);
+    }
+
+    // Exit spacetime tunnel (return to original world)
+    exitTunnel() {
+        if (!this.isInTunnel && !this.savedState) return;
+
+        console.log(`🚪 Exiting Spacetime Tunnel, returning to ${this.savedState?.world || "macro"} world`);
+        this.showMessage("The portal opens again... You step through.");
+
+        // Determine return biome
+        let returnBiome = "Plain";
+        if (this.savedState?.world === "macro") returnBiome = "Plain";
+        else if (this.savedState?.world === "micro") returnBiome = this.savedState.biome;
+        else if (this.savedState?.world === "void") returnBiome = this.savedState.biome;
+        this.game.startGame(returnBiome);
+
+        // Restore player position
+        if (this.savedState?.playerPos) {
+            this.game.player.physicsBody.position = this.savedState.playerPos;
+            this.game.cameraOffset = this.savedState.cameraOffset;
+        }
+
+        // Restore score
+        if (this.savedState?.score !== undefined) {
+            this.game.score = this.savedState.score;
+            this.game.enemiesKilled = this.savedState.enemiesKilled;
+        }
+
+        // Restore dropped cards
+        if (this.savedState?.droppedCards) {
+            this.game.droppedCards = this.savedState.droppedCards;
+        }
+
+        // Clear tunnel state
+        this.isInTunnel = false;
+        this.savedState = null;
+        this.currentTunnel = null;
+
+        this.showMessage("✨ You have returned from your spacetime journey!");
+        this.showMessage("🏆 Your items and progress have been preserved.");
+    }
+
+    // Force exit (called when player quits game)
+    forceExit() {
+        if (this.isInTunnel) {
+            console.log("⚠️ Force exiting Spacetime Tunnel");
+            this.isInTunnel = false;
+            this.savedState = null;
+            this.currentTunnel = null;
+        }
+    }
+
+    // Update (check for warnings)
+    update(dt) {
+        if (!this.isInTunnel) return;
+
+        const elapsed = Date.now() - this.tunnelEntryTime;
+        const remaining = this.tunnelDuration - elapsed;
+
+        // Show warning at 60s, 30s, 10s
+        if (!this.exitWarningGiven && remaining < 60000 && remaining > 0) {
+            this.exitWarningGiven = true;
+            const seconds = Math.ceil(remaining / 1000);
+            if (this.currentWorld === "micro") {
+                this.showMessage(`⚠️ ${seconds} seconds remaining in microverse!`);
+            } else if (this.currentWorld === "void") {
+                this.showMessage(`⚠️ ${seconds} seconds remaining in void!`);
+            }
+        }
+
+        // Show countdown at 10 seconds
+        if (remaining < 10000 && remaining > 0 && Math.floor(elapsed / 1000) % 5 === 0) {
+            const seconds = Math.ceil(remaining / 1000);
+            this.showMessage(`⏰ Portal closes in ${seconds} seconds...`);
+        }
+    }
+
+    // Get current world name
+    getCurrentWorld() {
+        return this.currentWorld;
+    }
+
+    // Check if in spacetime tunnel
+    isInSpacetimeTunnel() {
+        return this.isInTunnel;
+    }
+
+    // Get remaining time string
+    getRemainingTime() {
+        if (!this.isInTunnel) return null;
+
+        const remaining = this.tunnelDuration - (Date.now() - this.tunnelEntryTime);
+        if (remaining <= 0) return "0:00";
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Show message to player
+    showMessage(msg) {
+        console.log(msg);
+        if (this.game.player?.inventory?.craftingSystem?.showMessage) {
+            this.game.player.inventory.craftingSystem.showMessage(msg);
+        }
+    }
+
+    // Draw UI when in tunnel
+    draw(ctx) {
+        if (!this.isInTunnel) return;
+
+        const remaining = this.getRemainingTime();
+        if (!remaining) return;
+
+        ctx.save();
+
+        // Draw timer background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(WIDTH - 180, 10, 170, 40);
+
+        // Draw world icon and name
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+
+        let worldIcon = " ";
+        if (this.currentWorld === "micro") worldIcon = " Mic";
+        else if (this.currentWorld === "void") worldIcon = "Voi ";
+
+        ctx.fillText(`${worldIcon} ${this.currentWorld.toUpperCase()} WORLD`, WIDTH - 175, 28);
+
+        // Draw timer
+        ctx.font = 'bold 20px monospace';
+
+        let timerColor = "#00ff00";
+        const remainingMs = this.tunnelDuration - (Date.now() - this.tunnelEntryTime);
+        if (remainingMs < 30000) timerColor = "#ffaa00";
+        if (remainingMs < 10000) timerColor = "#ff0000";
+
+        ctx.fillStyle = timerColor;
+        ctx.textAlign = 'right';
+        ctx.fillText(remaining, WIDTH - 10, 38);
+
+        ctx.restore();
+    }
+}
 // 在 WorldMapGame 类中添加多人游戏菜单
 class MultiplayerMenu {
     constructor() {
@@ -30461,6 +33310,7 @@ class Player {
                 // 传入正确的总花瓣数
                 this.petals.push(new Petal(this, i, this.petalCount));  // 这里传入 this.petalCount
             }
+             this.updateFriendlyAuras();
         }
     getRandomSummonLevel(itemRarity = "Common") {
         // 根据物品稀有度返回不同的等级范围
@@ -30477,9 +33327,30 @@ class Player {
         return this.physicsBody.radius * this.currentViewScale;
     }
     recalculatePetalAngles() {
-        const angleStep = (Math.PI * 2) / this.petals.length;
+        const activeCount = this.petals.length;
+        if (activeCount === 0) return;
+
+        const angleStep = (Math.PI * 2) / activeCount;
+
+        // ✅ 使用极小的平滑因子，几乎不干扰自然旋转
+        // 从 0.08 降到 0.01，让角度几乎不被强制调整
+        const SMOOTH_FACTOR = 0.001;
+
         for (let i = 0; i < this.petals.length; i++) {
-            this.petals[i].angle = i * angleStep;
+            const targetAngle = i * angleStep;
+            const petal = this.petals[i];
+
+            // 计算最短弧线方向
+            let diff = targetAngle - petal.angle;
+            if (diff > Math.PI) diff -= Math.PI * 2;
+            if (diff < -Math.PI) diff += Math.PI * 2;
+
+            // ✅ 只做极微小的调整，让旋转看起来更自然
+            petal.angle += diff * SMOOTH_FACTOR;
+
+            // 确保角度在有效范围
+            if (petal.angle > Math.PI * 2) petal.angle -= Math.PI * 2;
+            if (petal.angle < 0) petal.angle += Math.PI * 2;
         }
     }
     get health() {
@@ -30601,14 +33472,13 @@ class Player {
         return totalArmor;
     }
     updateThirdEye() {
-        /** 从快捷栏中查找 ThirdEye 并更新范围加成 */
+        /** 从快捷栏中查找 ThirdEye 或 Quantum 并更新范围加成 */
         this.thirdEyeItem = null;
         this.thirdEyeRangeBonus = 0;
 
-        let found = false;
         for (let i = 0; i < this.quickSlot.slots.length; i++) {
             const slotItem = this.quickSlot.slots[i];
-            if (slotItem && slotItem.type === "ThirdEye") {
+            if (slotItem && (slotItem.type === "ThirdEye" || slotItem.type === "Quantum")) {
                 this.thirdEyeItem = slotItem;
 
                 // 获取范围加成
@@ -30617,8 +33487,13 @@ class Player {
                 if (bonus === undefined) {
                     bonus = 10 * (RARITY_LIST.indexOf(slotItem.rarity) + 1);
                 }
+
+                // Quantum 可以有额外加成
+                if (slotItem.type === "Quantum") {
+                    bonus = Math.floor(bonus * 1.2);  // Quantum 比 ThirdEye 强20%
+                }
+
                 this.thirdEyeRangeBonus = bonus;
-                found = true;
                 break;
             }
         }
@@ -30780,7 +33655,50 @@ class Player {
             }
         }
     }
+    updateFriendlyAuras() {
+        let totalSpeedBonus = 0;
+        let totalDamageReduction = 0;
+        let totalVisionBonus = 0;
 
+        for (const petal of this.petals) {
+            if (petal.isBroken || petal.isReloading) continue;
+            const item = petal.getCurrentItem();
+            if (!item) continue;
+
+            // Photon: 增加友方移动速度
+            if (item.type === "Photon") {
+                const rarityBonus = RARITY_MULTIPLIERS[item.rarity] || 1;
+                totalSpeedBonus += 0.1 + Math.log(rarityBonus) * 0.05;
+            }
+
+            // Charge: 减少友方受到的伤害
+            if (item.type === "Charge") {
+                const rarityBonus = RARITY_MULTIPLIERS[item.rarity] || 1;
+                totalDamageReduction += 0.15 + Math.log(rarityBonus) * 0.05;
+            }
+
+            // Quantum: 增加视野（类似ThirdEye）
+            if (item.type === "Quantum") {
+                const rarityBonus = RARITY_MULTIPLIERS[item.rarity] || 1;
+                totalVisionBonus += 0.2 + Math.log(rarityBonus) * 0.05;
+            }
+        }
+
+        // 应用到所有友方生物
+        if (this.gameInstance) {
+            for (const enemy of this.gameInstance.enemies) {
+                if (enemy.isFriendly && !enemy.isDead) {
+                    enemy.friendlySpeedBonus = totalSpeedBonus;
+                    enemy.friendlyDamageReduction = totalDamageReduction;
+                }
+            }
+        }
+
+        // 更新玩家视野
+        if (totalVisionBonus > 0) {
+            this.visionMultiplier = 1.0 + totalVisionBonus;
+        }
+    }
     getAntennaeCount() {
         return this.antennaeCount;
     }
@@ -30815,7 +33733,14 @@ class Player {
         this.mousePosition.x = mouseX;
         this.mousePosition.y = mouseY;
     }
-
+// 修改移动速度
+    getSpeed() {
+        let speed = this.baseSpeed;
+        if (this.isFriendly && this.friendlySpeedBonus > 0) {
+            speed *= (1 + this.friendlySpeedBonus);
+        }
+        return speed * this.slowMultiplier;
+    }
     getSpeedMultiplier() {
         let multiplier = 1.0;
         for (const petal of this.petals) {
@@ -30998,6 +33923,10 @@ class Player {
         // this.updateMousePosition(); // 移除，改为外部更新
         this.moveTowardsMouse(dt, cameraOffset);
 
+        this.recalculatePetalAngles();
+        for (const petal of this.petals) {
+        petal.update(dt, this.spreadMode, this.getWorldPosition());
+    }
         // 应用磁铁效果
         this.applyMagnetEffects(dt);
 
@@ -31265,9 +34194,7 @@ class Player {
         return maxRange;
     }
 
-// 修改 addPetal 方法
     addPetal() {
-        // 修改：从8改为10
         if (this.petalCount < 10) {
             this.petalCount += 1;
             const newPetal = new Petal(this, this.petalCount - 1, this.petalCount);
@@ -31285,43 +34212,78 @@ class Player {
         }
         return false;
     }
-
-    // 修改 removePetal 方法
     removePetal() {
-            // 修改：保留至少1个花瓣？可以根据需要调整
-            if (this.petalCount > 0) {
-                this.petalCount -= 1;
-                if (this.petals.length > 0) {
-                    const removedPetal = this.petals.pop();
+        if (this.petalCount > 0) {
+            this.petalCount -= 1;
+            if (this.petals.length > 0) {
+                const removedPetal = this.petals.pop();
 
-                    // 重新计算所有花瓣的角度
-                    this.recalculatePetalAngles();
+                // 重新计算所有花瓣的角度
+                this.recalculatePetalAngles();
 
-                    const petalIndex = this.petalCount;
-                    if (petalIndex < this.quickSlot.slots.length && this.quickSlot.slots[petalIndex]) {
-                        const item = this.quickSlot.removeItem(petalIndex);
-                        if (item) {
-                            this.inventory.addItem(item);
-                        }
+                const petalIndex = this.petalCount;
+                if (petalIndex < this.quickSlot.slots.length && this.quickSlot.slots[petalIndex]) {
+                    const item = this.quickSlot.removeItem(petalIndex);
+                    if (item) {
+                        this.inventory.addItem(item);
                     }
                 }
-                return true;
             }
-            return false;
+            return true;
+        }
+        return false;
     }
 
 
     toggleSpreadMode() {
         if (this.isDead) return;
         this.spreadMode = !this.spreadMode;
-        console.log(" toggleSpreadMode() called! spreadMode =", this.spreadMode); // ← 添加这行
-    }
 
+        // 展开模式和收缩模式互斥
+        if (this.spreadMode && this.contractMode) {
+            this.contractMode = false;
+        }
+
+        const targetRadius = this.spreadMode ? 65 : 35;
+        for (const petal of this.petals) {
+            petal.targetRadius = targetRadius;
+        }
+        console.log("spreadMode =", this.spreadMode);
+    }
+    // 🆕 切换收缩模式
+    toggleContractMode(active) {
+        if (this.isDead) return;
+        this.contractMode = active;
+
+        // 收缩模式和展开模式互斥
+        if (active && this.spreadMode) {
+            this.spreadMode = false;
+        }
+
+        const targetRadius = active ? 15 : 35;
+        for (const petal of this.petals) {
+            petal.targetRadius = targetRadius;
+        }
+    }
 // 获取护盾值（考虑护盾1点抵2生命）
     getEffectiveHealth() {
         return this.health + this.shield * 2;
     }
+// 在 Player 类中
+    get contractMode() {
+        return this._contractMode || false;
+    }
 
+    set contractMode(value) {
+        this._contractMode = value;
+        // 通知所有花瓣更新状态
+        for (const petal of this.petals) {
+            if (petal.getCurrentItem()?.type === "Bubble") {
+                // 触发破碎检查
+                petal.tryBreakBubble(0);
+            }
+        }
+    }
     // 添加护盾（由Shell物品调用）
     addShield(amount) {
         const shieldAmount = Math.min(amount, this.maxHealth - this.shield);
@@ -31633,6 +34595,7 @@ class Player {
         }
         return mappedRarity;
     }
+    // 在 Player 类中修改 attack 方法
     attack(enemies, dt = 0.0167) {
         if (this.isDead) {
             return [[], 0, 0];
@@ -31642,12 +34605,13 @@ class Player {
         const enemiesHit = [];
         const playerWorldPos = this.getWorldPosition();
 
+        // ✅ 改为：对每个敌人独立检测和攻击
         for (const enemy of enemies) {
             if ((enemy.health !== undefined && enemy.health <= 0) || (enemy.isSpawning !== undefined && enemy.isSpawning)) {
                 continue;
             }
 
-            // ✅ 获取所有可攻击的碰撞体（包括身体节）
+            // 获取所有可攻击的碰撞体（主体 + 身体节）
             const hitboxes = [];
 
             // 添加主体
@@ -31658,7 +34622,7 @@ class Player {
                 parentEnemy: enemy
             });
 
-            // ✅ 添加所有身体节（如果有）
+            // 添加所有身体节
             if (enemy.segmentColliders && enemy.segmentColliders.length > 0) {
                 for (const seg of enemy.segmentColliders) {
                     let segPos;
@@ -31678,6 +34642,7 @@ class Player {
                 }
             }
 
+            // 对每个花瓣检测这个敌人
             for (const petal of this.petals) {
                 if (petal.isReloading || petal.isBroken || petal.attackPower <= 0) {
                     continue;
@@ -31686,7 +34651,7 @@ class Player {
                 const petalPos = petal.getPosition();
                 const petalScaledRadius = petal.getRadius() * this.currentViewScale;
 
-                // ✅ 检查所有碰撞体
+                // 检查所有碰撞体
                 for (const hitbox of hitboxes) {
                     const dx = petalPos.x - hitbox.position.x;
                     const dy = petalPos.y - hitbox.position.y;
@@ -31742,11 +34707,10 @@ class Player {
                         // 护甲穿透计算
                         const attackerArmor = petal.armor || 0.0;
                         const defenderArmor = enemy.armor || 0.0;
-                        const finalDamage = applyArmorReduction(baseDamage, defenderArmor, attackerArmor);
+                        let finalDamage = applyArmorReduction(baseDamage, defenderArmor, attackerArmor);
 
-                        // 处理护甲过载反击
                         if (finalDamage < 0) {
-                            finalDamage=1;
+                            finalDamage = 1;
                         }
 
                         // 获取当前物品作为伤害来源
@@ -31804,14 +34768,12 @@ class Player {
 
                         petal.attackCooldown = petal.attackCooldownMax;
 
-                        // ========== 🔥 闪电链效果（电击）==========
+                        // 闪电链效果
                         const currentItemForLightning = petal.getCurrentItem();
                         if (currentItemForLightning &&
                             (currentItemForLightning.type === "Lightning" ||
-                             currentItemForLightning.type === "Hel Lighting" ||
                              currentItemForLightning.type === "Hel Lighting")) {
 
-                            // 获取基础跳跃次数
                             let bounces = 2;
                             if (currentItemForLightning.type === "Lightning") {
                                 const itemConfig = ITEM_STATS["Lightning"];
@@ -31821,7 +34783,6 @@ class Player {
                                 bounces = itemConfig.lightningBounces || 5;
                             }
 
-                            // 根据稀有度增加跳跃次数
                             const rarityBonus = {
                                 "Common": 1, "Unusual": 1, "Rare": 1, "Epic": 2,
                                 "Legendary": 2, "Mythic": 3, "Ultra": 3, "Super": 4,
@@ -31829,20 +34790,17 @@ class Player {
                             };
                             bounces = bounces * (rarityBonus[currentItemForLightning.rarity] || 1);
 
-                            // 计算链伤害（基础伤害的60%）
                             const chainDamage = petal.attackPower * 0.6;
-
-                            // 执行闪电链
                             this._applyLightningChain(
-                                enemy,           // 起始敌人
-                                chainDamage,     // 链伤害
-                                bounces,         // 剩余跳跃次数
-                                enemies,         // 所有敌人列表
-                                [enemy]          // 已击中的敌人
+                                enemy,
+                                chainDamage,
+                                bounces,
+                                enemies,
+                                [enemy]
                             );
                         }
 
-                        break;
+                        break; // 一个花瓣一帧只攻击一个敌人一次
                     }
                 }
             }
@@ -32247,7 +35205,7 @@ class DroppedCard {
         this.age = 0;
         this.scale = 1.0;
         this.pulseSpeed = 2.0;
-
+        this.ignoreWallCollision = true;
         // 视觉参数
         this.baseSize = 40;
 
@@ -32699,7 +35657,10 @@ class MainMenu {
         this.BUTTON_COLOR = [70, 70, 100];
         this.BUTTON_HOVER_COLOR = [100, 100, 150];
         this.talentButton = [20, 155, 100, 35];
-
+        this.mobGalleryButton = [WIDTH - 220, HEIGHT - 80, 200, 60];
+        // 图鉴按钮颜色
+        this.MOB_GALLERY_BUTTON_COLOR = [155, 89, 182];
+        this.MOB_GALLERY_BUTTON_HOVER_COLOR = [142, 68, 173];
         // ========== 9个生物群系的颜色配置 ==========
         this.BIOME_COLORS = {
             "Plain": [102, 187, 106],
@@ -33284,6 +36245,10 @@ class MainMenu {
             for (const [biome, rect] of Object.entries(this.biomeButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = biome; break; }
         }
+         if (this.isPointInRect(pos, this.mobGalleryButton)) {
+            this.hoveredButton = 'mob_gallery';
+            return;
+        }
         if (!foundHover) {
             for (const [name, rect] of Object.entries(this.otherButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = name; break; }
@@ -33322,7 +36287,13 @@ class MainMenu {
             const result = game.talentSystem.handleClick(pos);
             if (result) return result;
         }
-
+        // 检查图鉴按钮
+        if (this.isPointInRect(pos, this.mobGalleryButton)) {
+            if (window.gameInstance && window.gameInstance.mobGallery) {
+                window.gameInstance.mobGallery.open();
+            }
+            return "mob_gallery";
+        }
         if (this.huntingQuestPanelOpen && this.player?.gameInstance?.huntingQuestSystem) {
             const questSystem = this.player.gameInstance.huntingQuestSystem;
             const [px, py, pw, ph] = this._getQuestPanelRect();
@@ -33529,6 +36500,86 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
         ctx.stroke(); ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.fillText('TALENTS', tbx + tbw / 2, tby + tbh / 2);
+// ========== 🆕 绘制图鉴按钮（右下角）==========
+        const [mgx, mgy, mgw, mgh] = this.mobGalleryButton;
+        const isHovered = this.hoveredButton === 'mob_gallery';
+        const btnColor = isHovered ? this.MOB_GALLERY_BUTTON_HOVER_COLOR : this.MOB_GALLERY_BUTTON_COLOR;
+
+        // 绘制按钮背景
+        ctx.fillStyle = `rgb(${btnColor[0]}, ${btnColor[1]}, ${btnColor[2]})`;
+        ctx.beginPath();
+        ctx.roundRect(mgx, mgy, mgw, mgh, 12);
+        ctx.fill();
+
+        // 绘制边框
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(mgx, mgy, mgw, mgh, 12);
+        ctx.stroke();
+
+        // 绘制图标（简化版肉垫图标）
+        ctx.save();
+        ctx.shadowBlur = 0;
+
+        // 绘制小肉垫图标
+        ctx.fillStyle = 'white';
+        // 四个小脚趾
+        const toePositions = [
+            {cx: mgx + 35, cy: mgy + 25, cr: 8},
+            {cx: mgx + 55, cy: mgy + 18, cr: 9},
+            {cx: mgx + 80, cy: mgy + 20, cr: 9},
+            {cx: mgx + 95, cy: mgy + 35, cr: 8}
+        ];
+        toePositions.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.cx, p.cy, p.cr, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // 掌心
+        ctx.beginPath();
+        ctx.moveTo(mgx + 30, mgy + 60);
+        ctx.bezierCurveTo(mgx + 30, mgy + 40, mgx + 100, mgy + 40, mgx + 100, mgy + 60);
+        ctx.bezierCurveTo(mgx + 100, mgy + 80, mgx + 30, mgy + 80, mgx + 30, mgy + 60);
+        ctx.fill();
+
+        // 绘制 [M] 文字
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        const mx = mgx + 120, my = mgy + 12, mw = 65, mh = 40;
+
+        // 左括号
+        ctx.beginPath();
+        ctx.moveTo(mx + 8, my);
+        ctx.lineTo(mx, my);
+        ctx.lineTo(mx, my + mh);
+        ctx.lineTo(mx + 8, my + mh);
+        ctx.stroke();
+
+        // 右括号
+        ctx.beginPath();
+        ctx.moveTo(mx + mw - 8, my);
+        ctx.lineTo(mx + mw, my);
+        ctx.lineTo(mx + mw, my + mh);
+        ctx.lineTo(mx + mw - 8, my + mh);
+        ctx.stroke();
+
+        // 字母 M
+        ctx.font = `bold ${Math.floor(26)}px Arial`;
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('M', mx + mw/2, my + mh/2 + 2);
+
+        ctx.restore();
+
+        // 按钮文字
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('MOB GALLERY', mgx + mgw/2, mgy + mgh - 15);
 
         // 生物群系按钮
         for (const [biome, rect] of Object.entries(this.biomeButtons)) {
@@ -33989,7 +37040,146 @@ class MainMenu {
         return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
     }
 }
+// ==================== 程序化地图生成器 ====================
+class ProceduralMapGenerator {
+    constructor(gameInstance) {
+        this.game = gameInstance;
+        this.cache = new Map(); // 缓存生成的墙壁
+    }
 
+    // 生成微观世界地图
+    generateMicroMap(width, height) {
+        const cacheKey = `micro_${width}_${height}`;
+        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+
+        const walls = [];
+        const cellSize = 80;
+        const cols = Math.ceil(width / cellSize);
+        const rows = Math.ceil(height / cellSize);
+
+        // 生成细胞状结构（类似生物细胞）
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                // 使用 Perlin 风格噪声决定是否生成墙壁
+                const noise = this.simpleNoise(x * 0.1, y * 0.1);
+
+                // 细胞壁：边界和随机位置
+                const isBoundary = x === 0 || x === cols - 1 || y === 0 || y === rows - 1;
+                const isWall = isBoundary || (noise > 0.7 && Math.random() < 0.3);
+
+                if (isWall) {
+                    walls.push({
+                        x: x * cellSize,
+                        y: y * cellSize,
+                        width: cellSize,
+                        height: cellSize
+                    });
+                }
+            }
+        }
+
+        // 添加随机粒子状墙壁（模拟量子泡沫）
+        for (let i = 0; i < 200; i++) {
+            walls.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                width: 20 + Math.random() * 30,
+                height: 20 + Math.random() * 30
+            });
+        }
+
+        const result = { walls, imgWidth: cols, imgHeight: rows };
+        this.cache.set(cacheKey, result);
+        return result;
+    }
+
+    // 生成宇宙世界地图
+    generateVoidMap(width, height) {
+        // 确保 width 和 height 有效
+        if (!width || isNaN(width) || width <= 0) {
+            width = WORLD_WIDTH || 10000;
+        }
+        if (!height || isNaN(height) || height <= 0) {
+            height = WORLD_HEIGHT || 10000;
+        }
+
+        const cacheKey = `void_${width}_${height}`;
+        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+
+        const walls = [];
+        const cellSize = 80;
+        const cols = Math.ceil(width / cellSize);
+        const rows = Math.ceil(height / cellSize);
+
+        // 如果 cols 或 rows 无效，返回空墙壁
+        if (cols <= 0 || rows <= 0) {
+            console.warn("generateVoidMap: 无效的 cols/rows", cols, rows);
+            return { walls: [], imgWidth: 1, imgHeight: 1 };
+        }
+
+        // 生成星云状结构
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                const cx = cols / 2;
+                const cy = rows / 2;
+                const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+                const maxDist = Math.min(cols, rows) / 2;
+
+                if (maxDist <= 0) continue;
+
+                const isCore = dist < maxDist * 0.3 && Math.random() < 0.6;
+                const isOuter = dist > maxDist * 0.7 && Math.random() < 0.2;
+                const isAsteroid = Math.random() < 0.05;
+
+                if (isCore || isOuter || isAsteroid) {
+                    walls.push({
+                        x: x * cellSize,
+                        y: y * cellSize,
+                        width: cellSize,
+                        height: cellSize
+                    });
+                }
+            }
+        }
+
+        // 添加黑洞状圆形墙壁
+        const blackHoles = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < blackHoles; i++) {
+            const radius = 80 + Math.random() * 120;
+            walls.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                width: radius,
+                height: radius,
+                isCircular: true
+            });
+        }
+
+        const result = { walls, imgWidth: cols, imgHeight: rows };
+        this.cache.set(cacheKey, result);
+        return result;
+    }
+
+    // 简单噪声函数
+    simpleNoise(x, y) {
+        return (Math.sin(x * 12.9898) * Math.sin(y * 78.233) * 43758.5453) % 1;
+    }
+
+    // 获取地图数据
+    getMapData(biome, width, height) {
+        if (biome === "Micro") {
+            return this.generateMicroMap(width, height);
+        } else if (biome === "Void") {
+            return this.generateVoidMap(width, height);
+        }
+        return null;
+    }
+
+    // 清除缓存（地图切换时可选）
+    clearCache() {
+        this.cache.clear();
+    }
+}
 class WorldMapGame {
     constructor() {
         // 多人系统
@@ -34033,11 +37223,12 @@ class WorldMapGame {
         this.fullSyncInterval = 100;
         this.serverTime = 0;
         this.timeOffset = 0;
-
+         this.mapGenerator = new ProceduralMapGenerator(this);
         // ✅ 相机平滑缩放
         this.targetViewScale = 1.0;
         this.currentViewScale = 1.0;
         this.viewScaleTransitionSpeed = 25;
+        this.mobGallery = new MobGallery(this);
         // 简单的重生点
         this.spawnPoint = {
             x: WORLD_WIDTH / 2,
@@ -34070,7 +37261,7 @@ class WorldMapGame {
             window.imageLoader = ImageLoader.getInstance();
         }
         this.imagesLoaded = false;
-
+        this.tunnelSystem = new SpacetimeTunnelSystem(this);
         // 性能计数
         this.frameCount = 0;
         this.fpsTimer = 0;
@@ -34305,7 +37496,9 @@ class WorldMapGame {
     }
     async isInMazeWallAsync(worldX, worldY) {
     if (typeof MAZE_ENABLED === 'undefined' || !MAZE_ENABLED) return false;
-
+    if (this.currentBiome === "Micro" || this.currentBiome === "Void") {
+                return this.isInProceduralWall(worldX, worldY);
+            }
     const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
     if (!bgConfig?.map?.image) return false;
 
@@ -34374,6 +37567,15 @@ class WorldMapGame {
 
     // 保留同步版本用于碰撞检测（使用缓存）
     isInMazeWall(worldX, worldY) {
+        // 边界检查
+        if (isNaN(worldX) || isNaN(worldY)) return false;
+
+        // ========== 🆕 Void 和 Micro 地图使用程序化墙壁 ==========
+        if (this.currentBiome === "Void" || this.currentBiome === "Micro") {
+            return this.isInProceduralWall(worldX, worldY);
+        }
+
+        // 原有逻辑：使用图片检测
         if (typeof MAZE_ENABLED === 'undefined' || !MAZE_ENABLED) return false;
 
         const bgConfig = BIOME_BACKGROUNDS[this.currentBiome];
@@ -34382,10 +37584,8 @@ class WorldMapGame {
         const mapImageKey = bgConfig.map.image;
         const mapImg = window.imageLoader?.getImage(mapImageKey);
 
-        // 如果图片还没加载，返回 false（不阻挡）
         if (!mapImg || !mapImg.width) return false;
 
-        // 边界检查
         if (worldX < 0 || worldX >= WORLD_WIDTH || worldY < 0 || worldY >= WORLD_HEIGHT) return false;
 
         const imgW = mapImg.width;
@@ -35270,14 +38470,14 @@ class WorldMapGame {
             }
         }
 
-        // 检查掉落物是否在墙内
+// 🆕 检查掉落物 - 跳过墙壁碰撞
         for (const card of this.droppedCards) {
             if (card.collected) continue;
-
+            // 掉落物不进行墙壁碰撞检测
+            // 如果需要限制在地图边界内，可以添加边界检查
             const cardPos = card.physicsBody.position;
-            if (this.isInMazeWall(cardPos.x, cardPos.y)) {
-                this.pushOutOfWall(card.physicsBody);
-            }
+            cardPos.x = Math.max(10, Math.min(WORLD_WIDTH - 10, cardPos.x));
+            cardPos.y = Math.max(10, Math.min(WORLD_HEIGHT - 10, cardPos.y));
         }
     }
         // 在 WorldMapGame 类中，替换整个 update 方法
@@ -35306,6 +38506,43 @@ class WorldMapGame {
         if (this.player.health <= 0) {
             this.handlePlayerDeath();
             return;
+        }
+    // ========== 更新时空隧道系统 ==========
+        if (this.tunnelSystem) {
+            this.tunnelSystem.update(deltaTime);
+        }
+
+        // ========== 尝试生成时空隧道（每帧万分之一概率）==========
+        if (this.gameState === GameState.IN_GAME && !this.paused && !this.player.isDead) {
+            if (Math.random() < 0.0001) {  // 万分之一概率
+                this.tunnelSystem.trySpawnTunnel(this.enemies, WORLD_WIDTH, WORLD_HEIGHT);
+            }
+        }
+
+        // ========== 检测玩家与隧道的碰撞（增强版）==========
+        if (this.gameState === GameState.IN_GAME && !this.player.isDead && this.tunnelSystem) {
+            for (let i = 0; i < this.enemies.length; i++) {
+                const e = this.enemies[i];
+                if (!e.isTunnel) continue;
+
+                // 计算距离
+                const dx = this.player.physicsBody.position.x - e.physicsBody.position.x;
+                const dy = this.player.physicsBody.position.y - e.physicsBody.position.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const collisionDist = e.radius + this.player.physicsBody.radius;
+
+                // 调试输出（测试完后删除）
+                if (dist < 100) {
+                    console.log(`[隧道] 距离: ${dist.toFixed(1)} / ${collisionDist.toFixed(1)}`);
+                }
+
+                // 碰撞检测（增加10像素容差）
+                if (dist < collisionDist + 10) {
+                    console.log("🎯 玩家触碰时空隧道！");
+                    this.tunnelSystem.enterTunnel(e);
+                    break;
+                }
+            }
         }
 
         // ===== 性能检测 =====
@@ -35535,12 +38772,17 @@ class WorldMapGame {
                     }
                 }
 
-                // 友方攻击敌对 - 累积伤害后一次性显示
+
+                // 友方攻击敌对 - 攻击所有接触到的敌人
                 for (const friendly of friendlyUnits) {
                     if (friendly.isDead || friendly.health <= 0) continue;
                     if (hostileEnemies.length === 0) continue;
 
                     const friendlyScaledRadius = friendly.getScaledRadius?.() || friendly.physicsBody.radius * this.viewScale;
+
+                    // ✅ 临时保存并重置冷却
+                    const savedCooldown = friendly.attackCooldown;
+                    friendly.attackCooldown = 0;
 
                     // ✅ 为每个敌人累积伤害
                     const damageAccumulator = new Map();
@@ -35579,6 +38821,9 @@ class WorldMapGame {
                         }
                     }
 
+                    // ✅ 恢复冷却
+                    friendly.attackCooldown = savedCooldown;
+
                     // ✅ 每个敌人只显示一次总伤害
                     for (const [enemy, totalDamage] of damageAccumulator) {
                         if (totalDamage > 0) {
@@ -35592,32 +38837,86 @@ class WorldMapGame {
                     }
                 }
 
-                // 敌对攻击玩家和友方
+                // 敌对攻击玩家和友方 - 攻击所有接触到的目标
                 for (const enemy of hostileEnemies) {
                     if (enemiesToRemove.includes(enemy) || enemy.isDead || enemy.health <= 0) continue;
 
                     const potentialTargets = [this.player, ...friendlyUnits];
+                    const enemyScaledRadius = enemy.getScaledRadius ?
+                        enemy.getScaledRadius() :
+                        enemy.physicsBody.radius * this.viewScale;
 
+                    // ✅ 记录是否攻击了任何目标
+                    let hasAttacked = false;
+
+                    // ✅ 对每个目标单独检测和攻击
                     for (const target of potentialTargets) {
                         if (target.isDead) continue;
 
                         const distance = enemy.physicsBody.position.distanceTo(target.physicsBody.position);
-                        const enemyScaledRadius = enemy.getScaledRadius ? enemy.getScaledRadius() : enemy.physicsBody.radius * this.viewScale;
-                        const targetScaledRadius = target.getScaledRadius ? target.getScaledRadius() : target.physicsBody.radius * this.viewScale;
+                        const targetScaledRadius = target.getScaledRadius ?
+                            target.getScaledRadius() :
+                            target.physicsBody.radius * this.viewScale;
 
-                        // ✅ 关键修复：黄蜂和鱿鱼使用远程攻击范围，其他生物使用接触范围
+                        // 根据敌人类型确定攻击范围
                         let attackRange;
-                        if (enemy.type === "Wasp" || enemy.type === "Squid"|| enemy.type === "Scorpion") {
-                            // 远程生物使用自己的攻击范围
+                        const lightningEnemies = ["Jellyfish", "HelJellyfish", "Firefly"];
+                        const isLightningEnemy = lightningEnemies.includes(enemy.type);
+
+                        if (isLightningEnemy) {
+                            attackRange = enemy.lightningRange || 350;
+                        } else if (enemy.type === "Wasp" || enemy.type === "Squid" || enemy.type === "Scorpion") {
                             attackRange = enemy.attackRange || 300;
                         } else {
-                            // 近战生物使用接触范围
                             attackRange = enemyScaledRadius + targetScaledRadius;
                         }
 
                         if (distance <= attackRange) {
-                            const damage = enemy.attack(target);
+                            let damage = 0;
+
+                            if (isLightningEnemy) {
+                                // 闪电攻击
+                                if (enemy.lightningCooldown === undefined) enemy.lightningCooldown = 0;
+                                if (enemy.lightningCooldown <= 0) {
+                                    enemy.lightningCooldown = 1500;
+                                    if (typeof enemy.performLightningAttack === 'function') {
+                                        enemy.performLightningAttack(target);
+                                    } else {
+                                        const lightningDamage = enemy.attackDamage * 0.25;
+                                        if (target === this.player) {
+                                            target.takeDamage(lightningDamage, `${enemy.type} (Lightning)`);
+                                        } else {
+                                            target.health -= lightningDamage;
+                                        }
+                                        // 添加闪电视觉效果
+                                        if (this.lightningArcs) {
+                                            this.lightningArcs.push({
+                                                x1: enemy.physicsBody.position.x,
+                                                y1: enemy.physicsBody.position.y,
+                                                x2: target.physicsBody.position.x,
+                                                y2: target.physicsBody.position.y,
+                                                life: 1.0
+                                            });
+                                        }
+                                    }
+                                    damage = enemy.attackDamage * 0.25;
+                                }
+                            } else {
+                                // ✅ 普通攻击 - 对每个目标单独调用
+                                damage = enemy.attack(target);
+                            }
+
                             if (damage > 0) {
+                                hasAttacked = true;
+
+                                // 显示伤害数字
+                                this.addDamageNumber(
+                                    target.physicsBody.position.x,
+                                    target.physicsBody.position.y,
+                                    Math.floor(damage),
+                                    "normal"
+                                );
+
                                 if (target === this.player) {
                                     const playerDied = target.takeDamage(damage, `${enemy.type} (${enemy.rarity})`);
                                     if (playerDied) {
@@ -35635,6 +38934,11 @@ class WorldMapGame {
                                 }
                             }
                         }
+                    }
+
+                    // ✅ 只要攻击了任何目标，就设置冷却（避免一帧多次）
+                    if (hasAttacked) {
+                        enemy.attackCooldown = 100;
                     }
                 }
                 // 玩家攻击
@@ -35876,6 +39180,17 @@ class WorldMapGame {
     singlePlayerFullUpdate(deltaTime, shouldUpdateEnemies = true) {
         // 更新玩家位置（基于鼠标移动）
         this.player.update(this.dt, this.cameraOffset);
+        // 1. 更新隧道系统
+        if (this.tunnelSystem) {
+            this.tunnelSystem.update(deltaTime);
+        }
+
+        // 2. 尝试生成隧道（每帧千分之一概率，测试用）
+        if (this.gameState === GameState.IN_GAME && !this.paused && !this.player.isDead && this.tunnelSystem) {
+            if (Math.random() < 0.001) {  // 千分之一概率，测试用
+                this.tunnelSystem.trySpawnTunnel(this.enemies, WORLD_WIDTH, WORLD_HEIGHT);
+            }
+        }
 
         if (this.player.isDead) {
             this.handlePlayerDeath();
@@ -35885,7 +39200,6 @@ class WorldMapGame {
         // ===== 添加重生点更新逻辑 =====
         const playerPos = this.player.physicsBody.position;
         const currentBlock = this.blockManager.getBlockAt(playerPos.x, playerPos.y);
-
         if (currentBlock) {
             const blockKey = `${currentBlock.x},${currentBlock.y}`;
             if (this.lastBlockKey !== blockKey) {
@@ -35906,7 +39220,7 @@ class WorldMapGame {
         // 更新敌人加载/卸载
         this.updateEnemyLoading();
         this.poisonManager.updateAll();
-
+        this.flameManager.updateAll();
         // 更新掉落卡片（总是更新，开销小）
         for (let i = 0; i < this.droppedCards.length; i++) {
             if (i % 2 === this.frameCount % 2) {
@@ -35950,7 +39264,23 @@ class WorldMapGame {
             this.spawnEnemy();
             this.spawnTimer = 0;
         }
+        if (this.tunnelSystem && !this.player.isDead) {
+            for (let i = 0; i < this.enemies.length; i++) {
+                const e = this.enemies[i];
+                if (!e.isTunnel) continue;
 
+                const dx = this.player.physicsBody.position.x - e.physicsBody.position.x;
+                const dy = this.player.physicsBody.position.y - e.physicsBody.position.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const collisionDist = e.radius + this.player.physicsBody.radius;
+
+                if (dist < collisionDist + 10) {  // 10像素容差
+                    console.log("🎯 玩家触碰时空隧道！");
+                    this.tunnelSystem.enterTunnel(e);
+                    break;
+                }
+            }
+        }
         // 更新发射物
         this.updateProjectiles(deltaTime);
 
@@ -36928,24 +40258,39 @@ class WorldMapGame {
         }
     }
 
-
     startGame(biome = "Plain") {
         this.gameState = GameState.IN_GAME;
         this.gameOver = false;
         this.gameRunning = true;
         this.paused = false;
 
+        // ========== 1. 确保世界尺寸已定义 ==========
+        if (typeof WORLD_WIDTH === 'undefined') {
+            window.WORLD_WIDTH = 10000;
+            window.WORLD_HEIGHT = 10000;
+        }
+
         if (this.talentSystem) {
             this.talentSystem.player = this.player;
             this.talentSystem.applyToPlayer(this.player);
         }
 
-        this.enemies = [];
-        this.droppedCards = [];
-        this.score = 0;
-        this.enemiesKilled = 0;
-        this.deathScrollOffset = 0;
-        this.currentRunDrops = [];
+        // ========== 2. 判断是否为特殊世界 ==========
+        const isSpecialBiome = (biome === "Void" || biome === "Micro");
+
+        if (!isSpecialBiome) {
+            // 只有回到普通地图才彻底清空
+            this.enemies = [];
+            this.droppedCards = [];
+            this.score = 0;
+            this.enemiesKilled = 0;
+            this.deathScrollOffset = 0;
+            this.currentRunDrops = [];
+        } else {
+            // 进入特殊地图：保留隧道实体，清空普通敌人
+            this.enemies = this.enemies.filter(e => e.isTunnel);
+            this.droppedCards = [];
+        }
 
         this.currentBiome = biome;
 
@@ -36953,49 +40298,76 @@ class WorldMapGame {
             this.blockManager.setBiome(biome);
         }
 
-        // 加载存档（正常流程）
-        if (this.accountSystem && this.accountSystem.isLoggedIn()) {
-            const gameData = this.accountSystem.loadGameData();
-            if (gameData) {
-                this.accountSystem.applyGameData(this.player, gameData);
+        // ========== 3. 存档加载逻辑（特殊地图不覆盖背包） ==========
+        if (!isSpecialBiome) {
+            if (this.accountSystem && this.accountSystem.isLoggedIn()) {
+                const gameData = this.accountSystem.loadGameData();
+                if (gameData) {
+                    this.accountSystem.applyGameData(this.player, gameData);
+                } else {
+                    this.initializeDefaultItems();
+                }
             } else {
-                this.initializeDefaultItems();
-            }
-        } else {
-            const localData = this.autoSaveSystem?.loadGame(this.player);
-            if (!localData) {
-                this.initializeDefaultItems();
+                const localData = this.autoSaveSystem?.loadGame(this.player);
+                if (!localData) {
+                    this.initializeDefaultItems();
+                }
             }
         }
-        // ✅ 如果是 Random 地图，添加假人
+
+        // ✅ 特殊地图特定逻辑
         if (biome === "Random") {
             this.spawnDummies();
         }
-        // ✅ 如果用户刚刚点了 Load 按钮，用 loadout 覆盖存档快捷栏
-        // 应用完立即清除标记，后续进入游戏不再覆盖
+
+        // ✅ 处理 Loadout 覆盖
         if (this.mainMenu?._pendingLoadout) {
             this.mainMenu._applyLoadout(this.mainMenu._pendingLoadout);
-            this.mainMenu._pendingLoadout = null; // 用完就清除
+            this.mainMenu._pendingLoadout = null;
+        }
+    // ========== 🆕 6. 特殊地图初始化程序化墙壁 ==========
+        if (biome === "Void" || biome === "Micro") {
+            this.initProceduralWallsForBiome(biome);
+        }
+        // ========== 4. 关键修复：保护隧道系统状态 ==========
+        // 只有在回到 Macro（普通世界）时才重置隧道系统
+        if (this.tunnelSystem && !isSpecialBiome) {
+            this.tunnelSystem.isInTunnel = false;
+            this.tunnelSystem.currentWorld = "macro";
+            this.tunnelSystem.savedState = null;
+            this.tunnelSystem.currentTunnel = null;
+            this.tunnelSystem.exitWarningGiven = false;
         }
 
         this.initializeAllPetals();
         this.syncAllPetalsFromQuickSlot();
 
-        if (!this.accountSystem || !this.accountSystem.isLoggedIn()) {
-            this.player.physicsBody.position.x = WORLD_WIDTH / 2;
-            this.player.physicsBody.position.y = WORLD_HEIGHT / 2;
+        // ========== 5. 坐标初始化（修复 NaN 的核心） ==========
+        // 在特殊生物群落或未登录时，必须确保有位置
+        if (!this.accountSystem || !this.accountSystem.isLoggedIn() || isSpecialBiome) {
+
+            let spawnX = WORLD_WIDTH / 2;
+            let spawnY = WORLD_HEIGHT / 2;
+
+            // 核心检查：如果存在保存的隧道位置，则使用它
+            if (this.tunnelSystem && this.tunnelSystem.savedState && this.tunnelSystem.savedState.playerPos) {
+                spawnX = this.tunnelSystem.savedState.playerPos.x;
+                spawnY = this.tunnelSystem.savedState.playerPos.y;
+            }
+
+            // 最终防御：防止 WORLD_WIDTH 本身是无效值
+            this.player.physicsBody.position.x = spawnX || 5000;
+            this.player.physicsBody.position.y = spawnY || 5000;
         }
 
+        // 更新相机偏移
         this.cameraOffset.x = this.player.physicsBody.position.x - WIDTH / 2;
         this.cameraOffset.y = this.player.physicsBody.position.y - HEIGHT / 2;
-
-        this.spawnSpecialPeakZone();
 
         this.viewScale = 1.0;
         this.player.currentViewScale = 1.0;
     }
-
-
+// 在 WorldMapGame 类中添加这个方法
     spawnDummies() {
         // 1. 基础参数准备
         const worldWidth = WORLD_WIDTH || 10000;
@@ -37012,44 +40384,64 @@ class WorldMapGame {
         ];
 
         rarities.forEach((rarity, index) => {
-            // 2. 环形布局坐标计算
+            // 环形布局坐标计算
             const angle = (index / rarities.length) * Math.PI * 2;
             let x = centerX + Math.cos(angle) * spawnRadius;
             let y = centerY + Math.sin(angle) * spawnRadius;
 
-            // 3. 安全边界检查
+            // 安全边界检查
             x = Math.max(200, Math.min(worldWidth - 200, x));
             y = Math.max(200, Math.min(worldHeight - 200, y));
 
-            // 4. 实例化 Dummy
+            // 实例化 Dummy
             const dummy = new Dummy(rarity, x, y);
-
-            // --- 核心修复插件 ---
 
             // 关联游戏实例
             dummy.gameInstance = this;
 
-            // 强制确保 Dummy 被视为敌对目标（让友方 AI 能搜到它）
+            // 强制确保 Dummy 被视为敌对目标
             dummy.isFriendly = false;
-            dummy.isDummy = true; // 标记为假人，用于跳过某些伤害保护逻辑
+            dummy.isDummy = true;
 
             // 防止 Dummy 意外死亡
             dummy.health = 999999999999;
             dummy.maxHealth = 999999999999;
 
-            // 5. 注册到物理系统 (解决 AI “看不见” Dummy 的关键)
+            // 注册到物理系统
             if (this.collisionSystem) {
-                // 生成唯一 ID 并加入网格系统
                 const dummyId = `dummy_${rarity}_${Date.now()}_${index}`;
                 this.collisionSystem.addObject(dummy, dummyId);
             }
 
-            // 6. 加入敌人列表
+            // 加入敌人列表
             this.enemies.push(dummy);
         });
 
         console.log(`✅ 成功生成并注册了 ${this.enemies.length} 个训练假人`);
     }
+// ========== 🆕 添加这个方法 ==========
+    initProceduralWallsForBiome(biome) {
+        if (!this.mapGenerator) {
+            this.mapGenerator = new ProceduralMapGenerator(this);
+        }
+
+        let mapData;
+        if (biome === "Void") {
+            mapData = this.mapGenerator.generateVoidMap(WORLD_WIDTH, WORLD_HEIGHT);
+        } else if (biome === "Micro") {
+            mapData = this.mapGenerator.generateMicroMap(WORLD_WIDTH, WORLD_HEIGHT);
+        } else {
+            return;
+        }
+
+        this._proceduralMapCache = {
+            key: `${biome}_${WORLD_WIDTH}_${WORLD_HEIGHT}`,
+            walls: mapData.walls || []
+        };
+
+        console.log(`✅ ${biome} 程序化墙壁已初始化: ${this._proceduralMapCache.walls.length} 个墙壁`);
+    }
+
     // 在 WorldMapGame 类中修改 initializeDefaultItems 方法
     initializeDefaultItems() {
         if (!this.player || !this.player.inventory) return;
@@ -37405,6 +40797,7 @@ class WorldMapGame {
                 this.paused = !this.paused;
                 event.preventDefault();
             }
+
             // 在 WorldMapGame 类的 handleGameEvents 方法中
             else if (event.key === 'Escape') {
                 console.log("🚪 ESC pressed - force restoring all Mimics");
@@ -37471,20 +40864,31 @@ class WorldMapGame {
                 console.log(`调试模式: ${this.debugMode ? '开启' : '关闭'}`);
                 event.preventDefault();
             }
-            // ✅ 数字键 1-0：选择快捷栏槽位（支持10个槽位）
-            else if (event.key >= '0' && event.key <= '9') {
-                if (!this.paused) {
+            if (event.key === 'Shift') {
+                if (!this.paused && this.player) {
+                    this.player.toggleContractMode(true);
+                }
+                event.preventDefault();
+            }
+
+            // Shift 释放时恢复
+            if (event.key === 'Shift') {
+                // 在 keyup 事件中处理
+            }
+            // 在 handleGameEvents 的 keydown 事件中添加
+            if (event.key >= '0' && event.key <= '9') {
+                if (!this.paused && !event.shiftKey) {
                     let slotIndex;
                     if (event.key === '0') {
-                        slotIndex = 9;  // 0键对应第10个槽位（索引9）
+                        slotIndex = 9;
                     } else {
-                        slotIndex = parseInt(event.key) - 1;  // 1-9对应索引0-8
+                        slotIndex = parseInt(event.key) - 1;
                     }
 
-                    // 确保索引有效（0-9）
                     if (slotIndex >= 0 && slotIndex < 10) {
-                        this.player.quickSlot.selectedIndex = slotIndex;
-                        console.log(`选择快捷栏: 槽位 ${slotIndex + 1}`);
+                        // 切换该槽位的主副栏物品
+                        this.player.quickSlot.swapSlot(slotIndex);
+
                     }
                 }
                 event.preventDefault();
@@ -37550,12 +40954,72 @@ class WorldMapGame {
     }
 
     handleGameOverEvents(event) {
-        if (event.type === 'keydown' && event.key === 'Escape') {
-            this.resetGame();
-            this.gameState = GameState.MAIN_MENU;
+        if (event.type === 'click') {
+            const x = event.x;
+            const y = event.y;
+
+            // 检查 Continue 按钮
+            if (this.continueButtonRect &&
+                x >= this.continueButtonRect[0] && x <= this.continueButtonRect[0] + this.continueButtonRect[2] &&
+                y >= this.continueButtonRect[1] && y <= this.continueButtonRect[1] + this.continueButtonRect[3]) {
+                this.respawnPlayer();
+                return;
+            }
+
+            // 检查 Exit 按钮
+            if (this.exitButtonRect &&
+                x >= this.exitButtonRect[0] && x <= this.exitButtonRect[0] + this.exitButtonRect[2] &&
+                y >= this.exitButtonRect[1] && y <= this.exitButtonRect[1] + this.exitButtonRect[3]) {
+                this.resetGame();
+                this.gameState = GameState.MAIN_MENU;
+                this.paused = false;
+                return;
+            }
         } else if (event.type === 'wheel') {
-            this.handleDeathScroll(event.deltaY);
+            // 滚动掉落物列表
+            const totalItems = this.deathDrops?.length || 0;
+            const cols = 4;
+            const totalRows = Math.ceil(totalItems / cols);
+            const rowsPerPage = Math.floor(400 / 68); // 面板高度约400
+            const maxOffset = Math.max(0, totalRows - rowsPerPage);
+
+            if (event.deltaY > 0) {
+                this.deathScrollOffset = Math.min(maxOffset, (this.deathScrollOffset || 0) + 1);
+            } else {
+                this.deathScrollOffset = Math.max(0, (this.deathScrollOffset || 0) - 1);
+            }
         }
+    }
+
+    respawnPlayer() {
+        // 重置玩家状态
+        this.player.health = this.player.maxHealth;
+        this.player.isDead = false;
+
+        // 清空所有友方生物
+        this.clearAllFriendlyUnits();
+
+        // 重置位置到重生点
+        const spawnPoint = this.findNearestSafeRespawn(this.player.physicsBody.position);
+        this.player.physicsBody.position.x = spawnPoint.x;
+        this.player.physicsBody.position.y = spawnPoint.y;
+
+        // 重新初始化花瓣
+        this.initializeAllPetals();
+
+        // 重置游戏状态
+        this.gameOver = false;
+        this.gameRunning = true;
+        this.paused = false;
+        this.gameState = GameState.IN_GAME;
+        this.deathDrops = [];
+        this.deathScrollOffset = 0;
+
+        // 更新相机
+        this.cameraOffset.x = this.player.physicsBody.position.x - WIDTH / 2;
+        this.cameraOffset.y = this.player.physicsBody.position.y - HEIGHT / 2;
+
+        console.log("玩家复活，继续游戏");
     }
 
     _spawnSingleDrop(itemType, enemy, enemyRarity) {
@@ -38094,28 +41558,29 @@ class WorldMapGame {
 
         // ===== 检查是否是玩家生成的 Digger =====
         if (diggerTypes.includes(enemy.type) && enemy.ownerPetal) {
-            // 玩家生成的 Digger 无掉落
             return;
         }
 
         // ===== ✅ 给经验 =====
         let shouldGiveXP = false;
-
-        // 如果是玩家自己的宠物击杀的，或者没有击杀者记录（默认给玩家）
         if (enemy.killedByOwner === this.player.playerId || !enemy.killedByOwner) {
             shouldGiveXP = true;
         }
-
+        if (this.mobGallery && enemy && enemy.type && enemy.rarity) {
+                this.mobGallery.recordKill(enemy.type, enemy.rarity);
+            }
         if (shouldGiveXP) {
             const [xpGained, leveledUp] = this.player.gainXpFromKill(
                 enemy.rarity || 'Common',
                 enemy.type
             );
         }
+
         // ===== 更新狩猎任务进度 =====
         if (this.huntingQuestSystem && enemy && enemy.type && enemy.rarity) {
             this.huntingQuestSystem.updateProgress(enemy.type, enemy.rarity);
         }
+
         // 获取普通掉落表
         const dropItems = ENEMY_DROP_TABLE[enemy.type] || ["Leaf"];
         const enemyRarity = enemy.rarity || 'Common';
@@ -38123,12 +41588,17 @@ class WorldMapGame {
         // 判断是否为下水道生物（不包括 Digger 系列）
         const sewerEnemies = ["ManHole", "Rat", "Roach", "PooStorm"];
         const isSewerEnemy = sewerEnemies.includes(enemy.type);
-
-        // 判断是否为 Digger 生物
         const isDigger = diggerTypes.includes(enemy.type);
-
-        // 判断是否为 Eternal
         const isEternal = enemy.rarity === "Eternal";
+
+        // ========== 🆕 根据地图选择掉落表 ==========
+        let dropRates;
+        if (this.currentBiome === "Micro" || this.currentBiome === "Void") {
+            // 微观世界和宇宙世界使用高稀有度掉落表
+            dropRates = RARE_RARITY_DROP_RATES;
+        } else {
+            dropRates = RARITY_DROP_RATES;
+        }
 
         // ==========================================
         // 1. 优先处理特殊 DNA 掉落
@@ -38167,7 +41637,7 @@ class WorldMapGame {
                     if (isEternal) {
                         this._processEternalDrop(enemy, itemType, enemyRarity, i);
                     } else {
-                        const rarity = this.getRandomRarity(enemyRarity, RARITY_DROP_RATES);
+                        const rarity = this.getRandomRarity(enemyRarity, dropRates);
                         this._spawnItemDrop(enemy, itemType, rarity, i);
                     }
                 }
@@ -38196,7 +41666,7 @@ class WorldMapGame {
                 itemType === "Roach_egg"
             );
 
-            // 检查是否为 Digger 的蛋（Digger 自己的掉落）
+            // 检查是否为 Digger 的蛋
             const isDiggerEgg = isDigger && (
                 itemType === "TrashDigger egg" ||
                 itemType === "Digger egg" ||
@@ -38217,8 +41687,8 @@ class WorldMapGame {
                     this._spawnItemDrop(enemy, itemType, rarity, i);
                 }
                 else {
-                    // Digger 和其他生物使用普通掉落表
-                    const rarity = this.getRandomRarity(enemyRarity, RARITY_DROP_RATES);
+                    // 使用地图对应的掉落表
+                    const rarity = this.getRandomRarity(enemyRarity, dropRates);
                     this._spawnItemDrop(enemy, itemType, rarity, i);
                 }
             }
@@ -38591,7 +42061,6 @@ class WorldMapGame {
         return false;
     }
 
-    // 在 WorldMapGame 类中修改 handlePlayerDeath 方法
     handlePlayerDeath() {
         // 清空海绵伤害队列
         if (this.player) {
@@ -38604,42 +42073,18 @@ class WorldMapGame {
         // 收集本次运行的掉落物
         this.currentRunDrops = this.collectRunDrops();
 
-        // 重置玩家血量
-        this.player.health = this.player.maxHealth;
-        this.player.isDead = false;
+        // 不立即重置，而是显示死亡界面
+        this.gameState = GameState.GAME_OVER;
+        this.gameOver = true;
+        this.gameRunning = false;
 
-        // ===== 查找安全的重生点 =====
-        const playerPos = this.player.physicsBody.position;
+        // 保存死亡时的掉落物用于显示
+        this.deathDrops = [...this.currentRunDrops];
+        this.deathScrollOffset = 0;
 
-        // 方法1：使用区块系统查找安全位置
-        let spawnPoint = this.findNearestSafeRespawn(playerPos);
+        // 暂停游戏更新
+        this.paused = true;
 
-        // 方法2：如果区块系统返回的位置不安全，使用安全搜索
-        if (this.isInMazeWall(spawnPoint.x, spawnPoint.y) ||
-            this.isTooCloseToWall(spawnPoint.x, spawnPoint.y, 30)) {
-            console.log(`⚠️ 区块重生点不安全，搜索安全位置`);
-            spawnPoint = this.findSafeSpawnPoint(spawnPoint.x, spawnPoint.y, 300, 100);
-        }
-
-        this.spawnPoint = spawnPoint;
-        this.player.physicsBody.position.x = spawnPoint.x;
-        this.player.physicsBody.position.y = spawnPoint.y;
-
-
-        // 更新相机
-        this.cameraOffset.x = spawnPoint.x - WIDTH / 2;
-        this.cameraOffset.y = spawnPoint.y - HEIGHT / 2;
-
-        // 重新初始化花瓣
-        this.initializeAllPetals();
-
-        // 重置游戏状态
-        this.gameOver = false;
-        this.gameState = GameState.IN_GAME;
-        this.gameRunning = true;
-
-        // 自动保存
-        this.autoSave();
     }
 
     // ✅ 新增：清除所有友方生物
@@ -38755,9 +42200,7 @@ class WorldMapGame {
 
             // 绘制世界背景
             this.drawWorldBackground(context, cameraOffset);
-            if (this.player && this.player.statusBar) {
-                this.player.statusBar.draw(context);
-            }
+
             // 绘制敌人
             for (const enemy of this.enemies) {
                 if (enemy.isDead) continue;
@@ -38789,7 +42232,9 @@ class WorldMapGame {
                     this.network.chatSystem.draw(context, this.chatX, this.chatY, this.chatW, this.chatH);
                 }
             }
-
+            if (this.player && this.player.statusBar) {
+                this.player.statusBar.draw(context);
+            }
             // 绘制UI
             this.drawUi(context, new Vector2(0, 0), viewScale);
             // 绘制闪电连锁线
@@ -38845,7 +42290,10 @@ class WorldMapGame {
             if (this.gameState === GameState.PAUSED) {
                 this.drawPauseMenu(context);
             }
-
+        // ========== 绘制时空隧道UI（计时器等）==========
+            if (this.tunnelSystem) {
+                this.tunnelSystem.draw(context);
+            }
             // 绘制多人模式信息
             if (this.multiplayerMode) {
                 context.save();
@@ -39065,8 +42513,93 @@ class WorldMapGame {
         return offscreen;
     }
 
+    isInProceduralWall(worldX, worldY) {
+        // 边界检查
+        if (isNaN(worldX) || isNaN(worldY)) return false;
+        if (worldX < 0 || worldX >= WORLD_WIDTH || worldY < 0 || worldY >= WORLD_HEIGHT) {
+            return true;
+        }
 
-    // 在 WorldMapGame 类中，修改 drawWorldBackground 方法
+        // 获取或生成地图数据
+        const cacheKey = `${this.currentBiome}_${WORLD_WIDTH}_${WORLD_HEIGHT}`;
+        if (!this._proceduralMapCache || this._proceduralMapCache.key !== cacheKey) {
+            let mapData;
+            if (this.currentBiome === "Micro") {
+                mapData = this.mapGenerator.generateMicroMap(WORLD_WIDTH, WORLD_HEIGHT);
+            } else if (this.currentBiome === "Void") {
+                mapData = this.mapGenerator.generateVoidMap(WORLD_WIDTH, WORLD_HEIGHT);
+            } else {
+                return false;
+            }
+
+            if (!mapData || !mapData.walls) {
+                this._proceduralMapCache = { key: cacheKey, walls: [] };
+            } else {
+                this._proceduralMapCache = {
+                    key: cacheKey,
+                    walls: mapData.walls
+                };
+            }
+        }
+
+        // 检查是否在任何墙壁内
+        for (const wall of this._proceduralMapCache.walls) {
+            if (!wall) continue;
+
+            if (wall.isCircular) {
+                const cx = wall.x + wall.width / 2;
+                const cy = wall.y + wall.height / 2;
+                const radius = wall.width / 2;
+                const dx = worldX - cx;
+                const dy = worldY - cy;
+                if (dx * dx + dy * dy < radius * radius) {
+                    return true;
+                }
+            } else {
+                if (worldX >= wall.x && worldX <= wall.x + wall.width &&
+                    worldY >= wall.y && worldY <= wall.y + wall.height) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // 🆕 绘制程序化地图墙壁
+    drawProceduralWalls(context, cameraOffset) {
+        if (!this._proceduralMapCache) return;
+
+        const left = cameraOffset.x;
+        const right = cameraOffset.x + WIDTH;
+        const top = cameraOffset.y;
+        const bottom = cameraOffset.y + HEIGHT;
+
+        const wallColor = BIOME_BACKGROUNDS[this.currentBiome]?.wall_color || [50, 50, 50];
+
+        context.fillStyle = `rgb(${wallColor[0]}, ${wallColor[1]}, ${wallColor[2]})`;
+        context.beginPath();
+
+        for (const wall of this._proceduralMapCache.walls) {
+            // 视锥剔除
+            if (wall.x + wall.width < left || wall.x > right ||
+                wall.y + wall.height < top || wall.y > bottom) {
+                continue;
+            }
+
+            const screenX = wall.x - cameraOffset.x;
+            const screenY = wall.y - cameraOffset.y;
+
+            if (wall.isCircular) {
+                context.arc(screenX + wall.width/2, screenY + wall.height/2, wall.width/2, 0, Math.PI * 2);
+            } else {
+                context.rect(screenX, screenY, wall.width, wall.height);
+            }
+        }
+
+        context.fill();
+    }
+
     drawWorldBackground(context, cameraOffset) {
         const bgConfig = BIOME_BACKGROUNDS[this.currentBiome] || BIOME_BACKGROUNDS.Plain;
         const mapConfig = bgConfig.map || { background_color: bgConfig.base_color };
@@ -39088,16 +42621,83 @@ class WorldMapGame {
         context.fillStyle = `rgb(${groundColor[0]}, ${groundColor[1]}, ${groundColor[2]})`;
         context.fillRect(screenStartX, screenStartY, screenWidth, screenHeight);
 
-        // 2. ✅ 新增：绘制动态背景花纹
-        this.drawBackgroundPattern(context, cameraOffset, groundColor);
+        // ========== 🆕 微观世界和宇宙世界特殊效果 ==========
+        if (this.currentBiome === "Micro") {
+            this.drawQuantumBackground(context, cameraOffset);
+        } else if (this.currentBiome === "Void") {
+            this.drawBackgroundPattern(context, cameraOffset,groundColor);
+        } else {
+            // 原有地图：绘制动态背景花纹
+            this.drawBackgroundPattern(context, cameraOffset, groundColor);
+        }
 
-        // 3. 绘制墙壁
-        this.drawWallBoxes(context, cameraOffset);
+        // 3. 绘制墙壁（支持程序化墙壁）
+        if (this.currentBiome === "Micro" || this.currentBiome === "Void") {
+            this.drawProceduralWalls(context, cameraOffset);
+        } else {
+            this.drawWallBoxes(context, cameraOffset);
+        }
 
-        // 4. 绘制网格
-        this.drawMapGrid(context, cameraOffset, startX, startY, endX, endY,
-                        screenStartX, screenStartY, screenWidth, screenHeight, 100);
+        // 4. 绘制网格（微观世界显示网格，宇宙世界不显示）
+
+        this.drawMapGrid(context, cameraOffset, startX, startY, endX, endY,screenStartX, screenStartY, screenWidth, screenHeight, 100);
+
     }
+
+    // ========== 🆕 微观世界量子背景 ==========
+    drawQuantumBackground(context, cameraOffset) {
+        const now = Date.now() / 1000;
+        const particleCount = 80;
+
+        for (let i = 0; i < particleCount; i++) {
+            const seed = i * 137;
+            // 粒子在世界中的位置
+            const worldX = (seed * 0.007) % WORLD_WIDTH;
+            const worldY = (seed * 0.011) % WORLD_HEIGHT;
+
+            const screenX = worldX - cameraOffset.x;
+            const screenY = worldY - cameraOffset.y;
+
+            if (screenX < -100 || screenX > WIDTH + 100 || screenY < -100 || screenY > HEIGHT + 100) continue;
+
+            // 闪烁效果
+            const brightness = 0.3 + Math.sin(now * 3 + i) * 0.2;
+            const size = 2 + Math.sin(now * 5 + i) * 1;
+
+            // 量子泡沫效果（蓝紫色调）
+            const colors = [
+                `rgba(100, 150, 255, ${brightness * 0.5})`,
+                `rgba(150, 100, 255, ${brightness * 0.4})`,
+                `rgba(80, 200, 255, ${brightness * 0.3})`
+            ];
+
+            context.fillStyle = colors[i % colors.length];
+            context.beginPath();
+            context.arc(screenX, screenY, size, 0, Math.PI * 2);
+            context.fill();
+        }
+
+        // 添加量子波动线条
+        context.save();
+        context.strokeStyle = 'rgba(100, 150, 255, 0.2)';
+        context.lineWidth = 1;
+        for (let i = 0; i < 20; i++) {
+            const y = (i * 50 + now * 20) % WORLD_HEIGHT;
+            const screenY = y - cameraOffset.y;
+            if (screenY < -50 || screenY > HEIGHT + 50) continue;
+
+            context.beginPath();
+            for (let x = 0; x <= WIDTH; x += 20) {
+                const waveY = screenY + Math.sin(x * 0.02 + now * 3) * 5;
+                if (x === 0) context.moveTo(x, waveY);
+                else context.lineTo(x, waveY);
+            }
+            context.stroke();
+        }
+        context.restore();
+    }
+
+
     drawBackgroundPattern(context, cameraOffset, groundColor) {
         // ✅ 使用正确的缩放变量
         const scale = this.viewScale || 1;
@@ -39596,108 +43196,138 @@ class WorldMapGame {
     }
 
     drawGameOver(ctx) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        const W = ctx.canvas.width;
+        const H = ctx.canvas.height;
 
-        ctx.font = 'bold 72px Arial';
-        ctx.fillStyle = 'red';
+        // 半透明背景
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, W, H);
+
+        // 标题
+        ctx.font = 'bold 48px Arial';
+        ctx.fillStyle = '#ff4444';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('GAME OVER', WIDTH / 2, HEIGHT / 4);
+        ctx.fillText('YOU DIED', W / 2, H / 4);
 
-        ctx.font = '36px Arial';
+        // 按钮区域
+        const btnWidth = 180;
+        const btnHeight = 50;
+        const btnY = H - 100;
+        const continueBtnX = W / 2 - btnWidth - 20;
+        const exitBtnX = W / 2 + 20;
+
+        // Continue 按钮
+        ctx.fillStyle = '#27ae60';
+        ctx.beginPath();
+        ctx.roundRect(continueBtnX, btnY, btnWidth, btnHeight, 10);
+        ctx.fill();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = 'bold 20px Arial';
         ctx.fillStyle = 'white';
-        ctx.fillText(`Score: ${this.score || 0}`, WIDTH / 2, HEIGHT / 2);
-        ctx.fillText(`Enemies Killed: ${this.enemiesKilled || 0}`, WIDTH / 2, HEIGHT / 2 + 40);
+        ctx.fillText('CONTINUE', continueBtnX + btnWidth/2, btnY + btnHeight/2);
 
-        const panelWidth = Math.min(380, Math.floor(WIDTH / 3));
-        const panelHeight = Math.min(500, HEIGHT - 100);
-        const panelX = WIDTH - panelWidth - 10;
-        const panelY = 50;
+        // Exit 按钮
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.roundRect(exitBtnX, btnY, btnWidth, btnHeight, 10);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.fillText('EXIT', exitBtnX + btnWidth/2, btnY + btnHeight/2);
 
-        if (panelX > 0 && panelY + panelHeight < HEIGHT) {
-            ctx.fillStyle = 'rgb(30, 30, 40)';
-            ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
-            ctx.strokeStyle = 'rgb(100, 100, 150)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+        // 保存按钮位置供点击检测
+        this.continueButtonRect = [continueBtnX, btnY, btnWidth, btnHeight];
+        this.exitButtonRect = [exitBtnX, btnY, btnWidth, btnHeight];
 
-            ctx.font = 'bold 32px Arial';
-            ctx.fillStyle = 'rgb(200, 200, 255)';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillText('COLLECT THIS RUN', panelX + 10, panelY + 10);
+        // 绘制掉落物面板
+        this.drawDeathDropPanel(ctx);
+    }
 
-            const RARITY_ORDER = ["Unique","Eternal","Omega","Super", "Ultra", "Mythic", "Legendary", "Epic", "Rare", "Unusual", "Common"];
-            const RARITY_PRIORITY = {};
-            RARITY_ORDER.forEach((rarity, idx) => RARITY_PRIORITY[rarity] = idx);
+    drawDeathDropPanel(ctx) {
+        const W = ctx.canvas.width;
+        const H = ctx.canvas.height;
 
-            if (!this.currentRunDrops) this.currentRunDrops = [];
+        const panelWidth = Math.min(500, W - 100);
+        const panelHeight = Math.min(400, H - 250);
+        const panelX = (W - panelWidth);
+        const panelY = H - 800;
 
-            const sortedDrops = [...this.currentRunDrops].sort((a, b) =>
-                (RARITY_PRIORITY[a.rarity] || 999) - (RARITY_PRIORITY[b.rarity] || 999)
-            );
+        // 面板背景
+        ctx.fillStyle = 'rgba(30, 30, 40, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(panelX, panelY, panelWidth, panelHeight, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-            const cols = 4;
-            const rows = Math.floor((panelHeight - 70) / 65);
-            const itemsPerPage = rows * cols;
-            const startIdx = (this.deathScrollOffset || 0) * itemsPerPage;
-            const visibleItems = sortedDrops.slice(startIdx, startIdx + itemsPerPage);
+        // 标题
+        ctx.font = 'bold 20px Arial';
+        ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'center';
+        ctx.fillText('DROPS THIS RUN', panelX + panelWidth/2, panelY + 30);
 
-            for (let i = 0; i < visibleItems.length; i++) {
-                const row = Math.floor(i / cols);
-                const col = i % cols;
-                const x = panelX + 10 + col * 70;
-                const y = panelY + 50 + row * 65;
+        if (!this.deathDrops || this.deathDrops.length === 0) {
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#aaa';
+            ctx.fillText('No items collected', panelX + panelWidth/2, panelY + panelHeight/2);
+            return;
+        }
 
-                const itemData = visibleItems[i];
+        // 稀有度排序
+        const RARITY_ORDER = ["Unique", "Eternal", "Omega", "Super", "Ultra",
+                              "Mythic", "Legendary", "Epic", "Rare", "Unusual", "Common"];
+        const sortedDrops = [...this.deathDrops].sort((a, b) =>
+            RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity)
+        );
 
-                try {
-                    const item = Item.fromDict(itemData);
+        const cols = 4;
+        const slotSize = 60;
+        const slotMargin = 8;
+        const startX = panelX + (panelWidth - (cols * (slotSize + slotMargin))) / 2;
+        const startY = panelY + 55;
+        const rowsPerPage = Math.floor((panelHeight - 70) / (slotSize + slotMargin));
+        const itemsPerPage = cols * rowsPerPage;
 
-                    if (item.draw) {
-                        item.draw(ctx, x, y, 60);
-                    } else {
-                        ctx.fillStyle = RARITY_COLORS[item.rarity] || '#888';
-                        ctx.fillRect(x, y, 60, 60);
-                        ctx.strokeStyle = 'white';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(x, y, 60, 60);
+        const startIdx = (this.deathScrollOffset || 0) * itemsPerPage;
+        const visibleItems = sortedDrops.slice(startIdx, startIdx + itemsPerPage);
 
-                        ctx.fillStyle = 'white';
-                        ctx.font = '20px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(item.type.substring(0, 3), x + 30, y + 30);
-                    }
+        for (let i = 0; i < visibleItems.length; i++) {
+            const row = Math.floor(i / cols);
+            const col = i % cols;
+            const x = startX + col * (slotSize + slotMargin);
+            const y = startY + row * (slotSize + slotMargin);
 
-                    if (item.count > 1) {
-                        let countStr;
-                        if (item.count >= 1000 && item.count % 1000 === 0) {
-                            countStr = `x${item.count / 1000}K`;
-                        } else {
-                            countStr = `x${item.count}`;
-                        }
+            const itemData = visibleItems[i];
 
-                        ctx.font = 'bold 18px Arial';
-                        ctx.fillStyle = 'white';
-                        ctx.textAlign = 'right';
-                        ctx.textBaseline = 'bottom';
-                        ctx.fillText(countStr, x + 58, y + 58);
-                    }
-                } catch (e) {
-                    console.error("Draw error:", e);
+            try {
+                const item = Item.fromDict(itemData);
+                if (item.draw) {
+                    item.draw(ctx, x, y, slotSize, -1000, -1000);
+                } else {
+                    ctx.fillStyle = RARITY_COLORS[item.rarity] || '#888';
+                    ctx.fillRect(x, y, slotSize, slotSize);
+                    ctx.strokeStyle = 'white';
+                    ctx.strokeRect(x, y, slotSize, slotSize);
                 }
-            }
 
-            if (sortedDrops.length > itemsPerPage) {
-                const scrollBarHeight = (rows / Math.ceil(sortedDrops.length / cols)) * (panelHeight - 70);
-                const scrollBarY = panelY + 50 + (this.deathScrollOffset || 0) *
-                    ((panelHeight - 70 - scrollBarHeight) / (Math.ceil(sortedDrops.length / cols) - rows));
 
-                ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-                ctx.fillRect(panelX + panelWidth - 15, scrollBarY, 10, scrollBarHeight);
-            }
+            } catch(e) {}
+        }
+
+        // 滚动条
+        if (sortedDrops.length > itemsPerPage) {
+            const totalRows = Math.ceil(sortedDrops.length / cols);
+            const maxOffset = Math.max(0, totalRows - rowsPerPage);
+            const scrollBarHeight = (rowsPerPage / totalRows) * (panelHeight - 70);
+            const scrollBarY = startY + (this.deathScrollOffset / maxOffset) *
+                              ((panelHeight - 70) - scrollBarHeight);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(panelX + panelWidth - 12, scrollBarY, 6, scrollBarHeight);
         }
     }
 
@@ -39787,8 +43417,9 @@ class WorldMapGame {
         this.cameraOffset = new Vector2(0, 0);
         this.effectiveViewWidth = WIDTH;
         this.effectiveViewHeight = HEIGHT;
-
-
+         if (this.tunnelSystem) {
+                    this.tunnelSystem.forceExit();
+         }
         // ✅ 保留特殊区域计数
         this.zoneEnemyCounts = {};
 
