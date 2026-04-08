@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -194,64 +195,106 @@ html, body {
   white-space: nowrap;
 }
 
-/* 原有面板样式 */
-#multiplayer-panel, #account-panel {
+/* 原有面板样式 - 提升z-index并添加触摸拦截 */
+/* 所有模态面板统一使用全屏覆盖背景 */
+.modal-panel {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(3px);
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+.modal-panel > .panel-content {
   background: rgba(20, 30, 40, 0.95);
-  border-radius: 10px;
+  border-radius: 20px;
   padding: 30px;
   color: white;
-  z-index: 2000;
-  display: none;
-  min-width: 350px;
+  min-width: 280px;
+  max-width: 90%;
   text-align: center;
+  border: 1px solid rgba(255,215,0,0.5);
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  pointer-events: auto;
 }
-@media (max-width: 480px) {
-  #multiplayer-panel, #account-panel {
-    min-width: 280px;
-    padding: 20px;
-  }
-  #multiplayer-panel input, #account-panel input {
-    font-size: 14px;
-    padding: 8px;
-  }
-  #multiplayer-panel button, #account-panel button {
-    padding: 8px 16px;
-    font-size: 14px;
-    min-width: 120px;
-  }
+.modal-panel h2 { margin-bottom: 15px; color: #ffd700; }
+.modal-panel input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  background: #1e2a3a;
+  border: 1px solid #ffd700;
+  color: white;
+  border-radius: 10px;
+  font-size: 16px;
 }
-#multiplayer-panel { border: 2px solid #00a8ff; }
-#account-panel { border: 2px solid #f1c40f; }
-#multiplayer-panel h2 { color: #00a8ff; }
-#account-panel h2 { color: #f1c40f; }
+.modal-panel button {
+  background: #2c3e50;
+  border: none;
+  padding: 10px 20px;
+  margin: 8px;
+  border-radius: 30px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.modal-panel button.cancel { background: #c0392b; }
+.modal-panel button:hover { opacity: 0.8; }
+
+/* 兼容旧面板ID，应用新样式 */
+#multiplayer-panel, #account-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(3px);
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#multiplayer-panel > div, #account-panel > div {
+  background: rgba(20, 30, 40, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  min-width: 280px;
+  max-width: 90%;
+  text-align: center;
+  border: 1px solid rgba(255,215,0,0.5);
+}
+#multiplayer-panel h2, #account-panel h2 { color: #ffd700; margin-bottom: 15px; }
 #multiplayer-panel input, #account-panel input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin: 10px 0;
-  background: #1a2a3a;
-  border: 1px solid #00a8ff;
+  background: #1e2a3a;
+  border: 1px solid #ffd700;
   color: white;
-  border-radius: 5px;
-  font-size: 18px;
-}
-#account-panel input { border-color: #f1c40f; }
-#multiplayer-panel button, #account-panel button {
-  background: #00a8ff;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  margin: 10px;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 10px;
   font-size: 16px;
-  min-width: 150px;
 }
-#account-panel button { background: #f1c40f; color: black; font-weight: bold; }
-#multiplayer-panel button.cancel, #account-panel button.cancel { background: #e74c3c; color: white; }
+#multiplayer-panel button, #account-panel button {
+  background: #2c3e50;
+  border: none;
+  padding: 10px 20px;
+  margin: 8px;
+  border-radius: 30px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#multiplayer-panel button.cancel, #account-panel button.cancel { background: #c0392b; }
+
 #room-info {
   position: fixed;
   top: 10px;
@@ -335,76 +378,80 @@ canvas {
       </div>
     </div>
     <div id="toggle-panel">🎮</div>
-    <div id="touch-hint">💡 左键摇杆移动 | 点击地面移动 | SP=展开 | SW=交换 | MN=菜单</div>
+    <div id="touch-hint">💡 左键摇杆移动 | 右键点击地面移动 | SP=展开 | SW=交换 | MN=菜单</div>
 
-    <!-- 多人游戏面板 -->
+    <!-- 多人游戏面板（改造为全屏背景） -->
     <div id="multiplayer-panel">
-        <h2>👥 多人游戏</h2>
-        <div id="mp-menu">
-            <button onclick="showCreateRoom()">🎮 创建房间</button>
-            <button onclick="showJoinRoom()">🔑 加入房间</button>
-            <button class="cancel" onclick="hideMultiplayerPanel()">❌ 返回</button>
-        </div>
-        <div id="mp-create" style="display: none;">
-            <h3>创建房间</h3>
-            <div id="room-code-display" class="room-code">------</div>
-            <div id="room-link-display" class="link-box"></div>
-            <button onclick="copyRoomLink()">📋 复制链接</button>
-            <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
-        </div>
-        <div id="mp-join" style="display: none;">
-            <h3>加入房间</h3>
-            <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6">
-            <button onclick="joinRoom()">✅ 加入</button>
-            <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
-            <p id="join-error" style="color: #ff6b6b; margin-top: 10px;"></p>
+        <div>
+            <h2>👥 多人游戏</h2>
+            <div id="mp-menu">
+                <button onclick="showCreateRoom()">🎮 创建房间</button>
+                <button onclick="showJoinRoom()">🔑 加入房间</button>
+                <button class="cancel" onclick="hideMultiplayerPanel()">❌ 返回</button>
+            </div>
+            <div id="mp-create" style="display: none;">
+                <h3>创建房间</h3>
+                <div id="room-code-display" class="room-code">------</div>
+                <div id="room-link-display" class="link-box"></div>
+                <button onclick="copyRoomLink()">📋 复制链接</button>
+                <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
+            </div>
+            <div id="mp-join" style="display: none;">
+                <h3>加入房间</h3>
+                <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6">
+                <button onclick="joinRoom()">✅ 加入</button>
+                <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
+                <p id="join-error" style="color: #ff6b6b; margin-top: 10px;"></p>
+            </div>
         </div>
     </div>
 
-    <!-- 账号面板 -->
+    <!-- 账号面板（改造为全屏背景） -->
     <div id="account-panel">
-        <h2>👤 账号系统</h2>
-        <div id="account-menu">
-            <button onclick="showAccountLogin()">🔑 登录</button>
-            <button onclick="showAccountRegister()">📝 注册</button>
-            <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
-        </div>
-        <div id="account-login" style="display: none;">
-            <h3>登录</h3>
-            <div class="input-label">用户名</div>
-            <input type="text" id="login-username" placeholder="输入用户名" maxlength="20">
-            <div class="input-label">密码</div>
-            <div style="position: relative;">
-                <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                <span onclick="togglePasswordVisibility('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+        <div>
+            <h2>👤 账号系统</h2>
+            <div id="account-menu">
+                <button onclick="showAccountLogin()">🔑 登录</button>
+                <button onclick="showAccountRegister()">📝 注册</button>
+                <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
             </div>
-            <button onclick="handleLogin()">✅ 登录</button>
-            <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
-            <div id="login-message" class="message" style="display: none;"></div>
-        </div>
-        <div id="account-register" style="display: none;">
-            <h3>注册新账号</h3>
-            <div class="input-label">用户名 (3-20字符)</div>
-            <input type="text" id="register-username" placeholder="输入用户名" maxlength="20">
-            <div class="input-label">密码 (3-20字符)</div>
-            <div style="position: relative;">
-                <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                <span onclick="togglePasswordVisibility('register-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+            <div id="account-login" style="display: none;">
+                <h3>登录</h3>
+                <div class="input-label">用户名</div>
+                <input type="text" id="login-username" placeholder="输入用户名" maxlength="20">
+                <div class="input-label">密码</div>
+                <div style="position: relative;">
+                    <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                    <span onclick="togglePasswordVisibility('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+                </div>
+                <button onclick="handleLogin()">✅ 登录</button>
+                <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
+                <div id="login-message" class="message" style="display: none;"></div>
             </div>
-            <div class="input-label">确认密码</div>
-            <div style="position: relative;">
-                <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                <span onclick="togglePasswordVisibility('register-confirm')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+            <div id="account-register" style="display: none;">
+                <h3>注册新账号</h3>
+                <div class="input-label">用户名 (3-20字符)</div>
+                <input type="text" id="register-username" placeholder="输入用户名" maxlength="20">
+                <div class="input-label">密码 (3-20字符)</div>
+                <div style="position: relative;">
+                    <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                    <span onclick="togglePasswordVisibility('register-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+                </div>
+                <div class="input-label">确认密码</div>
+                <div style="position: relative;">
+                    <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
+                    <span onclick="togglePasswordVisibility('register-confirm')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
+                </div>
+                <button onclick="handleRegister()">📝 注册</button>
+                <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
+                <div id="register-message" class="message" style="display: none;"></div>
             </div>
-            <button onclick="handleRegister()">📝 注册</button>
-            <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
-            <div id="register-message" class="message" style="display: none;"></div>
-        </div>
-        <div id="account-loggedin" style="display: none;">
-            <h3>已登录</h3>
-            <div id="loggedin-username" style="font-size: 24px; margin: 20px; color: #f1c40f;"></div>
-            <button onclick="handleLogout()">🚪 登出</button>
-            <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
+            <div id="account-loggedin" style="display: none;">
+                <h3>已登录</h3>
+                <div id="loggedin-username" style="font-size: 24px; margin: 20px; color: #f1c40f;"></div>
+                <button onclick="handleLogout()">🚪 登出</button>
+                <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
+            </div>
         </div>
     </div>
 
@@ -415,22 +462,68 @@ canvas {
       ProbabilityCalculator, CraftAnimation
     } from './game.js';
 
+    // ========== 触摸穿透防护（全局） ==========
+    // 阻止所有UI面板上的触摸事件传递到canvas
+    const uiContainers = [
+        document.getElementById('multiplayer-panel'),
+        document.getElementById('account-panel'),
+        document.getElementById('touch-controls'),
+        document.getElementById('toggle-panel'),
+        document.getElementById('orientation-tip')
+    ];
+    function blockTouchPropagation(e) {
+        e.stopPropagation();
+        if (e.target && (e.target.tagName === 'BUTTON' || e.target.classList?.contains('touch-btn') || e.target.classList?.contains('btn'))) {
+            e.preventDefault();
+        }
+    }
+    uiContainers.forEach(container => {
+        if (container) {
+            container.addEventListener('touchstart', blockTouchPropagation, { passive: false });
+            container.addEventListener('touchmove', blockTouchPropagation, { passive: false });
+            container.addEventListener('touchend', blockTouchPropagation, { passive: false });
+        }
+    });
+    // 动态监听可能由game.js创建的面板（如商店、合成界面）
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) {
+                    if (node.style && (node.style.zIndex > 2000 || node.classList?.contains('dialog') || node.classList?.contains('panel') || node.classList?.contains('modal'))) {
+                        node.addEventListener('touchstart', blockTouchPropagation, { passive: false });
+                        node.addEventListener('touchmove', blockTouchPropagation, { passive: false });
+                        node.addEventListener('touchend', blockTouchPropagation, { passive: false });
+                    }
+                }
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // 全局触摸事件判断：如果触摸点位于任何UI区域内，则不传递给canvas的游戏移动逻辑
+    function isTouchOnUI(x, y) {
+        const uiElements = document.querySelectorAll('#multiplayer-panel, #account-panel, #touch-controls, #toggle-panel, .dialog, .modal, .shop-panel, .crafting-panel, .inventory-panel');
+        for (let el of uiElements) {
+            if (el && el.style.display !== 'none') {
+                const rect = el.getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // ========== 移动端安全检测函数 ==========
     let lastTouchTime = 0;
     let maxTouchPoints = 3;
-    let touchEventCounter = 0;
-    let suspiciousActivityFlag = false;
 
     function isTrustedTouchEvent(e) {
-        // 1. 检查是否为真实用户事件
         if (!e.isTrusted) return false;
-        // 2. 检查触摸点数量（防止多指脚本）
         if (e.touches && e.touches.length > maxTouchPoints) return false;
-        // 3. 检查时间间隔（防止高频模拟）
         const now = Date.now();
         if (now - lastTouchTime < 16) return false;
         lastTouchTime = now;
-        // 4. 检查触摸点是否在合理范围内
         if (e.touches && e.touches.length > 0) {
             const touch = e.touches[0];
             if (touch.clientX < -1000 || touch.clientX > 10000 || touch.clientY < -1000 || touch.clientY > 10000) {
@@ -445,11 +538,9 @@ canvas {
         e.stopPropagation();
     }
 
-    // 防控制台检测（简易版）
+    // 防控制台检测
     setInterval(() => {
-        if (window.console && console.profile && console.profileEnd) {
-            // 控制台可能已打开
-        }
+        if (window.console && console.profile && console.profileEnd) {}
     }, 5000);
 
     // 监控关键函数是否被劫持
@@ -469,18 +560,14 @@ canvas {
         return originalAddEventListener.call(this, type, listener, options);
     };
 
-    // 简单振动反馈
     function vibrate(ms = 15) {
         if (window.navigator && window.navigator.vibrate) {
-            try {
-                window.navigator.vibrate(ms);
-            } catch(e) {}
+            try { window.navigator.vibrate(ms); } catch(e) {}
         }
     }
 
     let screen = null, ctx = null, gameState = 'main_menu', gameInstance = null;
     let controlsInitialized = false, animationFrameId = null;
-    const GameState = { MAIN_MENU: 'main_menu', IN_GAME: 'in_game', PAUSED: 'paused', GAME_OVER: 'game_over' };
     let mouseTargetX = null, mouseTargetY = null, isMouseMoving = false;
     const MOUSE_MOVE_SPEED = 5;
     let editorMode = false;
@@ -490,11 +577,10 @@ canvas {
     window.RARITY_LIST = RARITY_LIST;
     window.RARITY_COLORS = RARITY_COLORS;
 
-    // 横屏检测函数
     function checkOrientation() {
         const tip = document.getElementById('orientation-tip');
         if (!tip) return;
-        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.UserAgent);
         if (isMobile && window.innerHeight > window.innerWidth) {
             tip.classList.remove('hidden');
         } else {
@@ -502,13 +588,10 @@ canvas {
         }
     }
 
-    // 优化后的画布尺寸初始化
     function initDOMElements() {
         screen = document.getElementById('gameCanvas');
         if (!screen) throw new Error("Canvas not found!");
-
         const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
         if (isMobile) {
             screen.width = window.innerWidth;
             screen.height = window.innerHeight;
@@ -516,17 +599,14 @@ canvas {
             screen.width = window.innerWidth;
             screen.height = window.innerHeight;
         }
-
         screen.style.width = '100%';
         screen.style.height = '100%';
         screen.style.position = 'fixed';
         screen.style.top = '0';
         screen.style.left = '0';
-
         ctx = screen.getContext('2d');
         window.WIDTH = screen.width;
         window.HEIGHT = screen.height;
-
         if (gameInstance) {
             gameInstance.WIDTH = window.WIDTH;
             gameInstance.HEIGHT = window.HEIGHT;
@@ -551,11 +631,11 @@ canvas {
         if (gameInstance) {
             gameInstance.WIDTH = w;
             gameInstance.HEIGHT = h;
+            if (gameInstance.handleResize) gameInstance.handleResize();
         }
         checkOrientation();
     }
 
-    // 在 window 上添加 keyup 事件
     window.addEventListener('keyup', (e) => {
         if (e.key === 'Shift' && gameInstance && !gameInstance.paused) {
             gameInstance.player.contractMode = false;
@@ -565,7 +645,6 @@ canvas {
         }
     });
 
-    // 窗口大小改变时重新适配
     window.addEventListener('resize', () => {
         resizeCanvas();
         if (gameInstance?.cameraOffset && gameInstance.player) {
@@ -588,7 +667,7 @@ canvas {
         if (el) el.type = el.type === 'password' ? 'text' : 'password';
     };
 
-    // ========== 触屏控制脚本（增强安全版） ==========
+    // ========== 触屏控制脚本（仅摇杆，禁用触摸移动） ==========
     (function() {
         const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const joystickArea = document.getElementById('joystick-area');
@@ -606,7 +685,6 @@ canvas {
         if (savedPanel !== null) panelVisible = savedPanel === 'true';
         else panelVisible = isTouch;
 
-        // 阻止所有触摸相关元素的默认行为
         const touchElements = [joystickArea, document.getElementById('btn-space'), document.getElementById('btn-r'), document.getElementById('btn-esc'), toggleJoystickBtn, togglePanelBtn];
         touchElements.forEach(el => {
             if (!el) return;
@@ -745,23 +823,6 @@ canvas {
 
         setJoystickVisible(joystickEnabled);
         setPanelVisible(panelVisible);
-
-        const canvas = document.getElementById('gameCanvas');
-        if (canvas) {
-            canvas.addEventListener('touchstart', e => {
-                if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
-                const t = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
-                const x = (t.clientX - rect.left) * sx, y = (t.clientY - rect.top) * sy;
-                const joyRect = joystickArea.getBoundingClientRect();
-                const btnRect = document.getElementById('btn-area').getBoundingClientRect();
-                if (t.clientX < joyRect.right && t.clientY > joyRect.top) return;
-                if (t.clientX > btnRect.left && t.clientY > btnRect.top) return;
-                if (window.gameInstance?.player?.quickSlot?.handleClick([x, y])) return;
-                canvas.dispatchEvent(new MouseEvent('mousedown', { button: 2, clientX: t.clientX, clientY: t.clientY, bubbles: true }));
-            }, { passive: false });
-        }
     })();
 
     // ===== 游戏初始化 =====
@@ -833,6 +894,7 @@ canvas {
     function handleMouseDown(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
+        if (isTouchOnUI(e.clientX, e.clientY)) return;
 
         const canvas = document.getElementById('gameCanvas');
         const canvasWidth = canvas.width;
@@ -847,18 +909,12 @@ canvas {
             }
             return;
         }
-        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
-            gameInstance.mobGallery.handleClick(x, y);
-            return;
-        }
         if (gameState === 'main_menu' && gameInstance) {
             if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
-
             const mgx = canvasWidth - 220;
             const mgy = canvasHeight - 80;
             const mgw = 200;
             const mgh = 60;
-
             if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
                 if (gameInstance.mobGallery) {
                     gameInstance.mobGallery.open();
@@ -866,12 +922,11 @@ canvas {
                 }
                 return;
             }
-
             const res = gameInstance.mainMenu.handleClick(ev);
             if (res) {
                 switch(res) {
                     case "shop": if(gameInstance.shopSystem) gameInstance.shopSystem.visible = true; break;
-                    case "crafting": if(gameInstance.player?.inventory?.craftingSystem) { gameInstance.player.inventory.craftingSystem.craftingVisible = true; gameState='crafting'; } break;
+                    case "crafting": openCrafting(); break;
                     case "inventory": openInventory(); break;
                     case "multiplayer": showMultiplayerPanel(); break;
                     case "account": showAccountPanel(); break;
@@ -896,6 +951,7 @@ canvas {
     }
     function handleMouseUp(e) {
         e.preventDefault();
+        if (isTouchOnUI(e.clientX, e.clientY)) return;
         const { x, y } = getCanvasCoordinates(e);
         const ev = { type: 'mouseup', button: e.button, x, y };
         if (gameState === 'in_game' && gameInstance?.handleEvents) {
@@ -915,14 +971,13 @@ canvas {
     }
     function handleMouseMove(e) {
         e.preventDefault();
+        if (isTouchOnUI(e.clientX, e.clientY)) return;
         const { x, y } = getCanvasCoordinates(e);
         window.mouseX = x; window.mouseY = y;
-
         if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
             gameInstance.mobGallery.handleMouseMove(x, y);
             return;
         }
-
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.handleMouseMove) {
             gameInstance.mainMenu.handleMouseMove({ type: 'mousemove', x, y });
             if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
@@ -945,6 +1000,7 @@ canvas {
     }
     function handleWheel(e) {
         e.preventDefault(); e.stopPropagation();
+        if (isTouchOnUI(e.clientX, e.clientY)) return;
         const { x, y } = getCanvasCoordinates(e);
         const we = { type: 'wheel', deltaY: e.deltaY, x, y };
         if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
@@ -988,13 +1044,11 @@ canvas {
             e.preventDefault(); return;
         }
         if (k === 'Shift') {
+            e.preventDefault();
+            e.stopPropagation();
             if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
                 gameInstance.player.contractMode = true;
-                for (const petal of gameInstance.player.petals) {
-                    petal.targetRadius = 15;
-                }
             }
-            e.preventDefault();
             return;
         }
         if (k >= '1' && k <= '9') {
@@ -1064,8 +1118,17 @@ canvas {
             e.preventDefault(); return;
         }
     }
-    function handleKeyUp(e) {}
-
+    function handleKeyUp(e) {
+        if (!e?.key) return;
+        const k = e.key;  // ← 添加这一行
+        if (k === 'Shift') {
+            e.preventDefault();
+            if (gameInstance?.player) {
+                gameInstance.player.contractMode = false;
+            }
+            return;
+        }
+    }
     let isProcessingEscape = false;
     function returnToMainMenu() {
         if (isProcessingEscape) return;
@@ -1235,13 +1298,12 @@ canvas {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
-    // 横屏提示点击关闭
     document.getElementById('orientation-tip')?.addEventListener('click', () => {
         document.getElementById('orientation-tip').classList.add('hidden');
     });
 
     // UI 函数
-    window.showMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'block'; document.getElementById('mp-menu').style.display = 'block'; document.getElementById('mp-create').style.display = 'none'; document.getElementById('mp-join').style.display = 'none'; };
+    window.showMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'flex'; document.getElementById('mp-menu').style.display = 'block'; document.getElementById('mp-create').style.display = 'none'; document.getElementById('mp-join').style.display = 'none'; };
     window.hideMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'none'; };
     window.showCreateRoom = async () => {
         document.getElementById('mp-menu').style.display = 'none'; document.getElementById('mp-create').style.display = 'block';
@@ -1269,10 +1331,10 @@ canvas {
             startGame('Plain');
         } catch(e) { document.getElementById('join-error').textContent = '加入失败: ' + e.message; }
     };
-    window.showAccountPanel = () => { document.getElementById('account-panel').style.display = 'block'; document.getElementById('account-menu').style.display = 'block'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); if(gameInstance?.accountSystem?.isLoggedIn()) showLoggedInStatus(); };
+    window.showAccountPanel = () => { document.getElementById('account-panel').style.display = 'flex'; document.getElementById('account-menu').style.display = 'block'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); if(gameInstance?.accountSystem?.isLoggedIn()) showLoggedInStatus(); };
     window.hideAccountPanel = () => { document.getElementById('account-panel').style.display = 'none'; clearAccountMessages(); };
-    window.showAccountLogin = () => { document.getElementById('account-menu').style.display = 'none'; document.getElementById('account-login').style.display = 'block'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); document.getElementById('login-username').value = ''; document.getElementById('login-password').value = ''; };
-    window.showAccountRegister = () => { document.getElementById('account-menu').style.display = 'none'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'block'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); document.getElementById('register-username').value = ''; document.getElementById('register-password').value = ''; document.getElementById('register-confirm').value = ''; };
+    window.showAccountLogin = () => { document.getElementById('account-menu').style.display = 'none'; document.getElementById('account-login').style.display = 'block'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); document.getElementById('login-username').value = ''; document.getElementById('login-password').value = ''; setTimeout(() => document.getElementById('login-username')?.focus(), 100); };
+    window.showAccountRegister = () => { document.getElementById('account-menu').style.display = 'none'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'block'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); document.getElementById('register-username').value = ''; document.getElementById('register-password').value = ''; document.getElementById('register-confirm').value = ''; setTimeout(() => document.getElementById('register-username')?.focus(), 100); };
     window.backToAccountMenu = () => { document.getElementById('account-menu').style.display = 'block'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); };
     window.showLoggedInStatus = () => {
         if (!gameInstance?.accountSystem) return;
