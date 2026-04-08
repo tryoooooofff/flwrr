@@ -18925,6 +18925,170 @@ class EnemyDrawer {
 
         ctx.restore();
     }
+    drawAlien(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        // 稀有度缩放因子
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
+        };
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / 120); // 120是基准大小
+
+        // 颜色定义（友方金色，敌方绿色）
+        let bodyColor, strokeColor, eyeColor, eyeInnerColor, mouthColor;
+
+        if (isFriendly) {
+            bodyColor = '#FFD700';      // 金色
+            strokeColor = '#B8860B';    // 深金色
+            eyeColor = '#2a1650';       // 深紫色
+            eyeInnerColor = '#3d2466';  // 浅紫色
+            mouthColor = '#DAA520';     // 金杖色
+        } else {
+            bodyColor = '#5dcc1a';      // 亮绿色
+            strokeColor = '#4aaa18';    // 深绿色
+            eyeColor = '#2a1650';       // 深紫色
+            eyeInnerColor = '#3d2466';  // 浅紫色
+            mouthColor = '#4ab814';     // 绿色
+        }
+
+        const cx = 0;
+        const cy = 0;
+        const r = 127 * scale;
+        const sq = 0.48;
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI);
+
+        // 辅助函数：绘制脸部轮廓
+        const drawFace = (radius, sqVal, fillColor, strokeColorVal, lineWidthVal) => {
+            context.beginPath();
+            // 顶部半圆
+            context.arc(cx, cy - radius * 0.12, radius, Math.PI, 0, false);
+            // 右侧曲线
+            context.bezierCurveTo(
+                cx + radius * 0.88, cy + radius * 0.45,
+                cx + radius * sqVal, cy + radius * 1.0,
+                cx, cy + radius * 1.0
+            );
+            // 左侧曲线
+            context.bezierCurveTo(
+                cx - radius * sqVal, cy + radius * 1.0,
+                cx - radius * 0.85, cy + radius * 0.50,
+                cx - radius, cy - radius * 0.10
+            );
+            context.closePath();
+
+            if (fillColor) {
+                context.fillStyle = fillColor;
+                context.fill();
+            }
+            if (strokeColorVal) {
+                context.strokeStyle = strokeColorVal;
+                context.lineWidth = lineWidthVal;
+                context.stroke();
+            }
+        };
+
+        // 辅助函数：绘制眼睛
+        const drawEye = (ex, ey, eyeR, side, fillCol, strokeCol, innerFill) => {
+            context.save();
+            context.translate(ex, ey + 10 * scale);
+            context.rotate(side * 0.9);
+            context.beginPath();
+            context.arc(0, -eyeR * 0.1, eyeR, Math.PI, 0, false);
+            context.bezierCurveTo(
+                eyeR, eyeR * 0.50,
+                eyeR * 0.35, eyeR * 1.05,
+                0, eyeR * 1.05
+            );
+            context.bezierCurveTo(
+                -eyeR * 0.35, eyeR * 1.05,
+                -eyeR, eyeR * 0.52,
+                -eyeR, -eyeR * 0.1
+            );
+            context.closePath();
+            context.fillStyle = fillCol;
+            context.fill();
+            context.strokeStyle = strokeCol;
+            context.lineWidth = 5 * scale;
+            context.stroke();
+
+            // 内眼
+            context.beginPath();
+            context.arc(0, -eyeR * 0.1, eyeR * 0.8, Math.PI, 0, false);
+            context.bezierCurveTo(
+                eyeR * 0.8, eyeR * 0.40,
+                eyeR * 0.28, eyeR * 0.84,
+                0, eyeR * 0.84
+            );
+            context.bezierCurveTo(
+                -eyeR * 0.28, eyeR * 0.84,
+                -eyeR * 0.8, eyeR * 0.42,
+                -eyeR * 0.8, -eyeR * 0.1
+            );
+            context.closePath();
+            context.fillStyle = innerFill;
+            context.fill();
+            context.restore();
+        };
+
+        // 辅助函数：绘制触角
+        const drawAntenna = (side) => {
+            const baseX = side * 46 * scale;
+            const baseY = cy - 105 * scale;
+            const cpX = side * 85 * scale;
+            const cpY = cy - 208 * scale;
+            const endX = side * 108 * scale;
+            const endY = cy - 148 * scale;
+
+            context.beginPath();
+            context.moveTo(baseX, baseY);
+            context.quadraticCurveTo(cpX, cpY, endX, endY);
+            context.strokeStyle = strokeColor;
+            context.lineWidth = 14 * scale;
+            context.lineCap = 'round';
+            context.stroke();
+        };
+
+        // 辅助函数：绘制嘴巴
+        const drawSmile = () => {
+            context.beginPath();
+            context.arc(cx, cy + 62 * scale, 15 * scale, 0.1 * Math.PI, 0.9 * Math.PI);
+            context.strokeStyle = mouthColor;
+            context.lineWidth = 6 * scale;
+            context.lineCap = 'round';
+            context.stroke();
+        };
+
+        // 1. 身体描边层
+        drawFace(r, sq, null, strokeColor, 12 * scale);
+
+        // 2. 身体主色
+        drawFace(r * 0.94, sq, bodyColor, null, 0);
+
+        // 3. 触角
+        drawAntenna(-1);
+        drawAntenna(1);
+
+        // 4. 眼睛（左眼）
+        drawEye(cx - 44 * scale, cy - 12 * scale, 36 * scale, -1, eyeColor, strokeColor, eyeInnerColor);
+
+        // 5. 眼睛（右眼）
+        drawEye(cx + 44 * scale, cy - 12 * scale, 36 * scale, 1, eyeColor, strokeColor, eyeInnerColor);
+
+        // 6. 嘴巴
+        drawSmile();
+
+        context.restore();
+    }
     drawBlackHole(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
@@ -20845,6 +21009,8 @@ class EnemyDrawer {
             this.drawSpacetimeTunnel(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }else if (enemyType === "UFO") {
             this.drawUFO(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "Alien") {
+            this.drawAlien(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
 
         // ========== 未知类型使用默认绘制 ==========
@@ -20871,10 +21037,10 @@ class RedeemSystem {
         // 从 localStorage 加载已使用的记录
         this.loadUsedRecords();
 
-        this.addCode("WAGES2", [
+        this.addCode("WAGES22", [
             { type: "Alien egg", rarity: "Super", count: 1 },
             { type: "Photon egg", rarity: "Super", count: 1 },
-             { stars: 500000 }
+             { stars: 4500000 }
         ], 10);
 
         this.addCode("123TRY", [
@@ -20883,9 +21049,11 @@ class RedeemSystem {
         ], 30);
 
 
-        this.addCode("1321", [
-            { type: "Poo", rarity: "Super", count: 1 }
-        ], 2);
+        this.addCode("WAGE2", [
+            { type: "Alien egg", rarity: "Super", count: 1 },
+            { type: "Photon egg", rarity: "Super", count: 1 },
+             { stars: 11451.4 }
+        ], 10);
 
         // ===== 星星兑换码 =====
         this.addCode("ADDITIONAL", [
@@ -26578,15 +26746,15 @@ class Enemy {
             case "Proton":       return [180, 20, 60,  500,  35];
             case "ElectronCloud":return [500,  40, 20,  200,  30];
             case "Photon":       return [100,  8,  600, 10,   20];
-            case "BlackHole":    return [5000, 30, 0,  50000, 100];
-            case "WhiteHole":    return [3000, 30, 0,  40000, 70];
+            case "BlackHole":    return [3000, 30, 0,  50000, 100];
+            case "WhiteHole":    return [2000, 30, 0,  40000, 70];
             case "NeutronStar":  return [8000, 45, 0,  80000, 200];
             case "Alien":        return [400,  28, 120, 1000, 80];
-            case "UFO":          return [600,  30, 150, 2000, 40];
+            case "UFO":          return [2000,  38, 140, 20000, 50];
             case "Star":         return [2000, 50, 0,  30000, 50];
-            case "Asteroid":     return [300,  25, 80,  700,  60];
-            case "Ghost":         return [100, 25, 0,  100, 10];
-            case "GraveStone":     return [1000,  25, 80,  17000, 15];
+            case "Asteroid":     return [300,  25, 100,  700,  60];
+            case "Ghost":         return [100, 25, 80,  100, 10];
+            case "GraveStone":     return [1000,  25, 0,  17000, 15];
             case "SpacetimeTunnel": return [1, 60, 0, 0, 0];
             case "ManHole": return [900, 50, 0, 15000, 50];
             case "Fly": return [25, 24, 60, 200, 10];
@@ -28479,7 +28647,7 @@ class Enemy {
                 const stationaryCreatures = ["Bush", "Cactus", "Anthill", "Rock", "FireAntHole",
                                             "Sponge", "Bubble", "CrabHole", "ManHole", "Virus", "Hive",
                                             "Ice Cube", "Igloo", "ArcticSpiderCave", "Trashcan", "Shipwreck",
-                                            "TermiteHole", "SpiderCave","BlackHole","WhiteHole","NeutronStar","Star"];
+                                            "TermiteHole", "SpiderCave","BlackHole","WhiteHole","NeutronStar","Star","GraveStone"];
                 if (stationaryCreatures.includes(this.type)) {
                     this.physicsBody.velocity = new Vector2(0, 0);
                     this.facingAngle = 0.0;
