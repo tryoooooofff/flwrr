@@ -726,39 +726,63 @@ canvas {
             joyY = dist > 5 ? Math.sin(angle) : 0;
         }
         function resetKnob() {
-            knob.style.left = (CENTER - KNOB_R) + 'px';
-            knob.style.top = (CENTER - KNOB_R) + 'px';
-            joyX = 0; joyY = 0;
-        }
+                knob.style.left = (CENTER - KNOB_R) + 'px';
+                knob.style.top = (CENTER - KNOB_R) + 'px';
+                joyX = 0;
+                joyY = 0;
+                joystickActive = false; // 确保状态关闭
+                joystickId = null;      // 清空ID
+            }
 
         joystickArea.addEventListener('touchstart', e => {
-            if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
-            e.preventDefault();
-            if (!joystickEnabled) return;
-            const t = e.changedTouches[0];
-            joystickId = t.identifier;
-            joystickActive = true;
-            const rect = joystickArea.getBoundingClientRect();
-            updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-        }, { passive: false });
-        joystickArea.addEventListener('touchmove', e => {
-            if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
-            e.preventDefault();
-            if (!joystickEnabled || !joystickActive) return;
-            for (const t of e.changedTouches) {
-                if (t.identifier === joystickId) {
-                    const rect = joystickArea.getBoundingClientRect();
-                    updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-                }
-            }
-        }, { passive: false });
-        joystickArea.addEventListener('touchend', e => {
-            e.preventDefault();
-            joystickActive = false;
-            joystickId = null;
-            resetKnob();
-        }, { passive: false });
+        // 如果已经有摇杆在操作，忽略新的触摸点
+        if (joystickActive || !joystickEnabled) return;
 
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        joystickId = t.identifier; // 记录这根手指的唯一ID
+        joystickActive = true;
+
+        const rect = joystickArea.getBoundingClientRect();
+        updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
+    }, { passive: false });
+
+    // 关键：将 move 和 end 监听挂载到 window 上
+    // 这样即使手指滑出摇杆圆圈范围，依然能控制和正常停止
+    window.addEventListener('touchmove', e => {
+        if (!joystickActive || !joystickEnabled) return;
+
+        // 遍历所有触摸点，只找那个属于摇杆的 ID
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            if (t.identifier === joystickId) {
+                const rect = joystickArea.getBoundingClientRect();
+                updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
+                // 阻止默认行为（比如页面滚动），防止干扰移动
+                if (e.cancelable) e.preventDefault();
+            }
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', e => {
+        // 检查离开屏幕的是不是控制摇杆的那根手指
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            if (t.identifier === joystickId) {
+                resetKnob(); // 彻底重置
+            }
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchcancel', e => {
+        // 处理系统中断（比如弹出电话）导致的触摸取消
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            if (t.identifier === joystickId) {
+                resetKnob();
+            }
+        }
+    }, { passive: false });
         let lastMoveTime = 0;
         function updateMovement(now) {
             if (!joystickActive || (Math.abs(joyX) < 0.1 && Math.abs(joyY) < 0.1)) {
