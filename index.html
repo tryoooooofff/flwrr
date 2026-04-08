@@ -1,10 +1,11 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>Flwrr</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Flwrr - 多人竞技游戏</title>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
 * {
@@ -21,7 +22,7 @@ html, body {
   font-family: 'Arial', sans-serif;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   color: white;
-  touch-action: pan-x pan-y; /* 允许滚动，但游戏区域会处理 */
+  touch-action: none;
 }
 #gameCanvas {
   position: fixed;
@@ -37,27 +38,27 @@ html, body {
 /* ========== 手机版自适应样式 ========== */
 @media (max-width: 768px) {
   .touch-btn {
-    width: 55px;
-    height: 55px;
+    width: 50px;
+    height: 50px;
     font-size: 14px;
   }
   #joystick-area {
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
   }
   #joystick-base {
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
   }
   #joystick-knob {
-    width: 46px;
-    height: 46px;
-    top: 37px;
-    left: 37px;
+    width: 42px;
+    height: 42px;
+    top: 34px;
+    left: 34px;
   }
   #toggle-joystick, #toggle-panel {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     font-size: 18px;
   }
   #touch-hint {
@@ -65,7 +66,7 @@ html, body {
     white-space: nowrap;
   }
   #btn-area {
-    gap: 10px;
+    gap: 8px;
   }
 }
 
@@ -74,7 +75,7 @@ html, body {
   display: block;
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: 200px;
+  height: 220px;
   z-index: 3000;
   pointer-events: none;
   user-select: none;
@@ -107,11 +108,10 @@ html, body {
   pointer-events: none;
 }
 
-/* 右侧按钮区域 - 调整位置避免被遮挡 */
+/* 右侧按钮区域 */
 #btn-area {
   position: absolute;
-  bottom: 80px;  /* 向上移动，避免被键盘遮挡 */
-  right: 20px;
+  bottom: 20px; right: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -138,7 +138,6 @@ html, body {
 #btn-space { background: rgba(100,200,100,0.55); }
 #btn-r     { background: rgba(180,80,180,0.55); }
 #btn-esc   { background: rgba(200,60,60,0.55); }
-#btn-b     { background: rgba(50,150,200,0.55); }  /* 新增 B 按钮（收缩模式） */
 
 /* 切换按钮 */
 #toggle-joystick {
@@ -179,10 +178,10 @@ html, body {
   z-index: 3100;
 }
 
-/* 提示信息 - 移到顶部避免被键盘遮挡 */
+/* 提示信息 */
 #touch-hint {
   position: fixed;
-  top: 10px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.6);
@@ -209,22 +208,19 @@ html, body {
   display: none;
   min-width: 350px;
   text-align: center;
-  max-height: 80vh;
-  overflow-y: auto;  /* 允许滚动 */
 }
 @media (max-width: 480px) {
   #multiplayer-panel, #account-panel {
     min-width: 280px;
     padding: 20px;
-    max-height: 70vh;
   }
   #multiplayer-panel input, #account-panel input {
-    font-size: 16px;  /* 更大的字体，防止 iOS 缩放 */
-    padding: 12px;
+    font-size: 14px;
+    padding: 8px;
   }
   #multiplayer-panel button, #account-panel button {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     min-width: 120px;
   }
 }
@@ -283,19 +279,33 @@ html, body {
   pointer-events: none;
   display: none;
 }
-/* 输入框获得焦点时，确保不被键盘完全遮挡 */
-input:focus, textarea:focus {
-  outline: none;
-  scroll-margin-bottom: 20px;
+
+/* 横屏提示 */
+#orientation-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 10000;
+  text-align: center;
+  font-size: 20px;
+  backdrop-filter: blur(5px);
 }
-</style>
-<style>
-  canvas {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    display: block;
-  }
+#orientation-tip.hidden { display: none; }
+
+canvas {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -303,6 +313,13 @@ input:focus, textarea:focus {
 
     <div id="room-info" style="display: none;"></div>
     <div id="current-user" style="display: none;"></div>
+
+    <!-- 横屏提示 -->
+    <div id="orientation-tip" class="hidden">
+        <div>📱 请将设备旋转至横屏模式</div>
+        <div style="margin-top: 20px; font-size: 16px; opacity:0.7;">游戏最佳体验为横屏</div>
+        <div style="margin-top: 30px; font-size: 14px; opacity:0.5;">点击屏幕继续</div>
+    </div>
 
     <!-- 触屏控制 -->
     <div id="touch-controls">
@@ -314,12 +331,11 @@ input:focus, textarea:focus {
       <div id="btn-area">
         <div class="touch-btn" id="btn-space">SP</div>
         <div class="touch-btn" id="btn-r">SW</div>
-        <div class="touch-btn" id="btn-b">B</div>
         <div class="touch-btn" id="btn-esc">MN</div>
       </div>
     </div>
     <div id="toggle-panel">🎮</div>
-    <div id="touch-hint">💡 左键摇杆移动 | 点击地面移动 | SP=展开 | SW=交换 | B=收缩 | MN=菜单</div>
+    <div id="touch-hint">💡 左键摇杆移动 | 点击地面移动 | SP=展开 | SW=交换 | MN=菜单</div>
 
     <!-- 多人游戏面板 -->
     <div id="multiplayer-panel">
@@ -338,7 +354,7 @@ input:focus, textarea:focus {
         </div>
         <div id="mp-join" style="display: none;">
             <h3>加入房间</h3>
-            <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6" inputmode="text">
+            <input type="text" id="room-code-input" placeholder="输入6位房间号" maxlength="6">
             <button onclick="joinRoom()">✅ 加入</button>
             <button class="cancel" onclick="backToMenu()">↩️ 返回</button>
             <p id="join-error" style="color: #ff6b6b; margin-top: 10px;"></p>
@@ -356,10 +372,10 @@ input:focus, textarea:focus {
         <div id="account-login" style="display: none;">
             <h3>登录</h3>
             <div class="input-label">用户名</div>
-            <input type="text" id="login-username" placeholder="输入用户名" maxlength="20" inputmode="text">
+            <input type="text" id="login-username" placeholder="输入用户名" maxlength="20">
             <div class="input-label">密码</div>
             <div style="position: relative;">
-                <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
+                <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
                 <span onclick="togglePasswordVisibility('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <button onclick="handleLogin()">✅ 登录</button>
@@ -369,15 +385,15 @@ input:focus, textarea:focus {
         <div id="account-register" style="display: none;">
             <h3>注册新账号</h3>
             <div class="input-label">用户名 (3-20字符)</div>
-            <input type="text" id="register-username" placeholder="输入用户名" maxlength="20" inputmode="text">
+            <input type="text" id="register-username" placeholder="输入用户名" maxlength="20">
             <div class="input-label">密码 (3-20字符)</div>
             <div style="position: relative;">
-                <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
+                <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
                 <span onclick="togglePasswordVisibility('register-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <div class="input-label">确认密码</div>
             <div style="position: relative;">
-                <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;" inputmode="text">
+                <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
                 <span onclick="togglePasswordVisibility('register-confirm')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
             </div>
             <button onclick="handleRegister()">📝 注册</button>
@@ -399,6 +415,69 @@ input:focus, textarea:focus {
       ProbabilityCalculator, CraftAnimation
     } from './game.js';
 
+    // ========== 移动端安全检测函数 ==========
+    let lastTouchTime = 0;
+    let maxTouchPoints = 3;
+    let touchEventCounter = 0;
+    let suspiciousActivityFlag = false;
+
+    function isTrustedTouchEvent(e) {
+        // 1. 检查是否为真实用户事件
+        if (!e.isTrusted) return false;
+        // 2. 检查触摸点数量（防止多指脚本）
+        if (e.touches && e.touches.length > maxTouchPoints) return false;
+        // 3. 检查时间间隔（防止高频模拟）
+        const now = Date.now();
+        if (now - lastTouchTime < 16) return false;
+        lastTouchTime = now;
+        // 4. 检查触摸点是否在合理范围内
+        if (e.touches && e.touches.length > 0) {
+            const touch = e.touches[0];
+            if (touch.clientX < -1000 || touch.clientX > 10000 || touch.clientY < -1000 || touch.clientY > 10000) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function blockTouchDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // 防控制台检测（简易版）
+    setInterval(() => {
+        if (window.console && console.profile && console.profileEnd) {
+            // 控制台可能已打开
+        }
+    }, 5000);
+
+    // 监控关键函数是否被劫持
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (type === 'touchstart' || type === 'touchend' || type === 'click' || type === 'touchmove') {
+            if (typeof listener !== 'function') return originalAddEventListener.call(this, type, listener, options);
+            const wrapped = function(e) {
+                if (!e.isTrusted) {
+                    console.warn('Untrusted event blocked');
+                    return;
+                }
+                return listener.apply(this, arguments);
+            };
+            return originalAddEventListener.call(this, type, wrapped, options);
+        }
+        return originalAddEventListener.call(this, type, listener, options);
+    };
+
+    // 简单振动反馈
+    function vibrate(ms = 15) {
+        if (window.navigator && window.navigator.vibrate) {
+            try {
+                window.navigator.vibrate(ms);
+            } catch(e) {}
+        }
+    }
+
     let screen = null, ctx = null, gameState = 'main_menu', gameInstance = null;
     let controlsInitialized = false, animationFrameId = null;
     const GameState = { MAIN_MENU: 'main_menu', IN_GAME: 'in_game', PAUSED: 'paused', GAME_OVER: 'game_over' };
@@ -411,34 +490,69 @@ input:focus, textarea:focus {
     window.RARITY_LIST = RARITY_LIST;
     window.RARITY_COLORS = RARITY_COLORS;
 
+    // 横屏检测函数
+    function checkOrientation() {
+        const tip = document.getElementById('orientation-tip');
+        if (!tip) return;
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        if (isMobile && window.innerHeight > window.innerWidth) {
+            tip.classList.remove('hidden');
+        } else {
+            tip.classList.add('hidden');
+        }
+    }
+
+    // 优化后的画布尺寸初始化
     function initDOMElements() {
-      screen = document.getElementById('gameCanvas');
-      if (!screen) throw new Error("Canvas not found!");
+        screen = document.getElementById('gameCanvas');
+        if (!screen) throw new Error("Canvas not found!");
 
-      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-      if (isMobile) {
-        screen.width = window.innerWidth;
-        screen.height = window.innerHeight;
-      } else {
-        screen.width = window.innerWidth;
-        screen.height = window.innerHeight;
-      }
+        if (isMobile) {
+            screen.width = window.innerWidth;
+            screen.height = window.innerHeight;
+        } else {
+            screen.width = window.innerWidth;
+            screen.height = window.innerHeight;
+        }
 
-      screen.style.width = '100%';
-      screen.style.height = '100%';
-      screen.style.position = 'fixed';
-      screen.style.top = '0';
-      screen.style.left = '0';
+        screen.style.width = '100%';
+        screen.style.height = '100%';
+        screen.style.position = 'fixed';
+        screen.style.top = '0';
+        screen.style.left = '0';
 
-      ctx = screen.getContext('2d');
-      window.WIDTH = screen.width;
-      window.HEIGHT = screen.height;
+        ctx = screen.getContext('2d');
+        window.WIDTH = screen.width;
+        window.HEIGHT = screen.height;
 
-      if (gameInstance) {
-        gameInstance.WIDTH = window.WIDTH;
-        gameInstance.HEIGHT = window.HEIGHT;
-      }
+        if (gameInstance) {
+            gameInstance.WIDTH = window.WIDTH;
+            gameInstance.HEIGHT = window.HEIGHT;
+        }
+    }
+
+    function resizeCanvas() {
+        const canvas = document.getElementById('gameCanvas');
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        let w, h;
+        if (isMobile) {
+            w = window.innerWidth;
+            h = window.innerHeight;
+        } else {
+            w = window.innerWidth;
+            h = window.innerHeight;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        if (gameInstance) {
+            gameInstance.WIDTH = w;
+            gameInstance.HEIGHT = h;
+        }
+        checkOrientation();
     }
 
     // 在 window 上添加 keyup 事件
@@ -453,384 +567,333 @@ input:focus, textarea:focus {
 
     // 窗口大小改变时重新适配
     window.addEventListener('resize', () => {
-      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        screen.width = window.innerWidth;
-        screen.height = window.innerHeight;
-      } else {
-        screen.width = window.innerWidth;
-        screen.height = window.innerHeight;
-      }
-
-      screen.style.width = '100%';
-      screen.style.height = '100%';
-
-      window.WIDTH = screen.width;
-      window.HEIGHT = screen.height;
-
-      if (gameInstance) {
-        gameInstance.WIDTH = window.WIDTH;
-        gameInstance.HEIGHT = window.HEIGHT;
-      }
+        resizeCanvas();
+        if (gameInstance?.cameraOffset && gameInstance.player) {
+            gameInstance.cameraOffset.x = gameInstance.player.x - window.WIDTH/2;
+            gameInstance.cameraOffset.y = gameInstance.player.y - window.HEIGHT/2;
+        }
+    });
+    window.addEventListener('orientationchange', () => {
+        setTimeout(checkOrientation, 100);
+        setTimeout(resizeCanvas, 100);
     });
 
     window.URL_PARAMS = (() => {
-      try { return { roomCode: new URLSearchParams(location.search).get('room') }; }
-      catch(e) { return { roomCode: null }; }
+        try { return { roomCode: new URLSearchParams(location.search).get('room') }; }
+        catch(e) { return { roomCode: null }; }
     })();
 
     window.togglePasswordVisibility = (id) => {
-      const el = document.getElementById(id);
-      if (el) el.type = el.type === 'password' ? 'text' : 'password';
+        const el = document.getElementById(id);
+        if (el) el.type = el.type === 'password' ? 'text' : 'password';
     };
 
-    // ===== 触屏控制脚本 =====
+    // ========== 触屏控制脚本（增强安全版） ==========
     (function() {
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const joystickArea = document.getElementById('joystick-area');
-      const knob = document.getElementById('joystick-knob');
-      const toggleJoystickBtn = document.getElementById('toggle-joystick');
-      const togglePanelBtn = document.getElementById('toggle-panel');
-      const controlsPanel = document.getElementById('touch-controls');
-      const BASE_R = 70, KNOB_R = 27, CENTER = BASE_R;
-      let joystickActive = false, joystickId = null, joyX = 0, joyY = 0;
-      let joystickEnabled = true, panelVisible = true;
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const joystickArea = document.getElementById('joystick-area');
+        const knob = document.getElementById('joystick-knob');
+        const toggleJoystickBtn = document.getElementById('toggle-joystick');
+        const togglePanelBtn = document.getElementById('toggle-panel');
+        const controlsPanel = document.getElementById('touch-controls');
+        const BASE_R = 70, KNOB_R = 27, CENTER = BASE_R;
+        let joystickActive = false, joystickId = null, joyX = 0, joyY = 0;
+        let joystickEnabled = true, panelVisible = true;
 
-      const savedJoy = localStorage.getItem('joystickEnabled');
-      if (savedJoy !== null) joystickEnabled = savedJoy === 'true';
-      const savedPanel = localStorage.getItem('touchControlsVisible');
-      if (savedPanel !== null) panelVisible = savedPanel === 'true';
-      else panelVisible = isTouch;
+        const savedJoy = localStorage.getItem('joystickEnabled');
+        if (savedJoy !== null) joystickEnabled = savedJoy === 'true';
+        const savedPanel = localStorage.getItem('touchControlsVisible');
+        if (savedPanel !== null) panelVisible = savedPanel === 'true';
+        else panelVisible = isTouch;
 
-      function setJoystickVisible(visible) {
-        joystickEnabled = visible;
-        if (visible) {
-          joystickArea.classList.remove('hidden');
-          toggleJoystickBtn.classList.remove('hidden-mode');
-          toggleJoystickBtn.textContent = '🎮';
-        } else {
-          joystickArea.classList.add('hidden');
-          toggleJoystickBtn.classList.add('hidden-mode');
-          toggleJoystickBtn.textContent = '❌';
+        // 阻止所有触摸相关元素的默认行为
+        const touchElements = [joystickArea, document.getElementById('btn-space'), document.getElementById('btn-r'), document.getElementById('btn-esc'), toggleJoystickBtn, togglePanelBtn];
+        touchElements.forEach(el => {
+            if (!el) return;
+            ['touchstart', 'touchmove', 'touchend'].forEach(evType => {
+                el.addEventListener(evType, blockTouchDefaults, { passive: false });
+            });
+        });
+
+        function setJoystickVisible(visible) {
+            joystickEnabled = visible;
+            if (visible) {
+                joystickArea.classList.remove('hidden');
+                toggleJoystickBtn.classList.remove('hidden-mode');
+                toggleJoystickBtn.textContent = '🎮';
+            } else {
+                joystickArea.classList.add('hidden');
+                toggleJoystickBtn.classList.add('hidden-mode');
+                toggleJoystickBtn.textContent = '❌';
+            }
+            localStorage.setItem('joystickEnabled', visible);
         }
-        localStorage.setItem('joystickEnabled', visible);
-      }
-      function setPanelVisible(visible) {
-        panelVisible = visible;
-        if (visible) controlsPanel.classList.remove('hidden');
-        else controlsPanel.classList.add('hidden');
-        localStorage.setItem('touchControlsVisible', visible);
-      }
+        function setPanelVisible(visible) {
+            panelVisible = visible;
+            if (visible) controlsPanel.classList.remove('hidden');
+            else controlsPanel.classList.add('hidden');
+            localStorage.setItem('touchControlsVisible', visible);
+        }
 
-      function updateKnob(dx, dy) {
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        const maxDist = BASE_R - KNOB_R;
-        const clamped = Math.min(dist, maxDist);
-        const angle = Math.atan2(dy, dx);
-        const nx = Math.cos(angle) * clamped;
-        const ny = Math.sin(angle) * clamped;
-        knob.style.left = (CENTER + nx - KNOB_R) + 'px';
-        knob.style.top = (CENTER + ny - KNOB_R) + 'px';
-        joyX = dist > 5 ? Math.cos(angle) : 0;
-        joyY = dist > 5 ? Math.sin(angle) : 0;
-      }
-      function resetKnob() {
-        knob.style.left = (CENTER - KNOB_R) + 'px';
-        knob.style.top = (CENTER - KNOB_R) + 'px';
-        joyX = 0; joyY = 0;
-      }
+        function updateKnob(dx, dy) {
+            const dist = Math.sqrt(dx*dx+dy*dy);
+            const maxDist = BASE_R - KNOB_R;
+            const clamped = Math.min(dist, maxDist);
+            const angle = Math.atan2(dy, dx);
+            const nx = Math.cos(angle) * clamped;
+            const ny = Math.sin(angle) * clamped;
+            knob.style.left = (CENTER + nx - KNOB_R) + 'px';
+            knob.style.top = (CENTER + ny - KNOB_R) + 'px';
+            joyX = dist > 5 ? Math.cos(angle) : 0;
+            joyY = dist > 5 ? Math.sin(angle) : 0;
+        }
+        function resetKnob() {
+            knob.style.left = (CENTER - KNOB_R) + 'px';
+            knob.style.top = (CENTER - KNOB_R) + 'px';
+            joyX = 0; joyY = 0;
+        }
 
-      joystickArea.addEventListener('touchstart', e => {
-        e.preventDefault();
-        if (!joystickEnabled) return;
-        const t = e.changedTouches[0];
-        joystickId = t.identifier;
-        joystickActive = true;
-        const rect = joystickArea.getBoundingClientRect();
-        updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-      }, { passive: false });
-      joystickArea.addEventListener('touchmove', e => {
-        e.preventDefault();
-        if (!joystickEnabled || !joystickActive) return;
-        for (const t of e.changedTouches) {
-          if (t.identifier === joystickId) {
+        joystickArea.addEventListener('touchstart', e => {
+            if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
+            e.preventDefault();
+            if (!joystickEnabled) return;
+            const t = e.changedTouches[0];
+            joystickId = t.identifier;
+            joystickActive = true;
             const rect = joystickArea.getBoundingClientRect();
             updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-          }
-        }
-      }, { passive: false });
-      joystickArea.addEventListener('touchend', e => {
-        e.preventDefault();
-        joystickActive = false;
-        joystickId = null;
-        resetKnob();
-      }, { passive: false });
+        }, { passive: false });
+        joystickArea.addEventListener('touchmove', e => {
+            if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
+            e.preventDefault();
+            if (!joystickEnabled || !joystickActive) return;
+            for (const t of e.changedTouches) {
+                if (t.identifier === joystickId) {
+                    const rect = joystickArea.getBoundingClientRect();
+                    updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
+                }
+            }
+        }, { passive: false });
+        joystickArea.addEventListener('touchend', e => {
+            e.preventDefault();
+            joystickActive = false;
+            joystickId = null;
+            resetKnob();
+        }, { passive: false });
 
-      let lastMoveTime = 0;
-      function updateMovement(now) {
-        if (!joystickActive || (Math.abs(joyX) < 0.1 && Math.abs(joyY) < 0.1)) {
-          requestAnimationFrame(updateMovement);
-          return;
-        }
-        if (!lastMoveTime) { lastMoveTime = now; requestAnimationFrame(updateMovement); return; }
-        const dt = Math.min(0.033, (now - lastMoveTime) / 1000);
-        lastMoveTime = now;
-        const game = window.gameInstance;
-        if (game && game.player && game.player.physicsBody) {
-          const p = game.player;
-          const speed = (p.speed || 80) * (p.slowMultiplier || 1);
-          if (joyX !== 0 || joyY !== 0) {
-            const len = Math.hypot(joyX, joyY);
-            p.physicsBody.position.x += (joyX / len) * speed * dt;
-            p.physicsBody.position.y += (joyY / len) * speed * dt;
-          }
-          const ww = window.WORLD_WIDTH || 10000, wh = window.WORLD_HEIGHT || 10000;
-          p.physicsBody.position.x = Math.max(30, Math.min(ww - 30, p.physicsBody.position.x));
-          p.physicsBody.position.y = Math.max(30, Math.min(wh - 30, p.physicsBody.position.y));
-          if (game.cameraOffset) {
-            game.cameraOffset.x = p.physicsBody.position.x - window.WIDTH / 2;
-            game.cameraOffset.y = p.physicsBody.position.y - window.HEIGHT / 2;
-          }
+        let lastMoveTime = 0;
+        function updateMovement(now) {
+            if (!joystickActive || (Math.abs(joyX) < 0.1 && Math.abs(joyY) < 0.1)) {
+                requestAnimationFrame(updateMovement);
+                return;
+            }
+            if (!lastMoveTime) { lastMoveTime = now; requestAnimationFrame(updateMovement); return; }
+            const dt = Math.min(0.033, (now - lastMoveTime) / 1000);
+            lastMoveTime = now;
+            const game = window.gameInstance;
+            if (game && game.player && game.player.physicsBody) {
+                const p = game.player;
+                const speed = (p.speed || 80) * (p.slowMultiplier || 1);
+                if (joyX !== 0 || joyY !== 0) {
+                    const len = Math.hypot(joyX, joyY);
+                    p.physicsBody.position.x += (joyX / len) * speed * dt;
+                    p.physicsBody.position.y += (joyY / len) * speed * dt;
+                }
+                const ww = window.WORLD_WIDTH || 10000, wh = window.WORLD_HEIGHT || 10000;
+                p.physicsBody.position.x = Math.max(30, Math.min(ww - 30, p.physicsBody.position.x));
+                p.physicsBody.position.y = Math.max(30, Math.min(wh - 30, p.physicsBody.position.y));
+                if (game.cameraOffset) {
+                    game.cameraOffset.x = p.physicsBody.position.x - window.WIDTH / 2;
+                    game.cameraOffset.y = p.physicsBody.position.y - window.HEIGHT / 2;
+                }
+            }
+            requestAnimationFrame(updateMovement);
         }
         requestAnimationFrame(updateMovement);
-      }
-      requestAnimationFrame(updateMovement);
 
-      function bindBtn(id, fn) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
-        el.addEventListener('click', e => { e.preventDefault(); fn(); });
-      }
-      function fakeKey(key) {
-        document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-      }
-      bindBtn('btn-space', () => {
-        const g = window.gameInstance;
-        if (g && g.player && g.player.toggleSpreadMode) g.player.toggleSpreadMode();
-      });
-      bindBtn('btn-r', () => {
-        const g = window.gameInstance;
-        if (g && g.player && g.player.quickSlot && g.player.quickSlot.swapAllSlots) g.player.quickSlot.swapAllSlots();
-        else fakeKey('r');
-      });
-      // 🆕 B 按钮：收缩模式（Shift 键功能）
-      bindBtn('btn-b', () => {
-        const g = window.gameInstance;
-        if (g && g.player && !g.paused) {
-          g.player.contractMode = true;
-          for (const petal of g.player.petals) {
-            petal.targetRadius = 15;
-          }
-          // 0.5秒后自动恢复
-          setTimeout(() => {
-            if (g.player && !g.player.isDead && !g.paused) {
-              g.player.contractMode = false;
-              for (const petal of g.player.petals) {
-                petal.targetRadius = 35;
-              }
-            }
-          }, 500);
+        function bindBtn(id, fn) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('touchstart', e => {
+                if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
+                e.preventDefault();
+                vibrate(10);
+                fn();
+            }, { passive: false });
+            el.addEventListener('click', e => { e.preventDefault(); fn(); });
         }
-      });
-      bindBtn('btn-esc', () => {
-        const g = window.gameInstance;
-        if (g && g.returnToMainMenu) g.returnToMainMenu();
-        else fakeKey('Escape');
-      });
+        function fakeKey(key) {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+        }
+        bindBtn('btn-space', () => {
+            const g = window.gameInstance;
+            if (g && g.player && g.player.toggleSpreadMode) g.player.toggleSpreadMode();
+        });
+        bindBtn('btn-r', () => {
+            const g = window.gameInstance;
+            if (g && g.player && g.player.quickSlot && g.player.quickSlot.swapAllSlots) g.player.quickSlot.swapAllSlots();
+            else fakeKey('r');
+        });
+        bindBtn('btn-esc', () => {
+            const g = window.gameInstance;
+            if (g && g.returnToMainMenu) g.returnToMainMenu();
+            else fakeKey('Escape');
+        });
 
-      toggleJoystickBtn.addEventListener('click', () => setJoystickVisible(!joystickEnabled));
-      togglePanelBtn.addEventListener('click', () => setPanelVisible(!panelVisible));
+        toggleJoystickBtn.addEventListener('click', () => setJoystickVisible(!joystickEnabled));
+        togglePanelBtn.addEventListener('click', () => setPanelVisible(!panelVisible));
 
-      setJoystickVisible(joystickEnabled);
-      setPanelVisible(panelVisible);
+        setJoystickVisible(joystickEnabled);
+        setPanelVisible(panelVisible);
 
-      const canvas = document.getElementById('gameCanvas');
-      if (canvas) {
-        canvas.addEventListener('touchstart', e => {
-          const t = e.touches[0];
-          const rect = canvas.getBoundingClientRect();
-          const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
-          const x = (t.clientX - rect.left) * sx, y = (t.clientY - rect.top) * sy;
-          const joyRect = joystickArea.getBoundingClientRect();
-          const btnRect = document.getElementById('btn-area').getBoundingClientRect();
-          if (t.clientX < joyRect.right && t.clientY > joyRect.top) return;
-          if (t.clientX > btnRect.left && t.clientY > btnRect.top) return;
-          if (window.gameInstance?.player?.quickSlot?.handleClick([x, y])) return;
-          canvas.dispatchEvent(new MouseEvent('mousedown', { button: 2, clientX: t.clientX, clientY: t.clientY, bubbles: true }));
-        }, { passive: false });
-      }
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.addEventListener('touchstart', e => {
+                if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
+                const t = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+                const x = (t.clientX - rect.left) * sx, y = (t.clientY - rect.top) * sy;
+                const joyRect = joystickArea.getBoundingClientRect();
+                const btnRect = document.getElementById('btn-area').getBoundingClientRect();
+                if (t.clientX < joyRect.right && t.clientY > joyRect.top) return;
+                if (t.clientX > btnRect.left && t.clientY > btnRect.top) return;
+                if (window.gameInstance?.player?.quickSlot?.handleClick([x, y])) return;
+                canvas.dispatchEvent(new MouseEvent('mousedown', { button: 2, clientX: t.clientX, clientY: t.clientY, bubbles: true }));
+            }, { passive: false });
+        }
     })();
 
     // ===== 游戏初始化 =====
     function createGameInstance() {
-      try {
-        const game = new WorldMapGame();
-        gameInstance = game;
-        window.gameInstance = game;
-        if (window.URL_PARAMS?.roomCode) {
-          setTimeout(async () => {
-            try {
-              await game.joinMultiplayerRoom(window.URL_PARAMS.roomCode);
-              startGame('Plain');
-            } catch(e) { console.error(e); }
-          }, 2000);
-        }
-        return game;
-      } catch(e) { console.error(e); return null; }
+        try {
+            const game = new WorldMapGame();
+            gameInstance = game;
+            window.gameInstance = game;
+            if (window.URL_PARAMS?.roomCode) {
+                setTimeout(async () => {
+                    try {
+                        await game.joinMultiplayerRoom(window.URL_PARAMS.roomCode);
+                        startGame('Plain');
+                    } catch(e) { console.error(e); }
+                }, 2000);
+            }
+            return game;
+        } catch(e) { console.error(e); return null; }
     }
 
-    // 替换原有的 getCanvasCoordinates 函数
     function getCanvasCoordinates(e) {
-        // 支持预计算坐标（用于触屏事件）
-        if (e._x !== undefined && e._y !== undefined) {
-            return { x: e._x, y: e._y };
-        }
-
-        const canvas = screen;
-        const rect = canvas.getBoundingClientRect();
-
-        // 计算缩放比例：canvas实际像素尺寸 / CSS显示尺寸
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        // 相对于canvas CSS区域的坐标
-        const relativeX = (e.clientX - rect.left);
-        const relativeY = (e.clientY - rect.top);
-
-        // 转换到canvas坐标系
-        const canvasX = relativeX * scaleX;
-        const canvasY = relativeY * scaleY;
-
-        // 边界检查
-        return {
-            x: Math.max(0, Math.min(canvas.width, canvasX)),
-            y: Math.max(0, Math.min(canvas.height, canvasY))
-        };
+        const rect = screen.getBoundingClientRect();
+        const sx = screen.width / rect.width, sy = screen.height / rect.height;
+        return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
     }
     function resetMouseMove() { mouseTargetX = mouseTargetY = null; isMouseMoving = false; }
     function setMouseTarget(x, y) {
-      if (gameState === 'in_game' && gameInstance?.player) {
-        mouseTargetX = x + (gameInstance.cameraOffset?.x || 0);
-        mouseTargetY = y + (gameInstance.cameraOffset?.y || 0);
-        isMouseMoving = true;
-      }
+        if (gameState === 'in_game' && gameInstance?.player) {
+            mouseTargetX = x + (gameInstance.cameraOffset?.x || 0);
+            mouseTargetY = y + (gameInstance.cameraOffset?.y || 0);
+            isMouseMoving = true;
+        }
     }
     function updatePlayerMovementByMouse() {
-      if (!isMouseMoving || !gameInstance?.player || mouseTargetX === null) return;
-      const p = gameInstance.player;
-      const px = p.physicsBody?.position?.x || 0, py = p.physicsBody?.position?.y || 0;
-      const dx = mouseTargetX - px, dy = mouseTargetY - py;
-      const dist = Math.hypot(dx, dy);
-      if (dist < MOUSE_MOVE_SPEED) {
-        if (p.physicsBody) { p.physicsBody.position.x = mouseTargetX; p.physicsBody.position.y = mouseTargetY; }
-        resetMouseMove();
-      } else {
-        const ang = Math.atan2(dy, dx);
-        const mx = Math.cos(ang) * MOUSE_MOVE_SPEED, my = Math.sin(ang) * MOUSE_MOVE_SPEED;
-        if (p.physicsBody) { p.physicsBody.position.x += mx; p.physicsBody.position.y += my; }
-      }
-      if (gameInstance.cameraOffset) {
-        const cx = p.physicsBody?.position?.x || 0, cy = p.physicsBody?.position?.y || 0;
-        gameInstance.cameraOffset.x = cx - window.WIDTH / 2;
-        gameInstance.cameraOffset.y = cy - window.HEIGHT / 2;
-      }
+        if (!isMouseMoving || !gameInstance?.player || mouseTargetX === null) return;
+        const p = gameInstance.player;
+        const px = p.physicsBody?.position?.x || 0, py = p.physicsBody?.position?.y || 0;
+        const dx = mouseTargetX - px, dy = mouseTargetY - py;
+        const dist = Math.hypot(dx, dy);
+        if (dist < MOUSE_MOVE_SPEED) {
+            if (p.physicsBody) { p.physicsBody.position.x = mouseTargetX; p.physicsBody.position.y = mouseTargetY; }
+            resetMouseMove();
+        } else {
+            const ang = Math.atan2(dy, dx);
+            const mx = Math.cos(ang) * MOUSE_MOVE_SPEED, my = Math.sin(ang) * MOUSE_MOVE_SPEED;
+            if (p.physicsBody) { p.physicsBody.position.x += mx; p.physicsBody.position.y += my; }
+        }
+        if (gameInstance.cameraOffset) {
+            const cx = p.physicsBody?.position?.x || 0, cy = p.physicsBody?.position?.y || 0;
+            gameInstance.cameraOffset.x = cx - window.WIDTH / 2;
+            gameInstance.cameraOffset.y = cy - window.HEIGHT / 2;
+        }
     }
 
     function isPointInInventoryArea(x, y) { return x >= 0 && x <= 400; }
     function isPointInCloseButton(x, y) { return Math.hypot(x - 370, y - 30) <= 15; }
     function openInventory() {
-      if (!gameInstance?.player?.inventory) { alert('Start a game first.'); return; }
-      if (gameInstance.player.inventory.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-      gameState = 'inventory';
+        if (!gameInstance?.player?.inventory) { alert('Start a game first.'); return; }
+        if (gameInstance.player.inventory.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        gameState = 'inventory';
     }
     function openCrafting() {
-      if (!gameInstance?.player?.inventory?.craftingSystem) { alert('Start a game first.'); return; }
-      gameInstance.player.inventory.craftingSystem.craftingVisible = true;
-      gameState = 'crafting';
+        if (!gameInstance?.player?.inventory?.craftingSystem) { alert('Start a game first.'); return; }
+        gameInstance.player.inventory.craftingSystem.craftingVisible = true;
+        gameState = 'crafting';
     }
     function closeInventory() { gameState = 'in_game'; }
-    // 在 handleMouseDown 函数定义之前添加
-    let lastClickTime = 0;
-    const CLICK_DEBOUNCE_TIME = 150;
 
-    function shouldProcessClick() {
-        const now = Date.now();
-        if (now - lastClickTime < CLICK_DEBOUNCE_TIME) {
-            return false;
-        }
-        lastClickTime = now;
-        return true;
-    }
     function handleMouseDown(e) {
-    if (!shouldProcessClick()) {
+        e.preventDefault();
+        const { x, y } = getCanvasCoordinates(e);
+
+        const canvas = document.getElementById('gameCanvas');
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
+        const ev = { type: 'mousedown', button: e.button, x, y };
+
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+            if (gameInstance.mobGallery.handleClick(x, y)) {
+                gameState = 'main_menu';
+            }
             return;
         }
-
-    e.preventDefault();
-    const { x, y } = getCanvasCoordinates(e);
-      const canvas = document.getElementById('gameCanvas');
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-
-      if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
-      const ev = { type: 'mousedown', button: e.button, x, y };
-
-      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
-        if (gameInstance.mobGallery.handleClick(x, y)) {
-          gameState = 'main_menu';
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+            gameInstance.mobGallery.handleClick(x, y);
+            return;
         }
-        return;
-      }
-      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
-        gameInstance.mobGallery.handleClick(x, y);
-        return;
-      }
-      if (gameState === 'main_menu' && gameInstance) {
-        if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
+        if (gameState === 'main_menu' && gameInstance) {
+            if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
 
-        const mgx = canvasWidth - 220;
-        const mgy = canvasHeight - 80;
-        const mgw = 200;
-        const mgh = 60;
+            const mgx = canvasWidth - 220;
+            const mgy = canvasHeight - 80;
+            const mgw = 200;
+            const mgh = 60;
 
-        if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
-          if (gameInstance.mobGallery) {
-            gameInstance.mobGallery.open();
-            gameState = 'mob_gallery';
-          }
-          return;
-        }
-
-        const res = gameInstance.mainMenu.handleClick(ev);
-        if (res) {
-            switch(res) {
-                case "shop": if(gameInstance.shopSystem) gameInstance.shopSystem.visible = true; break;
-                case "crafting": if(gameInstance.player?.inventory?.craftingSystem) { gameInstance.player.inventory.craftingSystem.craftingVisible = true; gameState='crafting'; } break;
-                case "inventory": openInventory(); break;
-                case "multiplayer": showMultiplayerPanel(); break;
-                case "account": showAccountPanel(); break;
-                case "bonus": gameInstance.bonusSystem?.claimBonus(); break;
-                default:
-                    if(res && res.startsWith('start_') && res.endsWith('_map')) {
-                        let bio = res.replace('start_','').replace('_map','');
-                        bio = bio.charAt(0).toUpperCase() + bio.slice(1);
-                        startGame(bio);
-                    } else if(res === 'start_maze') startMazeMode();
+            if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
+                if (gameInstance.mobGallery) {
+                    gameInstance.mobGallery.open();
+                    gameState = 'mob_gallery';
+                }
+                return;
             }
-        }
-      } else if (gameState === 'in_game' && gameInstance) {
-        if (gameInstance.player?.quickSlot?.handleClick([x,y])) return;
-        gameInstance.handleEvents?.(ev);
-      } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-        gameInstance.player.inventory.craftingSystem.handleMouseDown?.([x,y]);
-      } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
-        if (isPointInCloseButton(x,y)) closeInventory();
-        else if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseDown?.([x,y]);
-      }
-    }
 
+            const res = gameInstance.mainMenu.handleClick(ev);
+            if (res) {
+                switch(res) {
+                    case "shop": if(gameInstance.shopSystem) gameInstance.shopSystem.visible = true; break;
+                    case "crafting": if(gameInstance.player?.inventory?.craftingSystem) { gameInstance.player.inventory.craftingSystem.craftingVisible = true; gameState='crafting'; } break;
+                    case "inventory": openInventory(); break;
+                    case "multiplayer": showMultiplayerPanel(); break;
+                    case "account": showAccountPanel(); break;
+                    case "bonus": gameInstance.bonusSystem?.claimBonus(); break;
+                    default:
+                        if(res && res.startsWith('start_') && res.endsWith('_map')) {
+                            let bio = res.replace('start_','').replace('_map','');
+                            bio = bio.charAt(0).toUpperCase() + bio.slice(1);
+                            startGame(bio);
+                        } else if(res === 'start_maze') startMazeMode();
+                }
+            }
+        } else if (gameState === 'in_game' && gameInstance) {
+            if (gameInstance.player?.quickSlot?.handleClick([x,y])) return;
+            gameInstance.handleEvents?.(ev);
+        } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+            gameInstance.player.inventory.craftingSystem.handleMouseDown?.([x,y]);
+        } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+            if (isPointInCloseButton(x,y)) closeInventory();
+            else if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseDown?.([x,y]);
+        }
+    }
     function handleMouseUp(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
@@ -850,7 +913,6 @@ input:focus, textarea:focus {
             }
         }
     }
-
     function handleMouseMove(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
@@ -881,383 +943,291 @@ input:focus, textarea:focus {
             if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseMove?.([x,y]);
         }
     }
-
     function handleWheel(e) {
-      e.preventDefault(); e.stopPropagation();
-      const { x, y } = getCanvasCoordinates(e);
-      const we = { type: 'wheel', deltaY: e.deltaY, x, y };
-      if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+        e.preventDefault(); e.stopPropagation();
+        const { x, y } = getCanvasCoordinates(e);
+        const we = { type: 'wheel', deltaY: e.deltaY, x, y };
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
             gameInstance.mobGallery.handleWheel(e.deltaY);
             return;
         }
-      if (gameState === 'main_menu' && gameInstance?.shopSystem?.visible) gameInstance.shopSystem.handleClick?.(we);
-      else if (gameState === 'in_game' && gameInstance?.handleEvents) gameInstance.handleEvents(we);
-      else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.handleScrollWheel?.(e);
-      else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
-        if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleScrollWheel?.(e);
-      }
-    }
-// 触屏事件处理
-function handleTouchStart(e) {
-    e.preventDefault();
-
-    if (!shouldProcessClick()) {
-        return;
+        if (gameState === 'main_menu' && gameInstance?.shopSystem?.visible) gameInstance.shopSystem.handleClick?.(we);
+        else if (gameState === 'in_game' && gameInstance?.handleEvents) gameInstance.handleEvents(we);
+        else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.handleScrollWheel?.(e);
+        else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
+            if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleScrollWheel?.(e);
+        }
     }
 
-    const touch = e.changedTouches[0];
-    if (!touch) return;
-
-    const coords = getCanvasCoordinates({
-        clientX: touch.clientX,
-        clientY: touch.clientY
-    });
-
-    const mockEvent = {
-        preventDefault: () => {},
-        button: 0,
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-        _x: coords.x,
-        _y: coords.y
-    };
-
-    handleMouseDown(mockEvent);
-}
-
-    function handleTouchEnd(e) {
-        e.preventDefault();
-
-        const touch = e.changedTouches[0];
-        if (!touch) return;
-
-        const coords = getCanvasCoordinates({
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-
-        const mockEvent = {
-            preventDefault: () => {},
-            button: 0,
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            _x: coords.x,
-            _y: coords.y
-        };
-
-        handleMouseUp(mockEvent);
-    }
-
-    function handleTouchMove(e) {
-        e.preventDefault();
-
-        const touch = e.changedTouches[0];
-        if (!touch) return;
-
-        const coords = getCanvasCoordinates({
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-
-        const mockEvent = {
-            preventDefault: () => {},
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            _x: coords.x,
-            _y: coords.y
-        };
-
-        handleMouseMove(mockEvent);
-    }
     function initializePlayerControls() {
-          if (controlsInitialized) {
+        if (controlsInitialized) {
             screen.removeEventListener('mousedown', handleMouseDown);
             screen.removeEventListener('mouseup', handleMouseUp);
             screen.removeEventListener('mousemove', handleMouseMove);
             screen.removeEventListener('wheel', handleWheel);
-            // 添加触屏事件移除
-            screen.removeEventListener('touchstart', handleTouchStart);
-            screen.removeEventListener('touchend', handleTouchEnd);
-            screen.removeEventListener('touchmove', handleTouchMove);
-          }
-
-          screen.addEventListener('mousedown', handleMouseDown);
-          screen.addEventListener('mouseup', handleMouseUp);
-          screen.addEventListener('mousemove', handleMouseMove);
-          screen.addEventListener('wheel', handleWheel, { passive: false });
-
-          // 添加触屏事件监听
-          screen.addEventListener('touchstart', handleTouchStart, { passive: false });
-          screen.addEventListener('touchend', handleTouchEnd, { passive: false });
-          screen.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-          screen.addEventListener('contextmenu', e => e.preventDefault());
-          controlsInitialized = true;
         }
+        screen.addEventListener('mousedown', handleMouseDown);
+        screen.addEventListener('mouseup', handleMouseUp);
+        screen.addEventListener('mousemove', handleMouseMove);
+        screen.addEventListener('wheel', handleWheel, { passive: false });
+        screen.addEventListener('contextmenu', e => e.preventDefault());
+        controlsInitialized = true;
+    }
 
     function handleKeyDown(e) {
-      if (!e?.key) return;
-      if (gameInstance?.shopSystem?.redeemSystem?.inputVisible && gameInstance.shopSystem.redeemSystem.inputActive) {
-        if (gameInstance.shopSystem.redeemSystem.handleKeyDown(e)) { e.preventDefault(); return; }
-      }
-      const k = e.key;
-      if (k === 't' || k === 'T') {
-        if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
-          gameInstance.toggleChat();
-          if (gameInstance.chatVisible) gameInstance.network.chatSystem.inputActive = true;
+        if (!e?.key) return;
+        if (gameInstance?.shopSystem?.redeemSystem?.inputVisible && gameInstance.shopSystem.redeemSystem.inputActive) {
+            if (gameInstance.shopSystem.redeemSystem.handleKeyDown(e)) { e.preventDefault(); return; }
         }
-        e.preventDefault(); return;
-      }
-      if (k === 'Shift') {
-        if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
-          gameInstance.player.contractMode = true;
-          for (const petal of gameInstance.player.petals) {
-            petal.targetRadius = 15;
-          }
-        }
-        e.preventDefault();
-        return;
-      }
-      if (k >= '1' && k <= '9') {
-        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          let slotIndex = parseInt(k) - 1;
-          if (k === '9') slotIndex = 8;
-          gameInstance.player.quickSlot.swapSlot(slotIndex);
-        }
-        e.preventDefault();
-        return;
-      }
-      if (k === '0') {
-        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-          gameInstance.player.quickSlot.swapSlot(9);
-        }
-        e.preventDefault();
-        return;
-      }
-      if (k === ' ' || k === 'Space') {
-        if (gameState === 'in_game' && gameInstance?.player) gameInstance.player.toggleSpreadMode();
-        e.preventDefault(); return;
-      }
-      if (k === 'c' || k === 'C') {
-        if (gameState === 'in_game') openCrafting();
-        else if (gameState === 'crafting') { gameState = 'in_game'; if(gameInstance.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false; }
-        e.preventDefault(); return;
-      }
-      if (k === 'i' || k === 'I') {
-        if (gameState === 'in_game') openInventory();
-        else if (gameState === 'inventory') gameState = 'in_game';
-        e.preventDefault(); return;
-      }
-      if (k === 'b' || k === 'B') {
-        if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
-          gameInstance.player.contractMode = true;
-          for (const petal of gameInstance.player.petals) {
-            petal.targetRadius = 15;
-          }
-          setTimeout(() => {
-            if (gameInstance?.player && !gameInstance.player.isDead && !gameInstance.paused) {
-              gameInstance.player.contractMode = false;
-              for (const petal of gameInstance.player.petals) {
-                petal.targetRadius = 35;
-              }
+        const k = e.key;
+        if (k === 't' || k === 'T') {
+            if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
+                gameInstance.toggleChat();
+                if (gameInstance.chatVisible) gameInstance.network.chatSystem.inputActive = true;
             }
-          }, 500);
+            e.preventDefault(); return;
         }
-        e.preventDefault(); return;
-      }
-      if (k === 's' || k === 'S') {
-        const g = window.gameInstance;
-        if (g && g.gameState === 'in_game' && !g.paused && g.player) {
-          e.preventDefault(); e.stopPropagation();
-          for (const p of g.player.petals) if (p.toggleStillMode) p.toggleStillMode();
+        if (k === 'Shift') {
+            if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
+                gameInstance.player.contractMode = true;
+                for (const petal of gameInstance.player.petals) {
+                    petal.targetRadius = 15;
+                }
+            }
+            e.preventDefault();
+            return;
         }
-        return;
-      }
-      if (k === 'r' || k === 'R') {
-        if (gameState === 'in_game' && gameInstance?.player?.quickSlot) gameInstance.player.quickSlot.swapAllSlots();
-        e.preventDefault(); return;
-      }
-      if (k === 'd' || k === 'D') {
-        if (gameState === 'in_game' && gameInstance) gameInstance.debugMode = !gameInstance.debugMode;
-        e.preventDefault(); return;
-      }
-      if (k === 'p' || k === 'P') {
-        if (gameState === 'in_game' && gameInstance) gameInstance.paused = !gameInstance.paused;
-        e.preventDefault(); return;
-      }
-      if (k === 'Escape') {
-        e.preventDefault(); e.stopPropagation();
-        if (gameState !== 'main_menu') returnToMainMenu();
-        else if (gameInstance?.shopSystem?.visible) gameInstance.shopSystem.visible = false;
-        return;
-      }
-      if (['w','W','a','A','s','S','d','D','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)) {
-        resetMouseMove();
-        e.preventDefault(); return;
-      }
+        if (k >= '1' && k <= '9') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                let slotIndex = parseInt(k) - 1;
+                if (k === '9') slotIndex = 8;
+                console.log(`按数字键 ${k}，交换槽位 ${slotIndex + 1}`);
+                gameInstance.player.quickSlot.swapSlot(slotIndex);
+            }
+            e.preventDefault();
+            return;
+        }
+        if (k === '0') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
+                console.log(`按数字键 0，交换槽位 10`);
+                gameInstance.player.quickSlot.swapSlot(9);
+            }
+            e.preventDefault();
+            return;
+        }
+        if (k === ' ' || k === 'Space') {
+            if (gameState === 'in_game' && gameInstance?.player) gameInstance.player.toggleSpreadMode();
+            e.preventDefault(); return;
+        }
+        if (k === 'c' || k === 'C') {
+            if (gameState === 'in_game') openCrafting();
+            else if (gameState === 'crafting') { gameState = 'in_game'; if(gameInstance.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false; }
+            e.preventDefault(); return;
+        }
+        if (k === 'i' || k === 'I') {
+            if (gameState === 'in_game') openInventory();
+            else if (gameState === 'inventory') gameState = 'in_game';
+            e.preventDefault(); return;
+        }
+        if (k === 'b' || k === 'B') {
+            if (gameState === 'in_game' && gameInstance?.bonusSystem) gameInstance.bonusSystem.claimBonus();
+            e.preventDefault(); return;
+        }
+        if (k === 's' || k === 'S') {
+            const g = window.gameInstance;
+            if (g && g.gameState === 'in_game' && !g.paused && g.player) {
+                e.preventDefault(); e.stopPropagation();
+                for (const p of g.player.petals) if (p.toggleStillMode) p.toggleStillMode();
+            }
+            return;
+        }
+        if (k === 'r' || k === 'R') {
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) gameInstance.player.quickSlot.swapAllSlots();
+            e.preventDefault(); return;
+        }
+        if (k === 'd' || k === 'D') {
+            if (gameState === 'in_game' && gameInstance) gameInstance.debugMode = !gameInstance.debugMode;
+            e.preventDefault(); return;
+        }
+        if (k === 'p' || k === 'P') {
+            if (gameState === 'in_game' && gameInstance) gameInstance.paused = !gameInstance.paused;
+            e.preventDefault(); return;
+        }
+        if (k === 'Escape') {
+            e.preventDefault(); e.stopPropagation();
+            if (gameState !== 'main_menu') returnToMainMenu();
+            else if (gameInstance?.shopSystem?.visible) gameInstance.shopSystem.visible = false;
+            return;
+        }
+        if (['w','W','a','A','s','S','d','D','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)) {
+            resetMouseMove();
+            e.preventDefault(); return;
+        }
     }
     function handleKeyUp(e) {}
 
     let isProcessingEscape = false;
     function returnToMainMenu() {
-      if (isProcessingEscape) return;
-      isProcessingEscape = true;
-      if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-      if (gameState === 'in_game' && gameInstance && gameInstance.player && gameInstance.player.quickSlot) {
-        for (let i = 0; i < gameInstance.player.quickSlot.slots.length; i++) {
-          const it = gameInstance.player.quickSlot.slots[i];
-          const pt = gameInstance.player.petals[i];
-          if (it && it.type !== "Mimic") {
-            let od = pt?.originalMimicData || it._originalMimicData;
-            if (od && od.type === "Mimic") {
-              it.type = od.type; it.rarity = od.rarity; it.level = od.level;
-              it.durability = od.durability; it.maxDurability = od.maxDurability;
-              it.reloadTime = od.reloadTime; it.baseReloadTime = od.baseReloadTime; it.armor = od.armor;
-              if (pt && pt.updateFromQuickSlot) pt.updateFromQuickSlot(i);
-              if (pt) pt.originalMimicData = null;
-              it._originalMimicData = null;
+        if (isProcessingEscape) return;
+        isProcessingEscape = true;
+        if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        if (gameState === 'in_game' && gameInstance && gameInstance.player && gameInstance.player.quickSlot) {
+            for (let i = 0; i < gameInstance.player.quickSlot.slots.length; i++) {
+                const it = gameInstance.player.quickSlot.slots[i];
+                const pt = gameInstance.player.petals[i];
+                if (it && it.type !== "Mimic") {
+                    let od = pt?.originalMimicData || it._originalMimicData;
+                    if (od && od.type === "Mimic") {
+                        it.type = od.type; it.rarity = od.rarity; it.level = od.level;
+                        it.durability = od.durability; it.maxDurability = od.maxDurability;
+                        it.reloadTime = od.reloadTime; it.baseReloadTime = od.baseReloadTime; it.armor = od.armor;
+                        if (pt && pt.updateFromQuickSlot) pt.updateFromQuickSlot(i);
+                        if (pt) pt.originalMimicData = null;
+                        it._originalMimicData = null;
+                    }
+                }
             }
-          }
         }
-      }
-      if (gameInstance?.autoSave) gameInstance.autoSave();
-      gameState = 'main_menu';
-      editorMode = false;
-      if (gameInstance) gameInstance.gameState = 'main_menu';
-      resetMouseMove();
-      setTimeout(() => { isProcessingEscape = false; }, 100);
+        if (gameInstance?.autoSave) gameInstance.autoSave();
+        gameState = 'main_menu';
+        editorMode = false;
+        if (gameInstance) gameInstance.gameState = 'main_menu';
+        resetMouseMove();
+        setTimeout(() => { isProcessingEscape = false; }, 100);
     }
 
     async function startGame(biome) {
-      if (!gameInstance) gameInstance = createGameInstance();
-      if (!gameInstance) { alert('Failed to create game instance!'); return; }
-      try {
-        if (typeof WORLD_WIDTH === 'undefined') window.WORLD_WIDTH = 5000;
-        if (typeof WORLD_HEIGHT === 'undefined') window.WORLD_HEIGHT = 5000;
-        await gameInstance.startGame(biome);
-        gameState = 'in_game';
-        editorMode = false;
-        if (!controlsInitialized) initializePlayerControls();
-        resetMouseMove();
-      } catch(e) { console.error(e); alert('Failed to start game: ' + e.message); }
+        if (!gameInstance) gameInstance = createGameInstance();
+        if (!gameInstance) { alert('Failed to create game instance!'); return; }
+        try {
+            if (typeof WORLD_WIDTH === 'undefined') window.WORLD_WIDTH = 5000;
+            if (typeof WORLD_HEIGHT === 'undefined') window.WORLD_HEIGHT = 5000;
+            await gameInstance.startGame(biome);
+            gameState = 'in_game';
+            editorMode = false;
+            if (!controlsInitialized) initializePlayerControls();
+            resetMouseMove();
+        } catch(e) { console.error(e); alert('Failed to start game: ' + e.message); }
     }
     async function startMazeMode() {
-      if (!gameInstance) gameInstance = createGameInstance();
-      if (!gameInstance) { alert('Failed to create game instance!'); return; }
-      try {
-        if (typeof MAZE_WIDTH === 'undefined') window.MAZE_WIDTH = 10000;
-        if (typeof MAZE_HEIGHT === 'undefined') window.MAZE_HEIGHT = 10000;
-        gameInstance.startMazeMode();
-        gameState = 'in_game';
-        editorMode = true;
-        if (!controlsInitialized) initializePlayerControls();
-        resetMouseMove();
-      } catch(e) { console.error(e); alert('Failed to start maze mode: ' + e.message); }
+        if (!gameInstance) gameInstance = createGameInstance();
+        if (!gameInstance) { alert('Failed to create game instance!'); return; }
+        try {
+            if (typeof MAZE_WIDTH === 'undefined') window.MAZE_WIDTH = 10000;
+            if (typeof MAZE_HEIGHT === 'undefined') window.MAZE_HEIGHT = 10000;
+            gameInstance.startMazeMode();
+            gameState = 'in_game';
+            editorMode = true;
+            if (!controlsInitialized) initializePlayerControls();
+            resetMouseMove();
+        } catch(e) { console.error(e); alert('Failed to start maze mode: ' + e.message); }
     }
 
     function gameLoop() {
-      animationFrameId = requestAnimationFrame(gameLoop);
-      if (!gameInstance) return;
-      const dt = 16.67 / 1000;
-      if (gameState === 'in_game') updatePlayerMovementByMouse();
-      if (gameState === 'in_game' && gameInstance.update) gameInstance.update(dt);
-      else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem?.update) gameInstance.player.inventory.craftingSystem.update(dt);
-      else if (gameState === 'inventory' && gameInstance.player?.inventory?.update) gameInstance.player.inventory.update(dt);
+        animationFrameId = requestAnimationFrame(gameLoop);
+        if (!gameInstance) return;
+        const dt = 16.67 / 1000;
+        if (gameState === 'in_game') updatePlayerMovementByMouse();
+        if (gameState === 'in_game' && gameInstance.update) gameInstance.update(dt);
+        else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem?.update) gameInstance.player.inventory.craftingSystem.update(dt);
+        else if (gameState === 'inventory' && gameInstance.player?.inventory?.update) gameInstance.player.inventory.update(dt);
 
-      if (gameState === 'main_menu') {
-        ctx.clearRect(0,0,screen.width,screen.height);
-        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
-        if (gameInstance?.mainMenu) {
-          gameInstance.mainMenu.draw(ctx);
-          if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.update(); gameInstance.shopSystem.draw(ctx); }
-          ctx.save();
-          const bw = 200, bh = 50, bx = screen.width/2 - bw/2, by = screen.height/2 + 440;
-          ctx.fillStyle = '#8B4513'; ctx.fillRect(bx, by, bw, bh);
-          ctx.strokeStyle = '#CD853F'; ctx.strokeRect(bx, by, bw, bh);
-          drawButtonTextWithBorder(ctx, 'MAZE MODE', bx, by, bw, bh, { font: 'bold 20px "Arial", sans-serif', fillColor: '#FFD700' });
-          ctx.restore();
-        } else drawFallbackMenu(ctx);
-      } else if (gameState === 'in_game') {
-        ctx.clearRect(0,0,screen.width,screen.height);
-        gameInstance.draw(ctx);
-        let hints = '右键点击地面移动 | C:合成 | I:背包 | ESC:菜单 | S:静止 | T:聊天 | B:收缩';
-        if (gameInstance.useMaze) hints = '🗺️ 迷宫模式 | E:编辑器 | S:保存地图 | L:加载地图 | M:控制面板 | ' + hints;
-        drawTextWithBorder(ctx, hints, 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
-        if (gameInstance.editorMode) drawTextWithBorder(ctx, '🔨 编辑器模式 - 点击清除墙壁 | Shift+点击放置墙壁', screen.width/2, 50, { font: '16px "Arial", sans-serif', textAlign: 'center', textBaseline: 'top', borderWidth: 2, fillColor: '#FFA500' });
-        if (isMouseMoving && mouseTargetX !== null && mouseTargetY !== null && gameInstance.cameraOffset) {
-          const sx = mouseTargetX - gameInstance.cameraOffset.x, sy = mouseTargetY - gameInstance.cameraOffset.y;
-          if (sx >= 0 && sx <= screen.width && sy >= 0 && sy <= screen.height) {
+        if (gameState === 'main_menu') {
+            ctx.clearRect(0,0,screen.width,screen.height);
+            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
+            if (gameInstance?.mainMenu) {
+                gameInstance.mainMenu.draw(ctx);
+                if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.update(); gameInstance.shopSystem.draw(ctx); }
+                ctx.save();
+                const bw = 200, bh = 50, bx = screen.width/2 - bw/2, by = screen.height/2 + 440;
+                ctx.fillStyle = '#8B4513'; ctx.fillRect(bx, by, bw, bh);
+                ctx.strokeStyle = '#CD853F'; ctx.strokeRect(bx, by, bw, bh);
+                drawButtonTextWithBorder(ctx, 'MAZE MODE', bx, by, bw, bh, { font: 'bold 20px "Arial", sans-serif', fillColor: '#FFD700' });
+                ctx.restore();
+            } else drawFallbackMenu(ctx);
+        } else if (gameState === 'in_game') {
+            ctx.clearRect(0,0,screen.width,screen.height);
+            gameInstance.draw(ctx);
+            let hints = '右键点击地面移动 | C:合成 | I:背包 | ESC:菜单 | S:静止 | T:聊天';
+            if (gameInstance.useMaze) hints = '🗺️ 迷宫模式 | E:编辑器 | S:保存地图 | L:加载地图 | M:控制面板 | ' + hints;
+            drawTextWithBorder(ctx, hints, 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
+            if (gameInstance.editorMode) drawTextWithBorder(ctx, '🔨 编辑器模式 - 点击清除墙壁 | Shift+点击放置墙壁', screen.width/2, 50, { font: '16px "Arial", sans-serif', textAlign: 'center', textBaseline: 'top', borderWidth: 2, fillColor: '#FFA500' });
+            if (isMouseMoving && mouseTargetX !== null && mouseTargetY !== null && gameInstance.cameraOffset) {
+                const sx = mouseTargetX - gameInstance.cameraOffset.x, sy = mouseTargetY - gameInstance.cameraOffset.y;
+                if (sx >= 0 && sx <= screen.width && sy >= 0 && sy <= screen.height) {
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255,255,0,0.8)'; ctx.fillStyle = 'rgba(255,255,0,0.3)'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(sx, sy, 15, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(sx-20,sy); ctx.lineTo(sx+20,sy); ctx.moveTo(sx,sy-20); ctx.lineTo(sx,sy+20);
+                    ctx.strokeStyle = 'rgba(255,255,0,0.5)'; ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        } else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem) {
+            ctx.clearRect(0,0,screen.width,screen.height);
+            ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
+            ctx.globalAlpha = 0.3; gameInstance.draw(ctx); ctx.globalAlpha = 1.0;
+            const cs = gameInstance.player.inventory.craftingSystem;
+            cs.craftingVisible = true;
+            cs.draw(ctx);
+            drawTextWithBorder(ctx, 'ESC: 返回游戏', 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
+        } else if (gameState === 'inventory' && gameInstance.player?.inventory) {
+            ctx.clearRect(0,0,screen.width,screen.height);
+            ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
+            gameInstance.draw(ctx);
             ctx.save();
-            ctx.strokeStyle = 'rgba(255,255,0,0.8)'; ctx.fillStyle = 'rgba(255,255,0,0.3)'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(sx, sy, 15, 0, Math.PI*2); ctx.stroke();
-            ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(sx-20,sy); ctx.lineTo(sx+20,sy); ctx.moveTo(sx,sy-20); ctx.lineTo(sx,sy+20);
-            ctx.strokeStyle = 'rgba(255,255,0,0.5)'; ctx.stroke();
+            ctx.beginPath(); ctx.rect(0,0,400,screen.height); ctx.clip();
+            ctx.fillStyle = 'rgba(30,30,50,0.9)'; ctx.fillRect(0,0,400,screen.height);
+            ctx.strokeStyle = 'rgba(200,200,200,0.8)'; ctx.lineWidth = 2; ctx.strokeRect(2,2,396,screen.height-4);
+            drawTextWithBorder(ctx, 'INVENTORY', 200, 50, { font: 'bold 28px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3 });
+            ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(370,30,15,0,Math.PI*2); ctx.fill();
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+            drawTextWithBorder(ctx, 'X', 370,30, { font: 'bold 18px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 2, fillColor: 'white' });
+            if (gameInstance.player.inventory.draw) gameInstance.player.inventory.draw(ctx);
             ctx.restore();
-          }
+            if (gameInstance.player?.quickSlot?.draw) gameInstance.player.quickSlot.draw(ctx);
+            drawTextWithBorder(ctx, '点击物品添加到快捷栏 | ESC: 返回游戏', 10, screen.height-10, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'bottom', borderWidth: 2 });
         }
-      } else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem) {
-        ctx.clearRect(0,0,screen.width,screen.height);
-        ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
-        ctx.globalAlpha = 0.3; gameInstance.draw(ctx); ctx.globalAlpha = 1.0;
-        const cs = gameInstance.player.inventory.craftingSystem;
-        cs.craftingVisible = true;
-        cs.draw(ctx);
-        drawTextWithBorder(ctx, 'ESC: 返回游戏', 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
-      } else if (gameState === 'inventory' && gameInstance.player?.inventory) {
-        ctx.clearRect(0,0,screen.width,screen.height);
-        ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
-        gameInstance.draw(ctx);
-        ctx.save();
-        ctx.beginPath(); ctx.rect(0,0,400,screen.height); ctx.clip();
-        ctx.fillStyle = 'rgba(30,30,50,0.9)'; ctx.fillRect(0,0,400,screen.height);
-        ctx.strokeStyle = 'rgba(200,200,200,0.8)'; ctx.lineWidth = 2; ctx.strokeRect(2,2,396,screen.height-4);
-        drawTextWithBorder(ctx, 'INVENTORY', 200, 50, { font: 'bold 28px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3 });
-        ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(370,30,15,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        drawTextWithBorder(ctx, 'X', 370,30, { font: 'bold 18px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 2, fillColor: 'white' });
-        if (gameInstance.player.inventory.draw) gameInstance.player.inventory.draw(ctx);
-        ctx.restore();
-        if (gameInstance.player?.quickSlot?.draw) gameInstance.player.quickSlot.draw(ctx);
-        drawTextWithBorder(ctx, '点击物品添加到快捷栏 | ESC: 返回游戏', 10, screen.height-10, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'bottom', borderWidth: 2 });
-      }
     }
 
     function drawFallbackMenu(ctx) {
-      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
-      drawTextWithBorder(ctx, '🌸 flwrr 🌸', screen.width/2, screen.height/2-100, { font: '48px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 4 });
-      drawTextWithBorder(ctx, 'Click to Start', screen.width/2, screen.height/2, { font: '24px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3, fillColor: '#888' });
-      const btns = [
-        { text: 'Plain', y: screen.height/2+80 }, { text: 'Bio', y: screen.height/2+140 },
-        { text: 'Desert', y: screen.height/2+200 }, { text: 'Random', y: screen.height/2+260 },
-        { text: 'Crafting', y: screen.height/2+320 }, { text: 'Inventory', y: screen.height/2+380 },
-        { text: 'MAZE MODE', y: screen.height/2+440, color: '#8B4513' }
-      ];
-      btns.forEach(b => {
-        ctx.fillStyle = b.color || '#4a4a6a';
-        const bw = 200, bh = 50, bx = screen.width/2 - bw/2;
-        ctx.fillRect(bx, b.y, bw, bh);
-        ctx.strokeStyle = b.color ? '#CD853F' : '#6a6a8a';
-        ctx.strokeRect(bx, b.y, bw, bh);
-        drawButtonTextWithBorder(ctx, b.text, bx, b.y, bw, bh, { font: 'bold 20px "Arial", sans-serif', fillColor: b.text === 'MAZE MODE' ? '#FFD700' : 'white', borderWidth: 2 });
-      });
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
+        drawTextWithBorder(ctx, '🌸 flwrr 🌸', screen.width/2, screen.height/2-100, { font: '48px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 4 });
+        drawTextWithBorder(ctx, 'Click to Start', screen.width/2, screen.height/2, { font: '24px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3, fillColor: '#888' });
+        const btns = [
+            { text: 'Plain', y: screen.height/2+80 }, { text: 'Bio', y: screen.height/2+140 },
+            { text: 'Desert', y: screen.height/2+200 }, { text: 'Random', y: screen.height/2+260 },
+            { text: 'Crafting', y: screen.height/2+320 }, { text: 'Inventory', y: screen.height/2+380 },
+            { text: 'MAZE MODE', y: screen.height/2+440, color: '#8B4513' }
+        ];
+        btns.forEach(b => {
+            ctx.fillStyle = b.color || '#4a4a6a';
+            const bw = 200, bh = 50, bx = screen.width/2 - bw/2;
+            ctx.fillRect(bx, b.y, bw, bh);
+            ctx.strokeStyle = b.color ? '#CD853F' : '#6a6a8a';
+            ctx.strokeRect(bx, b.y, bw, bh);
+            drawButtonTextWithBorder(ctx, b.text, bx, b.y, bw, bh, { font: 'bold 20px "Arial", sans-serif', fillColor: b.text === 'MAZE MODE' ? '#FFD700' : 'white', borderWidth: 2 });
+        });
     }
 
     function drawTextWithBorder(ctx, txt, x, y, opt = {}) {
-      const { font='24px Arial', align='center', baseline='middle', border='black', bw=3, fill='white' } = opt;
-      ctx.save();
-      ctx.font = font; ctx.textAlign = align; ctx.textBaseline = baseline;
-      ctx.shadowColor = border; ctx.shadowBlur = bw;
-      ctx.fillStyle = fill; ctx.fillText(txt, x, y);
-      ctx.shadowBlur = 0; ctx.fillText(txt, x, y);
-      ctx.restore();
+        const { font='24px Arial', align='center', baseline='middle', border='black', bw=3, fill='white' } = opt;
+        ctx.save();
+        ctx.font = font; ctx.textAlign = align; ctx.textBaseline = baseline;
+        ctx.shadowColor = border; ctx.shadowBlur = bw;
+        ctx.fillStyle = fill; ctx.fillText(txt, x, y);
+        ctx.shadowBlur = 0; ctx.fillText(txt, x, y);
+        ctx.restore();
     }
     function drawButtonTextWithBorder(ctx, txt, x, y, w, h, opt = {}) {
-      drawTextWithBorder(ctx, txt, x+w/2, y+h/2, { font: opt.font || 'bold 20px Arial', align: 'center', baseline: 'middle', border: opt.borderColor || 'black', bw: opt.borderWidth || 3, fill: opt.fillColor || 'white' });
+        drawTextWithBorder(ctx, txt, x+w/2, y+h/2, { font: opt.font || 'bold 20px Arial', align: 'center', baseline: 'middle', border: opt.borderColor || 'black', bw: opt.borderWidth || 3, fill: opt.fillColor || 'white' });
     }
 
     // 启动游戏
     initDOMElements();
+    resizeCanvas();
+    checkOrientation();
     gameInstance = createGameInstance();
     gameLoop();
     initializePlayerControls();
@@ -1265,34 +1235,39 @@ function handleTouchStart(e) {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
+    // 横屏提示点击关闭
+    document.getElementById('orientation-tip')?.addEventListener('click', () => {
+        document.getElementById('orientation-tip').classList.add('hidden');
+    });
+
     // UI 函数
     window.showMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'block'; document.getElementById('mp-menu').style.display = 'block'; document.getElementById('mp-create').style.display = 'none'; document.getElementById('mp-join').style.display = 'none'; };
     window.hideMultiplayerPanel = () => { document.getElementById('multiplayer-panel').style.display = 'none'; };
     window.showCreateRoom = async () => {
-      document.getElementById('mp-menu').style.display = 'none'; document.getElementById('mp-create').style.display = 'block';
-      if (!gameInstance) gameInstance = createGameInstance();
-      try {
-        const code = await gameInstance.createMultiplayerRoom();
-        document.getElementById('room-code-display').textContent = code;
-        document.getElementById('room-link-display').textContent = `${location.href.split('?')[0]}?room=${code}`;
-        const ri = document.getElementById('room-info');
-        if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 等待玩家加入...`; }
-      } catch(e) { alert('创建房间失败: ' + e.message); backToMenu(); }
+        document.getElementById('mp-menu').style.display = 'none'; document.getElementById('mp-create').style.display = 'block';
+        if (!gameInstance) gameInstance = createGameInstance();
+        try {
+            const code = await gameInstance.createMultiplayerRoom();
+            document.getElementById('room-code-display').textContent = code;
+            document.getElementById('room-link-display').textContent = `${location.href.split('?')[0]}?room=${code}`;
+            const ri = document.getElementById('room-info');
+            if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 等待玩家加入...`; }
+        } catch(e) { alert('创建房间失败: ' + e.message); backToMenu(); }
     };
     window.showJoinRoom = () => { document.getElementById('mp-menu').style.display = 'none'; document.getElementById('mp-join').style.display = 'block'; document.getElementById('room-code-input').focus(); };
     window.backToMenu = () => { document.getElementById('mp-menu').style.display = 'block'; document.getElementById('mp-create').style.display = 'none'; document.getElementById('mp-join').style.display = 'none'; document.getElementById('join-error').textContent = ''; };
     window.copyRoomLink = () => { navigator.clipboard.writeText(document.getElementById('room-link-display').textContent); alert('✅ 链接已复制！'); };
     window.joinRoom = async () => {
-      const code = document.getElementById('room-code-input').value.toUpperCase();
-      if (code.length < 4) { document.getElementById('join-error').textContent = '请输入有效的房间号'; return; }
-      if (!gameInstance) gameInstance = createGameInstance();
-      try {
-        await gameInstance.joinMultiplayerRoom(code);
-        hideMultiplayerPanel();
-        const ri = document.getElementById('room-info');
-        if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 已加入`; }
-        startGame('Plain');
-      } catch(e) { document.getElementById('join-error').textContent = '加入失败: ' + e.message; }
+        const code = document.getElementById('room-code-input').value.toUpperCase();
+        if (code.length < 4) { document.getElementById('join-error').textContent = '请输入有效的房间号'; return; }
+        if (!gameInstance) gameInstance = createGameInstance();
+        try {
+            await gameInstance.joinMultiplayerRoom(code);
+            hideMultiplayerPanel();
+            const ri = document.getElementById('room-info');
+            if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 已加入`; }
+            startGame('Plain');
+        } catch(e) { document.getElementById('join-error').textContent = '加入失败: ' + e.message; }
     };
     window.showAccountPanel = () => { document.getElementById('account-panel').style.display = 'block'; document.getElementById('account-menu').style.display = 'block'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); if(gameInstance?.accountSystem?.isLoggedIn()) showLoggedInStatus(); };
     window.hideAccountPanel = () => { document.getElementById('account-panel').style.display = 'none'; clearAccountMessages(); };
@@ -1300,63 +1275,63 @@ function handleTouchStart(e) {
     window.showAccountRegister = () => { document.getElementById('account-menu').style.display = 'none'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'block'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); document.getElementById('register-username').value = ''; document.getElementById('register-password').value = ''; document.getElementById('register-confirm').value = ''; };
     window.backToAccountMenu = () => { document.getElementById('account-menu').style.display = 'block'; document.getElementById('account-login').style.display = 'none'; document.getElementById('account-register').style.display = 'none'; document.getElementById('account-loggedin').style.display = 'none'; clearAccountMessages(); };
     window.showLoggedInStatus = () => {
-      if (!gameInstance?.accountSystem) return;
-      const un = gameInstance.accountSystem.getCurrentUser();
-      document.getElementById('loggedin-username').textContent = un;
-      document.getElementById('account-menu').style.display = 'none';
-      document.getElementById('account-login').style.display = 'none';
-      document.getElementById('account-register').style.display = 'none';
-      document.getElementById('account-loggedin').style.display = 'block';
-      const ud = document.getElementById('current-user');
-      if (ud) { ud.style.display = 'block'; ud.innerHTML = `👤 ${un}`; }
+        if (!gameInstance?.accountSystem) return;
+        const un = gameInstance.accountSystem.getCurrentUser();
+        document.getElementById('loggedin-username').textContent = un;
+        document.getElementById('account-menu').style.display = 'none';
+        document.getElementById('account-login').style.display = 'none';
+        document.getElementById('account-register').style.display = 'none';
+        document.getElementById('account-loggedin').style.display = 'block';
+        const ud = document.getElementById('current-user');
+        if (ud) { ud.style.display = 'block'; ud.innerHTML = `👤 ${un}`; }
     };
     window.handleLogin = () => {
-      const un = document.getElementById('login-username').value.trim();
-      const pw = document.getElementById('login-password').value.trim();
-      if (!un || !pw) { showAccountMessage('login-message', '请输入用户名和密码', 'error'); return; }
-      if (!gameInstance?.accountSystem) { showAccountMessage('login-message', '游戏系统未初始化', 'error'); return; }
-      const res = gameInstance.accountSystem.login(un, pw);
-      if (res.success) {
-        showAccountMessage('login-message', '登录成功！', 'success');
-        if (res.gameData) gameInstance.accountSystem.applyGameData(gameInstance.player, res.gameData);
-        setTimeout(() => { hideAccountPanel(); showLoggedInStatus(); }, 1500);
-      } else showAccountMessage('login-message', res.message, 'error');
+        const un = document.getElementById('login-username').value.trim();
+        const pw = document.getElementById('login-password').value.trim();
+        if (!un || !pw) { showAccountMessage('login-message', '请输入用户名和密码', 'error'); return; }
+        if (!gameInstance?.accountSystem) { showAccountMessage('login-message', '游戏系统未初始化', 'error'); return; }
+        const res = gameInstance.accountSystem.login(un, pw);
+        if (res.success) {
+            showAccountMessage('login-message', '登录成功！', 'success');
+            if (res.gameData) gameInstance.accountSystem.applyGameData(gameInstance.player, res.gameData);
+            setTimeout(() => { hideAccountPanel(); showLoggedInStatus(); }, 1500);
+        } else showAccountMessage('login-message', res.message, 'error');
     };
     window.handleRegister = () => {
-      const un = document.getElementById('register-username').value.trim();
-      const pw = document.getElementById('register-password').value.trim();
-      const cf = document.getElementById('register-confirm').value.trim();
-      if (!un || !pw || !cf) { showAccountMessage('register-message', '请填写所有字段', 'error'); return; }
-      if (pw !== cf) { showAccountMessage('register-message', '两次输入的密码不一致', 'error'); return; }
-      if (un.length < 3 || un.length > 20) { showAccountMessage('register-message', '用户名长度必须在3-20字符之间', 'error'); return; }
-      if (pw.length < 3 || pw.length > 20) { showAccountMessage('register-message', '密码长度必须在3-20字符之间', 'error'); return; }
-      if (!gameInstance?.accountSystem) { showAccountMessage('register-message', '游戏系统未初始化', 'error'); return; }
-      const res = gameInstance.accountSystem.createAccount(un, pw);
-      if (res.success) {
-        showAccountMessage('register-message', '注册成功！请登录', 'success');
-        setTimeout(() => showAccountLogin(), 1500);
-      } else showAccountMessage('register-message', res.message, 'error');
+        const un = document.getElementById('register-username').value.trim();
+        const pw = document.getElementById('register-password').value.trim();
+        const cf = document.getElementById('register-confirm').value.trim();
+        if (!un || !pw || !cf) { showAccountMessage('register-message', '请填写所有字段', 'error'); return; }
+        if (pw !== cf) { showAccountMessage('register-message', '两次输入的密码不一致', 'error'); return; }
+        if (un.length < 3 || un.length > 20) { showAccountMessage('register-message', '用户名长度必须在3-20字符之间', 'error'); return; }
+        if (pw.length < 3 || pw.length > 20) { showAccountMessage('register-message', '密码长度必须在3-20字符之间', 'error'); return; }
+        if (!gameInstance?.accountSystem) { showAccountMessage('register-message', '游戏系统未初始化', 'error'); return; }
+        const res = gameInstance.accountSystem.createAccount(un, pw);
+        if (res.success) {
+            showAccountMessage('register-message', '注册成功！请登录', 'success');
+            setTimeout(() => showAccountLogin(), 1500);
+        } else showAccountMessage('register-message', res.message, 'error');
     };
     window.handleLogout = () => {
-      if (!gameInstance?.accountSystem) return;
-      gameInstance.accountSystem.logout();
-      document.getElementById('current-user').style.display = 'none';
-      backToAccountMenu();
-      showAccountMessage('login-message', '已登出', 'success');
+        if (!gameInstance?.accountSystem) return;
+        gameInstance.accountSystem.logout();
+        document.getElementById('current-user').style.display = 'none';
+        backToAccountMenu();
+        showAccountMessage('login-message', '已登出', 'success');
     };
     function showAccountMessage(eid, msg, type) {
-      const el = document.getElementById(eid);
-      if (!el) return;
-      el.textContent = msg;
-      el.className = `message ${type}`;
-      el.style.display = 'block';
-      setTimeout(() => { el.style.display = 'none'; }, 3000);
+        const el = document.getElementById(eid);
+        if (!el) return;
+        el.textContent = msg;
+        el.className = `message ${type}`;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
     }
     function clearAccountMessages() {
-      const lm = document.getElementById('login-message');
-      const rm = document.getElementById('register-message');
-      if (lm) { lm.style.display = 'none'; lm.textContent = ''; }
-      if (rm) { rm.style.display = 'none'; rm.textContent = ''; }
+        const lm = document.getElementById('login-message');
+        const rm = document.getElementById('register-message');
+        if (lm) { lm.style.display = 'none'; lm.textContent = ''; }
+        if (rm) { rm.style.display = 'none'; rm.textContent = ''; }
     }
     </script>
 </body>
