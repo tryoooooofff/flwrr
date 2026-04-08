@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -680,10 +681,33 @@ input:focus, textarea:focus {
       } catch(e) { console.error(e); return null; }
     }
 
+    // 替换原有的 getCanvasCoordinates 函数
     function getCanvasCoordinates(e) {
-      const rect = screen.getBoundingClientRect();
-      const sx = screen.width / rect.width, sy = screen.height / rect.height;
-      return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
+        // 支持预计算坐标（用于触屏事件）
+        if (e._x !== undefined && e._y !== undefined) {
+            return { x: e._x, y: e._y };
+        }
+
+        const canvas = screen;
+        const rect = canvas.getBoundingClientRect();
+
+        // 计算缩放比例：canvas实际像素尺寸 / CSS显示尺寸
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        // 相对于canvas CSS区域的坐标
+        const relativeX = (e.clientX - rect.left);
+        const relativeY = (e.clientY - rect.top);
+
+        // 转换到canvas坐标系
+        const canvasX = relativeX * scaleX;
+        const canvasY = relativeY * scaleY;
+
+        // 边界检查
+        return {
+            x: Math.max(0, Math.min(canvas.width, canvasX)),
+            y: Math.max(0, Math.min(canvas.height, canvasY))
+        };
     }
     function resetMouseMove() { mouseTargetX = mouseTargetY = null; isMouseMoving = false; }
     function setMouseTarget(x, y) {
@@ -727,11 +751,25 @@ input:focus, textarea:focus {
       gameState = 'crafting';
     }
     function closeInventory() { gameState = 'in_game'; }
+    // 在 handleMouseDown 函数定义之前添加
+    let lastClickTime = 0;
+    const CLICK_DEBOUNCE_TIME = 150;
 
+    function shouldProcessClick() {
+        const now = Date.now();
+        if (now - lastClickTime < CLICK_DEBOUNCE_TIME) {
+            return false;
+        }
+        lastClickTime = now;
+        return true;
+    }
     function handleMouseDown(e) {
-      e.preventDefault();
-      const { x, y } = getCanvasCoordinates(e);
+    if (!shouldProcessClick()) {
+            return;
+        }
 
+    e.preventDefault();
+    const { x, y } = getCanvasCoordinates(e);
       const canvas = document.getElementById('gameCanvas');
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
@@ -859,21 +897,103 @@ input:focus, textarea:focus {
         if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleScrollWheel?.(e);
       }
     }
+// 触屏事件处理
+function handleTouchStart(e) {
+    e.preventDefault();
 
-    function initializePlayerControls() {
-      if (controlsInitialized) {
-        screen.removeEventListener('mousedown', handleMouseDown);
-        screen.removeEventListener('mouseup', handleMouseUp);
-        screen.removeEventListener('mousemove', handleMouseMove);
-        screen.removeEventListener('wheel', handleWheel);
-      }
-      screen.addEventListener('mousedown', handleMouseDown);
-      screen.addEventListener('mouseup', handleMouseUp);
-      screen.addEventListener('mousemove', handleMouseMove);
-      screen.addEventListener('wheel', handleWheel, { passive: false });
-      screen.addEventListener('contextmenu', e => e.preventDefault());
-      controlsInitialized = true;
+    if (!shouldProcessClick()) {
+        return;
     }
+
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+
+    const coords = getCanvasCoordinates({
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+
+    const mockEvent = {
+        preventDefault: () => {},
+        button: 0,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        _x: coords.x,
+        _y: coords.y
+    };
+
+    handleMouseDown(mockEvent);
+}
+
+    function handleTouchEnd(e) {
+        e.preventDefault();
+
+        const touch = e.changedTouches[0];
+        if (!touch) return;
+
+        const coords = getCanvasCoordinates({
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+
+        const mockEvent = {
+            preventDefault: () => {},
+            button: 0,
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            _x: coords.x,
+            _y: coords.y
+        };
+
+        handleMouseUp(mockEvent);
+    }
+
+    function handleTouchMove(e) {
+        e.preventDefault();
+
+        const touch = e.changedTouches[0];
+        if (!touch) return;
+
+        const coords = getCanvasCoordinates({
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+
+        const mockEvent = {
+            preventDefault: () => {},
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            _x: coords.x,
+            _y: coords.y
+        };
+
+        handleMouseMove(mockEvent);
+    }
+    function initializePlayerControls() {
+          if (controlsInitialized) {
+            screen.removeEventListener('mousedown', handleMouseDown);
+            screen.removeEventListener('mouseup', handleMouseUp);
+            screen.removeEventListener('mousemove', handleMouseMove);
+            screen.removeEventListener('wheel', handleWheel);
+            // 添加触屏事件移除
+            screen.removeEventListener('touchstart', handleTouchStart);
+            screen.removeEventListener('touchend', handleTouchEnd);
+            screen.removeEventListener('touchmove', handleTouchMove);
+          }
+
+          screen.addEventListener('mousedown', handleMouseDown);
+          screen.addEventListener('mouseup', handleMouseUp);
+          screen.addEventListener('mousemove', handleMouseMove);
+          screen.addEventListener('wheel', handleWheel, { passive: false });
+
+          // 添加触屏事件监听
+          screen.addEventListener('touchstart', handleTouchStart, { passive: false });
+          screen.addEventListener('touchend', handleTouchEnd, { passive: false });
+          screen.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+          screen.addEventListener('contextmenu', e => e.preventDefault());
+          controlsInitialized = true;
+        }
 
     function handleKeyDown(e) {
       if (!e?.key) return;
