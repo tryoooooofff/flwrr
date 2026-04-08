@@ -18932,30 +18932,22 @@ class EnemyDrawer {
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
         const rarity = enemyObj?.rarity || "Common";
 
-        // 稀有度缩放因子
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
             "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
         };
         const legendaryFactor = raritySizeFactors["Legendary"];
         const rarityFactor = raritySizeFactors[rarity] || 1.0;
-        const scale = (rarityFactor / legendaryFactor) * (scaledSize / 120); // 120是基准大小
+        // 基准比例计算
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / 1200);
 
-        // 颜色定义（友方金色，敌方绿色）
         let bodyColor, strokeColor, eyeColor, eyeInnerColor, mouthColor;
-
         if (isFriendly) {
-            bodyColor = '#FFD700';      // 金色
-            strokeColor = '#B8860B';    // 深金色
-            eyeColor = '#2a1650';       // 深紫色
-            eyeInnerColor = '#3d2466';  // 浅紫色
-            mouthColor = '#DAA520';     // 金杖色
+            bodyColor = '#FFD700'; strokeColor = '#B8860B'; eyeColor = '#2a1650';
+            eyeInnerColor = '#3d2466'; mouthColor = '#DAA520';
         } else {
-            bodyColor = '#5dcc1a';      // 亮绿色
-            strokeColor = '#4aaa18';    // 深绿色
-            eyeColor = '#2a1650';       // 深紫色
-            eyeInnerColor = '#3d2466';  // 浅紫色
-            mouthColor = '#4ab814';     // 绿色
+            bodyColor = '#5dcc1a'; strokeColor = '#4aaa18'; eyeColor = '#2a1650';
+            eyeInnerColor = '#3d2466'; mouthColor = '#4ab814';
         }
 
         const cx = 0;
@@ -18965,82 +18957,67 @@ class EnemyDrawer {
 
         context.save();
         context.translate(x, y);
-        context.rotate(angleToPlayer + Math.PI);
 
-        // 辅助函数：绘制脸部轮廓
-        const drawFace = (radius, sqVal, fillColor, strokeColorVal, lineWidthVal) => {
+        // --- 修改后的核心函数：填充与描边一体化 ---
+        const drawFacePath = (radius, sqVal) => {
             context.beginPath();
-            // 顶部半圆
+            // 1. 顶部圆弧
             context.arc(cx, cy - radius * 0.12, radius, Math.PI, 0, false);
-            // 右侧曲线
+            // 2. 右侧曲线
             context.bezierCurveTo(
                 cx + radius * 0.88, cy + radius * 0.45,
                 cx + radius * sqVal, cy + radius * 1.0,
                 cx, cy + radius * 1.0
             );
-            // 左侧曲线
+            // 3. 左侧曲线 (严格镜像右侧数值：0.88 和 0.45)
             context.bezierCurveTo(
                 cx - radius * sqVal, cy + radius * 1.0,
-                cx - radius * 0.85, cy + radius * 0.50,
-                cx - radius, cy - radius * 0.10
+                cx - radius * 0.88, cy + radius * 0.45,
+                cx - radius, cy - radius * 0.12
             );
             context.closePath();
 
-            if (fillColor) {
-                context.fillStyle = fillColor;
-                context.fill();
-            }
-            if (strokeColorVal) {
-                context.strokeStyle = strokeColorVal;
-                context.lineWidth = lineWidthVal;
-                context.stroke();
-            }
+            // 先填充
+            context.fillStyle = bodyColor;
+            context.fill();
+
+            // 后描边 (这样描边会刚好贴在填充边缘，且一半宽度向内，一半向外)
+            context.strokeStyle = strokeColor;
+            context.lineWidth = 10 * scale; // 调整线宽
+            context.lineJoin = 'round';
+            context.stroke();
         };
 
-        // 辅助函数：绘制眼睛
+        // 辅助函数：绘制眼睛 (同步修复了内部路径对称性)
         const drawEye = (ex, ey, eyeR, side, fillCol, strokeCol, innerFill) => {
             context.save();
             context.translate(ex, ey + 10 * scale);
             context.rotate(side * 0.9);
-            context.beginPath();
-            context.arc(0, -eyeR * 0.1, eyeR, Math.PI, 0, false);
-            context.bezierCurveTo(
-                eyeR, eyeR * 0.50,
-                eyeR * 0.35, eyeR * 1.05,
-                0, eyeR * 1.05
-            );
-            context.bezierCurveTo(
-                -eyeR * 0.35, eyeR * 1.05,
-                -eyeR, eyeR * 0.52,
-                -eyeR, -eyeR * 0.1
-            );
-            context.closePath();
+
+            const drawSingleEyePath = (rVal) => {
+                context.beginPath();
+                context.arc(0, -rVal * 0.1, rVal, Math.PI, 0, false);
+                context.bezierCurveTo(rVal, rVal * 0.52, rVal * 0.35, rVal * 1.05, 0, rVal * 1.05);
+                context.bezierCurveTo(-rVal * 0.35, rVal * 1.05, -rVal, rVal * 0.52, -rVal, -rVal * 0.1);
+                context.closePath();
+            };
+
+            // 外眼
+            drawSingleEyePath(eyeR);
             context.fillStyle = fillCol;
             context.fill();
             context.strokeStyle = strokeCol;
-            context.lineWidth = 5 * scale;
+            context.lineWidth = 4 * scale;
             context.stroke();
 
             // 内眼
-            context.beginPath();
-            context.arc(0, -eyeR * 0.1, eyeR * 0.8, Math.PI, 0, false);
-            context.bezierCurveTo(
-                eyeR * 0.8, eyeR * 0.40,
-                eyeR * 0.28, eyeR * 0.84,
-                0, eyeR * 0.84
-            );
-            context.bezierCurveTo(
-                -eyeR * 0.28, eyeR * 0.84,
-                -eyeR * 0.8, eyeR * 0.42,
-                -eyeR * 0.8, -eyeR * 0.1
-            );
-            context.closePath();
+            drawSingleEyePath(eyeR * 0.8);
             context.fillStyle = innerFill;
             context.fill();
+
             context.restore();
         };
 
-        // 辅助函数：绘制触角
         const drawAntenna = (side) => {
             const baseX = side * 46 * scale;
             const baseY = cy - 105 * scale;
@@ -19058,7 +19035,6 @@ class EnemyDrawer {
             context.stroke();
         };
 
-        // 辅助函数：绘制嘴巴
         const drawSmile = () => {
             context.beginPath();
             context.arc(cx, cy + 62 * scale, 15 * scale, 0.1 * Math.PI, 0.9 * Math.PI);
@@ -19068,23 +19044,18 @@ class EnemyDrawer {
             context.stroke();
         };
 
-        // 1. 身体描边层
-        drawFace(r, sq, null, strokeColor, 12 * scale);
+        // 1. 绘制身体（包含自动贴合的描边）
+        drawFacePath(r, sq);
 
-        // 2. 身体主色
-        drawFace(r * 0.94, sq, bodyColor, null, 0);
-
-        // 3. 触角
+        // 2. 绘制触角
         drawAntenna(-1);
         drawAntenna(1);
 
-        // 4. 眼睛（左眼）
+        // 3. 绘制眼睛
         drawEye(cx - 44 * scale, cy - 12 * scale, 36 * scale, -1, eyeColor, strokeColor, eyeInnerColor);
-
-        // 5. 眼睛（右眼）
         drawEye(cx + 44 * scale, cy - 12 * scale, 36 * scale, 1, eyeColor, strokeColor, eyeInnerColor);
 
-        // 6. 嘴巴
+        // 4. 绘制嘴巴
         drawSmile();
 
         context.restore();
