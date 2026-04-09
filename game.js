@@ -2,7 +2,11 @@
 // 墙壁颜色
 export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
-//后期会增加地图，每个地图都有1/10000概率生成一个时空隧道，进入会先到微观世界十分钟（微观世界有原子，电子，质子，电子云，光子），然后再到void 1h（宇宙有黑洞，白洞，中子星，外星人，UFO，恒星，小行星）。如果中途退出游戏则返回进入时空隧道之前的地图）
+//后期会增加wave room ---无尽波次，每波敌人增强，每10波生成一次特殊波次（单一生物）。wave room只有常规地图，但是更快刷新速度而且敌方生物血量减少10%，但是玩家在一个2000*2000的空间里面
+//后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
+//后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton egg+ 1 charge组成1 electronCloud egg...
+//可能增加设置菜单，控制UI界面和特效，碰撞箱显示等。增加日志---写更新内容
+
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -1034,7 +1038,7 @@ export const SPECIAL_ZONES = {
             spawnRules: [
                 ["CrabHole", 1, 1, 5, ["Ultra", "Super", "Omega"]],     // 蟹洞
                 ["Crab", 100, 1, 5, ["Super", "Omega"]],        // 螃蟹
-                ["Starfish", 40, 1, 6, ["Super", "Omega"]]                 // 气泡
+                ["Bubble", 40, 1, 6, ["Super", "Omega"]]                 // 气泡
             ],
             spawnRate: 10.1,
             maxEnemies: 55
@@ -2066,7 +2070,7 @@ function applyArmorReduction(damage, defenderArmor, attackerArmor = 0) {
 
 
     const reduction = effectiveArmor / (effectiveArmor + 1000);
-    const reductionPercent = Math.min(0.1, reduction);
+    const reductionPercent = Math.min(0.01, reduction);
 
     return damage * (1 - reductionPercent);
 }
@@ -3334,7 +3338,7 @@ class MobGallery {
 
         // 判断生物类型
         const isSewerEnemy = ["ManHole", "Rat", "Roach", "PooStorm"].includes(mobType);
-        const isDigger = ["TrashDigger", "Digger", "MudDigger", "Biologist"].includes(mobType);
+        const isDigger = ["TrashDigger", "Digger", "MudDigger", "Biologist","Beekeeper","HelDigger","HelBeekeeper"].includes(mobType);
         const isCancer = mobType === "Cancer" || mobType === "CancerCell";
         const isStemCell = mobType === "StemCell";
 
@@ -5866,7 +5870,6 @@ class CollisionSystem {
     }
 
     _shouldSkipCollision(obj1, obj2) {
-        // 获取对象类型
         const isPlayer1 = obj1 === this.player || (obj1.constructor && obj1.constructor.name === 'Player');
         const isPlayer2 = obj2 === this.player || (obj2.constructor && obj2.constructor.name === 'Player');
         const isPetal1 = obj1.constructor && obj1.constructor.name === 'Petal';
@@ -5875,13 +5878,15 @@ class CollisionSystem {
         const isProjectile2 = obj2.constructor && obj2.constructor.name === 'Projectile';
         const isDroppedCard1 = obj1.constructor && obj1.constructor.name === 'DroppedCard';
         const isDroppedCard2 = obj2.constructor && obj2.constructor.name === 'DroppedCard';
-        // 检测身体节
         const isSegment1 = obj1.isSegment === true;
         const isSegment2 = obj2.isSegment === true;
 
-        // ✅ 检测友方（包括身体节）
         const isFriendly1 = obj1.isFriendly === true;
         const isFriendly2 = obj2.isFriendly === true;
+
+        // ✅ 幽灵/GraveDigger 无碰撞标记
+        const isNoCollision1 = obj1.noCollision === true;
+        const isNoCollision2 = obj2.noCollision === true;
 
         // 1. 花瓣不参与
         if (isPetal1 || isPetal2) return true;
@@ -5889,26 +5894,31 @@ class CollisionSystem {
         // 2. 玩家不撞玩家
         if (isPlayer1 && isPlayer2) return true;
 
-        // 3. ✅ 玩家不撞友方单位（包括友方身体节）
+        // 3. 玩家不撞友方单位
         if ((isPlayer1 && isFriendly2) || (isPlayer2 && isFriendly1)) {
             return true;
         }
 
-        // 4. 投射物不撞投射物
+        // 4. ✅ 幽灵不与其他任何单位碰撞（包括玩家、敌人、花瓣等）
+        if (isNoCollision1 || isNoCollision2) {
+            return true;
+        }
+
+        // 5. 投射物不撞投射物
         if (isProjectile1 && isProjectile2) return true;
 
-        // 5. 投射物不撞发射者
+        // 6. 投射物不撞发射者
         if (isProjectile1 && obj1.source === obj2) return true;
         if (isProjectile2 && obj2.source === obj1) return true;
         if (isDroppedCard1 || isDroppedCard2) return true;
-        // 6. 身体节之间不互相碰撞
+
+        // 7. 身体节之间不互相碰撞
         if (isSegment1 && isSegment2) return true;
 
-        // 7. 投射物阵营检测
+        // 8. 投射物阵营检测
         if (isProjectile1) {
             const projSource = obj1.source;
             const projIsFriendly = projSource ? (projSource.isFriendly === true) : false;
-
             if (projIsFriendly) {
                 if (isFriendly2 || isPlayer2) return true;
             } else {
@@ -5919,7 +5929,6 @@ class CollisionSystem {
         if (isProjectile2) {
             const projSource = obj2.source;
             const projIsFriendly = projSource ? (projSource.isFriendly === true) : false;
-
             if (projIsFriendly) {
                 if (isFriendly1 || isPlayer1) return true;
             } else {
@@ -6099,7 +6108,7 @@ class CollisionSystem {
         }
     }
     _handlePetalEnemyCollision(petal, enemy) {
-        // ✅ 如果是身体节，获取父级 Enemy
+
         let actualEnemy = enemy;
         if (enemy.isSegment === true && enemy.parentEnemy) {
             actualEnemy = enemy.parentEnemy;
@@ -6131,6 +6140,7 @@ class CollisionSystem {
             petal.startReload();
             return;
         }
+
         if (currentItem && currentItem.type === "Cancer") {
             const cancerRarity = currentItem.rarity;
             const targetRarity = actualEnemy.rarity || "Common";
@@ -6151,6 +6161,7 @@ class CollisionSystem {
                 actualEnemy.cancerInfectionTime = Date.now();
             }
         }
+
         // ===== 先造成伤害 =====
         let damageToEnemy = 0;
         if (petal.attackPower > 0 && petal.canAttack()) {
@@ -6178,15 +6189,24 @@ class CollisionSystem {
             }
         }
 
-        // ===== 再承受伤害（移除反弹）=====
+        // ===== 再承受伤害（添加冷却机制）=====
         if (!petal.isBroken && !petal.isReloading) {
+            // ✅ 为每个花瓣对每个敌人添加独立冷却（30次/秒 ≈ 33ms）
+            if (!petal._lastDamageTimePerEnemy) petal._lastDamageTimePerEnemy = new Map();
+            const enemyId = actualEnemy.id || actualEnemy;
+            const now = Date.now();
+            const lastTime = petal._lastDamageTimePerEnemy.get(enemyId) || 0;
+            const COOLDOWN_MS = 25; // 33ms ≈ 30次/秒
+            if (now - lastTime < COOLDOWN_MS) {
+                return; // 冷却中，不造成伤害
+            }
+            petal._lastDamageTimePerEnemy.set(enemyId, now);
+
             const enemyDamage = actualEnemy.attackDamage || 10;
             const petalDied = petal.takeDamage(enemyDamage);
 
-            // ✅ 移除反弹逻辑 - 花瓣死亡就只是死亡，不反弹伤害
             if (petalDied) {
-                // 什么都不做，或者只记录日志
-                // console.log(`花瓣 ${petal._petalIndex} 被摧毁`);
+                petal._lastDamageTimePerEnemy.clear();
             }
         }
     }
@@ -7060,6 +7080,7 @@ class Item {
             baseReloadTime: this.baseReloadTime,
             armor: this.armor
         };
+
     }
 
     // 从字典加载（用于读档）
@@ -7518,7 +7539,7 @@ class QuickSlot {
         this.player = player;
         this.mouseX = 0;
         this.mouseY = 0;
-
+        this.mimicTracker = new Map(); // key: 槽位标识, value: { originalData, displayType, isMain }
         // 主栏常量
         this.SLOT_SIZE = 55;
         this.SLOT_SPACING = 6;
@@ -7532,23 +7553,59 @@ class QuickSlot {
         this.SECONDARY_OFFSET_X = 50;
     }
 
-    // 在 QuickSlot 类中修改 swapAllSlots 方法
-    swapAllSlots() {
-        // ✅ 交换前清除所有旧召唤物
-        for (let i = 0; i < this.slots.length; i++) {
-            const petal = this.player?.petals[i];
-            if (petal && petal._clearAllSummons) {
-                petal._clearAllSummons();
-            }
+    swapSlot(slotIndex) {
+        if (slotIndex < 0 || slotIndex >= this.slots.length) return;
+
+        const mainItem = this.slots[slotIndex];
+        const secondaryItem = this.secondarySlots[slotIndex];
+
+        // ✅ 关键：分别处理主栏和副栏的 Mimic 数据
+        const mainKey = `main_${slotIndex}`;
+        const secKey = `sec_${slotIndex}`;
+
+        // 保存主栏的 Mimic 数据（如果有）
+        let mainMimicData = null;
+        if (this.mimicTracker.has(mainKey)) {
+            mainMimicData = this.mimicTracker.get(mainKey);
+            this.mimicTracker.delete(mainKey);
+            console.log(`📦 从主栏取出 Mimic 数据: ${mainKey}`);
         }
 
-        for (let i = 0; i < this.slots.length; i++) {
-            const temp = this.slots[i];
-            this.slots[i] = this.secondarySlots[i];
-            this.secondarySlots[i] = temp;
-            this.updatePetalFromSlot(i);
+        // 保存副栏的 Mimic 数据（如果有）
+        let secondaryMimicData = null;
+        if (this.mimicTracker.has(secKey)) {
+            secondaryMimicData = this.mimicTracker.get(secKey);
+            this.mimicTracker.delete(secKey);
+            console.log(`📦 从副栏取出 Mimic 数据: ${secKey}`);
         }
 
+        // 交换物品
+        this.slots[slotIndex] = secondaryItem;
+        this.secondarySlots[slotIndex] = mainItem;
+
+        // ✅ 将数据恢复到新位置（交换后，原主栏的数据去副栏，原副栏的数据去主栏）
+        if (mainMimicData) {
+            this.mimicTracker.set(secKey, {
+                ...mainMimicData,
+                isMain: false,
+                slotIndex: slotIndex
+            });
+            console.log(`📦 恢复 Mimic 数据到副栏: ${secKey}`);
+        }
+
+        if (secondaryMimicData) {
+            this.mimicTracker.set(mainKey, {
+                ...secondaryMimicData,
+                isMain: true,
+                slotIndex: slotIndex
+            });
+            console.log(`📦 恢复 Mimic 数据到主栏: ${mainKey}`);
+        }
+
+        // 更新花瓣
+        this.updatePetalFromSlot(slotIndex);
+
+        console.log(`🔄 交换槽位 ${slotIndex}: 主栏 ↔ 副栏`);
     }
     // 在 QuickSlot 类中添加
     restoreSecondarySlots(saveData) {
@@ -7575,28 +7632,44 @@ class QuickSlot {
     }
         // 在 QuickSlot 类中添加
     removeSecondaryItem(slotIndex) {
-        if (slotIndex >= 0 && slotIndex < this.secondarySlots.length && this.secondarySlots[slotIndex]) {
-            const item = this.secondarySlots[slotIndex];
-            this.secondarySlots[slotIndex] = null;
-            return item;
+            if (slotIndex >= 0 && slotIndex < this.secondarySlots.length && this.secondarySlots[slotIndex]) {
+                const item = this.secondarySlots[slotIndex];
+                this.secondarySlots[slotIndex] = null;
+                return item;
+            }
+            return null;
         }
-        return null;
+    swapAllSlots() {
+        // 保存所有 Mimic 数据
+        const allMimics = [];
+        for (const [key, data] of this.mimicTracker.entries()) {
+            allMimics.push({ key, data });
+            this.mimicTracker.delete(key);
+        }
+
+        // 交换所有槽位
+        for (let i = 0; i < this.slots.length; i++) {
+            const temp = this.slots[i];
+            this.slots[i] = this.secondarySlots[i];
+            this.secondarySlots[i] = temp;
+            this.updatePetalFromSlot(i);
+        }
+
+        // 恢复 Mimic 数据（主副栏互换）
+        for (const { key, data } of allMimics) {
+            const [type, slotIndex] = key.split('_');
+            const newType = type === 'main' ? 'sec' : 'main';
+            const newKey = `${newType}_${slotIndex}`;
+            this.mimicTracker.set(newKey, {
+                ...data,
+                isMain: newType === 'main',
+                slotIndex: parseInt(slotIndex)
+            });
+            console.log(`📦 移动 Mimic: ${key} → ${newKey}`);
+        }
+
+        console.log(`🔄 交换所有主副栏槽位完成`);
     }
-    // 在 QuickSlot 类中
-    swapSlot(slotIndex) {
-        if (slotIndex < 0 || slotIndex >= this.slots.length) return;
-
-        // 交换主栏和副栏
-        const temp = this.slots[slotIndex];
-        this.slots[slotIndex] = this.secondarySlots[slotIndex];
-        this.secondarySlots[slotIndex] = temp;
-
-        // 更新花瓣
-        this.updatePetalFromSlot(slotIndex);
-
-        console.log(`🔄 交换槽位 ${slotIndex}: 主栏->副栏, 副栏->主栏`);
-    }
-
 // 在 QuickSlot 类中修改 addItem 方法
     addItem(item, slotIndex) {
         if (slotIndex >= 0 && slotIndex < this.slots.length) {
@@ -7640,6 +7713,102 @@ class QuickSlot {
             return true;
         }
         return false;
+    }
+// 注册一个变形 Mimic
+    registerMimic(slotIndex, isMain, originalData, displayType) {
+        const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
+        this.mimicTracker.set(key, {
+            originalData: { ...originalData },
+            displayType: displayType,
+            isMain: isMain,
+            slotIndex: slotIndex
+        });
+        console.log(`📝 注册 Mimic: ${key}, 原始类型: ${originalData.type}, 显示为: ${displayType}`);
+    }
+
+    // 注销一个变形 Mimic（移动或恢复时调用）
+    unregisterMimic(slotIndex, isMain) {
+        const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
+        const existed = this.mimicTracker.has(key);
+        this.mimicTracker.delete(key);
+        if (existed) {
+            console.log(`🗑️ 注销 Mimic: ${key}`);
+        }
+        return existed;
+    }
+
+    // 移动 Mimic 数据（交换槽位时调用）
+    moveMimic(fromSlot, fromIsMain, toSlot, toIsMain) {
+        const fromKey = `${fromIsMain ? 'main' : 'sec'}_${fromSlot}`;
+        const toKey = `${toIsMain ? 'main' : 'sec'}_${toSlot}`;
+
+        if (this.mimicTracker.has(fromKey)) {
+            const data = this.mimicTracker.get(fromKey);
+            this.mimicTracker.delete(fromKey);
+            this.mimicTracker.set(toKey, {
+                ...data,
+                slotIndex: toSlot,
+                isMain: toIsMain
+            });
+            console.log(`📦 移动 Mimic: ${fromKey} → ${toKey}`);
+            return true;
+        }
+        return false;
+    }
+
+    // 获取某个槽位的 Mimic 数据
+    getMimicData(slotIndex, isMain) {
+        const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
+        return this.mimicTracker.get(key) || null;
+    }
+
+    // 恢复所有 Mimic（返回主菜单时调用）
+    restoreAllMimics() {
+        const restored = [];
+
+        for (const [key, data] of this.mimicTracker.entries()) {
+            const [type, slotIndex] = key.split('_');
+            const isMain = type === 'main';
+            const idx = parseInt(slotIndex);
+            const item = isMain ? this.slots[idx] : this.secondarySlots[idx];
+
+            // ✅ 关键：只恢复当前物品类型与显示类型不同的（说明是变形状态）
+            if (item && data.originalData && data.originalData.type === "Mimic") {
+                // 只有当物品当前不是 Mimic 时才恢复（避免重复恢复）
+                if (item.type !== "Mimic") {
+                    console.log(`✅ 恢复 Mimic: ${key}, ${item.type} → ${data.originalData.type}`);
+
+                    item.type = data.originalData.type;
+                    item.rarity = data.originalData.rarity;
+                    item.level = data.originalData.level;
+                    item.durability = data.originalData.durability;
+                    item.maxDurability = data.originalData.maxDurability;
+                    item.reloadTime = data.originalData.reloadTime;
+                    item.baseReloadTime = data.originalData.baseReloadTime;
+                    item.armor = data.originalData.armor;
+                    item.isBroken = data.originalData.isBroken || false;
+
+                    restored.push(key);
+                } else {
+                    console.log(`⚠️ 跳过恢复 ${key}: 已经是 Mimic`);
+                }
+            }
+
+            // 清除所有标记
+            item._originalMimicData = null;
+            item._isTransformedMimic = false;
+            item._mimicDisplayType = null;
+        }
+
+        this.mimicTracker.clear();
+
+        // 更新所有花瓣
+        for (let i = 0; i < this.slots.length; i++) {
+            this.updatePetalFromSlot(i);
+        }
+
+        console.log(`✅ 共恢复 ${restored.length} 个 Mimic`);
+        return restored;
     }
 
     addItemAuto(item) {
@@ -7832,7 +8001,6 @@ class QuickSlot {
             this.resetPetalFromSlot(slotIndex);
         }
     }
-
     updatePetalFromSlot(slotIndex) {
         if (this.player && this.player.petals &&
             slotIndex >= 0 && slotIndex < this.player.petals.length) {
@@ -7868,15 +8036,25 @@ class QuickSlot {
                     petal.magnetActive = false;
                 }
 
-                petal.hasAntennae = (item.type === "Antenna");
+                petal.hasAntennae = (item.type === "Antennae");
+
+                // ✅ 从追踪器获取变形数据，而不是从 item 上读取
+                const mimicData = this.getMimicData(slotIndex, true);
+                if (mimicData) {
+                    petal._isTransformedMimic = true;
+                    petal._originalMimicData = { ...mimicData.originalData };
+                    petal._mimicDisplayType = mimicData.displayType;
+                } else {
+                    petal._isTransformedMimic = false;
+                    petal._originalMimicData = null;
+                    petal._mimicDisplayType = null;
+                }
 
             } else {
                 petal.resetToDefault();
             }
-            petal.updateFromQuickSlot(slotIndex);
         }
     }
-
     resetPetalFromSlot(slotIndex) {
         if (this.player && this.player.petals && slotIndex >= 0 && slotIndex < this.player.petals.length) {
             const petal = this.player.petals[slotIndex];
@@ -15993,9 +16171,7 @@ class EnemyDrawer {
         const rarity = enemyObj?.rarity || "Common";
         const rarityIndex = RARITY_LIST.indexOf(rarity);
 
-        // 稀有度缩放因子
-        const rarityScale = 1 * rarityIndex;
-        const totalScale = viewScale * rarityScale ;
+        const totalScale = viewScale/1.5;
 
         // 稀有度描边乘数
         const STROKE_MULTIPLIERS = {
@@ -18925,138 +19101,529 @@ class EnemyDrawer {
 
         ctx.restore();
     }
-    drawAlien(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+    drawGraveStone(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
         if (scaledSize <= 0) return;
 
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
         const rarity = enemyObj?.rarity || "Common";
 
-        const raritySizeFactors = {
-            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
-            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4, "Omega": 12.0
-        };
-        const legendaryFactor = raritySizeFactors["Legendary"];
-        const rarityFactor = raritySizeFactors[rarity] || 1.0;
-        // 基准比例计算
-        const scale = (rarityFactor / legendaryFactor) * (scaledSize / 1200);
+        // ✅ 移除稀有度缩放，使用固定大小
+        const scale = scaledSize / 200;
 
-        let bodyColor, strokeColor, eyeColor, eyeInnerColor, mouthColor;
+        // 颜色定义（友方金色，敌方墓碑色）
+        let outerColor, mainColor, innerOutlineColor, innerColor, textColor;
+
         if (isFriendly) {
-            bodyColor = '#FFD700'; strokeColor = '#B8860B'; eyeColor = '#2a1650';
-            eyeInnerColor = '#3d2466'; mouthColor = '#DAA520';
+            outerColor = '#B8860B';      // 深金色
+            mainColor = '#FFD700';       // 金色
+            innerOutlineColor = '#DAA520'; // 金杖色
+            innerColor = '#FFD700';       // 金色
+            textColor = '#B8860B';        // 深金色
         } else {
-            bodyColor = '#5dcc1a'; strokeColor = '#4aaa18'; eyeColor = '#2a1650';
-            eyeInnerColor = '#3d2466'; mouthColor = '#4ab814';
+            outerColor = '#a06070';       // 深粉色/棕色
+            mainColor = '#d4aab8';        // 浅粉色
+            innerOutlineColor = '#a06070'; // 深色
+            innerColor = '#c898a8';        // 中粉色
+            textColor = '#906070';         // 暗粉色
         }
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer);
 
         const cx = 0;
         const cy = 0;
-        const r = 127 * scale;
-        const sq = 0.48;
+        const W = 190 * scale;
+        const H = 270 * scale;
+
+        // 辅助函数：绘制五边形墓碑形状
+        const drawShape = (cX, cY, w, h, fillColor, strokeColor = null, lineWidth = 0) => {
+            const pts = [
+                [cX,             cY - h * 0.50],
+                [cX + w * 0.60,  cY - h * 0.22],
+                [cX + w * 0.38,  cY + h * 0.50],
+                [cX - w * 0.38,  cY + h * 0.50],
+                [cX - w * 0.60,  cY - h * 0.22],
+            ];
+            context.beginPath();
+            context.moveTo(pts[0][0], pts[0][1]);
+            for (let i = 1; i < pts.length; i++) {
+                context.lineTo(pts[i][0], pts[i][1]);
+            }
+            context.closePath();
+
+            if (fillColor) {
+                context.fillStyle = fillColor;
+                context.fill();
+            }
+            if (strokeColor && lineWidth > 0) {
+                context.strokeStyle = strokeColor;
+                context.lineWidth = lineWidth;
+                context.stroke();
+            }
+        };
+
+        // 1. 最外层深色轮廓
+        drawShape(cx, cy, W, H, outerColor);
+
+        // 2. 主体浅色（外轮廓厚度）
+        drawShape(cx, cy, W * 0.93, H * 0.93, mainColor);
+
+        // 3. 主体色
+        drawShape(cx, cy, W * 0.91, H * 0.91, innerColor);
+
+        // 4. 内圈深色轮廓
+        drawShape(cx, cy, W * 0.72, H * 0.72, innerOutlineColor);
+
+        // 5. 内圈填充
+        drawShape(cx, cy, W * 0.65, H * 0.65, innerColor);
+
+        // 6. RIP 文字
+        context.font = `bold ${Math.floor(40 * scale)}px serif`;
+        context.fillStyle = textColor;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText('RIP', cx, cy - 5 * scale);
+
+        // ✅ 8. 如果是友方，添加十字架装饰
+        if (isFriendly) {
+            context.beginPath();
+            context.moveTo(cx - 20 * scale, cy - 60 * scale);
+            context.lineTo(cx + 20 * scale, cy - 60 * scale);
+            context.moveTo(cx, cy - 80 * scale);
+            context.lineTo(cx, cy - 40 * scale);
+            context.strokeStyle = '#FFD700';
+            context.lineWidth = 4 * scale;
+            context.stroke();
+        }
+
+        context.restore();
+    }
+    drawAlien(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+            const scaledSize = size * viewScale;
+            if (scaledSize <= 0) return;
+
+            const isFriendly = enemyObj && enemyObj.isFriendly === true;
+            const rarity = enemyObj?.rarity || "Common";
+
+            const raritySizeFactors = {
+                "Common": 1.0, "Unusual": 1.0, "Rare": 1.0, "Epic": 1.0,
+                "Legendary": 1.0, "Mythic": 1.0, "Ultra": 1.0, "Super": 1.0, "Omega": 1.0
+            };
+            const legendaryFactor = raritySizeFactors["Common"];
+            const rarityFactor = raritySizeFactors[rarity] || 1.0;
+            // 基准比例计算 - 改为除以300
+            const scale = (rarityFactor / legendaryFactor) * (scaledSize / 70);
+
+            let bodyColor, strokeColor, eyeColor, eyeInnerColor, mouthColor;
+            if (isFriendly) {
+                bodyColor = '#FFD700'; strokeColor = '#B8860B'; eyeColor = '#2a1650';
+                eyeInnerColor = '#3d2466'; mouthColor = '#DAA520';
+            } else {
+                bodyColor = '#5dcc1a'; strokeColor = '#4aaa18'; eyeColor = '#2a1650';
+                eyeInnerColor = '#3d2466'; mouthColor = '#4ab814';
+            }
+
+            const cx = 0;
+            const cy = 0;
+            const r = 31.75 * scale;  // 原来是127，除以4 = 31.75
+            const sq = 0.48;
+
+            context.save();
+            context.translate(x, y);
+
+            // --- 修改后的核心函数：填充与描边一体化 ---
+            const drawFacePath = (radius, sqVal) => {
+                context.beginPath();
+                // 1. 顶部圆弧
+                context.arc(cx, cy - radius * 0.12, radius, Math.PI, 0, false);
+                // 2. 右侧曲线
+                context.bezierCurveTo(
+                    cx + radius * 0.88, cy + radius * 0.45,
+                    cx + radius * sqVal, cy + radius * 1.0,
+                    cx, cy + radius * 1.0
+                );
+                // 3. 左侧曲线 (严格镜像右侧数值：0.88 和 0.45)
+                context.bezierCurveTo(
+                    cx - radius * sqVal, cy + radius * 1.0,
+                    cx - radius * 0.88, cy + radius * 0.45,
+                    cx - radius, cy - radius * 0.12
+                );
+                context.closePath();
+
+                // 先填充
+                context.fillStyle = bodyColor;
+                context.fill();
+
+                // 后描边 (这样描边会刚好贴在填充边缘，且一半宽度向内，一半向外)
+                context.strokeStyle = strokeColor;
+                context.lineWidth = 2.5 * scale; // 原来是10，除以4 = 2.5
+                context.lineJoin = 'round';
+                context.stroke();
+            };
+
+            // 辅助函数：绘制眼睛 (同步修复了内部路径对称性)
+            const drawEye = (ex, ey, eyeR, side, fillCol, strokeCol, innerFill) => {
+                context.save();
+                context.translate(ex, ey + 2.5 * scale); // 原来是10，除以4 = 2.5
+                context.rotate(side * 0.9);
+
+                const drawSingleEyePath = (rVal) => {
+                    context.beginPath();
+                    context.arc(0, -rVal * 0.1, rVal, Math.PI, 0, false);
+                    context.bezierCurveTo(rVal, rVal * 0.52, rVal * 0.35, rVal * 1.05, 0, rVal * 1.05);
+                    context.bezierCurveTo(-rVal * 0.35, rVal * 1.05, -rVal, rVal * 0.52, -rVal, -rVal * 0.1);
+                    context.closePath();
+                };
+
+                // 外眼
+                drawSingleEyePath(eyeR);
+                context.fillStyle = fillCol;
+                context.fill();
+                context.strokeStyle = strokeCol;
+                context.lineWidth = 1 * scale; // 原来是4，除以4 = 1
+                context.stroke();
+
+                // 内眼
+                drawSingleEyePath(eyeR * 0.8);
+                context.fillStyle = innerFill;
+                context.fill();
+
+                context.restore();
+            };
+
+            const drawAntenna = (side) => {
+                const baseX = side * 11.5 * scale;  // 原来是46，除以4 = 11.5
+                const baseY = cy - 26.25 * scale;    // 原来是105，除以4 = 26.25
+                const cpX = side * 21.25 * scale;    // 原来是85，除以4 = 21.25
+                const cpY = cy - 52 * scale;         // 原来是208，除以4 = 52
+                const endX = side * 27 * scale;      // 原来是108，除以4 = 27
+                const endY = cy - 37 * scale;        // 原来是148，除以4 = 37
+
+                context.beginPath();
+                context.moveTo(baseX, baseY);
+                context.quadraticCurveTo(cpX, cpY, endX, endY);
+                context.strokeStyle = eyeColor;
+                context.lineWidth = 3.5 * scale;     // 原来是14，除以4 = 3.5
+                context.lineCap = 'round';
+                context.stroke();
+            };
+
+            const drawSmile = () => {
+                context.beginPath();
+                context.arc(cx, cy + 15.5 * scale, 3.75 * scale, 0.1 * Math.PI, 0.9 * Math.PI); // 62/4=15.5, 15/4=3.75
+                context.strokeStyle = mouthColor;
+                context.lineWidth = 1.5 * scale;      // 原来是6，除以4 = 1.5
+                context.lineCap = 'round';
+                context.stroke();
+            };
+
+            // 1. 绘制身体（包含自动贴合的描边）
+            drawFacePath(r, sq);
+
+            // 2. 绘制触角
+            drawAntenna(-1);
+            drawAntenna(1);
+
+            // 3. 绘制眼睛
+            drawEye(cx - 11 * scale, cy - 3 * scale, 9 * scale, -1, eyeColor, strokeColor, eyeInnerColor);  // 44/4=11, 12/4=3, 36/4=9
+            drawEye(cx + 11 * scale, cy - 3 * scale, 9 * scale, 1, eyeColor, strokeColor, eyeInnerColor);   // 44/4=11, 12/4=3, 36/4=9
+
+            // 4. 绘制嘴巴
+            drawSmile();
+
+            context.restore();
+        }
+    drawGhost(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        const ctx = context;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const scale = scaledSize / 120;
+
+        // 颜色逻辑保持不变...
+        let bodyColor, strokeColor;
+        if (isFriendly) {
+            bodyColor = 'rgba(255, 215, 0, 0.7)';
+            strokeColor = 'rgba(200, 160, 0, 0.8)';
+        } else {
+            if (!enemyObj._ghostColors) {
+                const colors = [
+                    { body: 'rgba(255, 100, 100, 0.65)', stroke: 'rgba(180, 60, 60, 0.8)' },
+                    { body: 'rgba(255, 235, 180, 0.65)', stroke: 'rgba(200, 160, 100, 0.8)' },
+                    { body: 'rgba(100, 150, 255, 0.65)', stroke: 'rgba(60, 100, 180, 0.8)' }
+                ];
+                enemyObj._ghostColors = colors[Math.floor(Math.random() * colors.length)];
+            }
+            bodyColor = enemyObj._ghostColors.body;
+            strokeColor = enemyObj._ghostColors.stroke;
+        }
 
         context.save();
         context.translate(x, y);
 
-        // --- 修改后的核心函数：填充与描边一体化 ---
-        const drawFacePath = (radius, sqVal) => {
-            context.beginPath();
-            // 1. 顶部圆弧
-            context.arc(cx, cy - radius * 0.12, radius, Math.PI, 0, false);
-            // 2. 右侧曲线
-            context.bezierCurveTo(
-                cx + radius * 0.88, cy + radius * 0.45,
-                cx + radius * sqVal, cy + radius * 1.0,
-                cx, cy + radius * 1.0
-            );
-            // 3. 左侧曲线 (严格镜像右侧数值：0.88 和 0.45)
-            context.bezierCurveTo(
-                cx - radius * sqVal, cy + radius * 1.0,
-                cx - radius * 0.88, cy + radius * 0.45,
-                cx - radius, cy - radius * 0.12
-            );
-            context.closePath();
+        const cx = 0;
+        // --- Y轴核心调整 ---
+        const baseHeadCY = 10 * scale;      // 目标：125 -> 10 (减少了 115)
+        const bodyBottom = 95 * scale;      // 同步减少：210 - 115 = 95
+        const headR = 82 * scale;
+        const footLen = 32 * scale;
+        const fHW = 24 * scale;
 
-            // 先填充
-            context.fillStyle = bodyColor;
-            context.fill();
+        // 波浪动画高度和频率
+        const waveHeight = 10 * scale;
+        const t = animationTimer * 3;
+        const leftWave = Math.sin(t) * waveHeight;
+        const middleWave = Math.sin(t - 1.0) * waveHeight;
+        const rightWave = Math.sin(t - 2.0) * waveHeight;
 
-            // 后描边 (这样描边会刚好贴在填充边缘，且一半宽度向内，一半向外)
-            context.strokeStyle = strokeColor;
-            context.lineWidth = 10 * scale; // 调整线宽
-            context.lineJoin = 'round';
-            context.stroke();
+        // 辅助函数：绘制脚/触手
+        const drawFoot = (fcx, tipY) => {
+            const lx = fcx - fHW;
+            const rx = fcx + fHW;
+            // 注意这里的 bodyBottom 已经自动使用了新的 95 值
+            context.bezierCurveTo(lx, bodyBottom + footLen * 0.2, lx, tipY, lx, tipY);
+            context.arc(fcx, tipY, fHW, Math.PI, 0, true);
+            context.bezierCurveTo(rx, tipY, rx, bodyBottom + footLen * 0.2, rx, bodyBottom);
         };
 
-        // 辅助函数：绘制眼睛 (同步修复了内部路径对称性)
-        const drawEye = (ex, ey, eyeR, side, fillCol, strokeCol, innerFill) => {
-            context.save();
-            context.translate(ex, ey + 10 * scale);
-            context.rotate(side * 0.9);
+        const tentacleT = animationTimer * 2.5;
+        const wobbles = [
+            Math.sin(tentacleT) * 6 * scale,
+            Math.sin(tentacleT + 2) * 6 * scale,
+            Math.sin(tentacleT + 4) * 6 * scale
+        ];
 
-            const drawSingleEyePath = (rVal) => {
-                context.beginPath();
-                context.arc(0, -rVal * 0.1, rVal, Math.PI, 0, false);
-                context.bezierCurveTo(rVal, rVal * 0.52, rVal * 0.35, rVal * 1.05, 0, rVal * 1.05);
-                context.bezierCurveTo(-rVal * 0.35, rVal * 1.05, -rVal, rVal * 0.52, -rVal, -rVal * 0.1);
-                context.closePath();
+        const lx = cx - headR;
+        const rx = cx + headR;
+
+        context.beginPath();
+        context.moveTo(lx, bodyBottom);
+
+        // 1. 绘制三只脚
+        drawFoot(cx - headR + fHW, bodyBottom + footLen + wobbles[0]);
+        // 这里的 Y 偏移也跟着 bodyBottom 联动，无需额外手动改动逻辑
+        context.bezierCurveTo(cx - 40 * scale, bodyBottom - 12 * scale, cx - 20 * scale, bodyBottom - 12 * scale, cx - fHW, bodyBottom);
+
+        drawFoot(cx, bodyBottom + footLen + wobbles[1]);
+        context.bezierCurveTo(cx + 20 * scale, bodyBottom - 12 * scale, cx + 40 * scale, bodyBottom - 12 * scale, cx + headR - fHW * 3 + fHW, bodyBottom);
+
+        drawFoot(cx + headR - fHW, bodyBottom + footLen + wobbles[2]);
+
+        // 2. 绘制头部（基于新的 baseHeadCY）
+        context.lineTo(rx, bodyBottom);
+        context.lineTo(rx, baseHeadCY + rightWave);
+
+        context.bezierCurveTo(
+            rx, baseHeadCY - headR + rightWave,
+            cx + 10 * scale, baseHeadCY - headR + middleWave,
+            cx, baseHeadCY - headR + middleWave
+        );
+        context.bezierCurveTo(
+            cx - 10 * scale, baseHeadCY - headR + middleWave,
+            lx, baseHeadCY - headR + leftWave,
+            lx, baseHeadCY + leftWave
+        );
+
+        // 3. 闭合路径 (bodyBottom 已经变小，此处自动向上移动)
+        context.lineTo(lx, bodyBottom - 10 * scale);
+        context.closePath();
+
+        // 渲染样式
+        context.fillStyle = bodyColor;
+        context.fill();
+        context.strokeStyle = strokeColor;
+        context.lineWidth = 8 * scale;
+        context.lineJoin = 'round';
+        context.lineCap = 'round';
+        context.stroke();
+
+        // 4. 绘制眼睛/花纹（跟随新的头部高度）
+        context.beginPath();
+        context.ellipse(cx, baseHeadCY + middleWave - 5 * scale, 36 * scale, 18 * scale, 0, 0, Math.PI * 2);
+        context.fillStyle = 'rgba(160, 145, 40, 0.3)';
+        ctx.fill();
+
+        context.restore();
+    }
+    drawAsteroid(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        const scale = scaledSize / 110;
+        const baseRadius = 35 * scale;
+        const numPoints = 12;
+
+        // 2. 颜色定义
+        let bodyColor, darkColor, craterColor;
+        if (isFriendly) {
+            bodyColor = '#c8a830';
+            darkColor = '#FFD700';
+            craterColor = 'rgba(100, 80, 20, 0.7)';
+        } else {
+            bodyColor = '#8B7355';
+            darkColor = '#5C4033';
+            craterColor = 'rgba(45, 35, 25, 0.7)';
+        }
+
+        // 3. 数据初始化（修正了括号闭合问题）
+        if (!enemyObj._asteroidCache) {
+            enemyObj._asteroidCache = {
+                points: [],
+                craters: []
             };
 
-            // 外眼
-            drawSingleEyePath(eyeR);
-            context.fillStyle = fillCol;
+            // A. 生成不规则轮廓点
+            const roughness = 0.22;
+            for (let i = 0; i < numPoints; i++) {
+                let offset = 1 + (Math.random() - 0.5) * 2 * roughness;
+                if (Math.random() < 0.2) offset += 0.15;
+                enemyObj._asteroidCache.points.push(baseRadius * offset);
+            }
+
+            // B. 生成固定坑洞
+            const numCraters = 4 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < numCraters; i++) {
+                const dist = baseRadius * 0.6 * Math.sqrt(Math.random());
+                const angle = Math.random() * Math.PI * 2;
+                enemyObj._asteroidCache.craters.push({
+                    x: Math.cos(angle) * dist,
+                    y: Math.sin(angle) * dist,
+                    r: baseRadius * (0.08 + Math.random() * 0.12),
+                    ecc: 0.5 + Math.random() * 0.5,
+                    angle: Math.random() * Math.PI
+                });
+            }
+        } // <--- 之前漏掉的初始化块闭合括号
+
+        const cache = enemyObj._asteroidCache;
+
+        // 4. 绘制开始
+        context.save();
+        context.translate(x, y);
+        context.rotate(animationTimer * 0.8 + angleToPlayer);
+
+        // --- A. 绘制主体形状 ---
+        context.beginPath();
+        for (let i = 0; i < numPoints; i++) {
+            const angle = (i / numPoints) * Math.PI * 2;
+            const r = cache.points[i];
+            const px = Math.cos(angle) * r;
+            const py = Math.sin(angle) * r;
+            if (i === 0) context.moveTo(px, py);
+            else context.lineTo(px, py);
+        }
+        context.closePath();
+
+        // --- C. 绘制主体描边（最后绘制，覆盖在坑洞边缘之上，保持外轮廓干净） ---
+        context.strokeStyle = darkColor;
+        context.lineWidth = baseRadius / 2;
+        context.lineJoin = 'round';
+        context.stroke();
+
+        // 先填充
+        context.fillStyle = bodyColor;
+        context.fill();
+
+        // --- B. 绘制固定坑洞（在描边之前绘制，防止遮挡外边框） ---
+        for (const crater of cache.craters) {
+            context.beginPath();
+            context.ellipse(
+                crater.x, crater.y,
+                crater.r, crater.r * crater.ecc,
+                crater.angle, 0, Math.PI * 2
+            );
+            context.fillStyle = craterColor;
             context.fill();
-            context.strokeStyle = strokeCol;
-            context.lineWidth = 4 * scale;
+
+        }
+
+        context.restore();
+    }
+    drawNeutronStar(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        // 1. 基础参数定义
+        const scale = scaledSize / 110;
+        const coreRadius = 15 * scale; // 中子星核心非常小但致密
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+
+        // 2. 颜色方案
+        const colorScheme = isFriendly ? {
+            core: '#FFFFFF',
+            glow: 'rgba(255, 215, 0, 0.6)',
+            jet: 'rgba(255, 255, 200, 0.4)',
+            ring: 'rgba(200, 150, 0, 0.3)'
+        } : {
+            core: '#E0F7FF',
+            glow: 'rgba(0, 150, 255, 0.5)',
+            jet: 'rgba(150, 200, 255, 0.3)',
+            ring: 'rgba(100, 100, 255, 0.3)'
+        };
+
+        context.save();
+        context.translate(x, y);
+
+        // 中子星本体的高速旋转感（通过动画计时器）
+        const rotation = animationTimer * 2.0;
+
+        // --- A. 绘制磁轴辐射束 (Relativistic Jets) ---
+        // 辐射束通常沿磁极喷射，这里让它随时间轻微摆动
+        const jetSwing = Math.sin(animationTimer * 0.5) * 0.1;
+        context.save();
+        context.rotate(angleToPlayer + jetSwing); // 辐射束方向可以指向玩家或固定方向
+
+        const jetLength = 200 * scale;
+        const jetWidth = 10 * scale;
+        const jetGradient = context.createLinearGradient(0, -jetLength, 0, jetLength);
+        jetGradient.addColorStop(0, 'transparent');
+        jetGradient.addColorStop(0.5, colorScheme.jet);
+        jetGradient.addColorStop(1, 'transparent');
+
+        context.fillStyle = jetGradient;
+        // 绘制穿过核心的长条辐射束
+        context.fillRect(-jetWidth/2, -jetLength, jetWidth, jetLength * 2);
+        context.restore();
+
+        // --- B. 绘制吸积盘/引力环 (Accretion Rings) ---
+        for (let i = 1; i <= 2; i++) {
+            context.save();
+            context.rotate(rotation * (i === 1 ? 1 : -0.7));
+            context.scale(1, 0.3); // 压扁效果产生透视感
+            context.beginPath();
+            context.arc(0, 0, coreRadius * (2 + i * 1.5), 0, Math.PI * 2);
+            context.strokeStyle = colorScheme.ring;
+            context.lineWidth = 5 * scale;
             context.stroke();
-
-            // 内眼
-            drawSingleEyePath(eyeR * 0.8);
-            context.fillStyle = innerFill;
-            context.fill();
-
             context.restore();
-        };
+        }
 
-        const drawAntenna = (side) => {
-            const baseX = side * 46 * scale;
-            const baseY = cy - 105 * scale;
-            const cpX = side * 85 * scale;
-            const cpY = cy - 208 * scale;
-            const endX = side * 108 * scale;
-            const endY = cy - 148 * scale;
+        // --- C. 绘制外围强光晕 (Atmosphere/Glow) ---
+        const glow = context.createRadialGradient(0, 0, coreRadius, 0, 0, coreRadius * 4);
+        glow.addColorStop(0, colorScheme.glow);
+        glow.addColorStop(1, 'transparent');
 
-            context.beginPath();
-            context.moveTo(baseX, baseY);
-            context.quadraticCurveTo(cpX, cpY, endX, endY);
-            context.strokeStyle = strokeColor;
-            context.lineWidth = 14 * scale;
-            context.lineCap = 'round';
-            context.stroke();
-        };
+        context.fillStyle = glow;
+        context.beginPath();
+        context.arc(0, 0, coreRadius * 4, 0, Math.PI * 2);
+        context.fill();
 
-        const drawSmile = () => {
-            context.beginPath();
-            context.arc(cx, cy + 62 * scale, 15 * scale, 0.1 * Math.PI, 0.9 * Math.PI);
-            context.strokeStyle = mouthColor;
-            context.lineWidth = 6 * scale;
-            context.lineCap = 'round';
-            context.stroke();
-        };
+        // --- D. 绘制致密核心 (The Core) ---
+        // 核心由于极高引力，看起来应该是完美的球形
+        context.beginPath();
+        context.arc(0, 0, coreRadius, 0, Math.PI * 2);
+        context.fillStyle = colorScheme.core;
 
-        // 1. 绘制身体（包含自动贴合的描边）
-        drawFacePath(r, sq);
-
-        // 2. 绘制触角
-        drawAntenna(-1);
-        drawAntenna(1);
-
-        // 3. 绘制眼睛
-        drawEye(cx - 44 * scale, cy - 12 * scale, 36 * scale, -1, eyeColor, strokeColor, eyeInnerColor);
-        drawEye(cx + 44 * scale, cy - 12 * scale, 36 * scale, 1, eyeColor, strokeColor, eyeInnerColor);
-
-        // 4. 绘制嘴巴
-        drawSmile();
+        // 给核心加一点阴影模拟发光感
+        context.shadowBlur = 15 * scale;
+        context.shadowColor = colorScheme.glow;
+        context.fill();
 
         context.restore();
     }
@@ -20982,6 +21549,14 @@ class EnemyDrawer {
             this.drawUFO(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Alien") {
             this.drawAlien(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "GraveStone") {
+            this.drawGraveStone(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Ghost") {
+            this.drawGhost(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Asteroid") {
+            this.drawAsteroid(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "NeutronStar") {
+            this.drawNeutronStar(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
 
         // ========== 未知类型使用默认绘制 ==========
@@ -21400,11 +21975,37 @@ class RedeemSystem {
         return false;
     }
 
-    // 打开兑换码界面
+    // 在 open() 方法中
     open() {
         this.inputVisible = true;
         this.inputText = '';
-        this.inputActive = false;
+        this.inputActive = true;
+        // 延时确保 DOM 渲染后再聚焦
+        setTimeout(() => {
+            const input = document.getElementById('redeem-input');
+            if (input) input.focus();
+            else {
+                // 如果还没有真实 input 元素，可以临时创建一个
+                this.createTempInput();
+            }
+        }, 100);
+    }
+
+    createTempInput() {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.style.position = 'fixed';
+        input.style.top = '-100px';
+        input.style.left = '0';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.focus();
+        input.addEventListener('blur', () => {
+            document.body.removeChild(input);
+        });
+        input.addEventListener('input', (e) => {
+            this.inputText = e.target.value;
+        });
     }
 }
 // ==================== Shop System ====================
@@ -25801,7 +26402,7 @@ class Enemy {
         this.attackInterval = 100;
         this.lastAttackTimePerTarget = new Map();
         this.globalAttackCooldown = 0;
-        this.globalAttackCooldownMax = 100;
+        this.globalAttackCooldownMax = 150;
         this.lastDamageDisplayTime = 0;
         this.damageDisplayCooldown = 300; // 0.3秒冷却
         this.lastSpawnTime = 0;
@@ -25819,7 +26420,10 @@ class Enemy {
             this.triggered20 = false;
             this.triggeredDeath = false;
         }
-
+// 在 Enemy 构造函数中，设置 type 后添加
+        if (enemyType === "Ghost"|| enemyType === "GraveDigger") {
+            this.noCollision = true;  // 标记幽灵不参与物理碰撞
+        }
         if (enemyType === "HelHive") {
             this.triggered80 = false;
             this.triggered60 = false;
@@ -25842,6 +26446,13 @@ class Enemy {
             this.triggered40 = false;
             this.triggered20 = false;
             this.enemies = null;
+        }
+        // 在构造函数中，找到其他触发器变量的位置
+        if (enemyType === "StemCell") {
+            this.triggered80 = false;  // 80% 血量触发
+            this.triggered60 = false;  // 50% 血量触发
+            this.triggered40 = false;
+            this.triggered20 = false;
         }
         if (enemyType === "Shipwreck") {
             this.triggered80 = false;
@@ -25999,10 +26610,10 @@ class Enemy {
             "Epic": 54,
             "Legendary": 405,
             "Mythic": 2430,
-            "Ultra": 4452,
-            "Super": 20574,
-            "Omega": 82510,
-            "Eternal": 129830
+            "Ultra": 10240,
+            "Super": 25574,
+            "Omega": 202510,
+            "Eternal": 659830
         };
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
         const levelHealthMultiplier = 1 + (this.level - 1) * 0.01;
@@ -26017,7 +26628,7 @@ class Enemy {
             "Mythic": 243.0,
             "Ultra": 729.0,
             "Super": 2187.0,
-            "Omega": 7561.0,
+            "Omega": 6561.0,
             "Eternal": 19683.0
         };
         const rarityAttackMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0;
@@ -26172,6 +26783,7 @@ class Enemy {
             "HelHornet":     { damage: 3, duration: 2500, init: 0.5, ramp: 1.8 },
             "HelBeekeeper":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
             "HelDigger":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.2 },
+            "GraveDigger":   { damage: 80, duration: 2000, init: 0.5, ramp: 2.2 },
         };
 
         const flameCfg = FLAME_STATS[enemyType];
@@ -26724,8 +27336,8 @@ class Enemy {
             case "UFO":          return [2000,  38, 140, 20000, 50];
             case "Star":         return [2000, 50, 0,  30000, 50];
             case "Asteroid":     return [300,  25, 100,  700,  60];
-            case "Ghost":         return [100, 25, 80,  100, 10];
-            case "GraveStone":     return [1000,  25, 0,  17000, 15];
+            case "Ghost":         return [150, 25, 80,  100, 5];
+            case "GraveStone":     return [2000,  40, 0,  17000, 65];
             case "SpacetimeTunnel": return [1, 60, 0, 0, 0];
             case "ManHole": return [900, 50, 0, 15000, 50];
             case "Fly": return [25, 24, 60, 200, 10];
@@ -26733,12 +27345,12 @@ class Enemy {
             case "Roach": return [350, 28, 130, 500, 120];
             case "QueenBee": return [350, 26, 100, 500, 100];
             case "PooStorm": return [600, 22, 40 + Math.random() * 10, 300, 100];
-            case "TrashDigger": return [230, 25, 100, 550, 190];
+            case "TrashDigger": return [230, 25, 100, 550, 182];
             case "FrostDigger": return [120, 26, 80, 550, 200];
-            case "Digger": return [180, 28, 120, 600, 155];
-            case "MudDigger": return [300, 30, 70, 700, 140];
+            case "Digger": return [180, 28, 120, 600, 150];
+            case "MudDigger": return [300, 30, 70, 700, 135];
             case "Virus": return [50, 22, 0, 400, 10];
-            case "Biologist": return [210, 25, 110, 700, 180];
+            case "Biologist": return [200, 25, 110, 700, 180];
             case "Beekeeper": return [80, 25, 100, 800, 220];
             case "Square": return [1000, 25, 10, 6000, 500];
             case "Barnacle": return [400, 25, 1, 10000, 20];
@@ -26772,6 +27384,8 @@ class Enemy {
             case "ToxicDragon": return [150, 22, 110, 700, 40];
             case "FireStorm": return [180, 22, 80, 400, 60];
             case "HelQueenBee": return [180, 20, 120, 400, 100];
+            case "GraveDigger": return [260, 28, 90, 300, 20];
+            case "AlienDigger": return [500, 28, 90, 300, 200];
             default: return [100, 20, 60, 10, 40];
         }
     }
@@ -27072,7 +27686,41 @@ class Enemy {
             enemies.push(fly);
         }
     }
+// 生成白细胞
+    spawnWhiteBloodCells(enemies, count = 2) {
+        if (this.isDead || !enemies) return;
 
+        const baseX = this.physicsBody.position.x;
+        const baseY = this.physicsBody.position.y;
+
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const spawnX = Math.max(50, Math.min(WORLD_WIDTH - 50, baseX + Math.cos(angle) * distance));
+            const spawnY = Math.max(50, Math.min(WORLD_HEIGHT - 50, baseY + Math.sin(angle) * distance));
+
+            // 白细胞稀有度比 StemCell 低一级
+            let whiteCellRarity = this.rarity;
+            const rarityList = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+            const currentIndex = rarityList.indexOf(this.rarity);
+            if (currentIndex > 0) {
+                whiteCellRarity = rarityList[currentIndex];
+            }
+
+            const whiteCell = new Enemy("WhiteBloodCell", spawnX, spawnY, this.level, whiteCellRarity);
+            whiteCell.spawnTime = Date.now();
+            whiteCell.spawnProtection = 1000;
+            whiteCell.isSpawning = true;
+            whiteCell.isFriendly = this.isFriendly;  // 继承友方状态
+
+            enemies.push(whiteCell);
+
+            // 显示提示文字（可选）
+            if (this.gameInstance && this.gameInstance.addDamageNumber) {
+                this.gameInstance.addDamageNumber(spawnX, spawnY, "🩸 生成白细胞", "heal");
+            }
+        }
+    }
     spawnRat(enemies) {
         if (this.isDead || !enemies) return;
 
@@ -27567,7 +28215,7 @@ class Enemy {
             meleeDamage = finalDamage;
 
             // 毒伤触发（只有头部）
-            if (!isSegment && this.isPoisonous && !this.isFriendly && this.gameInstance?.poisonManager) {
+            if (!isSegment && this.isPoisonous && this.gameInstance?.poisonManager) {
                 this.gameInstance.poisonManager.applyPoison(
                     target,
                     this,
@@ -27579,7 +28227,7 @@ class Enemy {
             }
 
             // 火焰触发（只有头部）
-            if (!isSegment && this.isFlame && !this.isFriendly && this.gameInstance?.flameManager) {
+            if (!isSegment && this.isFlame && this.gameInstance?.flameManager) {
                 this.gameInstance.flameManager.applyFlame(
                     target,
                     this,
@@ -28325,6 +28973,32 @@ class Enemy {
             if (healthPercent <= 0.2 && !this.triggered20) {
                 this.triggered20 = true;
                 this.spawnHelBeeAndHelHornet(enemies);
+            }
+        }
+         // HelHive 逻辑 - 血量触发生成 HelBee + HelHornet
+        if (this.type === "StemCell" && !this.isSpawning && !this.isDead) {
+            const healthPercent = this.health / this.maxHealth;
+
+            if (!enemies) {
+                console.log(`❌ HelHive: enemies 参数为 null`);
+                return false;
+            }
+
+            if (healthPercent <= 0.8 && !this.triggered80) {
+                this.triggered80 = true;
+                this.spawnWhiteBloodCells(enemies);
+            }
+            if (healthPercent <= 0.6 && !this.triggered60) {
+                this.triggered60 = true;
+                this.spawnWhiteBloodCells(enemies);
+            }
+            if (healthPercent <= 0.4 && !this.triggered40) {
+                this.triggered40 = true;
+                this.spawnWhiteBloodCells(enemies);
+            }
+            if (healthPercent <= 0.2 && !this.triggered20) {
+                this.triggered20 = true;
+                this.spawnWhiteBloodCells(enemies);
             }
         }
         // 下水道井盖逻辑
@@ -29160,10 +29834,10 @@ class Dummy extends Enemy {
             "Epic": 1.6,
             "Legendary": 1.8,
             "Mythic": 2.8,
-            "Ultra": 4.0,
-            "Super": 8.4,
-            "Omega": 12.0,
-            "Eternal": 15.0
+            "Ultra": 3.3,
+            "Super": 5.4,
+            "Omega": 7.5,
+            "Eternal": 10.0
         };
 
         // 覆盖属性
@@ -30323,51 +30997,51 @@ class Petal {
             console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
         }
     }
-            // 在 Petal 类中添加
     tryBreakBubble(dt) {
         const currentItem = this.getCurrentItem();
         if (!currentItem || currentItem.type !== "Bubble") return;
+
+        // 破碎或重载中不能破碎
         if (this.isBroken || this.isReloading) return;
 
-        // 检查玩家是否按住了 Shift 键
-        if (this.player && this.player.contractMode && !this._isBreaking) {
-            // 防止重复触发
-            this._isBreaking = true;
+        // ✅ 关键：检查收缩模式，每帧都可以触发
+        if (this.player && this.player.contractMode) {
+            // 防止同一帧多次触发（但不同帧可以再次触发）
+            if (this._breakingThisFrame) return;
+            this._breakingThisFrame = true;
 
-            // 根据稀有度计算移动距离
+            // 延迟重置标志（下一帧可以再次破碎）
+            setTimeout(() => { this._breakingThisFrame = false; }, 160);
+
+            // 执行破碎逻辑...
             const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
             const baseDistance = 40;
             const totalDistance = baseDistance + Math.log(rarityMultiplier) * 30;
 
-            // 计算方向：从 Bubble 指向玩家（玩家被弹开的方向）
             const dx = this.worldX - this.player.physicsBody.position.x;
             const dy = this.worldY - this.player.physicsBody.position.y;
             const dist = Math.hypot(dx, dy);
 
             if (dist > 0.01) {
-                const dirX = -dx / dist;  // 远离 Bubble 的方向
+                const dirX = -dx / dist;
                 const dirY = -dy / dist;
 
-                // 目标位置
                 const startX = this.player.physicsBody.position.x;
                 const startY = this.player.physicsBody.position.y;
                 const targetX = startX + dirX * totalDistance;
                 const targetY = startY + dirY * totalDistance;
 
-                // 边界限制
                 const finalX = Math.max(50, Math.min(WORLD_WIDTH - 50, targetX));
                 const finalY = Math.max(50, Math.min(WORLD_HEIGHT - 50, targetY));
 
-                // 平滑移动动画
                 const startTime = Date.now();
-                const duration = 150; // 毫秒
+                const duration = 150;
                 const player = this.player;
                 const gameInst = this.player.gameInstance;
 
                 const animate = () => {
                     const elapsed = Date.now() - startTime;
                     const progress = Math.min(1, elapsed / duration);
-                    // 缓动函数 easeOutCubic
                     const easeProgress = 1 - Math.pow(1 - progress, 3);
 
                     player.physicsBody.position.x = startX + (finalX - startX) * easeProgress;
@@ -30381,23 +31055,19 @@ class Petal {
                     if (progress < 1) {
                         requestAnimationFrame(animate);
                     } else {
-                        // 动画完成，破碎花瓣
                         this.health = 0;
                         this.durability = 0;
                         this.isBroken = true;
                         this.startReload();
-                        this._isBreaking = false;
                     }
                 };
 
                 requestAnimationFrame(animate);
             } else {
-                // 距离为0的情况，直接破碎
                 this.health = 0;
                 this.durability = 0;
                 this.isBroken = true;
                 this.startReload();
-                this._isBreaking = false;
             }
         }
     }
@@ -30468,42 +31138,84 @@ class Petal {
         );
     }
     restoreMimic() {
-        console.log("🔄 restoreMimic START ==================");
-        console.log("Petal index:", this._petalIndex);
-        console.log("Has original data:", !!this.originalMimicData);
-        if (!this.originalMimicData) { console.log("❌ No original data to restore"); return false; }
-        if (!this.player) { console.log("❌ No player reference"); return false; }
-        if (!this.player.quickSlot) { console.log("❌ No quickSlot"); return false; }
+        console.log("🔄 尝试恢复 Mimic, 槽位:", this._petalIndex);
+
+        if (!this.player || !this.player.quickSlot) {
+            console.log("❌ 没有 player 或 quickSlot");
+            return false;
+        }
+
         const slotIndex = this._petalIndex;
-        console.log("Slot index:", slotIndex);
         if (slotIndex < 0 || slotIndex >= this.player.quickSlot.slots.length) {
-            console.log("❌ Invalid slot index:", slotIndex); return false;
+            console.log("❌ 无效槽位:", slotIndex);
+            return false;
         }
-        const mimicItem = this.player.quickSlot.slots[slotIndex];
-        console.log("Current item in slot:", mimicItem ? mimicItem.type : 'null');
-        console.log("Original data:", this.originalMimicData);
+
+        // ✅ 检查主栏和副栏
+        const mainItem = this.player.quickSlot.slots[slotIndex];
+        const secondaryItem = this.player.quickSlot.secondarySlots[slotIndex];
+
+        // 确定哪个槽位有变形的 Mimic
+        let mimicItem = null;
+        let isInMainSlot = false;
+
+        if (mainItem && (mainItem._originalMimicData || this._originalMimicData)) {
+            mimicItem = mainItem;
+            isInMainSlot = true;
+        } else if (secondaryItem && (secondaryItem._originalMimicData || this._originalMimicData)) {
+            mimicItem = secondaryItem;
+            isInMainSlot = false;
+        }
+
         if (!mimicItem) {
-            console.log("❌ No item in slot, creating new Mimic");
-            const newMimic = new Item(this.originalMimicData.type, this.originalMimicData.level, this.originalMimicData.rarity);
-            newMimic.durability = this.originalMimicData.durability;
-            newMimic.maxDurability = this.originalMimicData.maxDurability;
-            newMimic.reloadTime = this.originalMimicData.reloadTime;
-            newMimic.baseReloadTime = this.originalMimicData.baseReloadTime;
-            newMimic.armor = this.originalMimicData.armor;
-            this.player.quickSlot.slots[slotIndex] = newMimic;
-            console.log("✅ Created new Mimic in empty slot");
-        } else {
-            mimicItem.type = this.originalMimicData.type;
-            mimicItem.rarity = this.originalMimicData.rarity;
-            mimicItem.level = this.originalMimicData.level;
-            mimicItem.durability = this.originalMimicData.durability;
-            mimicItem.maxDurability = this.originalMimicData.maxDurability;
-            mimicItem.reloadTime = this.originalMimicData.reloadTime;
-            mimicItem.baseReloadTime = this.originalMimicData.baseReloadTime;
-            mimicItem.armor = this.originalMimicData.armor;
-            console.log(`✅ Restored to: ${mimicItem.type} (${mimicItem.rarity})`);
+            console.log("❌ 主栏和副栏都没有找到 Mimic 数据");
+            return false;
         }
-        this.updateFromQuickSlot(slotIndex);
+
+        // 尝试从多个来源获取原始数据
+        let originalData = this._originalMimicData ||
+                           mimicItem._originalMimicData ||
+                           this.player._mimicBackups?.[slotIndex] ||
+                           this.player.gameInstance?._mimicBackups?.[slotIndex];
+
+        if (!originalData) {
+            console.log("❌ 没有原始数据可恢复");
+            return false;
+        }
+
+        console.log("✅ 找到原始数据:", originalData);
+
+        // 恢复物品
+        mimicItem.type = originalData.type;
+        mimicItem.rarity = originalData.rarity;
+        mimicItem.level = originalData.level;
+        mimicItem.durability = originalData.durability;
+        mimicItem.maxDurability = originalData.maxDurability;
+        mimicItem.reloadTime = originalData.reloadTime;
+        mimicItem.baseReloadTime = originalData.baseReloadTime;
+        mimicItem.armor = originalData.armor;
+        mimicItem.isBroken = originalData.isBroken || false;
+
+        // 清除标记
+        this._originalMimicData = null;
+        this._isTransformedMimic = false;
+        mimicItem._originalMimicData = null;
+        mimicItem._isTransformedMimic = false;
+
+        if (this.player._mimicBackups) delete this.player._mimicBackups[slotIndex];
+        if (this.player.gameInstance?._mimicBackups) delete this.player.gameInstance._mimicBackups[slotIndex];
+
+        // ✅ 根据物品所在位置更新对应的花瓣
+        if (isInMainSlot) {
+            this.updateFromQuickSlot(slotIndex);
+        } else {
+            // 副栏的物品不需要更新花瓣，但需要刷新UI
+            if (this.player.gameInstance?.requestRedraw) {
+                this.player.gameInstance.requestRedraw();
+            }
+        }
+
+        console.log(`✅ Mimic 恢复: ${mimicItem.type} (${mimicItem.rarity}) 位置: ${isInMainSlot ? '主栏' : '副栏'}`);
         return true;
     }
     // 在 Petal 类的 update 方法中添加
@@ -30652,9 +31364,9 @@ class Petal {
             knockback = 500 + mult * 0.3;
         } else if (isFireBomb) {
             // 火焰炸弹：范围中，伤害中，附加燃烧效果
-            radius = 110 + mult * 0.5;
+            radius = 120 + mult * 0.5;
             damage = 20 * mult;
-            knockback = 180 + mult * 0.2;
+            knockback = 100 + mult * 0.1;
         } else if (isBubble) {
             radius = 100 + mult * 0.5;
             damage = 0.0 * mult;
@@ -30871,21 +31583,19 @@ class Petal {
         this.petalIndex = petalIndex;
 
         if (!this.player || !this.player.quickSlot) return;
+
         if (petalIndex < this.player.quickSlot.slots.length) {
             const item = this.player.quickSlot.slots[petalIndex];
 
-            // ✅ 关键修复：如果物品类型改变，清除旧召唤物并重置重载状态
+            // 关键修复：如果物品类型改变，清除旧召唤物并重置重载状态
             if (this.itemType && this.itemType !== (item?.type)) {
-
                 this._clearAllSummons();
-
-                // ✅ 重置重载状态
                 this.isReloading = false;
                 this.reloadCooldown = 0;
                 this.isBroken = false;
             }
 
-            // ✅ 如果槽位变空，清除召唤物并重置重载
+            // 如果槽位变空，清除召唤物并重置重载
             if (!item) {
                 if (this.itemType) {
                     this._clearAllSummons();
@@ -30899,7 +31609,6 @@ class Petal {
                 const isSameItem = this.itemType === item.type && this.rarity === item.rarity;
 
                 if (!isSameItem) {
-                    // ✅ 不同物品：重置重载状态
                     this.isReloading = false;
                     this.reloadCooldown = 0;
                     this.isBroken = false;
@@ -30933,13 +31642,10 @@ class Petal {
                 this.health = this.durability;
                 this.isBroken = item.isBroken || (this.health <= 0);
 
-                // ✅ 关键修复：使用新物品的重载时间，而不是继承旧的
                 this.baseReloadTime = item.baseReloadTime || 5000;
                 this.reloadTime = item.reloadTime || this.baseReloadTime;
 
-                // ✅ 如果物品没有损坏，确保重载状态正确
                 if (!this.isBroken && this.isReloading) {
-                    // 如果之前是重载状态但新物品不应该重载，强制重置
                     this.isReloading = false;
                     this.reloadCooldown = 0;
                 }
@@ -30964,36 +31670,23 @@ class Petal {
                 } else {
                     this.rotationSpeedBonus = 0;
                 }
-                // 在 Petal 类的 updateFromQuickSlot 方法中，针对 Bubble 特殊处理
+
                 if (item.type === "Bubble") {
                     const rarityReloadMap = {
-                        "Common": 1800,
-                        "Unusual": 1700,
-                        "Rare": 1600,
-                        "Epic": 1500,
-                        "Legendary": 1400,
-                        "Mythic": 1300,
-                        "Ultra": 1200,
-                        "Super": 1000,
-                        "Omega": 800,
-                        "Eternal": 200
+                        "Common": 1800, "Unusual": 1700, "Rare": 1600, "Epic": 1500,
+                        "Legendary": 1400, "Mythic": 1300, "Ultra": 1200,
+                        "Super": 1000, "Omega": 800, "Eternal": 200
                     };
                     this.baseReloadTime = rarityReloadMap[this.rarity] || 5000;
                     this.reloadTime = this.baseReloadTime;
                 }
+
                 if (item.type === "Antennae") {
                     this.hasAntennae = true;
                     const visionBonuses = {
-                        "Common": 0.1,
-                        "Unusual": 0.15,
-                        "Rare": 0.2,
-                        "Epic": 0.3,
-                        "Legendary": 0.4,
-                        "Mythic": 0.5,
-                        "Ultra": 0.6,
-                        "Super": 0.8,
-                        "Omega": 1.0,
-                        "Eternal": 1.4
+                        "Common": 0.1, "Unusual": 0.15, "Rare": 0.2, "Epic": 0.3,
+                        "Legendary": 0.4, "Mythic": 0.5, "Ultra": 0.6,
+                        "Super": 0.8, "Omega": 1.0, "Eternal": 1.4
                     };
                     this.visionBonus = visionBonuses[this.rarity] || 0.1;
                 }
@@ -31003,31 +31696,42 @@ class Petal {
                 this.isChromosome = (item.type === "Chromosome");
                 this.isSponge = (item.type === "Sponge");
 
-            const EGG_ITEMS = new Set([
-                // 原有蛋
-                "Egg", "Ant Egg", "Moon Egg",
-                "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
-                "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                "FireAntOvermind egg", "FireAntHole egg",
-                "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-                "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-                "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-                "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-                "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
-                "Bee egg", "Hive egg", "Beetle egg",
-                // 微观世界蛋
-                "Photon egg", "Electron egg", "ElectronCloud egg", "Proton egg", "Atom egg",
-                // 宇宙世界蛋
-                "BlackHole egg", "WhiteHole egg", "NeutronStar egg", "Star egg", "Asteroid egg",
-                "Alien egg", "UFO egg", "Ghost egg", "GraveStone egg",
-            ]);
-            this.isEggItem = EGG_ITEMS.has(item.type);
+                const EGG_ITEMS = new Set([
+                    "Egg", "Ant Egg", "Moon Egg",
+                    "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
+                    "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
+                    "FireAntOvermind egg", "FireAntHole egg",
+                    "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
+                    "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
+                    "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
+                    "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
+                    "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
+                    "Bee egg", "Hive egg", "Beetle egg",
+                    "Photon egg", "Electron egg", "ElectronCloud egg", "Proton egg", "Atom egg",
+                    "BlackHole egg", "WhiteHole egg", "NeutronStar egg", "Star egg", "Asteroid egg",
+                    "Alien egg", "UFO egg", "Ghost egg", "GraveStone egg",
+                ]);
+                this.isEggItem = EGG_ITEMS.has(item.type);
 
                 item.durability = this.durability;
                 item.maxDurability = this.maxDurability;
                 item.isBroken = this.isBroken;
                 item.reloadTime = this.reloadTime;
                 item.baseReloadTime = this.baseReloadTime;
+
+                // ✅ 从追踪器获取变形数据（用于显示）
+                const mimicData = this.player.quickSlot.getMimicData(petalIndex, true);
+                if (mimicData) {
+                    this._isTransformedMimic = true;
+                    this._originalMimicData = mimicData.originalData;
+                    this._mimicDisplayType = mimicData.displayType;
+                    console.log(`🎭 从追踪器恢复 Mimic 变形状态: 显示为 ${this._mimicDisplayType}`);
+                } else {
+                    this._isTransformedMimic = false;
+                    this._originalMimicData = null;
+                    this._mimicDisplayType = null;
+                }
+
                 return;
             }
         }
@@ -31448,7 +32152,9 @@ class Petal {
             this._updateExistingSummonedCreatures(dt);
             return;
         }
-
+        if (this.player && this.player.contractMode) {
+            this.tryBreakBubble(dt);
+        }
         const screenCenterX = WIDTH / 2;
         const screenCenterY = HEIGHT / 2;
 
@@ -32467,29 +33173,36 @@ class Petal {
 
     getCooldownRatio() { return this.attackCooldown / this.attackCooldownMax; }
 
+
     autoCopyWithMimic(mimicSlotIndex) {
         if (!this.player || !this.player.quickSlot) return;
+
         const targetSlotIndex = mimicSlotIndex + 1;
         if (targetSlotIndex >= this.player.quickSlot.slots.length) return;
+
         const targetItem = this.player.quickSlot.slots[targetSlotIndex];
         if (!targetItem) return;
+
         const mimicItem = this.player.quickSlot.slots[mimicSlotIndex];
+        if (!mimicItem) return;
+
+        // 保存原始数据
         const originalData = {
-            type: mimicItem.type, rarity: mimicItem.rarity, level: mimicItem.level,
-            durability: mimicItem.durability, maxDurability: mimicItem.maxDurability,
-            reloadTime: mimicItem.reloadTime, baseReloadTime: mimicItem.baseReloadTime,
-            armor: mimicItem.armor
+            type: mimicItem.type,
+            rarity: mimicItem.rarity,
+            level: mimicItem.level,
+            durability: mimicItem.durability,
+            maxDurability: mimicItem.maxDurability,
+            reloadTime: mimicItem.reloadTime,
+            baseReloadTime: mimicItem.baseReloadTime,
+            armor: mimicItem.armor,
+            isBroken: mimicItem.isBroken || false
         };
-        this._isTransformedMimic = true;
-        this._originalMimicData = originalData;
-        mimicItem._isTransformedMimic = true;
-        mimicItem._originalMimicData = originalData;
-        if (!this.player._mimicBackups) this.player._mimicBackups = {};
-        this.player._mimicBackups[mimicSlotIndex] = originalData;
-        if (this.player.gameInstance) {
-            if (!this.player.gameInstance._mimicBackups) this.player.gameInstance._mimicBackups = {};
-            this.player.gameInstance._mimicBackups[mimicSlotIndex] = originalData;
-        }
+
+        // ✅ 只使用追踪器，不设置物品上的标记
+        this.player.quickSlot.registerMimic(mimicSlotIndex, true, originalData, targetItem.type);
+
+        // 变形物品
         mimicItem.type = targetItem.type;
         mimicItem.level = targetItem.level;
         mimicItem.durability = targetItem.durability;
@@ -32497,10 +33210,19 @@ class Petal {
         mimicItem.reloadTime = targetItem.reloadTime;
         mimicItem.baseReloadTime = targetItem.baseReloadTime;
         mimicItem.armor = targetItem.armor;
-        console.log(`✨ Mimic 变形成功: ${mimicItem.rarity} ${mimicItem.type} (原始: ${originalData.type})`);
+
+        // ❌ 不再设置这些标记
+        // this._isTransformedMimic = true;
+        // this._originalMimicData = originalData;
+        // this._mimicDisplayType = targetItem.type;
+        // mimicItem._isTransformedMimic = true;
+        // mimicItem._originalMimicData = originalData;
+
+        console.log(`✨ Mimic 变形成功: 显示为 ${targetItem.type} (原始: ${originalData.type})`);
+
+        // 更新花瓣
         this.updateFromQuickSlot(mimicSlotIndex);
     }
-
     applyFrameDamageToEnemy(enemy) {
         if (this.isReloading || this.isBroken || !this.isInsideEnemy) return 0.0;
         if (this.frameDamageCooldown > 0) return 0.0;
@@ -34531,14 +35253,13 @@ class Player {
         return this._contractMode || false;
     }
 
+    // 在 Player 类中
     set contractMode(value) {
         this._contractMode = value;
-        // 通知所有花瓣更新状态
+        const targetRadius = value ? 15 : 35;
         for (const petal of this.petals) {
-            if (petal.getCurrentItem()?.type === "Bubble") {
-                // 触发破碎检查
-                petal.tryBreakBubble(0);
-            }
+            petal.targetRadius = targetRadius;
+            petal.radius = targetRadius;  // ✅ 立即设置半径，不用等平滑过渡
         }
     }
     // 添加护盾（由Shell物品调用）
@@ -43460,17 +44181,17 @@ class WorldMapGame {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
         ctx.fillRect(0, 0, W, H);
 
-        // 标题
+        // 标题 - 放在最顶部
         ctx.font = 'bold 48px Arial';
         ctx.fillStyle = '#ff4444';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('YOU DIED', W / 2, H / 4);
+        ctx.fillText('YOU DIED', W / 2, 80);  // 改为固定顶部位置
 
-        // 按钮区域
+        // 按钮区域 - 移到中间
         const btnWidth = 180;
         const btnHeight = 50;
-        const btnY = H - 100;
+        const btnY = H / 2 + 50;  // 中间偏下一点
         const continueBtnX = W / 2 - btnWidth - 20;
         const exitBtnX = W / 2 + 20;
 
@@ -43499,10 +44220,9 @@ class WorldMapGame {
         this.continueButtonRect = [continueBtnX, btnY, btnWidth, btnHeight];
         this.exitButtonRect = [exitBtnX, btnY, btnWidth, btnHeight];
 
-        // 绘制掉落物面板
+        // 绘制掉落物面板（位置需要相应调整）
         this.drawDeathDropPanel(ctx);
     }
-
     drawDeathDropPanel(ctx) {
         const W = ctx.canvas.width;
         const H = ctx.canvas.height;
