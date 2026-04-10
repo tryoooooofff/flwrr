@@ -6,7 +6,7 @@ export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
 //后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton egg+ 1 charge组成1 electronCloud egg...
 //可能增加设置菜单，控制UI界面和特效，碰撞箱显示等。增加日志---写更新内容
-
+//可能增加新地图error：所有生物使用黑白紫色
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -1506,6 +1506,7 @@ const ITEM_IMAGE_URLS = {
     "Firefly egg": "images/Firefly_egg.png",
     "TermiteHole egg": "images/TermiteHole_egg.png",
     "TermiteOvermind egg": "images/Termite_Overmind_egg.png",
+    "Compass": "images/compass.png",
     "SpiderCave egg": "images/SpiderCave_egg.png",
     "Relic": "images/relic.png",
     "Plank": "images/plank.png",
@@ -1576,6 +1577,7 @@ const ITEM_IMAGE_URLS = {
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000},
+    "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000},
     "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000},
     "Leaf": {base_attack:15, base_cooldown:180, healing:1, use_rarity_multiplier: true, base_reload_time:2500},
@@ -1587,7 +1589,7 @@ export const ITEM_STATS = {
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000},
-    "Corn": {base_attack:4, base_cooldown:250, durability_bonus:45, use_rarity_multiplier: true, base_reload_time:10000},
+    "Corn": {base_attack:5, base_cooldown:200, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:10000},
     "Yucca": {base_attack:10, base_cooldown:200, heal:2, use_rarity_multiplier: true, base_reload_time:1000},
     "Bomb": {base_attack:1, base_cooldown:500, is_bomb:true, use_rarity_multiplier: true, base_reload_time:3000},
     "Root": {base_attack:19, base_cooldown:500, knockback:0.3, use_rarity_multiplier: true, base_reload_time:1000},
@@ -1901,7 +1903,7 @@ export const ENEMY_DROP_TABLE = {
     "Mantis": ["Mantis egg", "Bur", "Pea"],
     "Firefly": ["Lightning", "Wing", "Firefly egg"],
     "TermiteHole": ["TermiteHole egg", "Magnet", "Soil"],
-    "TermiteOvermind": ["TermiteOvermind egg", "Tomato", "Soil"],
+    "TermiteOvermind": ["TermiteOvermind egg", "Tomato", "Soil","Compass"],
     "SpiderCave": ["Web","Iris", "SpiderCave egg","Rubber"],
     "TrashDigger": ["TrashDigger egg", "Poo", "Iris", "Cutter"],
     "PirateDigger": ["PirateDigger egg", "Coin", "Cutter", "Pearl"],
@@ -2067,8 +2069,8 @@ export function getItemArmorValue(itemType, rarity) {
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy","Ghost","ElectronCloud"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","UFO","Photon","Electron","Atom"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton","UFO"],
     "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest","NeutronStar"] // E级 - 最难打的Boss级生物
 };
@@ -10530,22 +10532,24 @@ class EnemyDrawer {
         const pupilRadius = 4 * viewScale * rarityFactor;  // 从5改为4
 
         // 判断是否愤怒（用于眼珠运动）
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 50) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -10734,23 +10738,24 @@ class EnemyDrawer {
         // 眼珠半径：相应缩小
         const pupilRadius = 4 * viewScale * rarityFactor;  // 从5改为4
 
-        // 判断是否愤怒（用于眼珠运动）
+
+    // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 50) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -11326,7 +11331,7 @@ class EnemyDrawer {
     // 2. 绘制头顶尖角
     ctx.fillStyle = TD;
     ctx.beginPath();
-    const sb = 15 * s;
+    const sb = 10 * s;
     ctx.moveTo(-sb, -H / 2 + 2 * s);
     ctx.lineTo(0, -H / 2 - 30 * s);
     ctx.lineTo(sb, -H / 2 + 2 * s);
@@ -13904,23 +13909,24 @@ class EnemyDrawer {
         // 使用TrashDigger的数值比例
         const eyeBaseY = -14 * viewScale * rarityFactor;
 
-        // 判断是否愤怒
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 110) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -14122,23 +14128,24 @@ class EnemyDrawer {
         const leftEyeX = -bodyRadius * 0.3; // 左眼X位置
         const rightEyeX = bodyRadius * 0.3; // 右眼X位置
 
-        // 判断是否愤怒
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 120) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -14418,24 +14425,16 @@ class EnemyDrawer {
         const bodyR = 32 * vf; // 身体半径
         const pR = 9 * vf;     // 眼罩/眼球半径
 
-        // --- 判断是否愤怒 ---
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
-                isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
-                }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
             }
+
         }
 
         // --- 计算眼珠偏移 ---
@@ -14648,22 +14647,24 @@ class EnemyDrawer {
         const leftEyeX = -10.5 * viewScale * rarityFactor;
         const rightEyeX = 10.5 * viewScale * rarityFactor;
 
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 100) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -14835,22 +14836,24 @@ class EnemyDrawer {
         const leftEyeX = -10.5 * viewScale * rarityFactor;
         const rightEyeX = 10.5 * viewScale * rarityFactor;
 
+
+        // 在 drawGraveDigger 方法中修改 isAngry 判断
         let isAngry = false;
         if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            const maxCooldown = 800;
 
-            if (attackCooldown > 0 && attackCooldown < maxCooldown) {
+            // 方法2：检查是否有目标（正在追逐玩家）
+            if (enemyObj.hasTarget === true) {
                 isAngry = true;
-            } else if (enemyObj.hasTarget === true) {
-                if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
-                    const vel = enemyObj.physicsBody.velocity;
-                    if (Math.abs(vel.x) > 5 || Math.abs(vel.y) > 5) {
-                        isAngry = true;
-                    }
+            }
+
+            // 方法3：检查速度（快速移动时表示愤怒）
+            if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+                const vx = enemyObj.physicsBody.velocity.x;
+                const vy = enemyObj.physicsBody.velocity.y;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > 110) {
+                    isAngry = true;
                 }
-            } else if (enemyObj.targetLockTimer && enemyObj.targetLockTimer > 0) {
-                isAngry = true;
             }
         }
 
@@ -19420,128 +19423,164 @@ class EnemyDrawer {
         return points;
     }
     // 在 EnemyDrawer 类中添加 GraveDigger 绘制方法
-    drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-        const scaledSize = size * viewScale;
-        if (scaledSize <= 0) return;
+// 在 EnemyDrawer 类中添加
+drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+    const scaledSize = size * viewScale;
+    if (scaledSize <= 0) return;
 
-        const isFriendly = enemyObj && enemyObj.isFriendly === true;
-        const rarity = enemyObj?.rarity || "Common";
+    const isFriendly = enemyObj && enemyObj.isFriendly === true;
+    const rarity = enemyObj?.rarity || "Common";
 
-        const raritySizeFactors = {
-            "Common": 0.7, "Unusual": 0.77, "Rare": 0.84, "Epic": 1.12,
-            "Legendary": 1.26, "Mythic": 1.96, "Ultra": 2.8, "Super": 5.88,
-            "Omega": 8.4, "Eternal": 10.5
-        };
+    const raritySizeFactors = {
+        "Common": 0.7, "Unusual": 0.77, "Rare": 0.84, "Epic": 1.12,
+        "Legendary": 1.26, "Mythic": 1.96, "Ultra": 2.8, "Super": 5.88,
+        "Omega": 8.4, "Eternal": 10.5
+    };
 
-        const rarityFactor = raritySizeFactors[rarity] || 0.7;
-        const vf = viewScale * rarityFactor;
-        const time = animationTimer;
+    const rarityFactor = raritySizeFactors[rarity] || 0.7;
+    const vf = viewScale * rarityFactor;
+    const time = animationTimer;
 
-        // --- 修改点：定义透明度变量 ---
-        const bodyAlpha = 0.7;  // 身体透明度
-        const innerAlpha = 0.5; // 内部亮部透明度（通常更透明一点层次感更好）
+    // 透明度定义
+    const bodyAlpha = 0.7;
+    const innerAlpha = 0.5;
 
-        let bodyColor, innerColor, strokeColor, eyeColor, pupilColor;
+    let bodyColor, innerColor, strokeColor, eyeColor, pupilColor, BLACK, WHITE;
 
-        if (isFriendly) {
-            bodyColor = `rgba(218, 165, 32, ${bodyAlpha})`;
-            innerColor = `rgba(255, 215, 0, ${innerAlpha})`;
-            strokeColor = '#B8860B';
-            eyeColor = '#1a1a1a';
-            pupilColor = '#FFFFFF';
-        } else {
-            bodyColor = `rgba(108, 103, 103, ${bodyAlpha})`;
-            innerColor = `rgba(74, 71, 71, ${innerAlpha})`;
-            strokeColor = '#2a2a2a';
-            eyeColor = '#141212';
-            pupilColor = '#ebe9e9';
-        }
-
-        const NUM_PTS = 20;
-        const tightIndices = [2, 3, 7, 8, 14, 15, 16];
-
-        const baseRadii = [];
-        for (let i = 0; i < NUM_PTS; i++) {
-            baseRadii.push((tightIndices.includes(i) ? 36 : 40) * vf);
-        }
-
-        const getBlobPoints = (cx, cy) => {
-            const floatX = Math.sin(time * 0.9) * 3 * vf;
-            const floatY = Math.sin(time * 1.2) * 4 * vf;
-            const points = [];
-            for (let i = 0; i < NUM_PTS; i++) {
-                const angle = (i / NUM_PTS) * Math.PI * 2;
-                const isTight = tightIndices.includes(i);
-                const amp = isTight ? 0.5 : 2.5;
-                const wave = Math.sin(time * 1.2 + i) * amp * vf;
-                const r = baseRadii[i] + wave;
-                points.push({
-                    x: cx + floatX + Math.cos(angle) * r,
-                    y: cy + floatY + Math.sin(angle) * r
-                });
-            }
-            return this.getConvexHull(points);
-        };
-
-        const cx = x;
-        const cy = y;
-
-        // 1. 绘制不规则外壳（保持原有透明）
-        const blobPoints = getBlobPoints(cx, cy);
-        context.beginPath();
-        context.moveTo(blobPoints[0].x, blobPoints[0].y); // 注意原代码这里的 pts 拼写建议检查
-        for (let i = 1; i < blobPoints.length; i++) {
-            context.lineTo(blobPoints[i].x, blobPoints[i].y);
-        }
-        context.closePath();
-        context.fillStyle = `rgba(20, 20, 20, 0.4)`;
-        context.fill();
-
-        // 2. 绘制核心身体 (现在支持透明了)
-        context.beginPath();
-        context.arc(cx, cy, 32 * vf, 0, Math.PI * 2);
-        context.fillStyle = bodyColor;
-        context.fill();
-
-        // 3. 内部亮部 (现在支持透明了)
-        context.beginPath();
-        context.arc(cx, cy, 29 * vf, 0, Math.PI * 2);
-        context.fillStyle = innerColor;
-        context.fill();
-
-        // 4. 眼睛（眼睛通常保持实色，否则会看不清，保持原样）
-        const eyeBaseY = cy - 8 * vf;
-        const leftEyeX = cx - 11 * vf;
-        const rightEyeX = cx + 11 * vf;
-        const eyeOffsetX = Math.sin(time * 2.0) * 1.4 * vf;
-        const eyeOffsetY = Math.cos(time * 2.5) * 1.4 * vf;
-
-        let isAngry = false;
-        if (enemyObj) {
-            const attackCooldown = enemyObj.attackCooldown || 0;
-            if (attackCooldown > 0 && attackCooldown < 800) isAngry = true;
-        }
-
-        context.fillStyle = eyeColor;
-        context.fillRect(leftEyeX - 4.5 * vf, eyeBaseY - 6.5 * vf, 9 * vf, 13 * vf);
-        context.fillRect(rightEyeX - 4.5 * vf, eyeBaseY - 6.5 * vf, 9 * vf, 13 * vf);
-
-        context.fillStyle = isAngry ? '#ff4444' : pupilColor;
-        context.fillRect(leftEyeX - 2 * vf + eyeOffsetX, eyeBaseY - 3 * vf + eyeOffsetY, 4 * vf, 6 * vf);
-        context.fillRect(rightEyeX - 2 * vf + eyeOffsetX, eyeBaseY - 3 * vf + eyeOffsetY, 4 * vf, 6 * vf);
-
-        // 5. 嘴巴
-        context.beginPath();
-        const mouthY = cy + 13 * vf;
-        if (!isAngry) {
-            context.arc(cx, mouthY, 8 * vf, 0.2 * Math.PI, 0.8 * Math.PI, false);
-        } else {
-            context.arc(cx, mouthY + 3 * vf, 10 * vf, 0.1 * Math.PI, 0.9 * Math.PI, false);
-        }
-        context.strokeStyle = strokeColor;
-        context.lineWidth = 2.5 * vf;
-        context.stroke();
+    if (isFriendly) {
+        bodyColor = `rgba(218, 165, 32, ${bodyAlpha})`;
+        innerColor = `rgba(255, 215, 0, ${innerAlpha})`;
+        strokeColor = '#B8860B';
+        eyeColor = '#1a1a1a';
+        pupilColor = '#FFFFFF';
+        BLACK = [0, 0, 0];
+        WHITE = [255, 255, 255];
+    } else {
+        bodyColor = `rgba(108, 103, 103, ${bodyAlpha})`;
+        innerColor = `rgba(74, 71, 71, ${innerAlpha})`;
+        strokeColor = '#2a2a2a';
+        eyeColor = '#141212';
+        pupilColor = '#ebe9e9';
+        BLACK = [0, 0, 0];
+        WHITE = [240, 240, 240];
     }
+
+    const NUM_PTS = 20;
+    const tightIndices = [2, 3, 7, 8, 14, 15, 16];
+
+    const baseRadii = [];
+    for (let i = 0; i < NUM_PTS; i++) {
+        baseRadii.push((tightIndices.includes(i) ? 36 : 40) * vf);
+    }
+
+    const getBlobPoints = (cx, cy) => {
+        const floatX = Math.sin(time * 0.9) * 3 * vf;
+        const floatY = Math.sin(time * 1.2) * 4 * vf;
+        const points = [];
+        for (let i = 0; i < NUM_PTS; i++) {
+            const angle = (i / NUM_PTS) * Math.PI * 2;
+            const isTight = tightIndices.includes(i);
+            const amp = isTight ? 0.5 : 2.5;
+            const wave = Math.sin(time * 1.2 + i) * amp * vf;
+            const r = baseRadii[i] + wave;
+            points.push({
+                x: cx + floatX + Math.cos(angle) * r,
+                y: cy + floatY + Math.sin(angle) * r
+            });
+        }
+        return this.getConvexHull(points);
+    };
+
+    const cx = x;
+    const cy = y;
+    const bodyY = y;
+
+    // 1. 绘制不规则外壳
+    const blobPoints = getBlobPoints(cx, cy);
+    context.beginPath();
+    context.moveTo(blobPoints[0].x, blobPoints[0].y);
+    for (let i = 1; i < blobPoints.length; i++) {
+        context.lineTo(blobPoints[i].x, blobPoints[i].y);
+    }
+    context.closePath();
+    context.fillStyle = `rgba(20, 20, 20, 0.4)`;
+    context.fill();
+
+    // 2. 绘制核心身体
+    context.beginPath();
+    context.arc(cx, cy, 32 * vf, 0, Math.PI * 2);
+    context.fillStyle = bodyColor;
+    context.fill();
+
+    // 3. 内部亮部
+    context.beginPath();
+    context.arc(cx, cy, 29 * vf, 0, Math.PI * 2);
+    context.fillStyle = innerColor;
+    context.fill();
+
+    // 4. 眼睛
+    const eyeBaseY = cy - 8 * vf;
+    const leftEyeX = cx - 11 * vf;
+    const rightEyeX = cx + 11 * vf;
+    const eyeOffsetX = Math.sin(time * 2.0) * 1.4 * vf;
+    const eyeOffsetY = Math.cos(time * 2.5) * 1.4 * vf;
+
+    // 在 drawGraveDigger 方法中修改 isAngry 判断
+    let isAngry = false;
+    if (enemyObj) {
+
+        // 方法2：检查是否有目标（正在追逐玩家）
+        if (enemyObj.hasTarget === true) {
+            isAngry = true;
+        }
+
+        // 方法3：检查速度（快速移动时表示愤怒）
+        if (enemyObj.physicsBody && enemyObj.physicsBody.velocity) {
+            const vx = enemyObj.physicsBody.velocity.x;
+            const vy = enemyObj.physicsBody.velocity.y;
+            const speed = Math.sqrt(vx * vx + vy * vy);
+            if (speed > 50) {
+                isAngry = true;
+            }
+        }
+    }
+
+    context.fillStyle = eyeColor;
+    context.fillRect(leftEyeX - 4.5 * vf, eyeBaseY - 6.5 * vf, 9 * vf, 13 * vf);
+    context.fillRect(rightEyeX - 4.5 * vf, eyeBaseY - 6.5 * vf, 9 * vf, 13 * vf);
+
+    context.fillStyle = isAngry ? pupilColor : pupilColor;
+    context.fillRect(leftEyeX - 2 * vf + eyeOffsetX, eyeBaseY - 3 * vf + eyeOffsetY, 4 * vf, 6 * vf);
+    context.fillRect(rightEyeX - 2 * vf + eyeOffsetX, eyeBaseY - 3 * vf + eyeOffsetY, 4 * vf, 6 * vf);
+
+    // 5. 嘴巴
+    context.save();
+    context.translate(x, bodyY);
+
+    context.strokeStyle = `rgb(${BLACK[0]}, ${BLACK[1]}, ${BLACK[2]})`;
+    context.lineWidth = Math.max(1, 2 * vf);
+    context.lineCap = 'round';
+
+    const bodyRadius = 35 * vf;
+    const mouthY = bodyRadius * 0.3;
+
+    if (!isAngry) {
+        // 微笑 - 上半椭圆
+        context.beginPath();
+        context.ellipse(0, mouthY, bodyRadius * 0.15, bodyRadius * 0.05, 0, 0, Math.PI, false);
+        context.stroke();
+    } else {
+        // 愤怒 - 下半椭圆
+        context.beginPath();
+            context.ellipse(0, mouthY + bodyRadius * 0.1,
+                bodyRadius * 0.18,  // 宽度更宽
+                bodyRadius * 0.14,  // 高度更高
+                0, Math.PI, 2 * Math.PI, false);
+            context.stroke();
+    }
+    context.restore();
+}
+
     // 辅助方法：凸包算法
     getConvexHull(points) {
         const sorted = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
@@ -21982,7 +22021,23 @@ class RedeemSystem {
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
-
+        this.addCode("BY5DRSR", [
+            { type: "Clover", rarity: "Super", count: 1 },
+            { type: "Atom egg", rarity: "Super", count: 1 },
+            { type: "Leaf", rarity: "Omega", count: 1 },
+            { type: "Digger egg", rarity: "Super", count: 2 },
+            { type: "BlackHole egg", rarity: "Super", count: 1 },
+            { type: "Dna", rarity: "Super", count: 1 },
+            { type: "Magnet", rarity: "Super", count: 1 },
+            { type: "Chromosome", rarity: "Super", count: 1 },
+            { type: "Cancer", rarity: "Super", count: 1 },
+            { type: "Antenna", rarity: "Super", count: 1 },
+            { type: "WhiteHole egg", rarity: "Super", count: 1 },
+            { type: "Golden Leaf", rarity: "Super", count: 1 },
+            { type: "Spider egg", rarity: "Omega", count: 1 },
+            { type: "Alien egg", rarity: "Super", count: 1 },
+             { stars: 2330000.0 }
+        ], 10);
 
         this.addCode("WAGE2", [
             { type: "Alien egg", rarity: "Super", count: 1 },
@@ -22448,6 +22503,7 @@ class ShopSystem {
             "Yucca": 4,
             "Root": 3,
             "Powder": 6,
+            "Compass": 10,
             "Suger": 3,
             "Cutter": 10,
             "Bubble Bomb": 18,
@@ -27220,7 +27276,11 @@ class Enemy {
 
         // 护甲计算
         this.armor = this._calculateArmor(enemyType);
-
+        // 在 Enemy 构造函数中，找到其他属性定义的地方添加
+        this.isInsideHost = false;      // 是否在宿主内部
+        this.hostTarget = null;         // 宿主目标
+        this.orbitAngle = Math.random() * Math.PI * 2;  // 随机起始角度
+        this.orbitRadius = 0;           // 环绕半径
         // ===== 🆕 多节碰撞箱系统（统一处理 Leech、Parasite、Centipede）=====
         this.segmentColliders = [];
         this.hasMultiSegmentCollision = (enemyType === "Leech" || enemyType === "Parasite" || enemyType === "Centipede"|| enemyType === "HelWorm");
@@ -27265,7 +27325,7 @@ class Enemy {
         const poisonCfg = POISON_STATS[enemyType];
         if (poisonCfg) {
             this.isPoisonous = true;
-            this.poisonDamage   = poisonCfg.damage   * (PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0) * 0.05;
+            this.poisonDamage   = poisonCfg.damage   * (PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0);
             this.poisonDuration = poisonCfg.duration;
             this.poisonInitMult = poisonCfg.init;
             this.poisonStableMult = poisonCfg.stable;
@@ -27281,13 +27341,13 @@ class Enemy {
             "HelHornet":     { damage: 3, duration: 2500, init: 0.5, ramp: 1.8 },
             "HelBeekeeper":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
             "HelDigger":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.2 },
-            "GraveDigger":   { damage: 80, duration: 2000, init: 0.5, ramp: 2.2 },
+            "GraveDigger":   { damage: 80, duration: 3000, init: 0.6, ramp: 2.8 },
         };
 
         const flameCfg = FLAME_STATS[enemyType];
         if (flameCfg) {
             this.isFlame = true;
-            this.flameDamage = flameCfg.damage * (PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0) * 0.05;
+            this.flameDamage = flameCfg.damage * (PROGRESSIVE_RARITY_MULTIPLIERS[this.rarity] || 1.0);
             this.flameDuration = flameCfg.duration;
             this.flameInitMult = flameCfg.init;
             this.flameRampMult = flameCfg.ramp;
@@ -27838,15 +27898,15 @@ class Enemy {
             case "Proton":       return [180, 20, 60,  500,  35];
             case "ElectronCloud":return [500,  40, 20,  200,  30];
             case "Photon":       return [100,  8,  600, 10,   20];
-            case "BlackHole":    return [3000, 30, 0,  50000, 100];
-            case "WhiteHole":    return [2000, 30, 0,  40000, 70];
+            case "BlackHole":    return [3000, 40, 0,  50000, 100];
+            case "WhiteHole":    return [2000, 40, 0,  40000, 70];
             case "NeutronStar":  return [8000, 45, 0,  80000, 200];
             case "Alien":        return [400,  28, 120, 1000, 80];
-            case "UFO":          return [2000,  38, 140, 20000, 50];
+            case "UFO":          return [2000,  38, 140, 20000, 20];
             case "Star":         return [2000, 50, 0,  30000, 50];
             case "Asteroid":     return [300,  25, 100,  700,  60];
             case "Ghost":         return [150, 25, 80,  100, 5];
-            case "GraveStone":     return [2000,  40, 0,  17000, 65];
+            case "GraveStone":     return [2000,  42, 0,  17000, 65];
             case "SpacetimeTunnel": return [1, 60, 0, 0, 0];
             case "ManHole": return [900, 50, 0, 15000, 50];
             case "Fly": return [25, 24, 60, 200, 10];
@@ -27893,7 +27953,7 @@ class Enemy {
             case "ToxicDragon": return [150, 22, 110, 700, 40];
             case "FireStorm": return [180, 22, 80, 400, 60];
             case "HelQueenBee": return [180, 20, 120, 400, 100];
-            case "GraveDigger": return [260, 28, 90, 300, 20];
+            case "GraveDigger": return [260, 30, 90, 300, 90];
             case "AlienDigger": return [500, 28, 90, 300, 200];
             default: return [100, 20, 60, 10, 40];
         }
@@ -29986,6 +30046,70 @@ class Enemy {
                 this.applyUFOBeam(gameInstance, dt);
             }
         }
+        // ========== GraveDigger / Ghost 内部环绕逻辑 ==========
+        if ((this.type === "GraveDigger" || this.type === "Ghost") && !this.isDead && !this.isSpawning) {
+            // 寻找宿主（如果没有宿主）
+            if (!this.isInsideHost && !this.hostTarget) {
+                let closestHost = null;
+                let closestDist = Infinity;
+
+                // 检查玩家
+                if (this.gameInstance?.player && !this.gameInstance.player.isDead) {
+                    const dx = this.physicsBody.position.x - this.gameInstance.player.physicsBody.position.x;
+                    const dy = this.physicsBody.position.y - this.gameInstance.player.physicsBody.position.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < this.radius + 50 && dist < closestDist) {
+                        closestHost = this.gameInstance.player;
+                        closestDist = dist;
+                    }
+                }
+
+                // 检查其他敌人
+                if (this.gameInstance?.enemies) {
+                    for (const enemy of this.gameInstance.enemies) {
+                        if (enemy === this) continue;
+                        if (enemy.isDead) continue;
+                        const dx = this.physicsBody.position.x - enemy.physicsBody.position.x;
+                        const dy = this.physicsBody.position.y - enemy.physicsBody.position.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < this.radius + (enemy.radius || 35) && dist < closestDist) {
+                            closestHost = enemy;
+                            closestDist = dist;
+                        }
+                    }
+                }
+
+                if (closestHost) {
+                    this.isInsideHost = true;
+                    this.hostTarget = closestHost;
+                    this.orbitRadius = (closestHost.radius || 35) * 0.6;
+                }
+            }
+
+            // 如果在宿主内部
+            if (this.isInsideHost && this.hostTarget && !this.hostTarget.isDead) {
+                const hostPos = this.hostTarget.physicsBody.position;
+                const dx = this.physicsBody.position.x - hostPos.x;
+                const dy = this.physicsBody.position.y - hostPos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // 确保至少30%不重合
+                const minDist = this.radius * 0.7;
+                if (dist < minDist) {
+                    const angle = Math.atan2(dy, dx);
+                    this.physicsBody.position.x = hostPos.x + Math.cos(angle) * minDist;
+                    this.physicsBody.position.y = hostPos.y + Math.sin(angle) * minDist;
+                }
+
+                if (this.hostTarget.isDead) {
+                    this.isInsideHost = false;
+                    this.hostTarget = null;
+                }
+            } else if (this.isInsideHost) {
+                this.isInsideHost = false;
+                this.hostTarget = null;
+            }
+        }
         // 非多节生物走原来的逻辑
         this.physicsBody.update(dt);
         this.clampPosition();
@@ -31149,6 +31273,9 @@ class Petal {
     constructor(player, petalIndex = 0, totalPetals = 10) {
         this.player = player;
         // 在 Petal 构造函数中添加
+        // 在 Petal 构造函数中
+        this.isCompass = false;
+        this.compassAngle = 0;
         this.isSponge = false;  // 标记是否为海绵花瓣
         this._petalIndex = petalIndex;
         this.petalIndex = petalIndex;
@@ -31938,9 +32065,9 @@ class Petal {
 
         if (isBubbleBomb) {
             // 泡泡炸弹：范围大，伤害低，击退强
-            radius = 120 + mult * 0.5;
+            radius = 130 + mult * 0.4;
             damage = 15 * mult;
-            knockback = 500 + mult * 0.3;
+            knockback = 600 + mult * 0.6;
         } else if (isFireBomb) {
             // 火焰炸弹：范围中，伤害中，附加燃烧效果
             radius = 120 + mult * 0.5;
@@ -31950,7 +32077,7 @@ class Petal {
             radius = 100 + mult * 0.5;
             damage = 0.0 * mult;
             knockback = 500 + mult * 0.2;
-        }else {
+        } else {
             // 普通炸弹：范围小，伤害高，击退中
             radius = 100 + mult * 0.4;
             damage = 25 * mult;
@@ -31971,8 +32098,8 @@ class Petal {
 
                 // ========== 🆕 FireBomb 附加燃烧效果 ==========
                 if (isFireBomb && !enemy.isDead) {
-                    const fireDamage = 30 * mult;  // 每秒燃烧伤害
-                    const fireDuration = 3000;      // 持续3秒
+                    const fireDamage = 30 * mult;
+                    const fireDuration = 3000;
 
                     if (game.flameManager) {
                         game.flameManager.applyFlame(
@@ -31980,21 +32107,26 @@ class Petal {
                             this,
                             fireDamage,
                             fireDuration,
-                            0.5,   // 初始倍率
-                            2.0    // 最终倍率（燃烧升温）
+                            0.5,
+                            2.0
                         );
                     }
                 }
 
-                // 击退效果
+                // ========== 击退效果（质量越大，击退越小）==========
+                const targetMass = Math.max(1, enemy.physicsBody.mass || 1);
+                // 质量因子：质量100时因子1，质量1000时因子0.1，质量10000时因子0.01
+                const massFactor = 500 / Math.min(10000, targetMass);
+                const finalKnockback = knockback * Math.max(0.01, massFactor);
+
                 if (dist > 0.1) {
                     const nx = dx / dist, ny = dy / dist;
-                    enemy.physicsBody.velocity.x += nx * knockback;
-                    enemy.physicsBody.velocity.y += ny * knockback;
+                    enemy.physicsBody.velocity.x += nx * finalKnockback;
+                    enemy.physicsBody.velocity.y += ny * finalKnockback;
                 } else {
                     const angle = Math.random() * Math.PI * 2;
-                    enemy.physicsBody.velocity.x += Math.cos(angle) * knockback;
-                    enemy.physicsBody.velocity.y += Math.sin(angle) * knockback;
+                    enemy.physicsBody.velocity.x += Math.cos(angle) * finalKnockback;
+                    enemy.physicsBody.velocity.y += Math.sin(angle) * finalKnockback;
                 }
                 enemy.knockbackTimer = 0.4;
 
@@ -32008,9 +32140,9 @@ class Petal {
                 }
             }
         }
-    // ========== 🆕 Bubble 破碎产生反推力 ==========
+
+        // ========== 🆕 Bubble 破碎产生反推力 ==========
         if (isBubble && this.player) {
-            // 计算反推方向（从爆炸中心向外）
             const angle = Math.atan2(cy - this.player.physicsBody.position.y,
                                       cx - this.player.physicsBody.position.x);
             const pushForce = 400 * mult;
@@ -32018,8 +32150,6 @@ class Petal {
             this.player.physicsBody.velocity.y -= Math.sin(angle) * pushForce;
             this.player.isBouncing = true;
             this.player.bounceCooldown = 200;
-
-            // 显示反推效果
             game.addDamageNumber(cx, cy, "heal");
         }
 
@@ -32220,7 +32350,7 @@ class Petal {
                 this.maxHealth = this.maxDurability;
                 this.health = this.durability;
                 this.isBroken = item.isBroken || (this.health <= 0);
-
+                this.isCompass = (item.type === "Compass");
                 this.baseReloadTime = item.baseReloadTime || 5000;
                 this.reloadTime = item.reloadTime || this.baseReloadTime;
 
@@ -35101,7 +35231,62 @@ class Player {
             }
         }
     }
-    // 在 Player 类中
+    updatePetalPositionsWithCompass() {
+        if (!this.petals || this.petals.length === 0) return;
+
+        let compassPetal = null;
+        const normalPetals = [];
+
+        // 1. 分类花瓣（排除 ThirdEye 和 Antennae）
+        for (let i = 0; i < this.petals.length; i++) {
+            const petal = this.petals[i];
+            if (!petal) continue;
+            const item = petal.getCurrentItem();
+
+            // ThirdEye 和 Antennae 不参与排列（固定在玩家身上）
+            if (item && (item.type === "ThirdEye" || item.type === "Antennae")) {
+                // 这些物品固定在玩家中心，半径设为 0
+                petal.angle = 0;
+                petal.radius = 0;
+                petal.screenX = WIDTH / 2;
+                petal.screenY = HEIGHT / 2;
+                continue;
+            }
+
+            if (item && item.type === "Compass") {
+                compassPetal = petal;
+            } else if (item) {
+                normalPetals.push(petal);
+            }
+        }
+
+        if (!compassPetal) {
+            this.recalculatePetalAngles();
+            return;
+        }
+
+        // 2. 计算 Compass 角度（指向鼠标相反方向）
+        const mouseX = this.mousePosition?.x || WIDTH / 2;
+        const mouseY = this.mousePosition?.y || HEIGHT / 2;
+        const mouseAngle = Math.atan2(mouseY - HEIGHT / 2, mouseX - WIDTH / 2);
+
+        compassPetal.compassAngle = mouseAngle + Math.PI;
+        compassPetal.angle = compassPetal.compassAngle;
+        compassPetal.radius = 40;
+
+        // 3. 计算其他花瓣排列
+        const n = normalPetals.length;
+        if (n > 0) {
+            const angleStep = (Math.PI * 2) / (n + 1);
+            const baseAngle = compassPetal.compassAngle;
+
+            for (let i = 0; i < n; i++) {
+                const petal = normalPetals[i];
+                petal.angle = baseAngle + (i + 1) * angleStep;
+                petal.radius = 45;
+            }
+        }
+    }
     syncPetalAngles() {
         // 检查花瓣角度是否混乱
         let needsSync = false;
@@ -35525,7 +35710,7 @@ class Player {
         // mousePosition 应在 WorldMapGame.handleMouseMove 中更新
         // this.updateMousePosition(); // 移除，改为外部更新
         this.moveTowardsMouse(dt, cameraOffset);
-
+        this.updatePetalPositionsWithCompass();
         this.recalculatePetalAngles();
         for (const petal of this.petals) {
         petal.update(dt, this.spreadMode, this.getWorldPosition());
@@ -38018,7 +38203,6 @@ class MainMenu {
         return null;
     }
 
-    // ==================== 布局重新计算 ====================
     recalculatePositions() {
         this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
@@ -38028,10 +38212,13 @@ class MainMenu {
         const BUTTON_SPACING = 15;
         const START_Y_OFFSET = -120;
 
+        // 左侧按钮列
         this.accountButton = [20, 20, 100, 35];
         this.shopButton = [20, 65, 100, 35];
         this.huntingQuestButton = [20, 110, 100, 35];
+        this.talentButton = [20, 155, 100, 35];      // ✅ 添加
 
+        // 生物群系按钮
         const biomeStartY = this.HEIGHT / 2 + START_Y_OFFSET - 30;
         const cols = 3;
         const totalWidth = cols * BUTTON_WIDTH + (cols - 1) * BUTTON_SPACING;
@@ -38049,6 +38236,7 @@ class MainMenu {
             "Hel": [startX + 2 * (BUTTON_WIDTH + BUTTON_SPACING), biomeStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
+        // 底部按钮
         const otherStartY = biomeStartY + 3 * (BUTTON_HEIGHT + BUTTON_SPACING) + 60;
 
         this.otherButtons = {
@@ -38062,6 +38250,9 @@ class MainMenu {
         this.extraBonusButton = [this.WIDTH - EXTRA_BONUS_SIZE - 10, 10, EXTRA_BONUS_SIZE, EXTRA_BONUS_SIZE];
         this.titleY = this.HEIGHT / 2 - 200;
         this.hintY = this.HEIGHT / 2 - 150;
+
+        // 图鉴按钮
+        this.mobGalleryButton = [this.WIDTH - 220, this.HEIGHT - 80, 200, 60];
 
         this._recalcLoadoutButtonRect();
     }
@@ -38132,6 +38323,7 @@ class MainMenu {
         ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
         ctx.stroke(); ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
         ctx.fillText('TALENTS', tbx + tbw / 2, tby + tbh / 2);
+
 // ========== 🆕 绘制图鉴按钮（右下角）==========
         const [mgx, mgy, mgw, mgh] = this.mobGalleryButton;
         const isHovered = this.hoveredButton === 'mob_gallery';
@@ -38812,6 +39004,7 @@ class ProceduralMapGenerator {
         this.cache.clear();
     }
 }
+
 class WorldMapGame {
     constructor() {
         // 多人系统
@@ -38836,7 +39029,6 @@ class WorldMapGame {
         this.accountSystem = new AccountSystem();
         this.blockManager = new BlockManager();
         this.mainMenu = new MainMenu(this.player, this.autoSaveSystem, this.bonusSystem);
-
         // ✅ 创建天赋系统（先不应用）
         this.talentSystem = new TalentSystem(this.player);
     // 伤害数字显示频率限制
@@ -40816,7 +41008,6 @@ class WorldMapGame {
         if (this.tunnelSystem) {
             this.tunnelSystem.update(deltaTime);
         }
-
         // 2. 尝试生成隧道（每帧千分之一概率，测试用）
         if (this.gameState === GameState.IN_GAME && !this.paused && !this.player.isDead && this.tunnelSystem) {
             if (Math.random() < 0.001) {  // 千分之一概率，测试用
@@ -43886,6 +44077,26 @@ class WorldMapGame {
             // 绘制UI
             this.drawUi(context, new Vector2(0, 0), viewScale);
             // 绘制闪电连锁线
+            // 在 WorldMapGame 类的 draw 方法中，绘制完花瓣后添加
+            // 调试模式：显示花瓣碰撞箱
+            if (this.debugMode && this.player && this.player.petals) {
+                for (const petal of this.player.petals) {
+                    const screenX = petal.screenX;
+                    const screenY = petal.screenY;
+                    const radius = petal.getRadius() * this.viewScale;
+
+                    context.beginPath();
+                    context.arc(screenX, screenY, radius, 0, Math.PI * 2);
+                    context.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+                    context.lineWidth = 1.5;
+                    context.stroke();
+
+                    // 显示碰撞箱半径数值
+                    context.font = '10px Arial';
+                    context.fillStyle = 'rgba(255, 100, 100, 0.8)';
+                    context.fillText(`r:${radius.toFixed(0)}`, screenX + radius + 2, screenY);
+                }
+            }
             if (this.lightningArcs && this.lightningArcs.length > 0) {
                 const cameraOffset = new Vector2(
                     this.player.physicsBody.position.x - WIDTH / 2,
@@ -44057,6 +44268,7 @@ class WorldMapGame {
             context.fillText('DEBUG MODE', 10, 60);
             context.restore();
         }
+
     }
 
     drawMinimap(ctx) {
