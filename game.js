@@ -22022,21 +22022,9 @@ class RedeemSystem {
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
         this.addCode("BY5DRSR", [
-            { type: "Clover", rarity: "Super", count: 1 },
-            { type: "Atom egg", rarity: "Super", count: 1 },
-            { type: "Leaf", rarity: "Omega", count: 1 },
-            { type: "Digger egg", rarity: "Super", count: 2 },
-            { type: "BlackHole egg", rarity: "Super", count: 1 },
-            { type: "Dna", rarity: "Super", count: 1 },
-            { type: "Magnet", rarity: "Super", count: 1 },
-            { type: "Chromosome", rarity: "Super", count: 1 },
-            { type: "Cancer", rarity: "Super", count: 1 },
-            { type: "Antenna", rarity: "Super", count: 1 },
-            { type: "WhiteHole egg", rarity: "Super", count: 1 },
-            { type: "Golden Leaf", rarity: "Super", count: 1 },
-            { type: "Spider egg", rarity: "Omega", count: 1 },
-            { type: "Alien egg", rarity: "Super", count: 1 },
-             { stars: 2330000.0 }
+            { type: "MudDigger egg", rarity: "Super", count: 1 },
+            { type: "TrashDigger egg", rarity: "Super", count: 1 },
+            { type: "Biologist egg", rarity: "Super", count: 1 },
         ], 10);
 
         this.addCode("WAGE2", [
@@ -27914,8 +27902,8 @@ class Enemy {
             case "Roach": return [350, 28, 130, 500, 120];
             case "QueenBee": return [350, 26, 100, 500, 100];
             case "PooStorm": return [600, 22, 40 + Math.random() * 10, 300, 100];
-            case "TrashDigger": return [230, 25, 100, 550, 182];
-            case "FrostDigger": return [120, 26, 80, 550, 200];
+            case "TrashDigger": return [230, 25, 100, 550, 180];
+            case "FrostDigger": return [120, 26, 80, 550, 180];
             case "Digger": return [180, 28, 120, 600, 150];
             case "MudDigger": return [300, 30, 70, 700, 135];
             case "Virus": return [50, 22, 0, 400, 10];
