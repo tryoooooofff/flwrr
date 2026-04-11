@@ -22068,7 +22068,7 @@ class RedeemSystem {
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
-        this.addCode("XXX13XXX", [
+        this.addCode("xxx13xxx", [
             { type: "MudDigger egg", rarity: "Super", count: 1 },
             { type: "TrashDigger egg", rarity: "Super", count: 1 },
             { type: "Biologist egg", rarity: "Super", count: 1 },
