@@ -31397,8 +31397,8 @@ class Petal {
         this.angle = petalIndex * angleStep;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.02;
-        this.baseRotationSpeed = 0.02;
+        this.rotationSpeed = 0.08;
+        this.baseRotationSpeed = 0.08;
         this.screenX = 0;
         this.screenY = 0;
         this.worldX = 0;
@@ -31651,8 +31651,8 @@ class Petal {
         this.armor = 0.0;
         this.radius = 35;
         this.targetRadius = 35;
-        this.rotationSpeed = 0.02;
-        this.baseRotationSpeed = 0.02;
+        this.rotationSpeed = 0.08;
+        this.baseRotationSpeed = 0.08;
         if (preserveAngle && currentAngle !== null) {
             this.angle = currentAngle;
         } else {
@@ -32865,7 +32865,7 @@ class Petal {
 
         // ===== ✅ 关键修改：强制更新角度（无论是否有物品）=====
         // 所有花瓣都持续旋转，不受任何条件限制
-            const ANGLE_INCREMENT = 0.04; // 固定增量，确保旋转可见
+            const ANGLE_INCREMENT = 0.08; // 固定增量，确保旋转可见
         this.angle += ANGLE_INCREMENT;
 
         // 确保角度在有效范围内
@@ -35479,7 +35479,7 @@ class Player {
             // ✅ Faster 物品：无视破碎，只要物品存在就生效
             if (item.type === "Faster") {
                 const rarityIndex = RARITY_LIST.indexOf(item.rarity);
-                const bonusRingsPerSec = 0.02 + (rarityIndex * 0.04);
+                const bonusRingsPerSec = 0.04 + (rarityIndex * 0.04);
                 if (bonusRingsPerSec > maxRotationBonus) {
                     maxRotationBonus = bonusRingsPerSec;
                 }
@@ -35498,7 +35498,7 @@ class Player {
             // ✅ 快捷栏中的 Faster 也生效（无视破碎）
             if (slotItem && slotItem.type === "Faster") {
                 const rarityIndex = RARITY_LIST.indexOf(slotItem.rarity);
-                const bonusRingsPerSec = 0.03 + (rarityIndex * 0.05);
+                const bonusRingsPerSec = 0.04 + (rarityIndex * 0.05);
                 if (bonusRingsPerSec > maxRotationBonus) {
                     maxRotationBonus = bonusRingsPerSec;
                 }
@@ -35544,7 +35544,7 @@ class Player {
         }
 
         // ✅ 8. 应用 Faster 旋转速度加成到所有花瓣（无视破碎）
-        const baseRotationSpeed = 0.07;
+        const baseRotationSpeed = 0.1;
         const bonusRadPerFrame = (maxRotationBonus * Math.PI * 2) / 60;
         const newRotationSpeed = baseRotationSpeed + bonusRadPerFrame;
 
