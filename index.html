@@ -913,8 +913,42 @@ canvas {
         gameInstance.player.inventory.craftingSystem.craftingVisible = true;
         gameState = 'crafting';
     }
-    function closeInventory() { gameState = 'in_game'; }
+    function closeInventory() {
+        // 如果在游戏中，返回游戏
+        if (gameInstance && gameInstance.gameState === 'in_game') {
+            gameState = 'in_game';
+        } else {
+            // 如果在主菜单或其他状态，返回主菜单
+            if (typeof window.returnToMainMenu === 'function') {
+                window.returnToMainMenu();
+            } else {
+                gameState = 'main_menu';
+            }
+        }
+    }
+    function closeCrafting() {
+        // 1. 先关闭合成界面
+        if (gameInstance?.player?.inventory?.craftingSystem) {
+            gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        }
 
+        // 2. 判定返回路径
+        if (gameInstance && gameInstance.gameState === 'in_game') {
+            // 如果游戏正在进行中，返回游戏
+            gameState = 'in_game';
+        } else if (gameInstance && gameInstance.gameState === 'main_menu') {
+            // 如果已经在主菜单，保持主菜单
+            gameState = 'main_menu';
+        } else {
+            // 其他情况返回主菜单
+            if (typeof window.returnToMainMenu === 'function') {
+                window.returnToMainMenu();
+            } else {
+                gameState = 'main_menu';
+            }
+        }
+    }
+window.closeCrafting = closeCrafting;
     function handleMouseDown(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
@@ -1279,7 +1313,7 @@ function returnToMainMenu() {
         console.log("✅ 已返回主菜单");
     }, 100);
 }
-
+window.returnToMainMenu = returnToMainMenu;
     async function startGame(biome) {
         if (!gameInstance) gameInstance = createGameInstance();
         if (!gameInstance) { alert('Failed to create game instance!'); return; }
