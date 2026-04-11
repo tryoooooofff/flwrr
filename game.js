@@ -43182,7 +43182,7 @@ class WorldMapGame {
         let antennaeBonus = 0;
         for (const petal of this.player.petals) {
             const item = petal.getCurrentItem();
-            if (item && item.type === "Antennae" && !petal.isBroken && !petal.isReloading) {
+            if (item && item.type === "Antennae") {
                 const rarityIndex = RARITY_LIST.indexOf(item.rarity);
                 // Common: 5%, Unusual: 10%, Rare: 15%, Epic: 20%, Legendary: 25%, Mythic: 30%, ...
                 const bonusValue = 0.05 + (rarityIndex * 0.1);
