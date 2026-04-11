@@ -1016,10 +1016,10 @@ window.closeCrafting = closeCrafting;
             gameInstance.handleEvents(ev);
             gameInstance.handleEvents({ type: 'click', x, y });
         } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-                if (c.handleModeClick) {
+            const c = gameInstance.player.inventory.craftingSystem;
+            if (c.handleModeClick) {
                 c.handleModeClick([x, y]);
             }
-            const c = gameInstance.player.inventory.craftingSystem;
             c.handleMouseUp?.([x,y]);
             c.handleClick?.([x,y]);
         } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
