@@ -35970,7 +35970,7 @@ class Player {
             if (petal.itemType === "queen ant egg") {
                 if (this.gameInstance) petal.updateQueenAnts(dt, this.gameInstance.enemies, worldPos);
             }
-            if (petal.itemType.includes("FireAnt")) {
+            if (petal.itemType && petal.itemType.includes("FireAnt")) {
                 if (this.gameInstance) petal.updateFireAnts(dt, this.gameInstance.enemies, worldPos);
             }
 
