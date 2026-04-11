@@ -25913,7 +25913,27 @@ class StarCraftUI {
 
         this.forceRedraw();
     }
+    // 在 StarCraftUI 类中添加
+    handleModeClick(pos) {
+        if (!this._modeClickAreas) return false;
 
+        for (const area of this._modeClickAreas) {
+            if (pos[0] >= area.x && pos[0] <= area.x + area.size &&
+                pos[1] >= area.y && pos[1] <= area.y + area.size) {
+
+                // 切换模式逻辑
+                this.oracleMode = (area.id === 'oracle');
+                this.tradeMode = (area.id === 'trade');
+
+                // 重置状态防止材料残留
+                this.resetCraftingState(false);
+                this.forceRedraw();
+                console.log("Mode switched to:", area.id);
+                return true;
+            }
+        }
+        return false;
+    }
 
 // ========== 修复后的点击处理 ==========
     handleClick(point) {
@@ -25957,7 +25977,24 @@ class StarCraftUI {
                 if (!this.craftingLocked) this.enterTradeMode();
                 return "trade_button";
             }
+            // 在 handleClick(pos) 内部添加
+            if (this._modeClickAreas) {
+                for (const area of this._modeClickAreas) {
+                    // 判定点击是否在按钮范围内
+                    if (pos.x >= area.x && pos.x <= area.x + area.size &&
+                        pos.y >= area.y && pos.y <= area.y + area.size) {
 
+                        // 执行切换
+                        this.oracleMode = (area.id === 'oracle');
+                        this.tradeMode = (area.id === 'trade');
+
+                        // 重置状态
+                        this.resetCraftingState(false);
+                        this.forceRedraw();
+                        return area.id;
+                    }
+                }
+            }
             // 3. 槽位点击判断 (必须使用上移后的坐标)
             const visualCenterY = this.center[1] - 80; // 与 draw 中保持一致
             if (!this.craftingLocked && !this.craftResult) {
@@ -26139,7 +26176,8 @@ class StarCraftUI {
 
         // --- 5. 按钮绘制 (Craft按钮, 概率显示等) ---
         this.drawInterfaceButtons(ctx);
-
+        // 绘制模式切换开关 (Oracle / Trade / Normal)
+        this.drawModeSelectors(ctx);
         // --- 6. 背包区域 (10x4 布局) ---
         const gridCols = 10;
         const gridRows = 4;
@@ -26253,6 +26291,49 @@ class StarCraftUI {
         ctx.restore();
     }
     // 辅助绘制圆角矩形
+    drawModeSelectors(ctx) {
+        const startX = 20; // 靠近屏幕左侧
+        const startY = HEIGHT / 2 - 100;
+        const btnSize = 50;
+        const spacing = 15;
+
+        const modes = [
+            { id: 'normal', label: 'C', color: '#A0A0A0', active: !this.oracleMode && !this.tradeMode },
+            { id: 'oracle', label: 'O', color: '#6600FF', active: this.oracleMode },
+            { id: 'trade', label: 'T', color: '#FFD700', active: this.tradeMode }
+        ];
+
+        modes.forEach((mode, i) => {
+            const y = startY + i * (btnSize + spacing);
+
+            ctx.save();
+            // 绘制背景
+            ctx.fillStyle = mode.active ? mode.color : "rgba(0,0,0,0.3)";
+            ctx.strokeStyle = mode.active ? "white" : "rgba(255,255,255,0.2)";
+            ctx.lineWidth = mode.active ? 3 : 1;
+
+            this.drawRoundedRect(ctx, startX, y, btnSize, btnSize, 8);
+            ctx.stroke();
+
+            // 绘制图标/文字
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // 黑色描边增强清晰度
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.strokeText(mode.label, startX + btnSize / 2, y + btnSize / 2);
+            ctx.fillText(mode.label, startX + btnSize / 2, y + btnSize / 2);
+
+            ctx.restore();
+
+            // 存入点击判定区域 (供 handleClick 使用)
+            if (!this._modeClickAreas) this._modeClickAreas = [];
+            this._modeClickAreas[i] = { id: mode.id, x: startX, y: y, size: btnSize };
+        });
+    }
     drawRoundedRect(ctx, x, y, width, height, radius) {
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
@@ -26269,95 +26350,99 @@ class StarCraftUI {
         const btnW = 100;
         const btnH = 45;
 
-        // --- 1. 基础逻辑计算 ---
-        const canCraft = this.canCraft() && !this.craftingLocked;
+        // --- 1. 判定当前模式与颜色 ---
+        const isNormalCraft = this.canCraft();
+        const isOracle = this.oracleMode;
+        const isTrade = this.tradeMode;
+        const canClick = (isNormalCraft || isOracle || isTrade) && !this.craftingLocked;
+
         let mainColor = "rgba(0, 0, 0, 0.1)";
         let strokeColor = "rgba(0, 0, 0, 0.2)";
+        let btnText = "Craft";
         let rateText = "";
         let attemptsText = "";
 
-        if (canCraft) {
-            // 获取当前槽位物品
-            const activeItems = this.slots.filter(s => s !== null);
-            const totalCards = this.slotCounts.reduce((a, b) => a + b, 0);
+        if (canClick) {
+            let displayRarity = "Common";
 
-            // 判定基准物品（最高稀有度）
-            const rarityWeight = {
-                "Common": 1, "Unusual": 2, "Rare": 3, "Epic": 4,
-                "Legendary": 5, "Mythic": 6, "Ultra": 7, "Super": 8,
-                "Omega": 9, "Eternal": 10
-            };
-            const baseItem = activeItems.reduce((prev, curr) =>
-                (rarityWeight[curr.rarity] > rarityWeight[prev.rarity]) ? curr : prev
-            );
+            if (isOracle || isTrade) {
+                // Oracle/Trade 模式：取中间那个槽位的物品
+                const item = this.slots[2];
+                displayRarity = item ? item.rarity : "Common";
+                btnText = isOracle ? "Oracle" : "Trade";
+                attemptsText = isOracle ? "Upgrade Card" : "Exchange Coin";
+            } else {
+                // 普通合成模式
+                const activeItems = this.slots.filter(s => s !== null);
+                const totalCards = this.slotCounts.reduce((a, b) => a + b, 0);
+                const baseItem = activeItems.reduce((prev, curr) => {
+                    const weights = { "Common":1, "Unusual":2, "Rare":3, "Epic":4, "Legendary":5, "Mythic":6, "Ultra":7, "Super":8, "Omega":9, "Eternal":10 };
+                    return (weights[curr.rarity] > weights[prev.rarity]) ? curr : prev;
+                });
+                displayRarity = baseItem.rarity;
 
-            // 使用你的逻辑计算概率和次数
-            const successRate = CRAFT_PROBABILITIES[baseItem.rarity] || 0.64;
-            const CARDS_PER_ATTEMPT = 3.5;
-            const attempts = Math.floor(totalCards / CARDS_PER_ATTEMPT);
+                const successRate = CRAFT_PROBABILITIES[displayRarity] || 0.64;
+                const attempts = Math.floor(totalCards / 3.5);
+                rateText = `${(successRate * 100).toFixed(1)}% Success Rate`;
+                attemptsText = `${attempts} Attempts`;
+            }
 
-            // 设置稀有度动态颜色
-            const rgb = this.craftAnimation.RARITY_COLORS[baseItem.rarity] || [160, 160, 160];
+            // 获取动态颜色
+            const rgb = this.craftAnimation.RARITY_COLORS[displayRarity] || [160, 160, 160];
             mainColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
             strokeColor = `rgb(${Math.max(0, rgb[0] - 60)}, ${Math.max(0, rgb[1] - 60)}, ${Math.max(0, rgb[2] - 60)})`;
-
-            rateText = `${(successRate * 100).toFixed(1)}% Success Rate`;
-            attemptsText = `${attempts} Attempts`;
         }
 
-        // --- 2. 绘制 Craft 按钮 ---
+        // --- 2. 绘制按钮主体 ---
         ctx.save();
-        // 填充按钮主体
         ctx.fillStyle = mainColor;
         this.drawRoundedRect(ctx, btnX, btnY, btnW, btnH, 10);
-
-        // 绘制加深颜色的描边
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 3;
         this.strokeRoundedRect(ctx, btnX, btnY, btnW, btnH, 10);
 
-        // 绘制按钮文字 "Craft"
+        // 按钮文字
         ctx.fillStyle = "white";
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        // 给文字加一点阴影增加立体感
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
-        ctx.fillText("Craft", btnX + btnW / 2, btnY + btnH / 2 + 2);
+        ctx.fillText(btnText, btnX + btnW / 2, btnY + btnH / 2 + 2);
         ctx.restore();
 
-        // --- 3. 绘制统计信息 (白色文字 + 黑色描边) ---
-        if (canCraft && !this.craftResult) {
+        // --- 3. 绘制统计/提示信息 (白色+黑色描边) ---
+        if (canClick && !this.craftResult) {
             ctx.save();
             const textX = btnX + btnW / 2;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-
-            // 设置通用的描边样式
             ctx.strokeStyle = "black";
             ctx.lineWidth = 3;
             ctx.fillStyle = "white";
-            // B. 绘制 Success Rate (成功率率)
-            ctx.font = "bold 15px Arial";
-            ctx.strokeText(rateText, textX, btnY + btnH + 40);
-            ctx.fillText(rateText, textX, btnY + btnH + 40);
 
+            // 第一行：Attempts 或 模式说明
+            ctx.font = "bold 14px Arial";
+            ctx.strokeText(attemptsText, textX, btnY + btnH + 20);
+            ctx.fillText(attemptsText, textX, btnY + btnH + 20);
+
+            // 第二行：成功率 (仅普通合成显示)
+            if (rateText) {
+                ctx.font = "bold 15px Arial";
+                ctx.strokeText(rateText, textX, btnY + btnH + 40);
+                ctx.fillText(rateText, textX, btnY + btnH + 40);
+            }
             ctx.restore();
         }
 
         // --- 4. 绘制关闭按钮 (X) ---
         const [cx, cy, cw, ch] = this.closeButton;
         ctx.save();
-        // 红色背景
         ctx.fillStyle = "#FF5555";
         this.drawRoundedRect(ctx, cx, cy, cw, ch, 5);
-        // 深红描边
         ctx.strokeStyle = "#990000";
         ctx.lineWidth = 2;
         this.strokeRoundedRect(ctx, cx, cy, cw, ch, 5);
-
-        // 文字 X
         ctx.fillStyle = "white";
         ctx.font = "bold 18px Arial";
         ctx.textAlign = "center";
