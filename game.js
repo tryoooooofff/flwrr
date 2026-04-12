@@ -5,7 +5,7 @@ export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //后期会增加wave room ---无尽波次，每波敌人增强，每10波生成一次特殊波次（单一生物）。wave room只有常规地图，但是更快刷新速度而且敌方生物血量减少10%，但是玩家在一个2000*2000的空间里面
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
 //后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton egg+ 1 charge组成1 electronCloud egg...
-//可能增加设置菜单，控制UI界面和特效，碰撞箱显示等。增加日志---写更新内容
+//增加日志---写更新内容
 //可能增加新地图error：所有生物使用黑白紫色
 // ============================================================
 // Performance Optimization Configuration
@@ -1376,7 +1376,7 @@ const ITEM_IMAGE_URLS = {
     "Bubble egg": "images/Bubble_egg.png",
     "Bubble": "images/Bubble.png",
     "Wing": "images/Wing.png",
-
+    "Bubonic Plague": "images/Bubonic Plague.png",
     "Claw": "images/Claw.png",
     "Fang": "images/Fang.png",
     "Powder": "images/Powder.png",
@@ -1586,7 +1586,7 @@ export const ITEM_STATS = {
     "Claw": {base_attack:20, base_cooldown:250, crit_chance:0.1, use_rarity_multiplier: true, base_reload_time:3500, dropFactor: 0.9},
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Pollen": {base_attack:30, base_cooldown:300, healing:0.5, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
-    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:30.0, poison_initial_multiplier:2.5, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 1.0},
+    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, poison_initial_multiplier:2.0, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 1.0},
     "Pincer": {base_attack:15, base_cooldown:500, poison_damage:12, poison_duration:4.0, poison_initial_multiplier:2.0, poison_stable_multiplier:0.5, web_slow:0.5, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 0.9},
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.9},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
@@ -1709,6 +1709,7 @@ export const ITEM_STATS = {
     "PooStick": {base_attack:1, base_cooldown:8000, spawn_poostorm:true, spawn_count:3, durability_bonus:10, slow_effect:0.4, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Poo": {base_attack:8, base_cooldown:120, slow_effect:0.3, slow_duration:2.0, poison_damage:2, poison_duration:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
     "Basil": {base_attack:12, base_cooldown:160, healing:3, poison_resistance:0.5, clean_effect: true, heal_speed_bonus: {"Common":0.05,"Unusual":0.10,"Rare":0.12,"Epic":0.14,"Legendary":0.16,"Mythic":0.20,"Ultra":0.25,"Super":0.30,"Omega":0.40,"Eternal":0.50}, use_rarity_multiplier: true, dropFactor: 0.85},
+    "Bubonic Plague": {base_attack:15, base_cooldown:200, poison_damage:30, poison_duration:30.0, poison_initial_multiplier:2.3, poison_stable_multiplier:0.2, use_rarity_multiplier:true, base_reload_time:5000,canStack: true , dropFactor: 0.09},
 
     // ========== 🆕 噬菌体蛋 ==========
     "Bacteriophage egg": {base_attack:1, base_cooldown:8000, spawn_bacteriophage:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
@@ -1798,7 +1799,7 @@ export const ITEM_STATS = {
         broken_crit_multiplier: 2.7,
         use_rarity_multiplier: true,
         base_reload_time: 1800,
-        dropFactor: 0.4
+        dropFactor: 0.1
     },
 
     // ========== Leech & Parasite 蛋 ==========
@@ -1964,7 +1965,8 @@ export const ENEMY_DROP_TABLE = {
     "Rat": [
         "Rat_egg",      // 老鼠蛋
         "Poo",          // 粪便
-        "Iris"          // 虹膜
+        "Iris",
+        "Bubonic Plague"
     ],
 
     "Roach": [
@@ -2232,15 +2234,36 @@ export function getDropRarityByItem(itemType, mobRarity) {
     const base = RARITY_DROP_RATES[mobRarity];
     if (!base) return "Common";
 
+    // 复制一份，避免修改原对象
+    const modifiedBase = { ...base };
+
     let weights = {};
     let totalWeight = 0;
 
     // 1. 获取所有可用稀有度
-    const availableRarities = Object.keys(base).filter(r => base[r] > 0);
+    let availableRarities = Object.keys(modifiedBase).filter(r => modifiedBase[r] > 0);
+
+    // ========== 新增：当 factor < 0.85 时，禁止 Super 掉落 ==========
+    const isSuperDisabled = factor < 0.85;
+
+    if (isSuperDisabled && modifiedBase["Super"] !== undefined && modifiedBase["Super"] > 0) {
+        const superProb = modifiedBase["Super"];
+        // 从可用稀有度中移除 Super
+        availableRarities = availableRarities.filter(r => r !== "Super");
+        // 将 Super 的概率加到 Ultra 上（不影响 Omega 和 Eternal）
+        if (modifiedBase["Ultra"] !== undefined) {
+            modifiedBase["Ultra"] = (modifiedBase["Ultra"] || 0) + superProb;
+        } else {
+            modifiedBase["Ultra"] = superProb;
+        }
+        // 将 Super 概率设为 0
+        modifiedBase["Super"] = 0;
+    }
+    // =========================================================
 
     // 2. 核心逻辑：因子越小，越向该生物掉落表的“右侧（高级）”挤压
     availableRarities.forEach((rarity) => {
-        const baseProb = base[rarity];
+        const baseProb = modifiedBase[rarity];
         const rarityIndex = RARITY_ORDER.indexOf(rarity);
 
         // 关键：这里使用 (1 / factor)。
@@ -2625,17 +2648,229 @@ class AutoSaveSystem {
         }
     }
 }
-// ============================================================
-// TalentSystem.js - 天赋系统
-// 接入方式：
-//   1. 在 game.js 中实例化：this.talentSystem = new TalentSystem(this.player);
-//   2. 在主菜单 draw 中调用：if (this.talentSystem?.panelOpen) this.talentSystem.draw(ctx);
-//   3. 在主菜单 handleClick 中调用：this.talentSystem?.handleClick(pos);
-//   4. 在主菜单 handleMouseMove 中调用：this.talentSystem?.handleMouseMove(pos);
-//   5. 在 MainMenu 的 otherButtons 或独立按钮区域添加打开按钮
-//   6. 每次进入游戏时调用：this.talentSystem.applyToPlayer(this.player);
-// ============================================================
 
+class ChangelogPanel {
+    constructor() {
+        this.visible = false;
+        this.scrollY = 0;
+        this.logs = [
+            { date: "12th April 2026", entries: [
+                "- Completed buttons UI design",
+                "- Finish mob gallery UI drawing",
+                "- Added flowing petals in main menu"
+            ]},
+            { date: "11th April 2026", entries: [
+                "- Battery body lightning: 69.",
+                "- Fixed Warp not teleporting.",
+                "- Warp is now affected by Golden Leaf & Golden Palm Leaf.",
+                "- New map UI and better setting"
+            ]},
+            { date: "9th April 2026", entries: [
+                "- Battery flower body lightning: 120 -> 100.",
+                "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.",
+                "- Amulet now allows all eggs to spawn."
+            ]},
+            { date: "7th April 2026", entries: [
+                "- Added new Hel biome with 15+ new enemies.",
+                "- Added spacetime tunnel system.",
+                "- Improved performance with chunk-based loading.",
+                "- Fixed petal rotation issues."
+            ]},
+            { date: "5th April 2026", entries: [
+                "- New item: Opal (crit chance & damage).",
+                "- Added hunting quest system.",
+                "- Added mob gallery.",
+                "- Balance changes: reduced boss spawn rates."
+            ]},
+            { date: "3rd April 2026", entries: [
+                "- Add Void and micro world",
+                "- Add SpacetimeTunnel",
+
+            ]},
+            { date: "1st April 2026", entries: [
+                "- changelog are not available before"
+            ]}
+        ];
+        this.panelW = 420;
+        this.panelH = 460;
+        this.closeRect = null;
+        this.totalContentH = 0;
+    }
+
+    draw(ctx) {
+        if (!this.visible) return;
+        const px = WIDTH - 1300 - this.panelW / 2;
+        const py = HEIGHT - 550 - this.panelH / 2;
+
+        // --- 背景 ---
+        ctx.fillStyle = '#4caf50';
+        ctx.beginPath();
+        ctx.roundRect(px, py, this.panelW, this.panelH, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#2e7d32';
+        ctx.lineWidth = 4;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // --- 标题位置修正 (加大号字体) ---
+        const titleX = px + this.panelW / 2;
+        const titleY = py + 35; // 稍微下移一点点以适应大字
+
+        ctx.font = 'bold 28px Arial'; // 22px -> 28px
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round';
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#000000';
+        ctx.strokeText('Changelog', titleX, titleY);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Changelog', titleX, titleY);
+
+        // --- 关闭按钮 ---
+        this.closeRect = [px + this.panelW - 50, py + 12, 38, 38]; // 稍微加宽一点
+        ctx.fillStyle = '#f44336';
+        ctx.beginPath();
+        ctx.roundRect(...this.closeRect, 8);
+        ctx.fill();
+
+        ctx.font = 'bold 22px Arial'; // 按钮文字加大
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.strokeText('✕', px + this.panelW - 31, py + 31);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('✕', px + this.panelW - 31, py + 31);
+
+        // --- 内容区 ---
+        const contentY = py + 70; // 标题变大，起始位下移
+        const contentH = this.panelH - 85;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(px + 10, contentY, this.panelW - 20, contentH);
+        ctx.clip();
+
+        let y = contentY + 10 - this.scrollY;
+        ctx.textAlign = 'left';
+
+        const drawTextWithStroke = (text, x, y, fontSize, fontWeight = 'normal') => {
+            ctx.font = `${fontWeight} ${fontSize}px Arial`;
+            ctx.textBaseline = 'top';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3; // 粗描边更有圆润感
+            ctx.strokeText(text, x, y);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, x, y);
+        };
+
+        for (let i = 0; i < this.logs.length; i++) {
+            const group = this.logs[i];
+
+            // 日期标题 (加大到 22px)
+            drawTextWithStroke(group.date, px + 16, y, 22, 'bold');
+            y += 32;
+
+            // 条目内容 (加大到 18px)
+            for (const entry of group.entries) {
+                const words = entry.split(' ');
+                let line = '';
+                // 预设字体以便测量
+                ctx.font = '18px Arial';
+
+                for (const word of words) {
+                    const test = line + word + ' ';
+                    // 增加边距感，宽度检测设为 panelW - 40
+                    if (ctx.measureText(test).width > this.panelW - 40 && line) {
+                        drawTextWithStroke(line, px + 16, y, 18);
+                        y += 24; // 行间距加大
+                        line = word + ' ';
+                    } else {
+                        line = test;
+                    }
+                }
+                if (line) {
+                    drawTextWithStroke(line.trim(), px + 16, y, 18);
+                    y += 24;
+                }
+                y += 6; // 段间距
+            }
+
+            // 分隔线
+            if (i < this.logs.length - 1) {
+                ctx.strokeStyle = '#388e3c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(px + 15, y + 8);
+                ctx.lineTo(px + this.panelW - 15, y + 8);
+                ctx.stroke();
+                y += 24;
+            }
+        }
+
+        this.totalContentH = y + this.scrollY - contentY;
+        ctx.restore();
+    }
+
+    handleClick(x, y) {
+        if (!this.visible) return false;
+
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) return false;
+
+        const px = canvas.width / 2 - this.panelW / 2;
+        const py = canvas.height / 2 - this.panelH / 2;
+
+        // 点击面板外关闭
+        if (x < px || x > px + this.panelW || y < py || y > py + this.panelH) {
+            this.visible = false;
+            return true;
+        }
+
+        // 关闭按钮
+        if (this.closeRect) {
+            const [cx, cy, cw, ch] = this.closeRect;
+            if (x >= cx && x <= cx + cw && y >= cy && y <= cy + ch) {
+                this.visible = false;
+                return true;
+            }
+        }
+
+        return true; // 在面板内，拦截点击
+    }
+
+    handleWheel(deltaY) {
+        if (!this.visible) return false;
+
+        const maxScroll = Math.max(0, (this.totalContentH || 0) - (this.panelH - 70));
+        this.scrollY = Math.max(0, Math.min(maxScroll, this.scrollY + deltaY));
+        return true;
+    }
+    handleScroll(deltaY) {
+            if (!this.visible) return false;
+
+            const contentH = this.panelH - 70;
+            const maxScroll = Math.max(0, (this.totalContentH || 0) - contentH);
+
+            // 滚动速度调整（deltaY 正值向下滚动）
+            const scrollAmount = deltaY * 0.8;
+            this.scrollY = Math.max(0, Math.min(maxScroll, this.scrollY + scrollAmount));
+
+            return true;
+        }
+    open() {
+        this.visible = true;
+        this.scrollY = 0;
+    }
+
+    close() {
+        this.visible = false;
+    }
+
+    toggle() {
+        this.visible = !this.visible;
+        if (this.visible) this.scrollY = 0;
+    }
+}
 class TalentSystem {
     constructor(player) {
         this.player = player;
@@ -3213,52 +3448,39 @@ class MobGallery {
 
         return { health, damage, armor };
     }
-
     getDropItems(mobType, mobRarity) {
+        // 获取该生物的所有掉落物品
         const dropItems = ENEMY_DROP_TABLE[mobType] || ["Leaf"];
         const result = [];
 
-        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
-                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        // 遍历所有掉落物品
+        for (const itemType of dropItems) {
+            // 计算所有稀有度的理论概率
+            const chances = this.calculateDropChances(itemType, mobRarity);
 
-        // 判断生物类型
-        const isSewerEnemy = ["ManHole", "Rat", "Roach", "PooStorm"].includes(mobType);
-        const isDigger = ["TrashDigger", "Digger", "MudDigger", "Biologist","Beekeeper","HelDigger","HelBeekeeper"].includes(mobType);
-        const isCancer = mobType === "Cancer" || mobType === "CancerCell";
-        const isStemCell = mobType === "StemCell";
+            // 收集所有概率大于0的稀有度
+            const entries = [];
+            for (const [rarity, chance] of Object.entries(chances)) {
+                if (chance > 0) {
+                    entries.push([rarity, chance]);
+                }
+            }
 
-        for (const itemType of dropItems.slice(0, 6)) {
+            // 按稀有度从高到低排序
+            entries.sort((a, b) => {
+                return RARITY_ORDER.indexOf(a[0]) - RARITY_ORDER.indexOf(b[0]);
+            });
+
+            // 只取前3种稀有度
+            const topEntries = entries.slice(0, 3);
+
+            if (topEntries.length === 0) continue;
+
             const dropChances = {};
-
-            // 根据物品类型和生物类型选择不同的掉落表
-            for (const rarity of rarities) {
-                let chance = 0;
-
-                // DNA 掉落
-                if (itemType === "DNA") {
-                    if (isStemCell) {
-                        const dnaRarity = getStemCellDNARarity?.(mobRarity) || "Common";
-                        chance = dnaRarity === rarity ? 100 : 0;
-                    } else if (isCancer) {
-                        const dnaRarity = getCancerDNARarity?.(mobRarity) || "Common";
-                        chance = dnaRarity === rarity ? 100 : 0;
-                    }
-                }
-                // 下水道蛋特殊掉落
-                else if (isSewerEnemy && (itemType.includes("egg") || itemType === "Sponge" ||
-                         itemType === "PooStick" || itemType === "Bubble Bomb")) {
-                    const rates = SEWEREGG_RARITY_DROP_RATES?.[mobRarity] || RARITY_DROP_RATES?.[mobRarity];
-                    chance = (rates?.[rarity] || 0) * 100;
-                }
-                // 普通掉落
-                else {
-                    const rates = RARITY_DROP_RATES?.[mobRarity];
-                    chance = (rates?.[rarity] || 0) * 100;
-                }
-
-                if (chance > 0.01) {
-                    dropChances[rarity] = chance.toFixed(2) + '%';
-                }
+            for (const [rarity, chance] of topEntries) {
+                // 转换为百分比，保留2位小数
+                const percent = (chance * 100).toFixed(2);
+                dropChances[rarity] = percent + '%';
             }
 
             result.push({
@@ -3268,6 +3490,51 @@ class MobGallery {
         }
 
         return result;
+    }
+
+    // 新增方法：计算理论掉落概率（不依赖随机）
+    calculateDropChances(itemType, mobRarity) {
+        const factor = ITEM_BASE_FACTOR[itemType] || ITEM_BASE_FACTOR["default"];
+        const base = RARITY_DROP_RATES[mobRarity];
+        if (!base) return {};
+
+        const weights = {};
+        let totalWeight = 0;
+
+        const availableRarities = Object.keys(base).filter(r => base[r] > 0);
+
+        availableRarities.forEach((rarity) => {
+            const baseProb = base[rarity];
+            const rarityIndex = RARITY_ORDER.indexOf(rarity);
+            let weight = baseProb * Math.pow(1 / factor, rarityIndex);
+            weights[rarity] = weight;
+            totalWeight += weight;
+        });
+
+        const chances = {};
+        for (const rarity of RARITY_ORDER) {
+            if (weights[rarity]) {
+                chances[rarity] = weights[rarity] / totalWeight;
+            }
+        }
+
+        return chances;
+    }
+
+    // 新增方法：获取最可能的掉落稀有度
+    getMostLikelyDropRarity(itemType, mobRarity) {
+        const chances = this.calculateDropChances(itemType, mobRarity);
+        let maxRarity = null;
+        let maxChance = 0;
+
+        for (const [rarity, chance] of Object.entries(chances)) {
+            if (chance > maxChance) {
+                maxChance = chance;
+                maxRarity = rarity;
+            }
+        }
+
+        return maxRarity;
     }
 
     getMobSprite(mobType, rarity, targetSize) {
@@ -3501,17 +3768,22 @@ class MobGallery {
         if (!this.hoveredMob) return;
 
         const mob = this.hoveredMob;
-
-
         const stats = this.getMobStats(mob.type, mob.rarity);
-        const drops = this.getDropItems(mob.type, mob.rarity);  // 传入 mob.rarity
-        // 布局常量
-        const tooltipWidth = 260;
-        const padding = 15;
-        const dropItemHeight = 48;
+        const drops = this.getDropItems(mob.type, mob.rarity);
+
+        // --- 1. 布局参数 ---
+        const itemSize = 54;
+        const padding = 16;
+        const itemGap = 12; // 格子之间的间距
+        // 动态计算宽度：左内边距 + 3个格子 + 2个间距 + 右内边距
+        const tooltipWidth = padding * 2 + (itemSize * 3) + (itemGap * 2) + 10;
+
         const headerHeight = 90;
-        const statsHeight = 80;
-        const tooltipHeight = headerHeight + statsHeight + (drops.length * dropItemHeight) + 10;
+        const statsHeight = 85;
+        const dropRowHeight = 100; // 略微增加高度以容纳概率文字
+
+        // 动态高度
+        const tooltipHeight = headerHeight + statsHeight + (drops.length * dropRowHeight) + 15;
 
         // 坐标计算
         let tx = this.mouseX + 20;
@@ -3521,91 +3793,99 @@ class MobGallery {
 
         ctx.save();
 
-        // 1. 背景
+        // --- 2. 背景与发光边框 ---
         ctx.shadowBlur = 20;
         ctx.shadowColor = 'rgba(0,0,0,0.6)';
-        ctx.fillStyle = 'rgba(15, 15, 25, 0.92)';
-        this.drawRoundedRect(ctx, tx, ty, tooltipWidth, tooltipHeight, 12);
+        ctx.fillStyle = 'rgba(15, 15, 25, 0.98)';
+        this.drawRoundedRect(ctx, tx, ty, tooltipWidth, tooltipHeight, 15);
         ctx.fill();
+
+        const mobColor = RARITY_COLORS[mob.rarity] || [255, 255, 255];
+        ctx.strokeStyle = `rgba(${mobColor[0]}, ${mobColor[1]}, ${mobColor[2]}, 0.5)`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // 2. 生物名称
+        // --- 3. 绘制名称与属性 ---
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        ctx.font = 'bold 24px Arial';
-        ctx.fillStyle = '#ff4d4d';
+        ctx.font = 'bold 22px Arial';
+        ctx.fillStyle = `rgb(${mobColor[0]}, ${mobColor[1]}, ${mobColor[2]})`;
         ctx.fillText(mob.name || mob.type, tx + padding, ty + padding);
 
-        // 3. 描述文字
-        ctx.font = '14px Arial';
-        ctx.fillStyle = '#ffffff';
-        const descText = `There are some ${mob.type.toLowerCase()}s inside of it.`;
-        ctx.fillText(descText, tx + padding, ty + padding + 32, tooltipWidth - (padding * 2));
-
-        // 4. 三围属性
         const sy = ty + headerHeight;
-        ctx.font = 'bold 17px Arial';
+        const drawStat = (label, val, color, y) => {
+            ctx.font = 'bold 15px Arial';
+            ctx.fillStyle = color;
+            ctx.fillText(label, tx + padding, sy + y);
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'right';
+            ctx.fillText(this.formatValue(val), tx + tooltipWidth - padding, sy + y);
+            ctx.textAlign = 'left';
+        };
+        drawStat('Health', stats.health, '#ff5e5e', 0);
+        drawStat('Damage', stats.damage, '#54a0ff', 25);
+        drawStat('Armor', stats.armor, '#ff9f43', 50);
 
-        ctx.fillStyle = '#ff5e5e';
-        ctx.fillText(`Health: ${this.formatValue(stats.health)}`, tx + padding, sy);
-
-        ctx.fillStyle = '#54a0ff';
-        ctx.fillText(`Damage: ${this.formatValue(stats.damage)}`, tx + padding, sy + 25);
-
-        ctx.fillStyle = '#ff9f43';
-        ctx.fillText(`Armor: ${this.formatValue(stats.armor)}`, tx + padding, sy + 50);
-
-        // 5. 掉落物列表
-        // 5. 掉落物列表
-        let dy = sy + 75;
-        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary",
-                          "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        // --- 4. 动态绘制掉落物 (限制3个) ---
+        let dy = sy + 85;
 
         for (const drop of drops) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-            this.drawRoundedRect(ctx, tx + padding, dy, tooltipWidth - (padding * 2), 55, 8);
-            ctx.fill();
+            let currentX = tx + padding;
+            // ✅ 获取前3种稀有度
+            const dropEntries = Object.entries(drop.chances).slice(0, 3);
 
-            // 物品图标
-            const dropIcon = this.getDropItemSprite(drop.name, 28);
-            if (dropIcon) {
-                ctx.drawImage(dropIcon, tx + padding + 8, dy + 13, 28, 28);
-            } else {
-                ctx.fillStyle = '#555';
-                ctx.beginPath();
-                ctx.arc(tx + padding + 22, dy + 27, 14, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            for (const [rarity, chanceStr] of dropEntries) {
+                const rarityColor = RARITY_COLORS[rarity] || [100, 100, 100];
+                const darkBg = [
+                    Math.max(0, rarityColor[0] - 80),
+                    Math.max(0, rarityColor[1] - 80),
+                    Math.max(0, rarityColor[2] - 80)
+                ];
 
-            // 物品名称
-            ctx.fillStyle = '#ddd';
-            ctx.font = 'bold 9px Arial';
-            ctx.textAlign = 'center';
-            let shortName = drop.name.length > 8 ? drop.name.substring(0, 6) + '..' : drop.name;
-            ctx.fillText(shortName, tx + padding + 22, dy + 50);
+                // A. 绘制卡片背景与边框
+                ctx.fillStyle = `rgb(${darkBg[0]}, ${darkBg[1]}, ${darkBg[2]})`;
+                ctx.fillRect(currentX, dy, itemSize, itemSize);
+                ctx.strokeStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(currentX, dy, itemSize, itemSize);
 
-            // 显示掉落概率（横向排列）
-            let chanceX = tx + padding + 55;
-            let shown = 0;
-            for (const rarity of rarities) {
-                const chance = drop.chances[rarity];
-                if (chance && shown < 5) {
-                    const rarityColor = RARITY_COLORS[rarity] || [255, 255, 255];
-                    ctx.fillStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
-                    ctx.font = '9px Arial';
-                    ctx.textAlign = 'left';
-                    // 显示缩写和概率
-                    let shortRarity = rarity.substring(0, 2);
-                    if (rarity === "Legendary") shortRarity = "Leg";
-                    if (rarity === "Mythic") shortRarity = "Myt";
-                    if (rarity === "Eternal") shortRarity = "Ete";
-                    ctx.fillText(`${shortRarity}:${chance}`, chanceX, dy + 18);
-                    chanceX += 48;
-                    shown++;
+                // B. 绘制物品图片
+                const itemImg = window.imageLoader?.getImage(drop.name, rarity, [itemSize - 12, itemSize - 12]);
+                if (itemImg) {
+                    ctx.drawImage(itemImg, currentX + 6, dy + 6, itemSize - 12, itemSize - 12);
                 }
+
+                // C. ✅ 绘制物品名字 (格子内底部)
+                ctx.save();
+                const fontSize = drop.name.length > 8 ? 8 : 9;
+                ctx.font = `bold ${fontSize}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "bottom";
+
+                // 黑色描边增强可读性
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 2;
+                ctx.strokeText(drop.name, currentX + itemSize / 2, dy + itemSize - 3);
+                ctx.fillStyle = "white";
+                ctx.fillText(drop.name, currentX + itemSize / 2, dy + itemSize - 3);
+                ctx.restore();
+
+                // D. 绘制概率百分比 (格子下方)
+                ctx.save();
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = `rgb(${rarityColor[0]}, ${rarityColor[1]}, ${rarityColor[2]})`;
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.strokeText(chanceStr, currentX + itemSize / 2, dy + itemSize + 15);
+                ctx.fillText(chanceStr, currentX + itemSize / 2, dy + itemSize + 15);
+                ctx.restore();
+
+                currentX += itemSize + itemGap;
             }
 
-            dy += 60;
+            dy += dropRowHeight;
         }
 
         ctx.restore();
@@ -6001,7 +6281,6 @@ class CollisionSystem {
         }
     }
     _handlePetalEnemyCollision(petal, enemy) {
-
         let actualEnemy = enemy;
         if (enemy.isSegment === true && enemy.parentEnemy) {
             actualEnemy = enemy.parentEnemy;
@@ -6016,6 +6295,33 @@ class CollisionSystem {
         }
 
         const currentItem = petal.getCurrentItem();
+
+        // ===== 新增：毒伤触发（在造成伤害之前）=====
+        // 检查花瓣是否有毒伤属性
+        if (currentItem && (currentItem.type === "Iris" || currentItem.type === "Pincer" || currentItem.type === "Bubonic Plague")) {
+            const config = ITEM_STATS[currentItem.type];
+            if (config && config.poison_damage) {
+                let poisonDamage = config.poison_damage;
+                let poisonDuration = (config.poison_duration || 3.0) * 1000;
+                let initialMultiplier = config.poison_initial_multiplier || 2.5;
+                let stableMultiplier = config.poison_stable_multiplier || 0.3;
+
+                // 应用稀有度倍数
+                const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
+                poisonDamage = Math.floor(poisonDamage * rarityMultiplier);
+
+                // 应用毒伤
+                if (petal.applyPoisonToEnemy) {
+                    petal.applyPoisonToEnemy(
+                        actualEnemy,
+                        poisonDamage,
+                        poisonDuration,
+                        initialMultiplier,
+                        stableMultiplier
+                    );
+                }
+            }
+        }
 
         // ===== ⚡ Lightning 特殊处理 =====
         if (currentItem && (currentItem.type === "Lightning" || currentItem.type === "Hel Lighting")) {
@@ -6084,14 +6390,13 @@ class CollisionSystem {
 
         // ===== 再承受伤害（添加冷却机制）=====
         if (!petal.isBroken && !petal.isReloading) {
-            // ✅ 为每个花瓣对每个敌人添加独立冷却（30次/秒 ≈ 33ms）
             if (!petal._lastDamageTimePerEnemy) petal._lastDamageTimePerEnemy = new Map();
             const enemyId = actualEnemy.id || actualEnemy;
             const now = Date.now();
             const lastTime = petal._lastDamageTimePerEnemy.get(enemyId) || 0;
-            const COOLDOWN_MS = 25; // 33ms ≈ 30次/秒
+            const COOLDOWN_MS = 25;
             if (now - lastTime < COOLDOWN_MS) {
-                return; // 冷却中，不造成伤害
+                return;
             }
             petal._lastDamageTimePerEnemy.set(enemyId, now);
 
@@ -6783,9 +7088,7 @@ class Item {
         return durability;
     }
 
-
     // 获取物品属性
-// 获取物品属性
     getStats() {
         const baseStats = ITEM_STATS[this.type] || {base_attack: 10, base_cooldown: 200};
 
@@ -6799,11 +7102,12 @@ class Item {
         }
 
         const isCactus = this.type === "Cactus" && baseStats.use_rarity_multiplier === true;
-        let attackPower, healthBonus = 0, durabilityBonus = 0;
+        let attackPower, attackCooldown, healthBonus = 0, durabilityBonus = 0;  // ← 添加 attackCooldown
 
         if (isCactus) {
             const baseAttack = baseStats.base_attack || 10;
             attackPower = baseAttack * rarityMultiplier;
+            attackCooldown = (baseStats.base_cooldown || 200) / rarityMultiplier;  // ← 添加
 
             const rawHealthBonus = baseStats.health_bonus || 0;
             healthBonus = rawHealthBonus * rarityMultiplier;
@@ -6822,6 +7126,7 @@ class Item {
             }
         } else {
             attackPower = (baseStats.base_attack || 10) * rarityMultiplier;
+            attackCooldown = (baseStats.base_cooldown || 200) / rarityMultiplier;  // ← 添加
             healthBonus = baseStats.health_bonus || 0;
         }
 
@@ -6837,9 +7142,9 @@ class Item {
         this.armor = armor;
 
         const stats = {
-            attack_power: attackPower || 0,
-            attack_cooldown: (baseStats.base_cooldown || 200) / rarityMultiplier,
-            rarity_color: this.color || [255,255,255],
+            attack_power: attackPower,
+            attack_cooldown: attackCooldown,  // ← 现在有定义了
+            rarity_color: this.color || [255, 255, 255],
             type: this.type,
             rarity: this.rarity,
             durability: this.durability,
@@ -6847,7 +7152,17 @@ class Item {
             isBroken: this.isBroken,
             reloadTime: this.reloadTime,
             baseReloadTime: this.baseReloadTime,
-            armor: armor
+            armor: this.armor,
+            // ========== 添加毒伤属性 ==========
+            poison_damage: baseStats.poison_damage,
+            poison_duration: baseStats.poison_duration,
+            poison_initial_multiplier: baseStats.poison_initial_multiplier,
+            poison_stable_multiplier: baseStats.poison_stable_multiplier,
+            // ========== 添加火焰属性 ==========
+            fire_damage: baseStats.fire_damage,
+            fire_duration: baseStats.fire_duration,
+            fire_init_mult: baseStats.fire_init_mult,
+            fire_ramp_mult: baseStats.fire_ramp_mult
         };
 
         // 确保所有数值都是有效数字
@@ -16120,163 +16435,87 @@ class EnemyDrawer {
         ctx.quadraticCurveTo(rightMidX, rightMidY, rightEndX, rightEndY);
         ctx.stroke();
     }
-    // ==================== 蚁后 ====================
-    drawQueenAnt(ctx, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
-        // 获取稀有度
-        const rarity = enemyObj?.rarity || "Common";
-        const rarityIndex = RARITY_LIST.indexOf(rarity);
+    drawQueenAnt(context, x, y, size, animationTimer, angleToPlayer, viewScale = 1.0) {
+        const scale = (size / 100) * viewScale * 0.45;  // 缩小一半
+        if (scale <= 0) return;
 
-        const totalScale = viewScale/1.5;
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer+Math.PI/2);
 
-        // 稀有度描边乘数
-        const STROKE_MULTIPLIERS = {
-            "Common": 1.0,
-            "Unusual": 1.1,
-            "Rare": 1.2,
-            "Epic": 1.5,
-            "Legendary": 1.8,
-            "Mythic": 2.2,
-            "Ultra": 2.6,
-            "Super": 3.0,
-            "Omega": 4.2,
-            "Eternal": 5.0
-        };
-        const strokeMult = STROKE_MULTIPLIERS[rarity] || 1.0;
+        const grey = '#6b6b6b';
+        const dark = '#2a2a2a';
+        const wingColor = 'rgba(139, 161, 169, 0.6)';
 
-        // 判断是否为友方
-        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        context.lineWidth = 6 * scale;  // 线宽减半
+        context.lineJoin = 'round';
 
-        // 颜色定义
-        let bodyColor, darkBodyColor, wingColor, antennaColor;
+        // 1. 身体底层（缩小）
+        context.fillStyle = grey;
+        context.strokeStyle = dark;
 
-        if (isFriendly) {
-            bodyColor = [255, 215, 0];
-            darkBodyColor = [200, 160, 0];
-            wingColor = [255, 215, 0, 0.5];
-            antennaColor = [0, 0, 0]; // 黑色触角
-        } else {
-            const baseGray = 110;
-            bodyColor = [baseGray, baseGray, baseGray];
-            darkBodyColor = [baseGray - 30, baseGray - 30, baseGray - 30];
-            wingColor = [200, 200, 200, 0.3];
-            antennaColor = [0, 0, 0];
-        }
+        // 尾部 (小圆)
+        context.beginPath();
+        context.arc(0, 32 * scale, 26 * scale, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
 
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angleToPlayer);
+        // 中段 (中圆)
+        context.beginPath();
+        context.arc(0, 12 * scale, 23 * scale, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
 
-        // ===== 基础常数已减半 =====
-        const smallBodyRadius = 20 * totalScale;
-        const bigBodyRadius = 27.5 * totalScale;
-        const bigBodyInnerRadius = 25 * totalScale;
+        // 2. 翅膀
+        context.fillStyle = wingColor;
+        const wingFlap = Math.sin(animationTimer * 10) * 0.15;
 
-        // 头部尺寸
-        const headRadius = smallBodyRadius * 1.1;
-        const headX = 22.5 * totalScale;
+        // 左翅膀
+        context.save();
+        context.translate(-8 * scale, 10 * scale);
+        context.rotate(wingFlap);
+        context.beginPath();
+        context.ellipse(-5 * scale, 10 * scale, 12 * scale, 38 * scale, 0.2, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
 
-        // 翅膀参数
-        const wingWidth = 65 * totalScale;
-        const wingHeight = 19 * totalScale;
-        const wingRightX = 17.5 * totalScale;
-        const wingSpeed = 6 + rarityIndex * 0.2;
-        const wingAngle = Math.sin(animationTimer * wingSpeed) * 30 * Math.PI / 180;
+        // 右翅膀
+        context.save();
+        context.translate(8 * scale, 10 * scale);
+        context.rotate(-wingFlap);
+        context.beginPath();
+        context.ellipse(5 * scale, 10 * scale, 12 * scale, 38 * scale, -0.2, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
 
-        // 身体位置偏移
-        const bodyOffset1 = -15 * totalScale;
-        const bodyOffset2 = 7.5 * totalScale;
-        // ========== 第1步：使用触角替代嘴巴 ==========
-        const antennaScale = totalScale * 0.8;
-        const antennaX = headX + headRadius * 0.8;
-        const antennaY = 0;
+        // 3. 触角
+        context.strokeStyle = dark;
+        context.lineWidth = 6 * scale;
+        context.lineCap = 'round';
+        const wobble = Math.sin(animationTimer * 5) * 2 * scale;
 
-        // 使用触角函数
-        this.drawAntAntenna(
-            ctx, antennaX, antennaY, 0, // 位置和角度（0表示朝右）
-            antennaScale, animationTimer,
-            antennaColor,                // 触角颜色
-            18,                          // antennaLen
-            4.0,                         // antennaWidth
-            0.25,                        // antennaWaveAmp
-            10,                           // antennaWaveFreq
-            1.1,                         // bendFactor
-            3,                           // startOffset
-            -4                            // endGap (控制外点距离)
-        );
-        // ========== 第1步：先绘制大后部身体 ==========
-        ctx.fillStyle = this.colorToCss(darkBodyColor);
-        ctx.beginPath();
-        ctx.arc(bodyOffset1, 0, bigBodyRadius, 0, Math.PI * 2);
-        ctx.fill();
+        // 左触角
+        context.beginPath();
+        context.moveTo(-5 * scale, -12 * scale);
+        context.quadraticCurveTo((-18 * scale) + wobble, -20 * scale, (-8 * scale) + wobble, -40 * scale);
+        context.stroke();
 
-        ctx.fillStyle = this.colorToCss(bodyColor);
-        ctx.beginPath();
-        ctx.arc(bodyOffset1, 0, bigBodyInnerRadius, 0, Math.PI * 2);
-        ctx.fill();
+        // 右触角
+        context.beginPath();
+        context.moveTo(5 * scale, -12 * scale);
+        context.quadraticCurveTo((18 * scale) - wobble, -20 * scale, (8 * scale) - wobble, -40 * scale);
+        context.stroke();
 
-        // 大身体描边
-        ctx.strokeStyle = this.colorToCss(darkBodyColor);
-        ctx.lineWidth = Math.max(3, 2 * totalScale * strokeMult);
-        ctx.beginPath();
-        ctx.arc(bodyOffset1, 0, bigBodyRadius, 0, Math.PI * 2);
-        ctx.stroke();
+        // 4. 头部
+        context.fillStyle = grey;
+        context.strokeStyle = dark;
+        context.lineWidth = 6 * scale;
+        context.beginPath();
+        context.arc(0, -9 * scale, 20 * scale, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
 
-        // ========== 第2步：绘制小前部身体 ==========
-        ctx.fillStyle = this.colorToCss(darkBodyColor);
-        ctx.beginPath();
-        ctx.arc(bodyOffset2, 0, smallBodyRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = this.colorToCss(bodyColor);
-        ctx.beginPath();
-        ctx.arc(bodyOffset2, 0, smallBodyRadius - 2.5 * totalScale, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 小身体描边
-        ctx.strokeStyle = this.colorToCss(darkBodyColor);
-        ctx.lineWidth = Math.max(3, 2 * totalScale * strokeMult);
-        ctx.beginPath();
-        ctx.arc(bodyOffset2, 0, smallBodyRadius, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // ========== 第3步：绘制翅膀 ==========
-        // 左翅膀（上）
-        ctx.save();
-        ctx.translate(wingRightX, -11 * totalScale);
-        ctx.rotate(wingAngle);
-        ctx.fillStyle = this.colorToCss(wingColor);
-        ctx.beginPath();
-        ctx.ellipse(-wingWidth/2, 0, wingWidth/2, wingHeight/2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // 右翅膀（下）
-        ctx.save();
-        ctx.translate(wingRightX, 11 * totalScale);
-        ctx.rotate(-wingAngle);
-        ctx.fillStyle = this.colorToCss(wingColor);
-        ctx.beginPath();
-        ctx.ellipse(-wingWidth/2, 0, wingWidth/2, wingHeight/2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // ========== 第4步：绘制头部 ==========
-        ctx.fillStyle = this.colorToCss(bodyColor);
-        ctx.beginPath();
-        ctx.arc(headX, 0, headRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.save();
-        ctx.strokeStyle = this.colorToCss(darkBodyColor);
-        const baseHeadStroke = 2;
-        const headStrokeWidth = Math.max(3, baseHeadStroke * totalScale * strokeMult);
-        ctx.lineWidth = headStrokeWidth;
-        ctx.stroke();
-        ctx.restore();
-
-
-
-        ctx.restore();
+        context.restore();
     }
     // ==================== 螃蟹 ====================
     drawCrab(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
@@ -22723,6 +22962,7 @@ class ShopSystem {
             "Frost Digger egg": 105,
             "Hel Digger egg": 108,
             "Hel Beekeeper egg": 104,
+            "Bubonic Plague":120,
             // ==================== 基础蛋类 ====================
             "Egg": 30,
             "Ant Egg": 12,
@@ -27296,9 +27536,9 @@ class Enemy {
             "Epic": 54,
             "Legendary": 405,
             "Mythic": 2430,
-            "Ultra": 15240,
+            "Ultra": 13240,
             "Super": 50574,
-            "Omega": 342510,
+            "Omega": 312510,
             "Eternal": 1059830
         };
         const healthMultiplier = ENEMY_HEALTH_MULTIPLIERS[this.rarity] || 1;
@@ -27438,21 +27678,21 @@ class Enemy {
         this.isLightningEnemy = LIGHTNING_ENEMIES.has(enemyType);
         // ===== 毒属性 =====
         const POISON_STATS = {
-            "ToxicDragon":    { damage: 30, duration: 4000, init: 3.0, stable: 0.4 },
-            "Bacteria":       { damage: 20,  duration: 3000, init: 2.5, stable: 0.3 },
-            "Bacteriophage":  { damage: 15,  duration: 3000, init: 2.5, stable: 0.3 },
-            "WhiteBloodCell": { damage: 20,  duration: 3000, init: 2.0, stable: 0.3 },
-            "Cancer":         { damage: 100, duration: 4000, init: 2.5, stable: 0.4 },
-            "StemCell":       { damage: 70,  duration: 4000, init: 2.2, stable: 0.3 },
-            "Roach":          { damage: 40,  duration: 3000, init: 2.5, stable: 0.3 },
+            "ToxicDragon":    { damage: 15, duration: 4000, init: 3.0, stable: 0.4 },
+            "Bacteria":       { damage: 15,  duration: 3000, init: 2.5, stable: 0.3 },
+            "Bacteriophage":  { damage: 12,  duration: 3000, init: 2.5, stable: 0.3 },
+            "WhiteBloodCell": { damage: 18,  duration: 3000, init: 2.0, stable: 0.3 },
+            "Cancer":         { damage: 90, duration: 4000, init: 2.5, stable: 0.4 },
+            "StemCell":       { damage: 60,  duration: 4000, init: 2.2, stable: 0.3 },
+            "Roach":          { damage: 30,  duration: 3000, init: 2.5, stable: 0.3 },
             "PooStorm":          { damage: 40,  duration: 3000, init: 2.5, stable: 0.3 },
-            "Virus":          { damage: 60,  duration: 3000, init: 2.8, stable: 0.2 },
-            "Rat":            { damage: 120, duration: 4000, init: 2.5, stable: 0.4 },
+            "Virus":          { damage: 55,  duration: 3000, init: 2.8, stable: 0.2 },
+            "Rat":            { damage: 90, duration: 3000, init: 2.5, stable: 0.4 },
             "Spider":         { damage: 8,  duration: 3000, init: 2.5, stable: 0.3 },
             "Parasite":         { damage: 20,  duration: 3000, init: 2.2, stable: 0.3 },
             "HelSpider":      { damage: 25, duration: 4000, init: 3.0, stable: 0.4 },
             "Scorpion":       { damage: 8, duration: 4000, init: 3.0, stable: 0.4 },
-            "Biologist":         { damage: 20,  duration: 3000, init: 2.2, stable: 0.4 },
+            "Biologist":         { damage: 5,  duration: 3000, init: 2.2, stable: 0.4 },
         };
         const poisonCfg = POISON_STATS[enemyType];
         if (poisonCfg) {
@@ -27473,7 +27713,7 @@ class Enemy {
             "HelHornet":     { damage: 3, duration: 2500, init: 0.5, ramp: 1.8 },
             "HelBeekeeper":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
             "HelDigger":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.2 },
-            "GraveDigger":   { damage: 80, duration: 3000, init: 0.6, ramp: 2.8 },
+            "GraveDigger":   { damage: 80, duration: 4000, init: 0.6, ramp: 2.8 },
         };
 
         const flameCfg = FLAME_STATS[enemyType];
@@ -28012,15 +28252,15 @@ class Enemy {
             case "WhiteBloodCell": return [125, 25, 50, 350, 30];
             case "Bee": return [50, 22, 90, 200, 50];
             case "Bacteriophage": return [80, 25, 100, 300, 30];
-            case "QueenAnt": return [250, 30, 70, 400, 20];
-            case "Squid": return [300, 20, 100, 500, 50];
+            case "QueenAnt": return [250, 30, 100, 400, 20];
+            case "Squid": return [300, 20, 110, 500, 50];
             case "WorkerFireAnt": return [50, 25, 80, 300, 20];
             case "SoldierFireAnt": return [100, 20, 50, 300, 25];
             case "BabyFireAnt": return [25, 20, 20, 400, 10];
             case "FireAntOvermind": return [300, 45, 10, 8000, 15];
             case "FireAntHole": return [750, 60, 0, 10000, 20];
             case "Cancer": return [330, 25, 40, 2000, 10];
-            case "Parasite": return [100, 15, 105, 100, 22];
+            case "Parasite": return [100, 15, 120, 100, 22];
             case "Leech": return [90, 15, 110, 100, 20];
             case "Sponge": return [100, 30, 0, 500, 10];
             case "Scallop": return [100, 25, 40, 450, 25];
@@ -28039,7 +28279,7 @@ class Enemy {
             case "WhiteHole":    return [2000, 40, 0,  40000, 70];
             case "NeutronStar":  return [8000, 45, 0,  80000, 200];
             case "Alien":        return [400,  28, 120, 1000, 80];
-            case "UFO":          return [2000,  38, 140, 20000, 20];
+            case "UFO":          return [2000,  45, 140, 20000, 20];
             case "Star":         return [2000, 50, 0,  30000, 50];
             case "Asteroid":     return [300,  25, 100,  700,  60];
             case "Ghost":         return [150, 25, 80,  100, 5];
@@ -28047,8 +28287,8 @@ class Enemy {
             case "SpacetimeTunnel": return [1, 60, 0, 0, 0];
             case "ManHole": return [900, 50, 0, 15000, 50];
             case "Fly": return [25, 24, 60, 200, 10];
-            case "Rat": return [500, 30, 100, 900, 220];
-            case "Roach": return [350, 28, 130, 500, 120];
+            case "Rat": return [500, 30, 130, 900, 200];
+            case "Roach": return [350, 28, 380, 500, 120];
             case "QueenBee": return [350, 26, 100, 500, 100];
             case "PooStorm": return [600, 22, 40 + Math.random() * 10, 300, 100];
             case "TrashDigger": return [230, 25, 100, 550, 180];
@@ -28062,11 +28302,11 @@ class Enemy {
             case "Barnacle": return [400, 25, 1, 10000, 20];
             case "Ice Dragon": return [320, 25, 120, 550, 80];
             case "Ice Cube": return [300, 28, 1, 600, 40];
-            case "Snowman": return [100, 22, 50, 700, 30];
+            case "Snowman": return [100, 22, 80, 700, 30];
             case "SnowStorm": return [100, 22, 50, 400, 90];
             case "Tick": return [80, 20, 150, 700, 40];
             case "Igloo": return [1000, 50, 0, 14000, 30];
-            case "SlagMight": return [50, 25, 150, 200, 200];
+            case "SlagMight": return [50, 25, 300, 200, 200];
             case "ArcticSpider": return [150, 25, 120, 300, 20];
             case "ArcticSpiderCave": return [750, 55, 0, 12000, 30];
             case "Shipwreck": return [1000, 48, 0, 150000, 40];
@@ -30850,6 +31090,8 @@ class PoisonSystem {
         this.startTime = Date.now();
         this.lastTickTime = Date.now();
         this.tickInterval = 100;
+        this.stackCount = 1;
+        this.maxStack = 256;  // 默认最大 256 层
 
         // 计算各阶段参数
         this.decayDuration = duration * 0.3;      // 衰减阶段占30%时间
@@ -30959,24 +31201,34 @@ class PoisonSystem {
         }
     }
 
-    // 重置毒伤（叠加时使用）
     reset() {
         this.startTime = Date.now();
         this.lastTickTime = Date.now();
-        this.currentDamage = this.baseDamage * this.initialMultiplier;
         this.active = true;
+        this.currentDamage = this.baseDamage * this.initialMultiplier;
     }
 
-    // 叠加毒伤（新毒伤与旧毒伤合并）
     stack(newPoison) {
-        // 取更长的持续时间
-        this.duration = Math.max(this.duration, newPoison.duration);
-        // 取更高的基础伤害
-        this.baseDamage = Math.max(this.baseDamage, newPoison.baseDamage);
-        // 重置计时器
+        // 检查是否已达到最大层数
+        if (this.stackCount >= this.maxStack) {
+            // 已达最大层数，只刷新时间，不叠加伤害
+            this.reset();
+            return;
+        }
+
+        // 叠加层数
+        this.stackCount++;
+
+        // 叠加伤害
+        this.baseDamage += newPoison.baseDamage;
+        this.currentDamage = this.baseDamage * this.initialMultiplier;
+        this.totalDamageDealt += newPoison.totalDamageDealt;
+
+        // 刷新时间
         this.reset();
-        // 重新计算衰减
-        this.decayPerTick = this._calculateDecayPerTick();
+
+        // 调试日志（可选）
+        // console.log(`[毒伤] 叠加层数: ${this.stackCount}/${this.maxStack}, 当前伤害: ${this.currentDamage}`);
     }
 
     // 获取毒伤统计
@@ -31258,22 +31510,45 @@ class FlameManager {
 // ==================== 毒伤管理器 ====================
 class PoisonManager {
     constructor() {
-        this.activePoisons = new Map();  // 存储每个目标的毒伤效果
+        // 存储每个目标的毒伤效果（单个 PoisonSystem）
+        this.activePoisons = new Map();
     }
 
-    applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+    /**
+     * 应用毒伤
+     * @param {Object} target - 目标对象
+     * @param {Object} source - 伤害来源
+     * @param {number} baseDamage - 基础伤害
+     * @param {number} duration - 持续时间（毫秒）
+     * @param {number} initialMultiplier - 初始倍率
+     * @param {number} stableMultiplier - 稳定倍率
+     * @param {boolean} canStack - true=合并模式（伤害叠加），false=原版排队模式
+     */
+    applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5, canStack = true) {
         if (!target || target.isDead) return false;
 
-        // 直接用对象引用作为 Map key，不需要 id
         const newPoison = new PoisonSystem(source, baseDamage, duration, initialMultiplier, stableMultiplier);
 
         if (this.activePoisons.has(target)) {
-            this.activePoisons.get(target).stack(newPoison);
+            const existingPoison = this.activePoisons.get(target);
+
+            if (canStack) {
+                // ===== 模式1：合并模式（stack）=====
+                // 新毒伤直接合并到旧毒伤，伤害叠加，时间重置
+                existingPoison.stack(newPoison);
+            } else {
+                // ===== 模式2：原版排队模式（不 stack）=====
+                // 新毒伤要等旧毒伤结束后才开始
+                // 什么都不做，保持原毒伤不变
+                // 新毒伤会被丢弃，等旧毒伤结束后才能施加新毒伤
+                return false;
+            }
         } else {
+            // 首次毒伤
             this.activePoisons.set(target, newPoison);
         }
 
-        // ✅ 添加：如果是玩家中毒，更新状态栏
+        // 添加状态栏效果
         if (target.isPlayer === true && target.statusBar) {
             const durationSec = duration / 1000;
             target.statusBar.addEffect("poison", durationSec);
@@ -31284,58 +31559,88 @@ class PoisonManager {
 
     updateAll(gameInstance) {
         const gi = gameInstance || window.gameInstance;
-        const toRemove = [];
+        const targetsToRemove = [];
 
         for (const [target, poison] of this.activePoisons) {
+            if (!target || target.isDead) {
+                targetsToRemove.push(target);
+                continue;
+            }
+
             const damage = poison.updateAndTick();
             if (damage > 0 && !target.isDead) {
-
-                if (typeof target.takeDamage === 'function') {
-                    target.takeDamage(damage, "poison");
-                } else {
-                    target.health -= damage;
-                }
-
-                // 显示伤害数字
-                if (gi?.addDamageNumber) {
-                    const isPlayer = target.isPlayer === true;
-                    gi.addDamageNumber(
-                        isPlayer ? WIDTH/2 : target.physicsBody.position.x,
-                        isPlayer ? HEIGHT/2-30 : target.physicsBody.position.y,
-                        Math.floor(damage),
-                        "poison"
-                    );
-                }
-
-                if (target.health <= 0 && !target.isDead) {
-                    target.isDead = true;
-
-                    // ✅ 只有非友方生物才掉落物品和给经验
-                    if (!target.isFriendly) {
-                        if (gi && typeof gi.dropCard === 'function') gi.dropCard(target);
-                        if (gi?.player && typeof gi.player.gainXpFromKill === 'function')
-                            gi.player.gainXpFromKill(target.rarity || 'Common', target.type);
-                        if (gi?.mobGallery && target.type && target.rarity)
-                            gi.mobGallery.recordKill(target.type, target.rarity);
-                    }
-
-                    if (gi) { gi.score += 20; gi.enemiesKilled++; }
-                    if (gi?.huntingQuestSystem && target.type && target.rarity && !target.isFriendly)
-                        gi.huntingQuestSystem.updateProgress(target.type, target.rarity);
-
-                    if (gi?.enemies) {
-                        const index = gi.enemies.indexOf(target);
-                        if (index !== -1) gi.enemies.splice(index, 1);
-                    }
-                }
+                this._applyDamage(target, damage, gi);
             }
-            if (!poison.isActive()) toRemove.push(target);
+
+            if (!poison.isActive()) {
+                targetsToRemove.push(target);
+            }
         }
 
-        for (const target of toRemove) {
+        // 移除失效的目标
+        for (const target of targetsToRemove) {
             this.activePoisons.delete(target);
-            if (target.isPlayer === true && target.statusBar)
+            if (target.isPlayer === true && target.statusBar) {
                 target.statusBar.removeEffect("poison");
+            }
+        }
+    }
+
+    // 应用伤害
+    _applyDamage(target, damage, gameInstance) {
+        if (typeof target.takeDamage === 'function') {
+            target.takeDamage(damage, "poison");
+        } else {
+            target.health -= damage;
+        }
+
+        // 显示伤害数字
+        if (gameInstance?.addDamageNumber) {
+            const isPlayer = target.isPlayer === true;
+            gameInstance.addDamageNumber(
+                isPlayer ? WIDTH / 2 : (target.physicsBody?.position?.x || target.x),
+                isPlayer ? HEIGHT / 2 - 30 : (target.physicsBody?.position?.y || target.y),
+                Math.floor(damage),
+                "poison"
+            );
+        }
+
+        // 处理死亡
+        if (target.health <= 0 && !target.isDead) {
+            this._handleTargetDeath(target, gameInstance);
+        }
+    }
+
+    // 处理目标死亡
+    _handleTargetDeath(target, gameInstance) {
+        target.isDead = true;
+
+        // 只有非友方生物才掉落物品和给经验
+        if (!target.isFriendly) {
+            if (gameInstance && typeof gameInstance.dropCard === 'function') {
+                gameInstance.dropCard(target);
+            }
+            if (gameInstance?.player && typeof gameInstance.player.gainXpFromKill === 'function') {
+                gameInstance.player.gainXpFromKill(target.rarity || 'Common', target.type);
+            }
+            if (gameInstance?.mobGallery && target.type && target.rarity) {
+                gameInstance.mobGallery.recordKill(target.type, target.rarity);
+            }
+        }
+
+        if (gameInstance) {
+            gameInstance.score += 20;
+            gameInstance.enemiesKilled++;
+        }
+
+        if (gameInstance?.huntingQuestSystem && target.type && target.rarity && !target.isFriendly) {
+            gameInstance.huntingQuestSystem.updateProgress(target.type, target.rarity);
+        }
+
+        // 从敌人列表中移除
+        if (gameInstance?.enemies) {
+            const index = gameInstance.enemies.indexOf(target);
+            if (index !== -1) gameInstance.enemies.splice(index, 1);
         }
     }
 
@@ -31348,18 +31653,11 @@ class PoisonManager {
     // 清除目标的毒伤
     clearPoison(target) {
         this.activePoisons.delete(target);
+        if (target.isPlayer === true && target.statusBar) {
+            target.statusBar.removeEffect("poison");
+        }
+    }
 
-        // ✅ 添加：清除时也移除状态栏效果
-        if (target.isPlayer === true && target.statusBar) {
-            target.statusBar.removeEffect("poison");
-        }
-    }
-    clearPoison(target) {
-        this.activePoisons.delete(target);
-        if (target.isPlayer === true && target.statusBar) {
-            target.statusBar.removeEffect("poison");
-        }
-    }
     // 获取所有活跃毒伤数量
     getActiveCount() {
         return this.activePoisons.size;
@@ -31828,7 +32126,7 @@ class Petal {
 
                 // ✅ 改为给物理身体一个“初速度”，力度根据稀有度决定
                 const rarityMult = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
-                const pushForce = 15 + Math.log(rarityMult) * 10;
+                const pushForce = 50 + Math.log(rarityMult) * 15;
 
                 // 1. 设置物理速度
                 this.player.physicsBody.velocity.x = dirX * pushForce;
@@ -31836,7 +32134,7 @@ class Petal {
 
                 // 2. 核心：标记玩家正在“反弹状态”，禁用手动移动干扰
                 this.player.isBouncing = true;
-                this.player.bounceCooldown = 250; // 持续 0.25 秒的物理滑行
+                this.player.bounceCooldown = 1000; // 持续 0.25 秒的物理滑行
             }
 
             // 破碎并重载
@@ -31859,7 +32157,7 @@ class Petal {
         const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
 
         // 降低基础力度，增加可控性
-        const basePush = 20;
+        const basePush = 200;
         const pushForce = basePush * mult;
 
         const dx = this.worldX - this.player.physicsBody.position.x;
@@ -31883,7 +32181,7 @@ class Petal {
 
         this.player.isBouncing = true;
         // 关键：给一个摩擦力大的状态，让玩家慢慢停下，而不是永远滑行
-        setTimeout(() => { this.player.isBouncing = false; }, 200);
+        setTimeout(() => { this.player.isBouncing = false; }, 400);
 
     }
     // 在 Petal 类中添加
@@ -32992,7 +33290,7 @@ class Petal {
                 "HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg","Hel Digger egg",
                 "Hel Beekeeper egg","FireStick","Photon egg","Electron egg","ElectronCloud egg",
                 "Proton egg","Atom egg","BlackHole egg","WhiteHole egg","NeutronStar egg",
-                "Star egg","Asteroid egg","Alien egg","UFO egg","Ghost egg","GraveStone egg"
+                "Star egg","Asteroid egg","Alien egg","UFO egg","Ghost egg","GraveStone egg","AlienDigger egg","GraveDigger egg"
             ]);
 
             if (this.hasAntennae) {
@@ -36532,29 +36830,6 @@ class Player {
                             }
                         }
 
-                        // Iris / Pincer：毒伤效果
-                        if (petal.itemType === "Iris" || petal.itemType === "Pincer") {
-                            const currentItem = petal.getCurrentItem();
-                            if (currentItem && !enemy.isDead) {
-                                const stats = currentItem.getStats();
-                                let poisonDamage = stats.poison_damage || 8;
-                                let poisonDuration = (stats.poison_duration || 3.0) * 1000;
-                                let initialMultiplier = stats.poison_initial_multiplier || 2.5;
-                                let stableMultiplier = stats.poison_stable_multiplier || 0.3;
-
-                                const rarityMultiplier = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
-                                poisonDamage = Math.floor(poisonDamage * Math.sqrt(rarityMultiplier));
-
-                                petal.applyPoisonToEnemy(
-                                    enemy,
-                                    poisonDamage,
-                                    poisonDuration,
-                                    initialMultiplier,
-                                    stableMultiplier
-                                );
-                            }
-                        }
-
                         // Web：减速效果
                         if (petal.itemType === "Web") {
                             const applied = petal.applyWeb(enemy);
@@ -37239,21 +37514,8 @@ class HuntingQuestSystem {
     // ==================== 任务核心方法 ====================
 
     getAvailableMobsByRarity() {
-        const allMobs = [
-            "Spider", "Crab", "Beetle", "Soldier Ant", "Worker Ant", "Bush",
-            "Ladybug", "Centipede", "Cactus", "Anthill", "Sandstorm", "Rock",
-            "StemCell", "Bacteria", "RedBloodCell", "WhiteBloodCell", "Bee",
-            "QueenAnt", "WorkerFireAnt", "SoldierFireAnt", "BabyFireAnt",
-            "FireAntOvermind", "FireAntHole", "Cancer", "Parasite", "Leech",
-            "Sponge", "Scallop", "Bubble", "Hive", "Starfish", "Jellyfish",
-            "CrabHole", "ManHole", "Fly", "Rat", "Roach", "QueenBee",
-            "PooStorm", "TrashDigger", "Digger", "MudDigger", "Virus",
-            "Biologist", "Beekeeper", "Square", "Barnacle", "Ice Dragon",
-            "Ice Cube", "Snowman", "SnowStorm", "Tick", "Igloo", "SlagMight",
-            "ArcticSpider", "ArcticSpiderCave", "Shipwreck", "PirateDigger",
-            "StickBug", "Soldier Termite", "Worker Termite", "TermiteHole",
-            "TermiteOvermind", "Wasp", "Firefly", "Mantis", "Scorpion"
-        ];
+        // 从 ENEMY_DROP_TABLE 获取所有生物类型
+        const allMobs = Object.keys(ENEMY_DROP_TABLE || []);
 
         const mobsByRarity = {
             "Ultra": [],
@@ -37263,15 +37525,14 @@ class HuntingQuestSystem {
         };
 
         for (const mob of allMobs) {
-            const completedUltra = this.completedToday.get("Ultra") || new Set();
-            const completedSuper = this.completedToday.get("Super") || new Set();
-            const completedOmega = this.completedToday.get("Omega") || new Set();
-            const completedMythic = this.completedToday.get("Mythic") || new Set();
+            if (!mob || mob === "SpacetimeTunnel") continue;
 
-            if (!completedUltra.has(mob)) mobsByRarity["Ultra"].push(mob);
-            if (!completedSuper.has(mob)) mobsByRarity["Super"].push(mob);
-            if (!completedOmega.has(mob)) mobsByRarity["Omega"].push(mob);
-            if (!completedMythic.has(mob)) mobsByRarity["Mythic"].push(mob);
+            const completed = this.completedToday.get(mob) || new Set();
+
+            if (!completed.has("Ultra")) mobsByRarity["Ultra"].push(mob);
+            if (!completed.has("Super")) mobsByRarity["Super"].push(mob);
+            if (!completed.has("Omega")) mobsByRarity["Omega"].push(mob);
+            if (!completed.has("Mythic")) mobsByRarity["Mythic"].push(mob);
         }
 
         return mobsByRarity;
@@ -37358,7 +37619,6 @@ class HuntingQuestSystem {
             this.lastResetDate = today;
             this.initDailyQuests();
             this.saveQuests();
-            console.log(`📅 Daily quests reset!`);
         }
     }
 
@@ -37456,10 +37716,6 @@ class HuntingQuestSystem {
         return true;
     }
 
-
-    // ──────────────────────────────────────────────────────────────
-    // 【MainMenu】新增辅助方法 _getQuestPanelRect()
-    // ──────────────────────────────────────────────────────────────
     _getQuestPanelRect() {
         const W  = this.WIDTH  || window.innerWidth;
         const H  = this.HEIGHT || window.innerHeight;
@@ -37471,10 +37727,8 @@ class HuntingQuestSystem {
     }
 
     replaceQuest(completedQuest) {
-    console.log(`🔄 Replacing quest: ${completedQuest.rarity} ${completedQuest.targetMob}`);
 
     const newMob = this.getRandomMob(completedQuest.rarity, completedQuest.targetMob);
-    console.log(`   New mob: ${newMob || 'none'}`);
 
     if (newMob) {
         const index = this.quests.findIndex(q => q.id === completedQuest.id);
@@ -37551,6 +37805,7 @@ class HuntingQuestSystem {
 class MainMenu {
     constructor(player, autoSaveSystem, bonusSystem) {
         this.player = player;
+        this.changelog = new ChangelogPanel();
         this.autoSaveSystem = autoSaveSystem;
         this.bonusSystem = bonusSystem;
         this._questCardRects = [];
@@ -37560,12 +37815,13 @@ class MainMenu {
         this.BUTTON_COLOR = [70, 70, 100];
         this.BUTTON_HOVER_COLOR = [100, 100, 150];
         this.talentButton = [20, 155, 100, 35];
-        this.mobGalleryButton = [WIDTH - 220, HEIGHT - 80, 200, 60];
-
+        this.mobGalleryButton = [20, 200, 100, 35];
         // 图鉴按钮颜色
+        this.spriteCache = new Map();
         this.MOB_GALLERY_BUTTON_COLOR = [155, 89, 182];
         this.MOB_GALLERY_BUTTON_HOVER_COLOR = [142, 68, 173];
-
+        this.floatingPetals = [];
+        this.initFloatingPetals();
         // ========== 9个生物群系的颜色配置 ==========
         this.BIOME_COLORS = {
             "Plain": [102, 187, 106],
@@ -37614,13 +37870,14 @@ class MainMenu {
         this.EXTRA_BONUS_ACTIVE_COLOR = [76, 175, 80];
         this.EXTRA_BONUS_PERMANENT_COLOR = [156, 39, 176];
         this.EXTRA_BONUS_DISABLED_COLOR = [100, 100, 100];
-
+        // ========== 新增：Changelog 按钮（设置按钮右边）==========
+        this.changelogButton = [150, 20, 40, 40];
         this.LOADOUT_BUTTON_COLOR = [155, 89, 182];
         this.LOADOUT_BUTTON_HOVER_COLOR = [142, 68, 173];
 
         this.HUNTING_QUEST_BUTTON_COLOR = [46, 204, 113];
         this.HUNTING_QUEST_BUTTON_HOVER_COLOR = [39, 174, 96];
-
+        this.petalImages = [];
         this.RARITY_COLOR_MAP = {
             "Common": "#00cc00", "Unusual": "#cccc00", "Rare": "#0066cc",
             "Epic": "#9932cc", "Legendary": "#cc0000", "Mythic": "#00cccc",
@@ -37754,15 +38011,154 @@ class MainMenu {
         }
         return false;
     }
+    updateAvailablePetalImages() {
+        // 清空并重新获取玩家当前拥有的花瓣图片
+        this.availablePetalImages = [];
+        const slots = this.player?.quickSlot?.slots || [];
 
+        slots.forEach(slot => {
+            if (slot?.type) {
+                const img = window.imageLoader?.getImage(slot.type, slot.rarity);
+                if (img) this.availablePetalImages.push(img);
+            }
+        });
+
+        // 如果没有，使用默认图片
+        if (this.availablePetalImages.length === 0) {
+            ["Leaf", "Wing", "Claw"].forEach(t => {
+                const img = window.imageLoader?.getImage(t, "Common");
+                if (img) this.availablePetalImages.push(img);
+            });
+        }
+
+        // 更新所有现有花瓣的图片引用（随机替换一部分）
+        if (this.floatingPetals && this.floatingPetals.length > 0 && this.availablePetalImages.length > 0) {
+            for (const petal of this.floatingPetals) {
+                // 30% 概率更换图片，避免全部瞬间变化
+                if (Math.random() < 0.3) {
+                    petal.imgRef = this.availablePetalImages[Math.floor(Math.random() * this.availablePetalImages.length)];
+                }
+            }
+        }
+
+        console.log(`✅ 更新花瓣图片缓存: ${this.availablePetalImages.length} 种图片`);
+    }
+    updateFloatingPetals(dt) {
+        if (!this.floatingPetals || this.floatingPetals.length === 0) return;
+
+        const W = this.WIDTH;
+        const H = this.HEIGHT;
+        const len = this.floatingPetals.length;
+
+        // 实时获取最新的图片列表
+        const currentImages = [];
+        const slots = this.player?.quickSlot?.slots || [];
+        slots.forEach(slot => {
+            if (slot?.type) {
+                const img = window.imageLoader?.getImage(slot.type, slot.rarity);
+                if (img) currentImages.push(img);
+            }
+        });
+
+        // 如果没有图片，使用默认
+        if (currentImages.length === 0) {
+            ["Leaf", "Wing", "Claw"].forEach(t => {
+                const img = window.imageLoader?.getImage(t, "Common");
+                if (img) currentImages.push(img);
+            });
+        }
+
+        const imgLen = currentImages.length;
+        if (imgLen === 0) return;
+
+        for (let i = 0; i < len; i++) {
+            const p = this.floatingPetals[i];
+            if (!p) continue;
+
+            p.x += p.speedX * dt;
+            p.y += p.speedY * dt;
+            p.rotation += p.rotationSpeed * dt;
+
+            if (p.x > W + p.size) {
+                p.x = -p.size;
+                p.y = Math.random() * H;
+                // 重置时使用最新的图片
+                p.imgRef = currentImages[Math.floor(Math.random() * imgLen)];
+            }
+            if (p.y > H + p.size) {
+                p.y = -p.size;
+            } else if (p.y < -p.size) {
+                p.y = H + p.size;
+            }
+        }
+    }
+    async initFloatingPetals() {
+        this.WIDTH = window.WIDTH || window.innerWidth;
+        this.HEIGHT = window.HEIGHT || window.innerHeight;
+
+        if (window.imageLoader) await window.imageLoader.waitAllLoaded();
+
+        // 预先提取玩家当前拥有的花瓣图片对象引用
+        this.availablePetalImages = [];
+        const slots = this.player?.quickSlot?.slots || [];
+
+        slots.forEach(slot => {
+            if (slot?.type) {
+                const img = window.imageLoader?.getImage(slot.type, slot.rarity);
+                if (img) this.availablePetalImages.push(img);
+            }
+        });
+
+        // 如果没有，加载默认图
+        if (this.availablePetalImages.length === 0) {
+            ["Leaf", "Wing", "Claw"].forEach(t => {
+                const img = window.imageLoader?.getImage(t, "Common");
+                if (img) this.availablePetalImages.push(img);
+            });
+        }
+
+        const petalCount = 20;
+        this.floatingPetals = [];
+        for (let i = 0; i < petalCount; i++) {
+            this.floatingPetals.push({
+                x: Math.random() * this.WIDTH,
+                y: Math.random() * this.HEIGHT,
+                size: 50 + Math.random() * 40,
+                speedX: 20 + Math.random() * 35,
+                speedY: 5 + Math.random() * 12,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 1.5,
+                opacity: 0.35 + Math.random() * 0.4,
+                // 直接存储 Image 对象的引用，不再存储 type/rarity 字符串
+                imgRef: this.availablePetalImages[Math.floor(Math.random() * this.availablePetalImages.length)]
+            });
+        }
+    }
+    drawFloatingPetals(ctx) {
+        if (!this.floatingPetals || this.floatingPetals.length === 0) return;
+
+        const len = this.floatingPetals.length;
+
+        for (let i = 0; i < len; i++) {
+            const p = this.floatingPetals[i];
+            if (!p || !p.imgRef) continue;
+
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.drawImage(p.imgRef, -p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        }
+    }
     // ==================== 辅助方法 ====================
     _getQuestPanelRect() {
         const W = this.WIDTH;
         const H = this.HEIGHT;
-        const pw = Math.min(680, W - 40);
+        const pw = Math.min(680, W - 100);
         const ph = 480;
-        const px = (W - pw) / 2;
-        const py = (H - ph) / 2;
+        const px = (W - pw) / 4;
+        const py = (H - ph) / 4;
         return [px, py, pw, ph];
     }
 
@@ -37876,12 +38272,41 @@ class MainMenu {
             const totalW = count * slotSize + (count - 1) * spacing;
             const barX = this.WIDTH / 2 - totalW / 2;
             const barY = this.HEIGHT - slotSize - 20;
-            this.loadoutButton = [barX + totalW + 100, barY, 60, slotSize];
+
+            // LOADOUT 按钮位置（右下角）
+            const btnW = 70;
+            const btnH = slotSize;
+            const btnX = barX + totalW + 50;
+            const btnY = barY;
+
+            if (btnX + btnW > this.WIDTH) {
+                this.loadoutButton = [barX - btnW - 20, btnY, btnW, btnH];
+            } else {
+                this.loadoutButton = [btnX, btnY, btnW, btnH];
+            }
+
+            // ========== 面板占据右半屏幕的 90% ==========
+            const panelW = this.WIDTH * 0.45;      // 屏幕宽度的 45%
+            const panelH = this.HEIGHT * 0.85;     // 屏幕高度的 85%
+            const panelX = this.WIDTH - panelW - 20;  // 右侧留 20px 边距
+            const panelY = (this.HEIGHT - panelH) / 2;  // 垂直居中
+
+            this.loadoutPanelRect = [panelX, panelY, panelW, panelH];
         } else {
-            this.loadoutButton = [this.WIDTH / 2 + 330, this.HEIGHT - 80, 60, 60];
+            // 默认位置
+            const btnW = 70;
+            const btnH = 60;
+            const btnX = this.WIDTH - btnW - 240;
+            const btnY = this.HEIGHT - btnH - 80;
+            this.loadoutButton = [btnX, btnY, btnW, btnH];
+
+            // 默认面板位置
+            const panelW = this.WIDTH * 0.45;
+            const panelH = this.HEIGHT * 0.85;
+            const panelX = this.WIDTH - panelW - 20;
+            const panelY = (this.HEIGHT - panelH) / 2;
+            this.loadoutPanelRect = [panelX, panelY, panelW, panelH];
         }
-        const [lx, ly, lw] = this.loadoutButton;
-        this.loadoutPanelRect = [lx - 220, ly - 360, 280, 355];
     }
 
     loadLoadouts() {
@@ -37949,140 +38374,220 @@ class MainMenu {
         this._recalcLoadoutButtonRect();
         const [lx, ly, lw, lh] = this.loadoutButton;
 
-        const btnColor = this.hoveredButton === 'loadout'
-            ? this.LOADOUT_BUTTON_HOVER_COLOR
-            : this.LOADOUT_BUTTON_COLOR;
-        const g = ctx.createLinearGradient(lx, ly, lx + lw, ly + lh);
-        g.addColorStop(0, `rgb(${btnColor[0]},${btnColor[1]},${btnColor[2]})`);
-        g.addColorStop(1, `rgb(${Math.floor(btnColor[0] * 0.8)},${Math.floor(btnColor[1] * 0.8)},${Math.floor(btnColor[2] * 0.8)})`);
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.roundRect(lx, ly, lw, lh, 10); ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        // 辅助函数：调整颜色亮度
+        const adjust = (rgb, f) => rgb.map(c => Math.max(0, Math.min(255, Math.floor(c * f))));
+
+        // --- 1. 绘制入口按钮 (Loadout Button) ---
+        const btnColor = this.hoveredButton === 'loadout' ? this.LOADOUT_BUTTON_HOVER_COLOR : this.LOADOUT_BUTTON_COLOR;
+        const darkColor = `rgb(${adjust(btnColor, 0.85).join(',')})`;
+        const lightColor = `rgb(${btnColor.join(',')})`;
+        const strokeColor = `rgb(${adjust(btnColor, 0.5).join(',')})`;
+
+        ctx.beginPath();
+        ctx.roundRect(lx, ly, lw, lh, 10);
+        ctx.fillStyle = lightColor;
+        ctx.fill();
+
+        // 按钮明暗部
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(lx, ly, lw, lh, 10);
+        ctx.clip();
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(lx, ly, lw, lh / 2);
+        ctx.restore();
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 按钮文字
+        ctx.font = 'bold 11px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.strokeText('LOAD', lx + lw / 2, ly + lh / 2 - 8);
         ctx.fillText('LOAD', lx + lw / 2, ly + lh / 2 - 8);
+        ctx.strokeText('OUT', lx + lw / 2, ly + lh / 2 + 8);
         ctx.fillText('OUT', lx + lw / 2, ly + lh / 2 + 8);
 
+        // 如果面板没打开则返回
         if (!this.loadoutPanelOpen) return;
 
+        // --- 2. 绘制大尺寸面板背景 ---
         const [px, py, pw, ph] = this.loadoutPanelRect;
-        ctx.fillStyle = 'rgba(20,20,40,0.95)';
-        ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill();
-        ctx.strokeStyle = 'rgba(155,89,182,0.8)'; ctx.lineWidth = 2; ctx.stroke();
 
-        ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText('Loadouts', px + 12, py + 20);
+        ctx.save();
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.fillStyle = 'rgba(12, 12, 25, 0.98)'; // 深蓝黑底色
+        ctx.beginPath();
+        ctx.roundRect(px, py, pw, ph, 15);
+        ctx.fill();
+        ctx.restore();
 
-        this._saveBtnRect = [px + pw - 80, py + 8, 70, 24];
-        const [sbx, sby, sbw, sbh] = this._saveBtnRect;
-        ctx.fillStyle = this.hoveredButton === 'loadout_save' ? '#8048c0' : '#9b59d0';
-        ctx.beginPath(); ctx.roundRect(sbx, sby, sbw, sbh, 7); ctx.fill();
-        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Save current', sbx + sbw / 2, sby + sbh / 2);
+        // 紫色发光边框
+        ctx.strokeStyle = 'rgba(155, 89, 182, 0.7)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(px + 8, py + 38); ctx.lineTo(px + pw - 8, py + 38); ctx.stroke();
+        // --- 3. 面板头部绘制 ---
+        // 标题
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Loadouts Gallery', px + 25, py + 32);
+
+        // 保存按钮
+        this._saveBtnRect = [px + pw - 120, py + 16, 100, 32];
+        const isSaveHover = this.hoveredButton === 'loadout_save';
+        const sCol = isSaveHover ? [142, 68, 173] : [100, 60, 150];
+
+        ctx.fillStyle = `rgb(${sCol.join(',')})`;
+        ctx.beginPath();
+        ctx.roundRect(...this._saveBtnRect, 8);
+        ctx.fill();
+        ctx.strokeStyle = `rgb(${adjust(sCol, 0.6).join(',')})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText('Save Current', this._saveBtnRect[0] + 50, this._saveBtnRect[1] + 16);
+
+        // 分隔线
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(px + 15, py + 60);
+        ctx.lineTo(px + pw - 15, py + 60);
+        ctx.stroke();
 
         this._loadoutItemRects = [];
 
-        if (!this.loadouts.length) {
-            ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        // --- 4. 列表逻辑 ---
+        if (!this.loadouts || this.loadouts.length === 0) {
+            ctx.font = '18px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
             ctx.textAlign = 'center';
-            ctx.fillText('No loadouts saved yet.', px + pw / 2, py + 90);
+            ctx.fillText('No Loadouts Saved', px + pw / 2, py + ph / 2);
         } else {
-            const itemH = 68;
-            const maxVisible = 4;
+            const itemH = Math.floor(ph * 0.16); // 动态高度
+            const maxVisible = 5;
+            const spacing = 15;
             const total = this.loadouts.length;
 
+            // 滚动计算
             this._loadoutScrollIdx = Math.max(0, Math.min(this._loadoutScrollIdx, total - maxVisible));
+            const startIdx = this._loadoutScrollIdx;
 
-            const startIdx = Math.max(0, this._loadoutScrollIdx);
-
-            this._scrollUpRect = null;
-            this._scrollDownRect = null;
-            if (total > maxVisible) {
-                const arrowW = 24, arrowH = 18;
-                const upX = px + pw - arrowW - 6, upY = py + 40;
-                const downX = upX, downY = py + ph - arrowH - 6;
-                this._scrollUpRect = [upX, upY, arrowW, arrowH];
-                this._scrollDownRect = [downX, downY, arrowW, arrowH];
-
-                ctx.fillStyle = (startIdx > 0)
-                    ? (this.hoveredButton === 'loadout_up' ? '#9b59d0' : 'rgba(155,89,182,0.6)')
-                    : 'rgba(100,100,100,0.3)';
-                ctx.beginPath(); ctx.roundRect(upX, upY, arrowW, arrowH, 4); ctx.fill();
-                ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('▲', upX + arrowW / 2, upY + arrowH / 2);
-
-                ctx.fillStyle = (startIdx + maxVisible < total)
-                    ? (this.hoveredButton === 'loadout_down' ? '#9b59d0' : 'rgba(155,89,182,0.6)')
-                    : 'rgba(100,100,100,0.3)';
-                ctx.beginPath(); ctx.roundRect(downX, downY, arrowW, arrowH, 4); ctx.fill();
-                ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('▼', downX + arrowW / 2, downY + arrowH / 2);
-
-                ctx.font = '10px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${startIdx + 1}-${Math.min(startIdx + maxVisible, total)}/${total}`, upX + arrowW / 2, upY + arrowH + 10);
-            }
-
+            // 绘制列表项
             this.loadouts.slice(startIdx, startIdx + maxVisible).forEach((lo, vi) => {
                 const realIdx = startIdx + vi;
-                const iy = py + 46 + vi * (itemH + 6);
-                const iw = pw - 16 - (total > maxVisible ? 30 : 0);
-                const ix = px + 8;
+                const iy = py + 75 + vi * (itemH + spacing);
+                const ix = px + 20;
+                const iw = pw - 40 - (total > maxVisible ? 30 : 0);
 
                 this._loadoutItemRects.push({ idx: realIdx, rect: [ix, iy, iw, itemH] });
 
-                ctx.fillStyle = lo.active ? 'rgba(155,89,182,0.3)' : 'rgba(255,255,255,0.06)';
-                ctx.beginPath(); ctx.roundRect(ix, iy, iw, itemH, 8); ctx.fill();
+                // 列表项背景
+                ctx.fillStyle = lo.active ? 'rgba(155, 89, 182, 0.25)' : 'rgba(255, 255, 255, 0.05)';
+                ctx.beginPath();
+                ctx.roundRect(ix, iy, iw, itemH, 12);
+                ctx.fill();
+
                 if (lo.active) {
-                    ctx.strokeStyle = 'rgba(155,89,182,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+                    ctx.strokeStyle = 'rgba(155, 89, 182, 0.9)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
                 }
 
-                ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-                ctx.fillText(`${realIdx + 1}. ${lo.name}`, ix + 8, iy + 13);
+                // 加载组名称 (大字号)
+                ctx.font = 'bold 18px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`${realIdx + 1}. ${lo.name || "Unnamed Loadout"}`, ix + 15, iy + 15);
 
-                const miniSize = 22, miniGap = 3;
+                // 槽位绘制 - 动态计算大小
+                const miniSize = Math.floor(iw * 0.082); // 槽位宽度
+                const miniGap = 8;
                 lo.slots.slice(0, 10).forEach((s, si) => {
-                    const mx = ix + 8 + si * (miniSize + miniGap);
-                    const my = iy + 24;
-                    ctx.fillStyle = (s && s.type)
-                        ? (this.RARITY_COLOR_MAP[s.rarity] || '#e05090')
-                        : 'rgba(255,255,255,0.1)';
-                    ctx.beginPath(); ctx.roundRect(mx, my, miniSize, miniSize, 4); ctx.fill();
+                    const mx = ix + 15 + si * (miniSize + miniGap);
+                    const my = iy + 45;
+
                     if (s && s.type) {
-                        ctx.font = '7px Arial'; ctx.fillStyle = 'white';
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                        ctx.fillText(s.type.slice(0, 3), mx + miniSize / 2, my + miniSize / 2);
+                        // 实例化并调用 draw
+                        let tempItem = s.type === "DNA"
+                            ? new DNA(s.rarity, s.level || 1)
+                            : new Item(s.type, s.level || 1, s.rarity);
+
+                        tempItem.count = 1;
+                        ctx.save();
+                        // 传入 undefined 坐标，避免内部产生 Tooltip
+                        tempItem.draw(ctx, mx, my, miniSize, undefined, undefined);
+                        ctx.restore();
+                    } else {
+                        // 空槽位
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                        ctx.beginPath();
+                        ctx.roundRect(mx, my, miniSize, miniSize, 6);
+                        ctx.fill();
                     }
                 });
 
-                const btnY = iy + itemH - 20;
-                const btnW = 54, btnH = 17;
-                [
-                    { label: 'Update', color: '#f5a623', key: 'update' },
-                    { label: 'Load', color: '#22cc66', key: 'load' },
-                    { label: 'Delete', color: '#ff4466', key: 'del' },
-                ].forEach((btn, bi) => {
-                    const bx = ix + 8 + bi * (btnW + 6);
-                    const hoverKey = `loadout_${btn.key}_${realIdx}`;
-                    ctx.fillStyle = this.hoveredButton === hoverKey ? btn.color : btn.color + 'cc';
-                    ctx.beginPath(); ctx.roundRect(bx, btnY, btnW, btnH, 4); ctx.fill();
-                    ctx.font = 'bold 9px Arial'; ctx.fillStyle = 'white';
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(btn.label, bx + btnW / 2, btnY + btnH / 2);
-                    this._loadoutItemRects.push({ key: btn.key, idx: realIdx, rect: [bx, btnY, btnW, btnH] });
+                // 绘制 Update/Load/Delete 按钮 (右对齐)
+                const btnW = 75, btnH = 28;
+                const btns = [
+                    { label: 'Update', color: '#f39c12', key: 'update' },
+                    { label: 'Load', color: '#27ae60', key: 'load' },
+                    { label: 'Delete', color: '#e74c3c', key: 'del' }
+                ];
+
+                btns.forEach((btn, bi) => {
+                    const bx = ix + iw - (3 - bi) * (btnW + 10) - 15;
+                    const by = iy + 15; // 置于右上角
+                    const hKey = `loadout_${btn.key}_${realIdx}`;
+                    const isH = this.hoveredButton === hKey;
+
+                    ctx.fillStyle = isH ? btn.color : btn.color + 'aa';
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, btnW, btnH, 6);
+                    ctx.fill();
+
+                    ctx.font = 'bold 11px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2);
+
+                    this._loadoutItemRects.push({ key: btn.key, idx: realIdx, rect: [bx, by, btnW, btnH] });
                 });
             });
+
+            // 绘制滚动条指示器
+            if (total > maxVisible) {
+                const upX = px + pw - 30, upY = py + 75;
+                const downX = upX, downY = py + ph - 40;
+
+                // 上下箭头背景
+                ctx.fillStyle = 'rgba(155, 89, 182, 0.6)';
+                ctx.beginPath(); ctx.roundRect(upX, upY, 25, 25, 5); ctx.fill();
+                ctx.beginPath(); ctx.roundRect(downX, downY, 25, 25, 5); ctx.fill();
+
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText('▲', upX + 12.5, upY + 14);
+                ctx.fillText('▼', downX + 12.5, downY + 14);
+            }
         }
 
-        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.restore();
     }
 
     handleLoadoutClick(pos) {
@@ -38217,6 +38722,12 @@ class MainMenu {
             for (const [biome, rect] of Object.entries(this.biomeButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = biome; break; }
         }
+
+        if (!foundHover && this.isPointInRect(pos, this.changelogButton)) {
+            foundHover = 'changelog';
+        }
+        // ================================================
+
         if (this.isPointInRect(pos, this.mobGalleryButton)) {
             this.hoveredButton = 'mob_gallery';
             return;
@@ -38249,7 +38760,6 @@ class MainMenu {
         }
         this.hoveredButton = foundHover;
     }
-
     handleClick(event) {
         if (event.type !== 'mousedown' || event.button !== 0) return null;
         const pos = [event.x, event.y];
@@ -38259,7 +38769,18 @@ class MainMenu {
             const result = game.talentSystem.handleClick(pos);
             if (result) return result;
         }
-
+        // ========== 优先检查图鉴按钮 ==========
+        if (this.isPointInRect(pos, this.mobGalleryButton)) {
+            if (window.gameInstance && window.gameInstance.mobGallery) {
+                window.gameInstance.mobGallery.open();
+            }
+            return "mob_gallery";
+        }
+        // ========== Loadout 按钮点击检测 ==========
+        if (this.loadoutButton && this.isPointInRect(pos, this.loadoutButton)) {
+            this.loadoutPanelOpen = !this.loadoutPanelOpen;
+            return "loadout_toggle";
+        }
         // 检查设置按钮
         if (this.isPointInRect(pos, this.settingsButton)) {
             this.settingsPanelOpen = !this.settingsPanelOpen;
@@ -38289,13 +38810,14 @@ class MainMenu {
             }
         }
 
-        // 检查图鉴按钮
-        if (this.isPointInRect(pos, this.mobGalleryButton)) {
-            if (window.gameInstance && window.gameInstance.mobGallery) {
-                window.gameInstance.mobGallery.open();
+        // ========== 新增：Changelog 按钮点击检测 ==========
+        if (this.isPointInRect(pos, this.changelogButton)) {
+            if (this.changelog) {
+                this.changelog.toggle();
+                return "changelog";
             }
-            return "mob_gallery";
         }
+        // ================================================
 
         if (this.huntingQuestPanelOpen && this.player?.gameInstance?.huntingQuestSystem) {
             const questSystem = this.player.gameInstance.huntingQuestSystem;
@@ -38397,13 +38919,17 @@ class MainMenu {
         const BUTTON_HEIGHT = 45;
         const BUTTON_SPACING = 15;
         const START_Y_OFFSET = -120;
-
+        if (this.floatingPetals.length === 0) {
+            this.initFloatingPetals();
+        }
         // 左侧按钮列
         this.accountButton = [20, 20, 100, 35];
         this.shopButton = [20, 65, 100, 35];
         this.huntingQuestButton = [20, 110, 100, 35];
         this.talentButton = [20, 155, 100, 35];
-
+        this.mobGalleryButton = [20, 200, 100, 35];
+    // ========== Changelog 按钮（设置按钮右边）==========
+        this.changelogButton = [ 150, 20, 40, 40];
         // 设置按钮（右上角）
         this.settingsButton = [this.WIDTH - 50, 20, 40, 40];
 
@@ -38440,369 +38966,192 @@ class MainMenu {
         this.titleY = this.HEIGHT / 2 - 200;
         this.hintY = this.HEIGHT / 2 - 150;
 
-        // 图鉴按钮
-        this.mobGalleryButton = [this.WIDTH - 220, this.HEIGHT - 80, 200, 60];
-
         this._recalcLoadoutButtonRect();
     }
-
     // ==================== 绘制 ====================
     draw(ctx) {
-        if (!ctx) { console.error('MainMenu: No drawing context!'); return; }
+    if (!ctx) { console.error('MainMenu: No drawing context!'); return; }
 
-        this.WIDTH = window.WIDTH || window.innerWidth;
-        this.HEIGHT = window.HEIGHT || window.innerHeight;
+    this.WIDTH = window.WIDTH || window.innerWidth;
+    this.HEIGHT = window.HEIGHT || window.innerHeight;
 
-        ctx.fillStyle = `rgb(${this.MENU_BG.join(',')})`;
-        ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-        this.drawFlowerPattern(ctx);
+    // --- 1. 背景绘制 ---
+    ctx.fillStyle = `rgb(${this.MENU_BG.join(',')})`;
+    ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+    this.drawFlowerPattern(ctx);
+    this.drawFloatingPetals(ctx);
+if (this.floatingPetals.length === 0) {
+    this.initFloatingPetals();
+}
+// 删除 else 分支中的 refreshFloatingPetals()，不再需要
+    // --- 2. 核心辅助函数：绘制符合截图样式的按钮/框 ---
+    const adjust = (rgb, f) => rgb.map(c => Math.max(0, Math.min(255, Math.floor(c * f))));
 
-        ctx.font = 'bold 64px Arial';
-        ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
-        ctx.shadowColor = 'rgba(255,255,255,0.5)';
-        ctx.shadowBlur = 10;
-        const tw = ctx.measureText('Flwrr.pro').width;
-        ctx.fillText('Flwrr.pro', this.WIDTH / 2 - tw / 2, this.titleY);
-        ctx.shadowBlur = 0;
+    const drawStyledButton = (text, rect, baseColor, fontSize = 16) => {
+        const [x, y, w, h] = rect;
+        const darkColor = `rgb(${adjust(baseColor, 0.85).join(',')})`;
+        const lightColor = `rgb(${baseColor.join(',')})`;
+        const strokeColor = `rgb(${adjust(baseColor, 0.5).join(',')})`;
 
-        // Account 按钮
-        const [ax, ay, aw, ah] = this.accountButton;
-        const ac = this.hoveredButton === 'account' ? this.OTHER_BUTTON_HOVER_COLORS.account : this.OTHER_BUTTON_COLORS.account;
-        const ag = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
-        ag.addColorStop(0, `rgb(${ac[0]},${ac[1]},${ac[2]})`);
-        ag.addColorStop(1, `rgb(${Math.floor(ac[0] * 0.8)},${Math.floor(ac[1] * 0.8)},${Math.floor(ac[2] * 0.8)})`);
-        ctx.fillStyle = ag;
-        ctx.beginPath(); ctx.roundRect(ax, ay, aw, ah, 8); ctx.fill();
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
-        ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Account', ax + aw / 2, ay + ah / 2);
-        ctx.shadowBlur = 0;
-
-        // Shop 按钮
-        const [sx, sy, sw, sh] = this.shopButton;
-        const sc = this.hoveredButton === 'shop' ? this.SHOP_BUTTON_HOVER_COLOR : this.SHOP_BUTTON_COLOR;
-        const sg = ctx.createLinearGradient(sx, sy, sx + sw, sy + sh);
-        sg.addColorStop(0, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
-        sg.addColorStop(1, `rgb(${Math.floor(sc[0] * 0.8)},${Math.floor(sc[1] * 0.8)},${Math.floor(sc[2] * 0.8)})`);
-        ctx.fillStyle = sg;
-        ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 8); ctx.fill();
-        ctx.stroke(); ctx.fillStyle = 'white';
-        ctx.fillText('Shop', sx + sw / 2, sy + sh / 2);
-
-        // Hunt 按钮
-        const [hx, hy, hw, hh] = this.huntingQuestButton;
-        const hc = this.hoveredButton === 'hunting_quest' ? this.HUNTING_QUEST_BUTTON_HOVER_COLOR : this.HUNTING_QUEST_BUTTON_COLOR;
-        const hg = ctx.createLinearGradient(hx, hy, hx + hw, hy + hh);
-        hg.addColorStop(0, `rgb(${hc[0]},${hc[1]},${hc[2]})`);
-        hg.addColorStop(1, `rgb(${Math.floor(hc[0] * 0.8)},${Math.floor(hc[1] * 0.8)},${Math.floor(hc[2] * 0.8)})`);
-        ctx.fillStyle = hg;
-        ctx.beginPath(); ctx.roundRect(hx, hy, hw, hh, 8); ctx.fill();
-        ctx.stroke(); ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-        ctx.fillText('HUNT', hx + hw / 2, hy + hh / 2);
-
-        // Talent 按钮
-        const [tbx, tby, tbw, tbh] = this.talentButton;
-        const tc = this.hoveredButton === 'talent' ? [142, 68, 173] : [155, 89, 182];
-        const tg = ctx.createLinearGradient(tbx, tby, tbx + tbw, tby + tbh);
-        tg.addColorStop(0, `rgb(${tc[0]},${tc[1]},${tc[2]})`);
-        tg.addColorStop(1, `rgb(${Math.floor(tc[0] * 0.8)},${Math.floor(tc[1] * 0.8)},${Math.floor(tc[2] * 0.8)})`);
-        ctx.fillStyle = tg;
-        ctx.beginPath(); ctx.roundRect(tbx, tby, tbw, tbh, 8); ctx.fill();
-        ctx.stroke(); ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.fillText('TALENTS', tbx + tbw / 2, tby + tbh / 2);
-
-        // ========== 绘制设置按钮（右上角）==========
-        const [stx, sty, stw, sth] = this.settingsButton;
-        const isHovering = this.hoveredButton === 'settings';
-
-        ctx.fillStyle = isHovering ? '#555577' : '#333355';
         ctx.beginPath();
-        ctx.roundRect(stx, sty, stw, sth, 8);
-        ctx.fill();
-        ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        ctx.font = '22px Arial';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('⚙', stx + stw/2, sty + sth/2);
-
-        // ========== 绘制设置面板 ==========
-        if (this.settingsPanelOpen) {
-            const panelW = 220;
-            const panelH = 200;
-            const panelX = stx - panelW + 10;
-            const panelY = sty + sth + 5;
-
-            // 保存面板位置供点击检测
-            this.settingsPanelRect = [panelX, panelY, panelW, panelH];
-
-            // 背景
-            ctx.fillStyle = 'rgba(30, 30, 50, 0.95)';
-            ctx.beginPath();
-            ctx.roundRect(panelX, panelY, panelW, panelH, 10);
-            ctx.fill();
-
-            // 边框
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(panelX, panelY, panelW, panelH, 10);
-            ctx.stroke();
-
-            // 标题
-            ctx.font = 'bold 16px Arial';
-            ctx.fillStyle = '#ffd700';
-            ctx.textAlign = 'center';
-            ctx.fillText('Settings', panelX + panelW/2, panelY + 25);
-
-            // 分隔线
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(panelX + 10, panelY + 35);
-            ctx.lineTo(panelX + panelW - 10, panelY + 35);
-            ctx.stroke();
-
-            // 设置项
-            const items = [
-                { label: 'Show Hitbox', key: 'showHitbox', color: '#66ff66' },
-                { label: 'Show Rarity', key: 'showRarity', color: '#ffcc66' },
-                { label: 'Show Damage', key: 'showDamage', color: '#ff9966' },
-                { label: 'Show Particles', key: 'showParticles', color: '#66ccff' }
-            ];
-
-            let startY = panelY + 55;
-            const itemH = 30;
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                const itemY = startY + i * itemH;
-
-                // 复选框
-                const checkX = panelX + 15;
-                const checkY = itemY + 6;
-                const checkSize = 16;
-
-                ctx.fillStyle = this[item.key] ? item.color : 'rgba(80, 80, 100, 0.8)';
-                ctx.beginPath();
-                ctx.roundRect(checkX, checkY, checkSize, checkSize, 4);
-                ctx.fill();
-
-                if (this[item.key]) {
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(checkX + 4, checkY + checkSize/2);
-                    ctx.lineTo(checkX + checkSize/2, checkY + checkSize - 4);
-                    ctx.lineTo(checkX + checkSize - 4, checkY + 4);
-                    ctx.stroke();
-                }
-
-                // 标签
-                ctx.font = '13px Arial';
-                ctx.fillStyle = '#eeeeee';
-                ctx.textAlign = 'left';
-                ctx.fillText(item.label, checkX + checkSize + 8, itemY + 18);
-            }
-        }
-
-        // ========== 绘制图鉴按钮（右下角）==========
-        const [mgx, mgy, mgw, mgh] = this.mobGalleryButton;
-        const isHovered = this.hoveredButton === 'mob_gallery';
-        const btnColor = isHovered ? this.MOB_GALLERY_BUTTON_HOVER_COLOR : this.MOB_GALLERY_BUTTON_COLOR;
-
-        ctx.fillStyle = `rgb(${btnColor[0]}, ${btnColor[1]}, ${btnColor[2]})`;
-        ctx.beginPath();
-        ctx.roundRect(mgx, mgy, mgw, mgh, 12);
+        ctx.roundRect(x, y, w, h, 10);
+        ctx.fillStyle = lightColor;
         ctx.fill();
 
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(mgx, mgy, mgw, mgh, 12);
-        ctx.stroke();
-
-        // 绘制图标
         ctx.save();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'white';
-        const toePositions = [
-            {cx: mgx + 35, cy: mgy + 25, cr: 8},
-            {cx: mgx + 55, cy: mgy + 18, cr: 9},
-            {cx: mgx + 80, cy: mgy + 20, cr: 9},
-            {cx: mgx + 95, cy: mgy + 35, cr: 8}
-        ];
-        toePositions.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.cx, p.cy, p.cr, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
         ctx.beginPath();
-        ctx.moveTo(mgx + 30, mgy + 60);
-        ctx.bezierCurveTo(mgx + 30, mgy + 40, mgx + 100, mgy + 40, mgx + 100, mgy + 60);
-        ctx.bezierCurveTo(mgx + 100, mgy + 80, mgx + 30, mgy + 80, mgx + 30, mgy + 60);
-        ctx.fill();
-
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        const mx = mgx + 120, my = mgy + 12, mw = 65, mh = 40;
-
-        ctx.beginPath();
-        ctx.moveTo(mx + 8, my);
-        ctx.lineTo(mx, my);
-        ctx.lineTo(mx, my + mh);
-        ctx.lineTo(mx + 8, my + mh);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(mx + mw - 8, my);
-        ctx.lineTo(mx + mw, my);
-        ctx.lineTo(mx + mw, my + mh);
-        ctx.lineTo(mx + mw - 8, my + mh);
-        ctx.stroke();
-
-        ctx.font = `bold ${Math.floor(26)}px Arial`;
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('M', mx + mw/2, my + mh/2 + 2);
+        ctx.roundRect(x, y, w, h, 10);
+        ctx.clip();
+        ctx.fillStyle = darkColor;
+        ctx.fillRect(x, y, w, h / 2);
         ctx.restore();
 
-        ctx.font = 'bold 14px Arial';
-        ctx.fillStyle = 'white';
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        if (text) {
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 4;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(text, x + w / 2, y + h / 2);
+            ctx.fillStyle = 'white';
+            ctx.fillText(text, x + w / 2, y + h / 2);
+        }
+    };
+
+    // --- 3. 标题绘制 ---
+    ctx.font = 'bold 64px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 8;
+    ctx.strokeText('Flwrr.pro', this.WIDTH / 2, this.titleY);
+    ctx.fillStyle = 'white';
+    ctx.fillText('Flwrr.pro', this.WIDTH / 2, this.titleY);
+
+    // --- 4. 功能按钮 ---
+    const ac = this.hoveredButton === 'account' ? this.OTHER_BUTTON_HOVER_COLORS.account : this.OTHER_BUTTON_COLORS.account;
+    drawStyledButton('Account', this.accountButton, ac, 14);
+
+    const sc = this.hoveredButton === 'shop' ? this.SHOP_BUTTON_HOVER_COLOR : this.SHOP_BUTTON_COLOR;
+    drawStyledButton('Shop', this.shopButton, sc, 14);
+
+    const hc = this.hoveredButton === 'hunting_quest' ? this.HUNTING_QUEST_BUTTON_HOVER_COLOR : this.HUNTING_QUEST_BUTTON_COLOR;
+    drawStyledButton('HUNT', this.huntingQuestButton, hc, 12);
+
+    const tc = this.hoveredButton === 'talent' ? [155, 89, 182] : [142, 68, 173];
+    drawStyledButton('TALENTS', this.talentButton, tc, 11);
+
+    // 设置与更新日志图标
+    const [stx, sty, stw, sth] = this.settingsButton;
+    drawStyledButton('⚙', this.settingsButton, this.hoveredButton === 'settings' ? [85, 85, 119] : [51, 51, 85], 22);
+    drawStyledButton('📋', this.changelogButton, this.hoveredButton === 'changelog' ? [28, 146, 32] : [21, 213, 28], 22);
+
+    // --- 5. 设置面板逻辑 (关键部分) ---
+    if (this.settingsPanelOpen) {
+        const panelW = 220; const panelH = 200;
+        const panelX = stx - panelW + 10; const panelY = sty + sth + 5;
+        this.settingsPanelRect = [panelX, panelY, panelW, panelH];
+
+        // 绘制面板背景 (深色描边样式的框)
+        drawStyledButton('', this.settingsPanelRect, [40, 40, 60]);
+
+        // 面板标题: Settings
+        ctx.font = 'bold 16px Arial';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('MOB GALLERY', mgx + mgw/2, mgy + mgh - 15);
+        ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
+        ctx.strokeText('Settings', panelX + panelW/2, panelY + 25);
+        ctx.fillStyle = 'white'; ctx.fillText('Settings', panelX + panelW/2, panelY + 25);
 
-        // 生物群系按钮
-        for (const [biome, rect] of Object.entries(this.biomeButtons)) {
-            const [x, y, w, h] = rect;
-            const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
-            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
-            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
-            ctx.fillStyle = gr;
-            ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
-            ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white';
-            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(biome, x + w / 2, y + h / 2);
-            ctx.shadowBlur = 0;
-        }
+        // 分割线
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(panelX + 10, panelY + 35); ctx.lineTo(panelX + panelW - 10, panelY + 35); ctx.stroke();
 
-        // 其他按钮
-        const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus'};
-        for (const [name, rect] of Object.entries(this.otherButtons)) {
-            const [x, y, w, h] = rect;
-            const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
-            const gr = ctx.createLinearGradient(x, y, x + w, y + h);
-            gr.addColorStop(0, `rgb(${c[0]},${c[1]},${c[2]})`);
-            gr.addColorStop(1, `rgb(${Math.floor(c[0] * 0.8)},${Math.floor(c[1] * 0.8)},${Math.floor(c[2] * 0.8)})`);
-            ctx.fillStyle = gr;
-            ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
-            ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'white';
-            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(labelMap[name] || name, x + w / 2, y + h / 2);
-            ctx.shadowBlur = 0;
-        }
+        const items = [
+            { label: 'Show Hitbox', key: 'showHitbox', color: [102, 255, 102] },
+            { label: 'Show Rarity', key: 'showRarity', color: [255, 204, 102] },
+            { label: 'Show Damage', key: 'showDamage', color: [255, 153, 102] },
+            { label: 'Show Particles', key: 'showParticles', color: [102, 204, 255] }
+        ];
 
-        // Extra Bonus 按钮
-        const [ex, ey, ew, eh] = this.extraBonusButton;
-        let bc;
-        if (this.extraBonusPermanent) {
-            bc = this.EXTRA_BONUS_PERMANENT_COLOR;
-        } else if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) {
-            bc = this.EXTRA_BONUS_ACTIVE_COLOR;
-        } else if (this.hoveredButton === 'extra_bonus') {
-            bc = this.EXTRA_BONUS_HOVER_COLOR;
-        } else {
-            bc = this.EXTRA_BONUS_COLOR;
-        }
-        const bg = ctx.createRadialGradient(ex + ew / 2, ey + eh / 2, 0, ex + ew / 2, ey + eh / 2, ew);
-        bg.addColorStop(0, `rgb(${bc[0] + 30},${bc[1] + 30},${bc[2] + 30})`);
-        bg.addColorStop(1, `rgb(${bc[0]},${bc[1]},${bc[2]})`);
-        ctx.fillStyle = bg;
-        ctx.fillRect(ex, ey, ew, eh);
-        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(ex, ey, ew, eh);
-        ctx.font = 'bold 12px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        items.forEach((item, i) => {
+            const itemY = panelY + 55 + i * 30;
+            const checkX = panelX + 15; const checkY = itemY + 6; const size = 16;
 
-        if (this.extraBonusPermanent) {
-            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 9);
-            ctx.fillText('PERMANENT', ex + ew / 2, ey + eh / 2 + 9);
-        } else if (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) {
-            const remaining = this.extraBonusExpireTime - Date.now();
-            const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
-            const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-            const mins = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-            let timeStr;
-            if (days > 0) timeStr = `${days}d ${hours}h left`;
-            else if (hours > 0) timeStr = `${hours}h ${mins}m left`;
-            else if (mins > 0) timeStr = `${mins}m left`;
-            else timeStr = 'Expiring soon';
-            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
-            ctx.fillText('ACTIVE', ex + ew / 2, ey + eh / 2);
-            ctx.font = '10px Arial';
-            ctx.fillText(timeStr, ex + ew / 2, ey + eh / 2 + 15);
-            ctx.fillText('click to refresh', ex + ew / 2, ey + eh / 2 + 28);
-        } else {
-            ctx.fillText('EXTRA', ex + ew / 2, ey + eh / 2 - 18);
-            ctx.fillText('BONUS', ex + ew / 2, ey + eh / 2);
-            ctx.font = '9px Arial';
-            ctx.fillText('10K STAR / 5d', ex + ew / 2, ey + eh / 2 + 18);
-            ctx.fillText('1T STAR / forever', ex + ew / 2, ey + eh / 2 + 31);
-        }
+            // 绘制勾选框 (使用深色描边风格)
+            const boxColor = this[item.key] ? item.color : [80, 80, 100];
+            drawStyledButton('', [checkX, checkY, size, size], boxColor);
 
-        ctx.font = '12px Arial';
-        ctx.fillStyle = `rgb(${this.GRAY.join(',')})`;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('v0.3.0 - Hel Update', this.WIDTH - 10, this.HEIGHT - 10);
-
-        ctx.textAlign = 'left';
-        if (this.autoSaveSystem?.hasSaveData?.()) {
-            const info = this.autoSaveSystem.getSaveInfo?.();
-            if (info) {
-                ctx.font = '12px Arial';
-                ctx.fillStyle = `rgb(${this.LIGHT_GRAY.join(',')})`;
-                ctx.fillText(`Last Score: ${info.score || 0}`, 10, 70);
-                ctx.fillText(`Kills: ${info.enemies_killed || 0}`, 10, 90);
+            if (this[item.key]) {
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(checkX+3, checkY+size/2); ctx.lineTo(checkX+size/2, checkY+size-3); ctx.lineTo(checkX+size-3, checkY+3); ctx.stroke();
             }
-        }
 
-        if (window.gameInstance?.accountSystem?.isLoggedIn()) {
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#27ae60';
-            ctx.textAlign = 'left';
-            ctx.fillText(`User: ${window.gameInstance.accountSystem.getCurrentUser()}`, 10, 45);
-        }
-
-        if (this.player?.quickSlot) this.player.quickSlot.draw(ctx);
-
-        this.drawBonusTooltip(ctx);
-        this.drawLoadout(ctx);
-
-        if (this.huntingQuestPanelOpen) {
-            this.drawHuntingQuestPanel(ctx);
-        }
-
-        const talentGame = window.gameInstance;
-        if (talentGame?.talentSystem?.panelOpen) {
-            talentGame.talentSystem.draw(ctx);
-        }
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
+            // 选项文字
+            ctx.font = 'bold 13px Arial'; ctx.textAlign = 'left';
+            ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
+            ctx.strokeText(item.label, checkX + size + 8, itemY + 18);
+            ctx.fillStyle = 'white'; ctx.fillText(item.label, checkX + size + 8, itemY + 18);
+        });
     }
+
+    // --- 6. 生物群系按钮 ---
+    for (const [biome, rect] of Object.entries(this.biomeButtons)) {
+        const c = this.hoveredButton === biome ? this.BIOME_HOVER_COLORS[biome] : this.BIOME_COLORS[biome];
+        drawStyledButton(biome, rect, c, 16);
+    }
+
+    // --- 7. 其他按钮 ---
+    const labelMap = { inventory: 'Inventory', crafting: 'Crafting', multiplayer: 'Multiplayer', bonus: 'Bonus'};
+    for (const [name, rect] of Object.entries(this.otherButtons)) {
+        const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
+        drawStyledButton(labelMap[name] || name, rect, c, 14);
+    }
+
+    // --- 8. 图鉴按钮 (适配左侧小按钮样式) ---
+    const mgc = this.hoveredButton === 'mob_gallery' ? this.MOB_GALLERY_BUTTON_HOVER_COLOR : this.MOB_GALLERY_BUTTON_COLOR;
+    const [mgx, mgy, mgw, mgh] = this.mobGalleryButton;
+
+    // 使用统一的 StyledButton 样式，文字设小一点以适应 100 宽度
+    drawStyledButton('GALLERY', this.mobGalleryButton, mgc, 11);
+
+    // 如果你还想保留那个小爪印图标，可以把它画在文字旁边或者缩小放在角落
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; // 半透明，不遮挡文字
+    // 缩小版图标
+    [{cx:15,cy:12,cr:3},{cx:25,cy:8,cr:4},{cx:35,cy:10,cr:4},{cx:45,cy:15,cr:3}].forEach(p => {
+        ctx.beginPath();
+        ctx.arc(mgx + p.cx, mgy + p.cy, p.cr, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.restore();
+    // --- 9. 版本与信息 ---
+    const drawInfo = (txt, x, y, align) => {
+        ctx.font = 'bold 12px Arial'; ctx.textAlign = align;
+        ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
+        ctx.strokeText(txt, x, y);
+        ctx.fillStyle = 'white'; ctx.fillText(txt, x, y);
+    };
+    drawInfo(`v0.3.0 - Hel Update`, this.WIDTH - 10, this.HEIGHT - 10, 'right');
+    if (window.gameInstance?.accountSystem?.isLoggedIn()) {
+        drawInfo(`User: ${window.gameInstance.accountSystem.getCurrentUser()}`, 10, 45, 'left');
+    }
+
+            this.drawLoadout(ctx);
+
+    // 绘制外部组件
+    if (this.player?.quickSlot) this.player.quickSlot.draw(ctx);
+    if (this.huntingQuestPanelOpen) this.drawHuntingQuestPanel(ctx);
+    if (this.changelog?.visible) this.changelog.draw(ctx);
+    if (window.gameInstance?.talentSystem?.panelOpen) window.gameInstance.talentSystem.draw(ctx);
+
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+}
 
     drawBonusTooltip(ctx) {
         const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
@@ -38857,275 +39206,196 @@ class MainMenu {
         }
         ctx.restore();
     }
-
     drawHuntingQuestPanel(ctx) {
-        const questSystem = this.player?.gameInstance?.huntingQuestSystem;
-        if (!questSystem) return;
+    const questSystem = this.player?.gameInstance?.huntingQuestSystem;
+    if (!questSystem) return;
 
-        questSystem.updateParticles(0.016);
+    const toRGB = (arr) => `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
 
-        const [px, py, pw, ph] = this._getQuestPanelRect();
+    const RARITY_COLORS = {
+        "Mythic": [0, 204, 204],
+        "Ultra": [204, 84, 144],
+        "Super": [116, 191, 116],
+        "Omega": [179, 31, 163],
+    };
 
-        const bgGrad = ctx.createLinearGradient(px, py, px, py + ph);
-        bgGrad.addColorStop(0, '#f5974e');
-        bgGrad.addColorStop(1, '#d96820');
-        ctx.fillStyle = bgGrad;
+    const ICON_BG = {
+        "Mythic": [0, 204, 204],
+        "Ultra": [204, 84, 144],
+        "Super": [116, 191, 116],
+        "Omega": [179, 31, 163],
+    };
+
+    const [px, py, pw, ph] = this._getQuestPanelRect();
+
+    // 1. 面板背景 (主面板保留大圆角，维持UI结构)
+    ctx.fillStyle = '#e5966d';
+    ctx.beginPath();
+    ctx.roundRect(px, py, pw, ph, 15);
+    ctx.fill();
+    ctx.strokeStyle = '#9e6244';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // --- 关键设置：让文字描边圆润 ---
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // 2. 标题 Challenges
+    ctx.font = 'bold 30px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 6.0; // 加粗一点让圆润感更强
+    ctx.strokeText('Challenges', px + pw / 2, py + 45);
+    ctx.fillStyle = 'white';
+    ctx.fillText('Challenges', px + pw / 2, py + 45);
+
+    const quests = questSystem.getCurrentQuests();
+    const CARD_PAD = 20;
+    const CARD_GAP = 12;
+    const cardW = (pw - CARD_PAD * 2 - CARD_GAP) / 2;
+    const cardH = (ph - 140) / 2;
+
+    quests.forEach((quest, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const cx = px + CARD_PAD + col * (cardW + CARD_GAP);
+        const cy = py + 85 + row * (cardH + CARD_GAP);
+
+        // 3. 任务卡片背景 (修改点：使用 rect，完全直角)
+        ctx.fillStyle = '#d6865c';
         ctx.beginPath();
-        ctx.roundRect(px, py, pw, ph, 20);
+        ctx.rect(cx, cy, cardW, cardH);
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        // 4. 图标区域 (正方形直角框)
+        const iconBoxSize = cardH * 0.5;
+        const ix = cx + 22;
+        const iy = cy + (cardH - iconBoxSize) / 2;
 
-        const shine = ctx.createLinearGradient(px, py, px, py + 55);
-        shine.addColorStop(0, 'rgba(255,255,255,0.22)');
-        shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine;
+        let bgColor = ICON_BG[quest.rarity] || [100, 100, 100];
+        let darkColor = bgColor.map(v => Math.max(0, v - 50));
+
+        ctx.fillStyle = toRGB(bgColor);
         ctx.beginPath();
-        ctx.roundRect(px + 3, py + 3, pw - 6, 55, [17, 17, 0, 0]);
+        ctx.rect(ix, iy, iconBoxSize, iconBoxSize); // 图标框也改为直角
         ctx.fill();
-
-        ctx.font = 'bold 38px "Comic Sans MS", "Chalkboard SE", cursive';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'white';
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = 7;
-        ctx.shadowOffsetY = 3;
-        ctx.fillText('Hunting Quests', px + pw / 2, py + 40);
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-
-        const closeSize = 46;
-        const closeX = px + pw - closeSize - 8;
-        const closeY = py + 8;
-        const closeHovered = this.hoveredButton === 'hq_close';
-        ctx.fillStyle = closeHovered ? '#ff3333' : '#cc2222';
-        ctx.beginPath();
-        ctx.roundRect(closeX, closeY, closeSize, closeSize, 10);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.font = 'bold 26px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('✕', closeX + closeSize / 2, closeY + closeSize / 2);
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(px + 20, py + 76);
-        ctx.lineTo(px + pw - 20, py + 76);
+        ctx.strokeStyle = toRGB(darkColor);
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
-        const quests = questSystem.getCurrentQuests();
-
-        const RARITY_COLORS = {
-            "Mythic": "#00cccc",
-            "Ultra": "#cc5490",
-            "Super": "#44dd77",
-            "Omega": "#cc44dd"
-        };
-        const ICON_BG = {
-            "Mythic": "#18b0b0",
-            "Ultra": "#c03070",
-            "Super": "#28aa50",
-            "Omega": "#9922bb"
-        };
-
-        this._questCardRects = [];
-
-        const GRID_TOP = py + 84;
-        const GRID_BOTTOM = py + ph - 50;
-        const GRID_H = GRID_BOTTOM - GRID_TOP;
-        const CARD_PAD = 14;
-        const CARD_GAP = 12;
-
-        if (quests.length === 0) {
-            ctx.font = 'bold 22px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('All quests completed!', px + pw / 2, py + ph / 2 - 16);
-            ctx.font = '15px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText('New quests tomorrow', px + pw / 2, py + ph / 2 + 16);
-        } else {
-            const cols = 2;
-            const rows = Math.ceil(quests.length / cols);
-            const cardW = (pw - CARD_PAD * 2 - CARD_GAP * (cols - 1)) / cols;
-            const cardH = Math.min(160, (GRID_H - CARD_GAP * (rows - 1)) / rows);
-
-            quests.forEach((quest, i) => {
-                const col = i % cols;
-                const row = Math.floor(i / cols);
-                const cx = px + CARD_PAD + col * (cardW + CARD_GAP);
-                const cy = GRID_TOP + row * (cardH + CARD_GAP);
-
-                const cardBg = ctx.createLinearGradient(cx, cy, cx, cy + cardH);
-                cardBg.addColorStop(0, 'rgba(255,255,255,0.2)');
-                cardBg.addColorStop(1, 'rgba(180,100,30,0.2)');
-                ctx.fillStyle = cardBg;
-                ctx.beginPath();
-                ctx.roundRect(cx, cy, cardW, cardH, 14);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.38)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                const iconSize = Math.min(cardH - 20, 80);
-                const iconX = cx + 14;
-                const iconY = cy + (cardH - iconSize) / 2;
-
-                ctx.fillStyle = ICON_BG[quest.rarity] || '#666';
-                ctx.beginPath();
-                ctx.roundRect(iconX, iconY, iconSize, iconSize, 10);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.65)';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-
-                const raw = quest.targetMob.replace(/[^A-Za-z]/g, '');
-                const caps = raw.replace(/[a-z]/g, '');
-                const abbr = (caps.length >= 2 ? caps : raw.slice(0, 2)).slice(0, 3).toUpperCase();
-                ctx.font = `bold ${Math.floor(iconSize * 0.3)}px "Comic Sans MS", cursive`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.45)';
-                ctx.shadowBlur = 4;
-                ctx.fillText(abbr, iconX + iconSize / 2, iconY + iconSize / 2);
-                ctx.shadowBlur = 0;
-
-                const textX = cx + iconSize + 26;
-                const textW = cardW - iconSize - 38;
-                const nameFS = Math.min(20, Math.floor(cardH * 0.2));
-
-                ctx.font = `bold ${nameFS}px "Comic Sans MS", "Chalkboard SE", cursive`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 3;
-                let mobName = quest.targetMob;
-                while (ctx.measureText(mobName).width > textW && mobName.length > 3) {
-                    mobName = mobName.slice(0, -1);
-                }
-                if (mobName !== quest.targetMob) mobName += '…';
-                ctx.fillText(mobName, textX, cy + 14);
-                ctx.shadowBlur = 0;
-
-                const rarityFS = Math.min(17, Math.floor(cardH * 0.17));
-                ctx.font = `bold ${rarityFS}px "Comic Sans MS", cursive`;
-                ctx.fillStyle = RARITY_COLORS[quest.rarity] || '#fff';
-                ctx.fillText(quest.rarity, textX, cy + 14 + nameFS + 4);
-
-                const progressAreaY = cy + cardH - 50;
-                if (!quest.completed) {
-                    const barW = textW;
-                    const barH = 8;
-                    const barY = progressAreaY + 2;
-                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                    ctx.beginPath();
-                    ctx.roundRect(textX, barY, barW, barH, 4);
-                    ctx.fill();
-                    const fill = Math.min(1, quest.currentCount / quest.targetCount);
-                    if (fill > 0) {
-                        const fg = ctx.createLinearGradient(textX, 0, textX + barW, 0);
-                        fg.addColorStop(0, RARITY_COLORS[quest.rarity] || '#fff');
-                        fg.addColorStop(1, 'white');
-                        ctx.fillStyle = fg;
-                        ctx.beginPath();
-                        ctx.roundRect(textX, barY, barW * fill, barH, 4);
-                        ctx.fill();
-                    }
-                    ctx.font = '10px Arial';
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.textBaseline = 'top';
-                    ctx.fillText(`${quest.currentCount} / ${quest.targetCount}`, textX, barY + barH + 3);
-                } else {
-                    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 280);
-                    ctx.font = 'bold 13px Arial';
-                    ctx.fillStyle = `rgba(255,230,0,${pulse})`;
-                    ctx.textBaseline = 'top';
-                    ctx.fillText('✓ COMPLETE!', textX, progressAreaY + 2);
-                }
-
-                const btnW = Math.min(textW, 120);
-                const btnH = 30;
-                const btnX = textX;
-                const btnY = cy + cardH - btnH - 8;
-                const isClaimable = quest.completed && !quest._claimed;
-                const hKey = `hq_claim_${quest.id}`;
-                const isHov = this.hoveredButton === hKey;
-
-                if (isClaimable) {
-                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
-                    g.addColorStop(0, isHov ? '#55ee99' : '#2ecc71');
-                    g.addColorStop(1, isHov ? '#22bb66' : '#1a9e52');
-                    ctx.fillStyle = g;
-                } else {
-                    const g = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
-                    g.addColorStop(0, '#c8c0b0');
-                    g.addColorStop(1, '#a09080');
-                    ctx.fillStyle = g;
-                }
-                ctx.beginPath();
-                ctx.roundRect(btnX, btnY, btnW, btnH, 9);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                ctx.font = `bold ${isClaimable ? 13 : 16}px Arial`;
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 2;
-                if (isClaimable) {
-                    ctx.fillText(`CLAIM  +${quest.reward} ⭐`, btnX + btnW / 2, btnY + btnH / 2);
-                } else {
-                    ctx.fillText(`⭐  ${quest.reward}`, btnX + btnW / 2, btnY + btnH / 2);
-                }
-                ctx.shadowBlur = 0;
-
-                this._questCardRects.push({
-                    id: quest.id,
-                    claimable: isClaimable,
-                    btnRect: [btnX, btnY, btnW, btnH],
-                    effectX: btnX + btnW / 2,
-                    effectY: btnY + btnH / 2
-                });
-            });
+        // 生物图片缩小
+        const mobImg = this.getMobSprite(quest.targetMob, quest.rarity, iconBoxSize * 0.65);
+        if (mobImg) {
+            ctx.drawImage(mobImg, ix + iconBoxSize * 0.225, iy + iconBoxSize * 0.225, iconBoxSize * 0.55, iconBoxSize * 0.55);
         }
 
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setHours(24, 0, 0, 0);
-        const msLeft = Math.max(0, tomorrow - now);
-        const hh = Math.floor(msLeft / 3600000);
-        const mm = Math.floor((msLeft % 3600000) / 60000);
-        const ss = Math.floor((msLeft % 60000) / 1000);
-        const cs = Math.floor((msLeft % 1000) / 10).toString().padStart(2, '0');
-        const timerStr = `Resets in ${hh}h ${mm}m ${ss}.${cs}s...`;
-
-        ctx.font = 'bold 15px "Comic Sans MS", cursive';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 3;
-        ctx.fillText(timerStr, px + pw / 2, py + ph - 24);
-        ctx.shadowBlur = 0;
-
-        questSystem.drawParticles(ctx);
-
+        // 5. 文字区域 (圆润描边)
+        const tx = cx + iconBoxSize + 42;
         ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 4;
+
+        // 目标名字
+        ctx.font = 'bold 18px Arial';
+        ctx.strokeText(quest.targetMob, tx, cy + 32);
+        ctx.fillStyle = 'white';
+        ctx.fillText(quest.targetMob, tx, cy + 32);
+
+        // 稀有度
+        ctx.font = 'bold 15px Arial';
+        ctx.strokeText(quest.rarity, tx, cy + 55);
+        ctx.fillStyle = toRGB(RARITY_COLORS[quest.rarity] || [255, 255, 255]);
+        ctx.fillText(quest.rarity, tx, cy + 55);
+
+        // 6. 奖励按钮 (建议保留一点圆角，否则无法区分可点击区域)
+        const btnW = 100;
+        const btnH = 32;
+        const bx = tx - 5;
+        const by = cy + cardH - 45;
+
+        ctx.fillStyle = '#919191';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, btnW, btnH, 8);
+        ctx.fill();
+
+        ctx.fillStyle = '#bcbcbc';
+        ctx.beginPath();
+        ctx.roundRect(bx, by - 3, btnW, btnH, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText(`⭐ ${quest.reward}`, bx + btnW/2, by + btnH/2 - 2);
+    });
+
+    // 7. 底部倒计时 (圆润描边)
+    const timerStr = `Resets in 24m 18.85s...`;
+    ctx.font = 'bold 17px Arial';
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(timerStr, px + pw / 2, py + ph - 25);
+    ctx.fillStyle = 'white';
+    ctx.fillText(timerStr, px + pw / 2, py + ph - 25);
+}
+
+    // 辅助方法：获取生物精灵图
+    getMobSprite(mobType, rarity, targetSize) {
+        if (!this.spriteCache) this.spriteCache = new Map();
+
+        const forcedRarity = "Common";
+        const cacheKey = `${mobType}_${forcedRarity}_${targetSize}`;
+        if (this.spriteCache.has(cacheKey)) {
+            return this.spriteCache.get(cacheKey);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const offCtx = canvas.getContext('2d');
+        offCtx.clearRect(0, 0, targetSize, targetSize);
+
+        const drawSize = targetSize - 8;
+        const enemyObj = { rarity: forcedRarity, type: mobType, isFriendly: false };
+        const viewScale = drawSize / 80;
+
+        // 尝试多种方式获取 enemyDrawer
+        let drawer = null;
+        if (window.enemyDrawer) {
+            drawer = window.enemyDrawer;
+        } else if (this.player?.gameInstance?.enemyDrawer) {
+            drawer = this.player.gameInstance.enemyDrawer;
+        } else if (window.gameInstance?.enemyDrawer) {
+            drawer = window.gameInstance.enemyDrawer;
+        }
+
+        // 如果还是找不到，尝试创建临时实例
+        if (!drawer && typeof EnemyDrawer !== 'undefined') {
+            drawer = new EnemyDrawer();
+            window.enemyDrawer = drawer;
+        }
+
+        if (drawer && typeof drawer.drawEnemy === 'function') {
+            drawer.drawEnemy(offCtx, mobType, targetSize/2, targetSize/2, drawSize, 0, 0, 1, enemyObj, viewScale);
+        } else {
+            // 降级：绘制简单图标
+            offCtx.fillStyle = '#666';
+            offCtx.fillRect(0, 0, targetSize, targetSize);
+            offCtx.fillStyle = 'white';
+            offCtx.font = `bold ${Math.floor(targetSize/4)}px Arial`;
+            offCtx.textAlign = 'center';
+            offCtx.textBaseline = 'middle';
+            offCtx.fillText(mobType.substring(0, 3), targetSize/2, targetSize/2);
+        }
+
+        this.spriteCache.set(cacheKey, canvas);
+        return canvas;
     }
 
     isPointInRect(point, rect) {
@@ -42760,6 +43030,7 @@ class WorldMapGame {
             // 只有回到普通地图才彻底清空
             this.enemies = [];
             this.droppedCards = [];
+            this.dormantEnemies = []; // ✅ 加这行
             this.score = 0;
             this.enemiesKilled = 0;
             this.deathScrollOffset = 0;
@@ -44189,85 +44460,116 @@ class WorldMapGame {
     }
 
     updateEnemyLoading() {
-        // ===== 原有的卸载逻辑（完全不变）=====
-        const enemiesToRemove = [];
-        for (const enemy of this.enemies) {
-            if (enemy.isDead) continue;
-            if (enemy.neverUnload || enemy.isDummy) {
-                continue;
-            }
-            const distance = this.player.physicsBody.position.distanceTo(enemy.physicsBody.position);
+        // ✅ 初始化休眠池
+        if (!this.dormantEnemies) this.dormantEnemies = [];
 
-            if (distance > WEAK_LOAD_DISTANCE) {
-                enemiesToRemove.push(enemy);
-            }
-        }
-
-        for (const enemy of enemiesToRemove) {
-            const index = this.enemies.indexOf(enemy);
-            if (index !== -1) {
-                this.enemies.splice(index, 1);
-            }
-        }
-
-        // ===== 新增：预生成区块生物（只添加这部分）=====
         const playerPos = this.player.physicsBody.position;
-        const currentBlock = this.blockManager.getBlockAt(playerPos.x, playerPos.y);
-        if (!currentBlock) return;
 
-        // 计算需要加载的区块范围（和卸载范围一致）
+        // ===== 卸载：超出范围 → 存入休眠池 =====
+        const toRemove = [];
+        for (const enemy of this.enemies) {
+            if (enemy.isDead || enemy.neverUnload || enemy.isDummy) continue;
+            const dist = Math.hypot(
+                enemy.physicsBody.position.x - playerPos.x,
+                enemy.physicsBody.position.y - playerPos.y
+            );
+            if (dist > WEAK_LOAD_DISTANCE) {
+                // ✅ 只存必要字段，不保留整个对象
+                // updateEnemyLoading 卸载时，保存触发器状态
+                this.dormantEnemies.push({
+                    type: enemy.type,
+                    rarity: enemy.rarity,
+                    level: enemy.level,
+                    x: enemy.physicsBody.position.x,
+                    y: enemy.physicsBody.position.y,
+                    health: enemy.health,
+                    maxHealth: enemy.maxHealth,
+                    isFriendly: enemy.isFriendly,
+                    // ✅ 保存所有触发器状态
+                    triggers: {
+                        triggered80: enemy.triggered80,
+                        triggered70: enemy.triggered70,
+                        triggered60: enemy.triggered60,
+                        triggered50: enemy.triggered50,
+                        triggered40: enemy.triggered40,
+                        triggered30: enemy.triggered30,
+                        triggered20: enemy.triggered20,
+                        triggered10: enemy.triggered10,
+                        triggered90: enemy.triggered90,
+                        triggeredDeath: enemy.triggeredDeath,
+                    }
+                });
+                toRemove.push(enemy);
+            }
+        }
+        for (const e of toRemove) {
+            this.enemies.splice(this.enemies.indexOf(e), 1);
+        }
+
+        // ===== 唤醒：休眠敌人重新进入视野 =====
+        const wakeUp = [];
+        const stillDormant = [];
+        for (const d of this.dormantEnemies) {
+            const dist = Math.hypot(d.x - playerPos.x, d.y - playerPos.y);
+            if (dist <= WEAK_LOAD_DISTANCE) {
+                wakeUp.push(d);
+            } else {
+                stillDormant.push(d);
+            }
+        }
+        this.dormantEnemies = stillDormant;
+
+        for (const d of wakeUp) {
+            const enemy = new Enemy(d.type, d.x, d.y, d.level, d.rarity);
+            enemy.health = d.health;
+            enemy.maxHealth = d.maxHealth;
+            enemy.isFriendly = d.isFriendly;
+            enemy.isSpawning = false;
+            // ✅ 恢复触发器状态（只恢复有值的字段，undefined不覆盖）
+            if (d.triggers) {
+                for (const [key, val] of Object.entries(d.triggers)) {
+                    if (val !== undefined) enemy[key] = val;
+                }
+            }
+            this.enemies.push(enemy);
+        }
+
+        // ===== 休眠池上限（防内存无限增长）=====
+        if (this.dormantEnemies.length > 300) {
+            this.dormantEnemies.splice(0, this.dormantEnemies.length - 300);
+        }
+
+        // ===== 原有预生成逻辑（不变）=====
         const blockSize = this.blockManager.blockSize;
         const centerBlockX = Math.floor(playerPos.x / blockSize);
         const centerBlockY = Math.floor(playerPos.y / blockSize);
         const radius = Math.ceil(WEAK_LOAD_DISTANCE / blockSize) + 1;
 
-        // 遍历周围区块
         for (let dx = -radius; dx <= radius; dx++) {
             for (let dy = -radius; dy <= radius; dy++) {
                 const blockX = (centerBlockX + dx) * blockSize;
                 const blockY = (centerBlockY + dy) * blockSize;
-
                 if (blockX < 0 || blockX >= WORLD_WIDTH || blockY < 0 || blockY >= WORLD_HEIGHT) continue;
-
                 const block = this.blockManager.getBlockAt(blockX, blockY);
                 if (!block || block.prepopulated) continue;
-
-                // 只预生成一次
                 block.prepopulated = true;
 
-                // 根据区块类型决定预生成数量
-                let count = 1;
-                if (block.type === 'A') count = 5;
-                else if (block.type === 'B') count = 3;
-                else if (block.type === 'C') count = 3;
-                else if (block.type === 'D') count = 3;
-                else if (block.type === 'E') count = 3;
-                else if (block.type === 'F') count = 4;
-
-                // 获取该区块可用的生物类型
+                let count = block.type === 'A' ? 5 : block.type === 'F' ? 4 : 3;
                 const availableEnemies = getAvailableEnemiesForRegion(this.currentBiome, block.config.minLevel);
-                if (availableEnemies.length === 0) continue;
+                if (!availableEnemies.length) continue;
 
-                // 生成生物
                 for (let i = 0; i < count; i++) {
                     const enemyType = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
                     const enemyRarity = this.blockManager.getRandomRarityForBlock(block.type);
                     const levelRange = this.blockManager.getLevelRangeForBlock(block.type);
                     const enemyLevel = Math.floor(Math.random() * (levelRange.max - levelRange.min + 1)) + levelRange.min;
-
-                    // 在区块内随机位置
                     const margin = 50;
                     const x = block.x + margin + Math.random() * (block.width - margin * 2);
                     const y = block.y + margin + Math.random() * (block.height - margin * 2);
-
-                    // 检查是否在墙内
                     if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
-
                     const enemy = new Enemy(enemyType, x, y, enemyLevel, enemyRarity);
                     enemy.spawnTime = 0;
-                    enemy.spawnProtection = 0;
                     enemy.isSpawning = false;
-
                     this.enemies.push(enemy);
                 }
             }
