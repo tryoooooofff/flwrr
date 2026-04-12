@@ -967,12 +967,19 @@ window.closeCrafting = closeCrafting;
             }
             return;
         }
+            // ========== 🆕 优先处理 Changelog 面板点击 ==========
+        if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
+            const handled = gameInstance.mainMenu.changelog.handleClick(x, y);
+            if (handled) return;
+        }
         if (gameState === 'main_menu' && gameInstance) {
             if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
-            const mgx = canvasWidth - 220;
-            const mgy = canvasHeight - 80;
-            const mgw = 200;
-            const mgh = 60;
+
+            // 改为左上角位置
+            const mgx = 20;
+            const mgy = 200;
+            const mgw = 100;
+            const mgh = 35;
             if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
                 if (gameInstance.mobGallery) {
                     gameInstance.mobGallery.open();
@@ -1069,6 +1076,11 @@ window.closeCrafting = closeCrafting;
         const we = { type: 'wheel', deltaY: e.deltaY, x, y };
         if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
             gameInstance.mobGallery.handleWheel(e.deltaY);
+            return;
+        }
+            // ========== 🆕 优先处理 Changelog 面板滚动 ==========
+        if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
+            gameInstance.mainMenu.changelog.handleScroll(e.deltaY);
             return;
         }
         if (gameState === 'main_menu' && gameInstance?.shopSystem?.visible) gameInstance.shopSystem.handleClick?.(we);
@@ -1355,7 +1367,9 @@ window.returnToMainMenu = returnToMainMenu;
         if (gameState === 'in_game' && gameInstance.update) gameInstance.update(dt);
         else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem?.update) gameInstance.player.inventory.craftingSystem.update(dt);
         else if (gameState === 'inventory' && gameInstance.player?.inventory?.update) gameInstance.player.inventory.update(dt);
-
+         if (gameState === 'main_menu' && gameInstance?.mainMenu) {
+                gameInstance.mainMenu.updateFloatingPetals(dt);
+            }
         if (gameState === 'main_menu') {
             ctx.clearRect(0,0,screen.width,screen.height);
             ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
