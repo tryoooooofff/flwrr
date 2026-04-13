@@ -967,6 +967,12 @@ window.closeCrafting = closeCrafting;
             }
             return;
         }
+        if (gameInstance?.talentSystem?.panelOpen) {
+        const result = gameInstance.talentSystem.handleClick([x, y]);
+        if (result === 'talent_levelup' || result === 'talent_no_points' || result === 'talent_close' || result === 'talent_reset') {
+            return; // 天赋面板处理了点击
+        }
+    }
             // ========== 🆕 优先处理 Changelog 面板点击 ==========
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
             const handled = gameInstance.mainMenu.changelog.handleClick(x, y);
@@ -1078,6 +1084,12 @@ window.closeCrafting = closeCrafting;
             gameInstance.mobGallery.handleWheel(e.deltaY);
             return;
         }
+           // ✅ 添加天赋系统滚轮处理
+        if (gameInstance?.talentSystem?.handleScroll(e.deltaY)) {
+            e.preventDefault();
+            return;
+        }
+
             // ========== 🆕 优先处理 Changelog 面板滚动 ==========
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
             gameInstance.mainMenu.changelog.handleScroll(e.deltaY);
@@ -1127,6 +1139,7 @@ window.closeCrafting = closeCrafting;
             }
             return;
         }
+
         if (k >= '1' && k <= '9') {
             if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
                 let slotIndex = parseInt(k) - 1;
@@ -1403,7 +1416,6 @@ window.returnToMainMenu = returnToMainMenu;
                 }
             }
         } else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem) {
-            ctx.clearRect(0,0,screen.width,screen.height);
             ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
             ctx.globalAlpha = 0.3; gameInstance.draw(ctx); ctx.globalAlpha = 1.0;
             const cs = gameInstance.player.inventory.craftingSystem;
@@ -1411,14 +1423,9 @@ window.returnToMainMenu = returnToMainMenu;
             cs.draw(ctx);
             drawTextWithBorder(ctx, 'ESC: 返回游戏', 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
         } else if (gameState === 'inventory' && gameInstance.player?.inventory) {
-            ctx.clearRect(0,0,screen.width,screen.height);
-            ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
+
             gameInstance.draw(ctx);
             ctx.save();
-            ctx.beginPath(); ctx.rect(0,0,400,screen.height); ctx.clip();
-            ctx.fillStyle = 'rgba(30,30,50,0.9)'; ctx.fillRect(0,0,400,screen.height);
-            ctx.strokeStyle = 'rgba(200,200,200,0.8)'; ctx.lineWidth = 2; ctx.strokeRect(2,2,396,screen.height-4);
-            drawTextWithBorder(ctx, 'INVENTORY', 200, 50, { font: 'bold 28px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3 });
             ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(370,30,15,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
             drawTextWithBorder(ctx, 'X', 370,30, { font: 'bold 18px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 2, fillColor: 'white' });
