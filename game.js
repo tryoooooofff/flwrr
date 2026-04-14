@@ -1585,8 +1585,8 @@ export const ITEM_STATS = {
     "Claw": {base_attack:20, base_cooldown:250, crit_chance:0.1, use_rarity_multiplier: true, base_reload_time:3500, dropFactor: 0.9},
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Pollen": {base_attack:30, base_cooldown:300, healing:0.5, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
-    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, poison_initial_multiplier:2.0, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 1.0},
-    "Pincer": {base_attack:15, base_cooldown:500, poison_damage:12, poison_duration:4.0, poison_initial_multiplier:2.0, poison_stable_multiplier:0.5, web_slow:0.5, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 0.9},
+    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, poison_initial_multiplier:1.3, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 1.0},
+    "Pincer": {base_attack:15, base_cooldown:500, poison_damage:12, poison_duration:4.0, poison_initial_multiplier:1.2, poison_stable_multiplier:0.5, web_slow:0.5, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 0.9},
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.9},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
     "Powder": {base_attack:17, base_cooldown:300, speed_bonus:0.2, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
@@ -1708,7 +1708,7 @@ export const ITEM_STATS = {
     "PooStick": {base_attack:1, base_cooldown:8000, spawn_poostorm:true, spawn_count:3, durability_bonus:10, slow_effect:0.4, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Poo": {base_attack:8, base_cooldown:120, slow_effect:0.3, slow_duration:2.0, poison_damage:2, poison_duration:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
     "Basil": {base_attack:12, base_cooldown:160, healing:3, poison_resistance:0.5, clean_effect: true, heal_speed_bonus: {"Common":0.05,"Unusual":0.10,"Rare":0.12,"Epic":0.14,"Legendary":0.16,"Mythic":0.20,"Ultra":0.25,"Super":0.30,"Omega":0.40,"Eternal":0.50}, use_rarity_multiplier: true, dropFactor: 0.85},
-    "Bubonic Plague": {base_attack:15, base_cooldown:200, poison_damage:30, poison_duration:30.0, poison_initial_multiplier:2.3, poison_stable_multiplier:0.2, use_rarity_multiplier:true, base_reload_time:5000,canStack: true , dropFactor: 0.09},
+    "Bubonic Plague": {base_attack:15, base_cooldown:200, poison_damage:30, poison_duration:30.0, poison_initial_multiplier:1.5, poison_stable_multiplier:0.2, use_rarity_multiplier:true, base_reload_time:5000,canStack: true , dropFactor: 0.09},
 
     // ========== 🆕 噬菌体蛋 ==========
     "Bacteriophage egg": {base_attack:1, base_cooldown:8000, spawn_bacteriophage:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
@@ -27917,21 +27917,21 @@ class Enemy {
         this.isLightningEnemy = LIGHTNING_ENEMIES.has(enemyType);
         // ===== 毒属性 =====
         const POISON_STATS = {
-            "ToxicDragon":    { damage: 15, duration: 4000, init: 3.0, stable: 0.4 },
-            "Bacteria":       { damage: 15,  duration: 3000, init: 2.5, stable: 0.3 },
-            "Bacteriophage":  { damage: 12,  duration: 3000, init: 2.5, stable: 0.3 },
-            "WhiteBloodCell": { damage: 18,  duration: 3000, init: 2.0, stable: 0.3 },
-            "Cancer":         { damage: 90, duration: 4000, init: 2.5, stable: 0.4 },
-            "StemCell":       { damage: 60,  duration: 4000, init: 2.2, stable: 0.3 },
-            "Roach":          { damage: 30,  duration: 3000, init: 2.5, stable: 0.3 },
-            "PooStorm":          { damage: 40,  duration: 3000, init: 2.5, stable: 0.3 },
-            "Virus":          { damage: 55,  duration: 3000, init: 2.8, stable: 0.2 },
-            "Rat":            { damage: 90, duration: 3000, init: 2.5, stable: 0.4 },
-            "Spider":         { damage: 8,  duration: 3000, init: 2.5, stable: 0.3 },
-            "Parasite":         { damage: 20,  duration: 3000, init: 2.2, stable: 0.3 },
-            "HelSpider":      { damage: 25, duration: 4000, init: 3.0, stable: 0.4 },
-            "Scorpion":       { damage: 8, duration: 4000, init: 3.0, stable: 0.4 },
-            "Biologist":         { damage: 5,  duration: 3000, init: 2.2, stable: 0.4 },
+            "ToxicDragon":    { damage: 15, duration: 4000, init: 1.3, stable: 0.4 },
+            "Bacteria":       { damage: 15,  duration: 3000, init: 1.5, stable: 0.3 },
+            "Bacteriophage":  { damage: 12,  duration: 3000, init: 1.5, stable: 0.3 },
+            "WhiteBloodCell": { damage: 18,  duration: 3000, init: 1.3, stable: 0.3 },
+            "Cancer":         { damage: 90, duration: 4000, init: 1.5, stable: 0.4 },
+            "StemCell":       { damage: 60,  duration: 4000, init: 1.2, stable: 0.3 },
+            "Roach":          { damage: 30,  duration: 3000, init: 1.4, stable: 0.3 },
+            "PooStorm":          { damage: 40,  duration: 3000, init: 1.5, stable: 0.3 },
+            "Virus":          { damage: 55,  duration: 3000, init: 1.8, stable: 0.2 },
+            "Rat":            { damage: 90, duration: 3000, init: 1.5, stable: 0.4 },
+            "Spider":         { damage: 8,  duration: 3000, init: 1.5, stable: 0.3 },
+            "Parasite":         { damage: 20,  duration: 3000, init: 1.2, stable: 0.3 },
+            "HelSpider":      { damage: 25, duration: 4000, init: 1.3, stable: 0.4 },
+            "Scorpion":       { damage: 8, duration: 4000, init: 1.5, stable: 0.4 },
+            "Biologist":         { damage: 5,  duration: 3000, init: 1.2, stable: 0.4 },
         };
         const poisonCfg = POISON_STATS[enemyType];
         if (poisonCfg) {
@@ -27946,13 +27946,13 @@ class Enemy {
         // 在 Enemy 构造函数中，找到设置毒属性的地方，添加火焰属性
         const FLAME_STATS = {
             "Dragon":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
-            "HelBee":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.2 },
-            "FireStorm":     { damage: 10, duration: 5000, init: 0.4, ramp: 2.2 },
-            "HelBeetle":     { damage: 5, duration: 3000, init: 0.5, ramp: 2.0 },
+            "HelBee":   { damage: 2, duration: 3500, init: 0.5, ramp: 1.5 },
+            "FireStorm":     { damage: 10, duration: 5000, init: 0.4, ramp: 1.7 },
+            "HelBeetle":     { damage: 5, duration: 3000, init: 0.5, ramp: 1.3 },
             "HelHornet":     { damage: 3, duration: 2500, init: 0.5, ramp: 1.8 },
             "HelBeekeeper":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
-            "HelDigger":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.2 },
-            "GraveDigger":   { damage: 80, duration: 4000, init: 0.6, ramp: 2.8 },
+            "HelDigger":   { damage: 2, duration: 3500, init: 0.5, ramp: 2.0 },
+            "GraveDigger":   { damage: 80, duration: 4000, init: 0.6, ramp: 2.4 },
         };
 
         const flameCfg = FLAME_STATS[enemyType];
@@ -31318,7 +31318,7 @@ class Dummy extends Enemy {
 }
 // ==================== 毒伤系统类 ====================
 class PoisonSystem {
-    constructor(source, baseDamage, duration = 5000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+    constructor(source, baseDamage, duration = 5000, initialMultiplier = 1.5, stableMultiplier = 0.5) {
         this.source = source;                    // 伤害来源
         this.baseDamage = baseDamage;            // 基础伤害
         this.duration = duration;                // 总持续时间（毫秒）
@@ -31764,7 +31764,7 @@ class PoisonManager {
      * @param {number} stableMultiplier - 稳定倍率
      * @param {boolean} canStack - true=合并模式（伤害叠加），false=原版排队模式
      */
-    applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5, canStack = true) {
+    applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 1.5, stableMultiplier = 0.5, canStack = true) {
         if (!target || target.isDead) return false;
 
         const newPoison = new PoisonSystem(source, baseDamage, duration, initialMultiplier, stableMultiplier);
@@ -32568,7 +32568,7 @@ class Petal {
             }
         }
     }
-    applyPoisonToEnemy(enemy, baseDamage, duration = 3000, initialMultiplier = 3.0, stableMultiplier = 0.5) {
+    applyPoisonToEnemy(enemy, baseDamage, duration = 3000, initialMultiplier = 1.5, stableMultiplier = 0.5) {
         if (!enemy || enemy.isDead || enemy.isFriendly) return false;
         if (!this.player || !this.player.gameInstance) return false;
 
