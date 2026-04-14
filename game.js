@@ -2321,16 +2321,16 @@ function getEternalDropRarity(originalRarity) {
 
 // Clover extra drop probability (based on held Clover rarity)
 export const CLOVER_EXTRA_DROP_BONUS = {
-    "Common": 0.01,    // +1%
-    "Unusual": 0.02,   // +2%
-    "Rare": 0.03,
-    "Epic": 0.04,
-    "Legendary": 0.05,  // Optional, you didn't specify, but suggested to complete
-    "Mythic": 0.06,
-    "Ultra": 0.07,     // Note: you wrote Ultra+5%, Super+7%
-    "Super": 0.09,
-    "Omega": 0.11,
-    "Eternal": 0.14
+    "Common": 0.001,    // +1%
+    "Unusual": 0.002,   // +2%
+    "Rare": 0.003,
+    "Epic": 0.004,
+    "Legendary": 0.005,  // Optional, you didn't specify, but suggested to complete
+    "Mythic": 0.006,
+    "Ultra": 0.007,     // Note: you wrote Ultra+5%, Super+7%
+    "Super": 0.008,
+    "Omega": 0.012,
+    "Eternal": 0.019
 };
 
 // Clover DNA upgrade probability bonus (per card, +X% absolute)
@@ -5378,7 +5378,8 @@ class BonusSystem {
             "total_claims": 0,
             "last_bonus_time": null,
             "bonus_history": [],
-            "extra_bonus_multiplier": null // 记录 Extra Bonus 倍数
+            "extra_bonus_multiplier": null,
+            "saved_multiplier": 1  // ✅ 新增：保存激活时的倍数
         };
 
         try {
@@ -5421,25 +5422,24 @@ class BonusSystem {
         try {
             const lastBonusTime = new Date(lastBonusTimeStr);
             const now = new Date();
-            const elapsed = (now - lastBonusTime) / 1000; // 转换为秒
+            const elapsed = (now - lastBonusTime) / 1000;
 
             if (elapsed < BONUS_DURATION) {
                 this.bonusActive = true;
-                this.bonusStartTime = Date.now() / 1000 - elapsed; // 转换为秒
+                this.bonusStartTime = Date.now() / 1000 - elapsed;
                 this.remainingTime = BONUS_DURATION - elapsed;
 
-                // 判断是 Daily 还是 Extra Bonus
                 const extraMult = this.bonusData.extra_bonus_multiplier;
                 if (extraMult !== null) {
-                    this.bonusMultiplier = extraMult; // 使用 Extra 倍数
+                    this.bonusMultiplier = extraMult;
                 } else {
-                    this.bonusMultiplier = this.getBonusMultiplier(); // Daily Bonus
+                    // ✅ 直接使用保存的倍数，不要重新计算
+                    this.bonusMultiplier = this.bonusData.saved_multiplier || 2;
                 }
             } else {
                 this.bonusActive = false;
                 this.bonusMultiplier = 1;
                 this.remainingTime = 0;
-                // 清理过期的 Extra Bonus 标记
                 this.bonusData.extra_bonus_multiplier = null;
                 this.saveBonusData();
             }
@@ -5469,18 +5469,62 @@ class BonusSystem {
     getBonusMultiplier() {
         const streakDays = this.bonusData.streak_days || 0;
 
-        // 前3天：2倍
+        // 普通玩家的倍率
+        let normalMultiplier = 2; // 默认2倍
+
         if (streakDays <= 3) {
-            return 2;
+            normalMultiplier = 2;
+        } else if (streakDays % 4 === 0) {
+            normalMultiplier = 4;
+        } else {
+            normalMultiplier = 3;
         }
 
-        // 每4天一次4倍
-        if (streakDays % 4 === 0) {
-            return 4;
+        // 检查是否是 Ruby 会员
+        const membershipTier = window.gameInstance?.shopSystem?.getMembershipTier();
+        const isRuby = membershipTier?.id === 'ruby';
+        const isDiamond = membershipTier?.id === 'diamond';
+        // Ruby 会员永远多2倍
+        if (isRuby) {
+            return normalMultiplier + 2;
+        }
+        if (isDiamond) {
+            return normalMultiplier + 1;
+        }
+        return normalMultiplier;
+    }
+
+    // ========== 新增：获取会员加成的最终倍数 ==========
+    getFinalMultiplier() {
+        let multiplier = this.getCurrentMultiplier();
+
+        // 应用会员加成
+        if (window.gameInstance?.shopSystem) {
+            const membershipBonusBuff = window.gameInstance.shopSystem.getMembershipBonusBuff();
+            if (membershipBonusBuff > 0) {
+                // 会员额外增加倍数（例如 diamond 加1倍，ruby 加2倍）
+                multiplier += membershipBonusBuff;
+            }
         }
 
-        // 其他天：3倍
-        return 3;
+        return multiplier;
+    }
+
+    // ========== 新增：获取当前激活的倍数（不考虑会员） ==========
+    getCurrentMultiplier() {
+        return this.bonusActive ? this.bonusMultiplier : 1;
+    }
+
+    // ========== 新增：检查是否有会员加成 ==========
+    hasMembershipBonus() {
+        if (!window.gameInstance?.shopSystem) return false;
+        return window.gameInstance.shopSystem.getMembershipBonusBuff() > 0;
+    }
+
+    // ========== 新增：获取会员加成数值 ==========
+    getMembershipBonusValue() {
+        if (!window.gameInstance?.shopSystem) return 0;
+        return window.gameInstance.shopSystem.getMembershipBonusBuff();
     }
 
     activateExtraBonus() {
@@ -5554,20 +5598,26 @@ class BonusSystem {
 
     startBonus() {
         this.bonusActive = true;
-        this.bonusStartTime = Date.now() / 1000; // 转换为秒
+        this.bonusStartTime = Date.now() / 1000;
         this.bonusMultiplier = this.getBonusMultiplier();
         this.remainingTime = BONUS_DURATION;
+
+        // ✅ 保存倍数
+        this.bonusData.saved_multiplier = this.bonusMultiplier;
+        this.saveBonusData();
     }
+
 
     update() {
         if (this.bonusActive) {
-            const currentTime = Date.now() / 1000; // 转换为秒
+            const currentTime = Date.now() / 1000;
             const elapsed = currentTime - this.bonusStartTime;
             this.remainingTime = Math.max(0, BONUS_DURATION - elapsed);
 
             if (this.remainingTime <= 0) {
                 this.bonusActive = false;
                 this.bonusMultiplier = 1;
+                this.remainingTime = 0;
                 this.bonusData.extra_bonus_multiplier = null;
                 this.saveBonusData();
             }
@@ -5584,11 +5634,21 @@ class BonusSystem {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
+    // 在 BonusSystem 类中
     getStatusInfo() {
         const today = new Date().toISOString().split('T')[0];
         const canClaim = this.canClaimBonus();
         const streakDays = this.bonusData.streak_days || 0;
-        const nextMultiplier = this.getBonusMultiplier();
+        const nextMultiplier = this.getBonusMultiplier(); // 每次重新计算
+
+        // 实时计算剩余时间
+        let remainingTime = "00:00";
+        if (this.bonusActive) {
+            const remaining = this.remainingTime;
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+            remainingTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
         return {
             "can_claim": canClaim,
@@ -5596,7 +5656,7 @@ class BonusSystem {
             "bonus_active": this.bonusActive,
             "current_multiplier": this.bonusActive ? this.bonusMultiplier : 1,
             "next_multiplier": nextMultiplier,
-            "remaining_time": this.getRemainingTimeStr(),
+            "remaining_time": remainingTime,
             "total_claims": this.bonusData.total_claims || 0
         };
     }
@@ -7706,7 +7766,7 @@ class Item {
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, finalSize, finalSize);
 
-        // 绘制物品图像
+        // ✅ 统一使用图片绘制，不再区分 DNA
         const itemImage = imageLoader.getImage(
             this.type,
             this.rarity,
@@ -7744,16 +7804,7 @@ class Item {
     }
 
     draw(ctx, x, y, size, mouseX, mouseY) {
-        if (this.type === "DNA") {
-            const dnaInstance = new DNA(this.rarity, this.level);
-            dnaInstance.draw(ctx, x, y, size);
-            // ✅ DNA 物品也显示提示框
-            if (mouseX !== undefined && mouseY !== undefined) {
-                TooltipSystem.drawItemTooltip(ctx, this, x, y, mouseX, mouseY, size);
-            }
-            return;
-        }
-
+        // ✅ 删除 DNA 特殊判断，所有物品统一处理
         const borderColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
         const [r, g, b] = borderColor;
         const darkBg = [
@@ -7771,8 +7822,7 @@ class Item {
         ctx.lineWidth = 4;
         ctx.strokeRect(x, y, size, size);
 
-
-        // 绘制物品图像
+        // ✅ 统一使用图片绘制
         const itemImage = imageLoader.getImage(
             this.type,
             this.rarity,
@@ -7783,130 +7833,112 @@ class Item {
             ctx.drawImage(itemImage, x + 5, y + 5);
         }
 
-// ✅ 绘制物品名字（自适应大小，尽量不拆单词）
-    if (this.type) {
-        ctx.save();
+        // 绘制物品名字
+        if (this.type) {
+            ctx.save();
 
-        let itemName = this.type;
-        const maxWidth = size * 0.95;
-        const maxHeight = size * 0.22;
+            let itemName = this.type;
+            const maxWidth = size * 0.95;
+            const maxHeight = size * 0.22;
 
-        // 1. 智能拆分：优先按空格，没有空格才按字符
-        let lines = [];
-        const maxCharsPerLine = 10;
+            // 智能拆分
+            let lines = [];
+            const maxCharsPerLine = 10;
 
-        if (itemName.length > maxCharsPerLine) {
-            // 尝试按空格拆分
-            let spaceIndex = itemName.indexOf(' ');
-
-            if (spaceIndex !== -1 && spaceIndex <= maxCharsPerLine && spaceIndex < itemName.length - 1) {
-                // 有空格且位置合适，按空格拆分
-                lines = [itemName.substring(0, spaceIndex), itemName.substring(spaceIndex + 1)];
-            } else {
-                // 没有空格或空格位置不合适，按字符数平分
-                const mid = Math.ceil(itemName.length / 2);
-                // 尽量在完整单词处拆分（向后查找空格）
-                let splitPoint = mid;
-                for (let i = mid; i < itemName.length; i++) {
-                    if (itemName[i] === ' ') {
-                        splitPoint = i;
-                        break;
-                    }
-                }
-                // 如果没找到空格，就用中点
-                if (splitPoint === mid) {
-                    for (let i = mid - 1; i > 0; i--) {
+            if (itemName.length > maxCharsPerLine) {
+                let spaceIndex = itemName.indexOf(' ');
+                if (spaceIndex !== -1 && spaceIndex <= maxCharsPerLine && spaceIndex < itemName.length - 1) {
+                    lines = [itemName.substring(0, spaceIndex), itemName.substring(spaceIndex + 1)];
+                } else {
+                    const mid = Math.ceil(itemName.length / 2);
+                    let splitPoint = mid;
+                    for (let i = mid; i < itemName.length; i++) {
                         if (itemName[i] === ' ') {
                             splitPoint = i;
                             break;
                         }
                     }
+                    if (splitPoint === mid) {
+                        for (let i = mid - 1; i > 0; i--) {
+                            if (itemName[i] === ' ') {
+                                splitPoint = i;
+                                break;
+                            }
+                        }
+                    }
+                    lines = [itemName.substring(0, splitPoint), itemName.substring(splitPoint + 1)];
                 }
-                lines = [itemName.substring(0, splitPoint), itemName.substring(splitPoint + 1)];
-            }
-        } else {
-            lines = [itemName];
-        }
-
-        // 2. 初始字号
-        let fontSize = lines.length > 1 ? Math.floor(maxHeight * 0.6) : Math.floor(maxHeight * 0.9);
-
-        ctx.font = `bold ${fontSize}px Arial`;
-        let longestLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
-
-        // 3. 仅在宽度超出时缩小字号
-        while (longestLineWidth > maxWidth && fontSize > 7) {
-            fontSize--;
-            ctx.font = `bold ${fontSize}px Arial`;
-            longestLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
-        }
-
-        // 4. 绘制设置
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const textX = x + size / 2;
-        const spacing = fontSize * 0.85;
-
-        // 5. 绘制逻辑
-        lines.forEach((line, index) => {
-            let textY;
-            if (lines.length === 1) {
-                textY = y + size - (maxHeight / 2) - 2;
             } else {
-                const baseY = y + size - (maxHeight / 2) - 4;
-                textY = (index === 0) ? baseY - (spacing / 2) : baseY + (spacing / 2);
+                lines = [itemName];
             }
 
-            // 黑色粗描边
+            let fontSize = lines.length > 1 ? Math.floor(maxHeight * 0.6) : Math.floor(maxHeight * 0.9);
+            ctx.font = `bold ${fontSize}px Arial`;
+            let longestLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+
+            while (longestLineWidth > maxWidth && fontSize > 7) {
+                fontSize--;
+                ctx.font = `bold ${fontSize}px Arial`;
+                longestLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width));
+            }
+
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            const textX = x + size / 2;
+            const spacing = fontSize * 0.85;
+
+            lines.forEach((line, index) => {
+                let textY;
+                if (lines.length === 1) {
+                    textY = y + size - (maxHeight / 2) - 2;
+                } else {
+                    const baseY = y + size - (maxHeight / 2) - 4;
+                    textY = (index === 0) ? baseY - (spacing / 2) : baseY + (spacing / 2);
+                }
+
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = fontSize > 12 ? 3 : 2;
+                ctx.lineJoin = "round";
+                ctx.strokeText(line, textX, textY);
+
+                ctx.fillStyle = "white";
+                ctx.fillText(line, textX, textY);
+            });
+
+            ctx.restore();
+        }
+
+        // 数量显示
+        if (this.count > 1) {
+            ctx.save();
+
+            let countStr = "x" + (this.count >= 1000000 ? (this.count / 1000000).toFixed(1) + 'M' :
+                                  this.count >= 1000 ? (this.count / 1000).toFixed(1) + 'K' :
+                                  this.count);
+
+            const fontSize = Math.max(14, Math.floor(18 * size / 70));
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const centerX = x + size - 10;
+            const centerY = y + 5;
+
+            ctx.translate(centerX, centerY);
+            ctx.rotate(0.3);
+
             ctx.strokeStyle = "black";
-            ctx.lineWidth = fontSize > 12 ? 3 : 2;
+            ctx.lineWidth = 4;
             ctx.lineJoin = "round";
-            ctx.strokeText(line, textX, textY);
+            ctx.strokeText(countStr, 0, 0);
 
-            // 白色填充
             ctx.fillStyle = "white";
-            ctx.fillText(line, textX, textY);
-        });
+            ctx.fillText(countStr, 0, 0);
 
-        ctx.restore();
-    }
+            ctx.restore();
+        }
 
-    if (this.count > 1) {
-        ctx.save();
-
-        // 1. 准备数量字符串
-        let countStr = "x" + (this.count >= 1000000 ? (this.count / 1000000).toFixed(1) + 'M' :
-                              this.count >= 1000 ? (this.count / 1000).toFixed(1) + 'K' :
-                              this.count);
-
-        // 2. 设置样式
-        const fontSize = Math.max(14, Math.floor(18 * size / 70));
-        ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-        ctx.textAlign = "center"; // 旋转时建议用居中对齐，更容易控制旋转中心
-        ctx.textBaseline = "middle";
-
-        // 3. 核心：移动坐标系并旋转
-        // 目标位置：右上角
-        const centerX = x + size - 10;
-        const centerY = y + 5;
-
-        ctx.translate(centerX, centerY);
-        ctx.rotate(0.3); // ⚠️ 负数向左上方倾斜（约 -11.5度），正数向右倾斜
-
-        // 4. 绘制黑色厚描边
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 4;
-        ctx.lineJoin = "round";
-        ctx.strokeText(countStr, 0, 0); // 坐标给 0,0 因为已经 translate 过了
-
-        // 5. 绘制白色填充
-        ctx.fillStyle = "white";
-        ctx.fillText(countStr, 0, 0);
-
-        ctx.restore();
-    }
-
-        // ✅ 添加提示框（放在最后，确保在最上层）
+        // 提示框
         if (mouseX !== undefined && mouseY !== undefined) {
             TooltipSystem.drawItemTooltip(ctx, this, x, y, mouseX, mouseY, size);
         }
@@ -7961,92 +7993,6 @@ class DNA extends Item {
         };
     }
 
-    draw(ctx, x, y, size) {
-        const borderColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
-        const [r, g, b] = borderColor;
-        const darkBg = [
-            Math.max(0, r - 60),
-            Math.max(0, g - 60),
-            Math.max(0, b - 60)
-        ];
-
-        // 背景
-        ctx.fillStyle = `rgb(${darkBg[0]}, ${darkBg[1]}, ${darkBg[2]})`;
-        ctx.fillRect(x, y, size, size);
-
-        // 边框
-        ctx.strokeStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-        ctx.lineWidth = 4;
-        ctx.strokeRect(x, y, size, size);
-
-        // DNA图片
-        const dnaImg = window.imageLoader?.getImage("DNA", this.rarity, [size - 10, size - 10]);
-        if (dnaImg) {
-            ctx.drawImage(dnaImg, x + 5, y + 5, size - 10, size - 10);
-        } else {
-            // 备用：绘制 DNA 双螺旋结构
-            const centerX = x + size / 2;
-            const centerY = y + size / 2;
-            const radius = size / 4;
-
-            // 绘制双螺旋
-            ctx.strokeStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-            ctx.lineWidth = 3;
-
-            // 左链
-            ctx.beginPath();
-            ctx.moveTo(centerX - radius/2, centerY - radius);
-            ctx.lineTo(centerX - radius/2, centerY + radius);
-            ctx.stroke();
-
-            // 右链
-            ctx.beginPath();
-            ctx.moveTo(centerX + radius/2, centerY - radius);
-            ctx.lineTo(centerX + radius/2, centerY + radius);
-            ctx.stroke();
-
-            // 横档
-            for (let i = -0.6; i <= 0.6; i += 0.3) {
-                ctx.beginPath();
-                ctx.moveTo(centerX - radius/2, centerY + i * radius);
-                ctx.lineTo(centerX + radius/2, centerY + i * radius);
-                ctx.stroke();
-            }
-        }
-
-        // 数量显示
-        if (this.count > 1) {
-            ctx.font = `bold ${Math.max(16, Math.floor(20 * size / 60))}px Arial`;
-            ctx.fillStyle = "white";
-            ctx.textAlign = "right";
-            ctx.textBaseline = "bottom";
-
-            let countStr;
-            if (this.count >= 1000000) {
-                const millions = this.count / 1000000;
-                countStr = millions.toFixed(2) + 'M';
-            } else if (this.count >= 1000) {
-                const thousands = this.count / 1000;
-                countStr = thousands.toFixed(2) + 'K';
-            } else {
-                countStr = this.count.toString();
-            }
-
-            ctx.fillText(countStr, x + size - 2, y + size - 2);
-        }
-
-        // 稀有度标签
-        const short = {
-            "Omega": "O", "Super": "S", "Ultra": "U", "Mythic": "M",
-            "Legendary": "L", "Epic": "E", "Rare": "R", "Unusual": "U", "Common": "C"
-        }[this.rarity] || "C";
-
-        ctx.font = `${Math.max(14, Math.floor(16 * size / 60))}px Arial`;
-        ctx.fillStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-        ctx.textAlign = "right";
-        ctx.textBaseline = "top";
-        ctx.fillText(short, x + size - 2, y + 2);
-    }
 }
 
 // ==================== Coin 类（继承 Item）====================
@@ -8099,80 +8045,6 @@ class Coin extends Item {
             isBroken: this.isBroken
         };
     }
-
-    draw(ctx, x, y, size) {
-        const borderColor = RARITY_COLORS[this.rarity] || [255, 255, 255];
-        const [r, g, b] = borderColor;
-        const darkBg = [
-            Math.max(0, r - 60),
-            Math.max(0, g - 60),
-            Math.max(0, b - 60)
-        ];
-
-        // 背景
-        ctx.fillStyle = `rgb(${darkBg[0]}, ${darkBg[1]}, ${darkBg[2]})`;
-        ctx.fillRect(x, y, size, size);
-
-        // 边框
-        ctx.strokeStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-        ctx.lineWidth = 4;
-        ctx.strokeRect(x, y, size, size);
-
-        // Coin图片
-        const coinImg = imageLoader.getImage("Coin", this.rarity, [size - 10, size - 10]);
-        if (coinImg) {
-            ctx.drawImage(coinImg, x + 5, y + 5);
-        } else {
-            // 备用：绘制圆形
-            const centerX = x + size / 2;
-            const centerY = y + size / 2;
-            const radius = size / 2 - 2;
-
-            ctx.fillStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-
-        // 数量显示
-        if (this.count > 1) {
-            ctx.font = `bold ${Math.max(16, Math.floor(20 * size / 60))}px Arial`;
-            ctx.fillStyle = "white";
-            ctx.textAlign = "right";
-            ctx.textBaseline = "bottom";
-
-            let countStr;
-            if (this.count >= 1000000) {
-                const millions = this.count / 1000000;
-                countStr = millions.toFixed(2) + 'M';
-            } else if (this.count >= 1000) {
-                const thousands = this.count / 1000;
-                countStr = thousands.toFixed(2) + 'K';
-            } else {
-                countStr = this.count.toString();
-            }
-
-            ctx.fillText(countStr, x + size - 2, y + size - 2);
-        }
-
-        // 稀有度标签
-        const short = {
-            "Omega": "O", "Super": "S", "Ultra": "U", "Mythic": "M",
-            "Legendary": "L", "Epic": "E", "Rare": "R", "Unusual": "U", "Common": "C"
-        }[this.rarity] || "C";
-
-        ctx.font = `${Math.max(14, Math.floor(16 * size / 60))}px Arial`;
-        ctx.fillStyle = `rgb(${borderColor[0]}, ${borderColor[1]}, ${borderColor[2]})`;
-        ctx.textAlign = "right";
-        ctx.textBaseline = "top";
-        ctx.fillText(short, x + size - 2, y + 2);
-    }
 }
 
 class QuickSlot {
@@ -8197,7 +8069,6 @@ class QuickSlot {
         this.SECONDARY_OFFSET_X = 50;
     }
 
-    // 在 QuickSlot 类中修改 swapSlot 方法
     swapSlot(slotIndex) {
         if (slotIndex < 0 || slotIndex >= this.slots.length) return;
 
@@ -8239,11 +8110,18 @@ class QuickSlot {
             });
         }
 
-        // ✅ 关键修复：交换后更新花瓣（主栏槽位）
+        // ✅ 关键：清除这个槽位对应的花瓣的召唤物
+        if (this.player && this.player.petals) {
+            const targetPetal = this.player.petals.find(p => p && p._petalIndex === slotIndex);
+            if (targetPetal && targetPetal._clearAllSummons) {
+                targetPetal._clearAllSummons();
+                targetPetal.eggSpawned = false;
+            }
+        }
+
+        // 更新花瓣
         this.updatePetalFromSlot(slotIndex);
 
-        // ✅ 如果副栏也有花瓣对应关系，也需要更新（如果有副栏花瓣系统）
-        // 目前副栏不影响花瓣，但需要刷新UI
         if (this.player?.gameInstance?.requestRedraw) {
             this.player.gameInstance.requestRedraw();
         }
@@ -8290,6 +8168,16 @@ class QuickSlot {
             this.mimicTracker.delete(key);
         }
 
+        // ✅ 清除所有花瓣的召唤物
+        if (this.player && this.player.petals) {
+            for (const petal of this.player.petals) {
+                if (petal && petal._clearAllSummons) {
+                    petal._clearAllSummons();
+                    petal.eggSpawned = false;
+                }
+            }
+        }
+
         // 交换所有槽位
         for (let i = 0; i < this.slots.length; i++) {
             const temp = this.slots[i];
@@ -8313,7 +8201,7 @@ class QuickSlot {
 
         console.log(`🔄 交换所有主副栏槽位完成`);
     }
-// 在 QuickSlot 类中修改 addItem 方法
+
     addItem(item, slotIndex) {
         if (slotIndex >= 0 && slotIndex < this.slots.length) {
             if (item && item.type !== "Mimic") {
@@ -23070,14 +22958,40 @@ class ShopSystem {
         this.inventory = inventory;
         this.quickSlot = quickSlot;
         this.visible = false;
-
+        this.scrollOffset = 0;
+        this.membershipScrollOffset = 0;
         this.shopArea = [WIDTH/2 - 600, HEIGHT/2 - 400, 800, 600];
         this.closeButton = [this.shopArea[0] + this.shopArea[2] - 40, this.shopArea[1] + 10, 30, 30];
         this.redeemSystem = new RedeemSystem(this);
 
-        this.buyButton  = [this.shopArea[0] + 200, this.shopArea[1] + 60, 150, 40];
-        this.sellButton = [this.shopArea[0] + 450, this.shopArea[1] + 60, 150, 40];
+        // Three tabs: BUY | MEMBERSHIP | SELL
+        this.buyButton        = [this.shopArea[0] + 75,  this.shopArea[1] + 60, 140, 38];
+        this.membershipButton = [this.shopArea[0] + 330, this.shopArea[1] + 60, 140, 38];
+        this.sellButton       = [this.shopArea[0] + 585, this.shopArea[1] + 60, 140, 38];
         this.currentTab = "buy";
+
+        // ── Membership tiers ──
+        this.MEMBERSHIP_TIERS = [
+            { id:'bronze',   label:'Bronze',   emoji:'',    color:[176,106,52],  price:10000,
+              bonusMinutes:15,  xpMult:1.05, dropRate:0,     bonusBuff:0, extraBonus:false,
+              desc:['+15 min bonus time/day','×1.05 XP'] },
+            { id:'silver',   label:'Silver',   emoji:'',    color:[160,160,175], price:90000,
+              bonusMinutes:30,  xpMult:1.1,  dropRate:0.02,  bonusBuff:0, extraBonus:false,
+              desc:['+30 min bonus time/day','×1.1 XP','+2% drop rate'] },
+            { id:'gold',     label:'Gold',     emoji:'',    color:[220,180,40],  price:200000,
+              bonusMinutes:60,  xpMult:1.3,  dropRate:0.05,  bonusBuff:0, extraBonus:false,
+              desc:['+1 h bonus time/day','×1.3 XP','+5% drop rate'] },
+            { id:'platinum', label:'Platinum', emoji:'',    color:[100,210,230], price:900000,
+              bonusMinutes:90,  xpMult:1.4,  dropRate:0.075, bonusBuff:0, extraBonus:false,
+              desc:['+1.5 h bonus time/day','×1.4 XP','+7.5% drop rate'] },
+            { id:'diamond',  label:'Diamond',  emoji:'',    color:[140,230,255], price:20000000,
+              bonusMinutes:120, xpMult:1.5,  dropRate:0.10,  bonusBuff:1, extraBonus:false,
+              desc:['+2 h bonus time/day','×1.5 XP','+10% drop rate','+1 Bonus Buff (3x→4x, base 3x)'] },
+            { id:'ruby',     label:'Ruby',     emoji:'', color:[220,40,80],   price:200000000,
+              bonusMinutes:0,   xpMult:1.7,  dropRate:0.15,  bonusBuff:2, extraBonus:true,
+              desc:['×1.7 XP','+15% drop rate','+2 Bonus Buff (3x→5x)','Extra Bonus: 1 month'] },
+        ];
+        this.activeMembership = this._loadMembership();
 
         // ── Filter state ──
         this.filterRarity = "All";
@@ -23095,22 +23009,46 @@ class ShopSystem {
 
         // ── Rarity / Biome lists ──
         this.RARITY_FILTER_LIST = ["All","Common","Unusual","Rare","Epic","Legendary","Mythic","Ultra","Super","Omega","Eternal"];
-        this.BIOME_LIST = ["All","Plain","Bio","Desert","Ocean","Sewer","Jungle","Arctic","Hel","Void","Micro"];
+        this.BIOME_LIST = ["All","Plain","Bio","Desert","Ocean","Sewer","Jungle","Arctic","Hel","Space","Digger"];
 
         this.ITEM_BIOME_MAP = {
-            "Plain": ["Leaf","Wing","Fang","Web","Stinger","Pollen","Honey","Corn","Root","Cutter","Golden Leaf","Rose","Clover","Iris","Antennae","ThirdEye","Cactus","Magnet","Heavy","Rock",,"Egg","Ant Egg","Stick","Rubber","Slime","Blood Stinger","Soldier Ant egg","Worker Ant egg","Ladybug egg","Bee egg","Centipede egg","Hive egg","Queen Bee egg","Spider egg"],
-            "Bio":   ["Chromosome","Cancer","DNA","WhiteBloodCell egg","RedBloodCell egg","StemCell egg","Bacteria_egg","Cancer egg","Virus egg","Bacteriophage egg","Iris","Lotus","Chromosome","Biologist","Cutter","Suger"],
-            "Desert":["Sand","Yucca","Leaf","WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg","FireAntOvermind egg","FireAntHole egg","Corn","Beetle egg","Digger egg","Cutter","Magnet","Cactus","Wing","Lotus","Stick","Rock","Moon egg","Scorpion egg"],
-            "Ocean": ["Pearl","Coral","Shell","Jelly","Salt","Starfish egg","Bubble egg","Crab egg","Jellyfish egg","CrabHole egg","Squid egg","Shipwreck egg","Barnacle egg","Leech Egg","Parasite Egg","Shell egg","Bubble Bomb","Coin","Cotton","PirateDigger egg","Sponge","Starfish","Sand","Magnet"],
-            "Sewer": ["Poo","PooStick","Iris","Bubonic Plague","ManHole egg","Fly_egg","Rat_egg","Roach_egg","Trashcan egg","Basil","Cotton","Wing","Powder","Antennae","Spider egg","Web","Fang"],
+            "Plain": ["Air","Leaf","Wing","Claw","Fang","Web","Stinger","Pollen","Honey","Corn","Yucca","Root",
+                      "Powder","Compass","Suger","Cutter","Bubble Bomb","Bomb","Missile","Glass","Faster",
+                      "Lightning","Jelly","Pearl","Coral","Shell","Salt","Sand","Poo","Basil","Golden Leaf",
+                      "Chromosome","Mimic","Rose","Bubble","Clover","Iris","Lotus","Cancer","DNA","Antennae",
+                      "ThirdEye","Cactus","Magnet","Heavy","Rock","Sponge","Cotton","Starfish","Coin","Egg",
+                      "Ant Egg","Moon Egg","Stick","Rubber","Slime","Blood Stinger",
+                      "Soldier Ant egg","Worker Ant egg","Beetle egg","Ladybug egg","Bee egg",
+                      "Centipede egg","Hive egg","Queen Bee egg","Scorpion egg","Spider egg"],
+            "Bio":   ["Chromosome","Cancer","DNA","Photon egg","Electron egg","ElectronCloud egg",
+                      "Proton egg","Atom egg","Photon","Electron","Quark","Quantum","Charge","Nucleus",
+                      "WhiteBloodCell egg","RedBloodCell egg","StemCell egg","Bacteria_egg",
+                      "Cancer egg","Virus egg","Bacteriophage egg"],
+            "Desert":["Sand","Yucca","Root","WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg",
+                      "FireAntOvermind egg","FireAntHole egg"],
+            "Ocean": ["Pearl","Coral","Shell","Jelly","Salt","Starfish egg","Bubble egg",
+                      "Crab egg","Jellyfish egg","CrabHole egg","Squid egg","Shipwreck egg",
+                      "Barnacle egg","Leech Egg","Parasite Egg","Shell egg"],
+            "Sewer": ["Poo","PooStick","Rubber","Slime","ManHole egg","Fly_egg","Rat_egg",
+                      "Roach_egg","Trashcan egg"],
             "Jungle":["Wasp egg","Worker Termite egg","Soldier Termite egg","StickBug egg",
                       "Firefly egg","TermiteHole egg","TermiteOvermind egg","SpiderCave egg",
-                      "Plank","Mantis egg","Spider egg","Missile","Clover","Wing","Relic","Fly_egg","Poo",
-                      "Stick","Bur","Lightning","Antennae","Soil","Magnet","Tomato","Compass","Iris"],
-            "Arctic":["Ice Rose","Ice Cube","Snowball","Carrot","Icicle","Snowflake","SnowStick","SlagMight egg","Ice Cube egg","Ice Dragon egg","Igloo egg","Tick egg","ArcticSpider egg","ArcticSpiderCave egg","Snowman egg","Frost Digger egg","Cutter","Web","Bone"],
-            "Hel":   ["Hel Lighting","Hel Honey","FireStick","HelWorm egg","HelSpider egg","Hel Bee egg","HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg","HelHive egg","HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg","Hel Digger egg","Hel Beekeeper egg","Lightning","Golden Leaf","Blood Stinger","Missile","Bomb","Cutter","Heavy","Pincer","Bone","Pollen","Glass","Sand"],
-            "Void": ["Plasma","Orb","Dvd","Stardust","Opal","Gamma Ray","Dust","Singularity","BlackHole egg","GraveDigger egg","AlienDigger egg","WhiteHole egg","NeutronStar egg","Star egg","Asteroid egg","Alien egg","UFO egg","Ghost egg","GraveStone egg",,"Nucleus","FireBomb","Slime","Air","Cutter","DarkMatter","Bomb","Quantum"],
-            "Micro":[,"Photon egg","Electron egg","ElectronCloud egg","Proton egg","Atom egg","Photon","Electron","Quark","Quantum","Charge","Bomb","Faster"],
+                      "Scorpion egg","Mantis egg","Beetle egg","Bee egg","Hive egg","Queen Bee egg",
+                      "Centipede egg","Ladybug egg"],
+            "Arctic":["Ice Rose","Ice Cube","Snowball","Carrot","Icicle","Snowflake","SnowStick",
+                      "SlagMight egg","Ice Cube egg","Ice Dragon egg","Igloo egg","Tick egg",
+                      "ArcticSpider egg","ArcticSpiderCave egg","Snowman egg","Frost Digger egg"],
+            "Hel":   ["Hel Lighting","Hel Honey","FireBomb","FireStick","HelWorm egg","HelSpider egg",
+                      "Hel Bee egg","HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg",
+                      "HelHive egg","HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg",
+                      "Hel Digger egg","Hel Beekeeper egg"],
+            "Space": ["Plasma","Orb","Dvd","Stardust","Opal","Gamma Ray","Dust","Singularity",
+                      "BlackHole egg","GraveDigger egg","AlienDigger egg","WhiteHole egg",
+                      "NeutronStar egg","Star egg","Asteroid egg","Alien egg","UFO egg",
+                      "Ghost egg","GraveStone egg"],
+            "Digger":["Digger egg","Biologist egg","Beekeeper egg","PirateDigger egg",
+                      "MudDigger_egg","TrashDigger egg","Frost Digger egg","Hel Digger egg",
+                      "Hel Beekeeper egg","Bubonic Plague","PooStick"],
         };
 
         // ── Prices ──
@@ -23134,7 +23072,7 @@ class ShopSystem {
             "BlackHole egg":110,"GraveDigger egg":115,"AlienDigger egg":109,
             "WhiteHole egg":99,"NeutronStar egg":100,"Star egg":60,"Asteroid egg":30,
             "Alien egg":30,"UFO egg":80,"Ghost egg":15,"GraveStone egg":45,
-            "Plasma":30,"Orb":30,"Slime":5,"Dvd":20,"FireBomb":100,"Stardust":18,
+            "Plasma":30,"Orb":30,"Slime":12,"Dvd":20,"FireBomb":100,"Stardust":18,
             "Opal":50,"Gamma Ray":40,"Dust":10,"Singularity":90,
             "Antennae":12,"ThirdEye":15,"Cactus":4,"Magnet":10,"Heavy":5,"Rock":5,
             "Sponge":7,"Cotton":4,"Starfish":5,
@@ -23163,7 +23101,7 @@ class ShopSystem {
             "Biologist egg":102,"Beekeeper egg":100,"PirateDigger egg":103,
             "Frost Digger egg":105,"Hel Digger egg":108,"Hel Beekeeper egg":104,
             "Bubonic Plague":120,
-            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,
+            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2
         };
 
         this.shopItems = [];
@@ -23192,18 +23130,31 @@ class ShopSystem {
     // ─────────────────────────────────────────
     // Filter helpers
     // ─────────────────────────────────────────
-    getFilteredItems() {
-        return this.shopItems.filter(item => {
+getFilteredItems() {
+    // 获取当前选中的稀有度，如果选的是 "All"，我们默认展示 "Common"（或者你想展示的默认等级）
+    const targetRarity = this.filterRarity === "All" ? "Common" : this.filterRarity;
+
+    return this.shopItems
+        .filter(item => {
+            // 搜索过滤
             if (this.filterSearch &&
                 !item.type.toLowerCase().includes(this.filterSearch.toLowerCase())) return false;
+
+            // 生物群系过滤
             if (this.filterBiome !== "All") {
                 const list = this.ITEM_BIOME_MAP[this.filterBiome] || [];
                 if (!list.includes(item.type)) return false;
             }
             return true;
+        })
+        .map(item => {
+            // 【关键点】：返回一个新对象，并将 rarity 设置为当前过滤器选中的稀有度
+            return {
+                ...item,
+                rarity: targetRarity
+            };
         });
-    }
-
+}
     handleKeyDown(e) {
         if (!this.visible || this.currentTab !== "buy") return false;
         if (!this.filterSearchActive) return false;
@@ -23287,6 +23238,59 @@ class ShopSystem {
     getFormattedSellPrice(type, rarity) { return this.formatPrice(this.getItemSellPrice(type, rarity)); }
 
     // ─────────────────────────────────────────
+    // Membership helpers
+    // ─────────────────────────────────────────
+    _loadMembership() {
+        try {
+            const raw = localStorage.getItem('flwrr_membership');
+            if (!raw) return null;
+            const m = JSON.parse(raw);
+            if (m.expiresAt && Date.now() > m.expiresAt) return null;
+            return m;
+        } catch(e) { return null; }
+    }
+    _saveMembership(tierId) {
+        const m = { tierId, purchasedAt: Date.now(), expiresAt: Date.now() + 30*24*60*60*1000 };
+        try { localStorage.setItem('flwrr_membership', JSON.stringify(m)); } catch(e) {}
+        this.activeMembership = m;
+    }
+    getMembershipTier()        { if(!this.activeMembership) return null; return this.MEMBERSHIP_TIERS.find(t=>t.id===this.activeMembership.tierId)||null; }
+    getMembershipXpMult()      { return this.getMembershipTier()?.xpMult       ?? 1; }
+    getMembershipDropRate()    { return this.getMembershipTier()?.dropRate      ?? 0; }
+    getMembershipBonusBuff()   { return this.getMembershipTier()?.bonusBuff     ?? 0; }
+    getMembershipBonusMinutes(){ return this.getMembershipTier()?.bonusMinutes  ?? 0; }
+    _purchaseMembership(tier) {
+        if (this.stars < tier.price) {
+            this.showMessage(`❌ Need ⭐${this.formatPrice(tier.price)} for ${tier.label}`);
+            return false;
+        }
+        const cur = this.getMembershipTier();
+        if (cur) {
+            const ci = this.MEMBERSHIP_TIERS.findIndex(t => t.id === cur.id);
+            const ni = this.MEMBERSHIP_TIERS.findIndex(t => t.id === tier.id);
+            if (ni <= ci) {
+                this.showMessage(`❌ Already have ${cur.label} or higher`);
+                return false;
+            }
+        }
+        this.removeStars(tier.price);
+        this._saveMembership(tier.id);
+        this.showMessage(`✅ ${tier.emoji} ${tier.label} Membership activated! (30 days)`);
+
+        // ✅ 新增：如果是 Ruby 会员，通知 MainMenu
+        if (tier.id === 'ruby' && window.gameInstance?.mainMenu) {
+            const mm = window.gameInstance.mainMenu;
+            mm.rubyMembershipActive = true;
+            mm.rubyMembershipExpireTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            mm.saveExtraBonusStatus();
+            console.log('✅ MainMenu Ruby 会员状态已同步');
+        }
+
+        this.forceSaveAfterPurchase();
+        return true;
+    }
+
+    // ─────────────────────────────────────────
     // Stars
     // ─────────────────────────────────────────
     getStarCount() { return this.stars; }
@@ -23318,23 +23322,116 @@ class ShopSystem {
         } catch(e) {}
     }
     forceSaveAfterSell() { this.forceSaveAfterPurchase(); }
+// 在 ShopSystem 类中添加
 
+// 在 ShopSystem 类中添加
+
+    getWeeklySellLimit() {
+        const membershipTier = this.getMembershipTier();
+        if (!membershipTier) {
+            return 3; // 普通玩家每周3张
+        }
+
+        // 根据会员等级返回每周出售上限
+        const limits = {
+            'bronze': 6,
+            'silver': 15,
+            'gold': 27,
+            'platinum': 42,
+            'diamond': 66,
+            'ruby': Infinity  // 无限
+        };
+
+        return limits[membershipTier.id] || 3;
+    }
+
+    getWeekNumber(date) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    }
+
+    getRemainingWeeklySellCount() {
+        const now = new Date();
+        const currentWeek = this.getWeekNumber(now);
+        const currentYear = now.getFullYear();
+        const lastSellWeek = localStorage.getItem('last_sell_week');
+        const lastSellYear = localStorage.getItem('last_sell_year');
+        const soldThisWeek = parseInt(localStorage.getItem('sold_week_count') || '0');
+
+        // 如果不是同一周，重置计数
+        if (lastSellWeek != currentWeek || lastSellYear != currentYear) {
+            return this.getWeeklySellLimit();
+        }
+
+        const limit = this.getWeeklySellLimit();
+        return limit === Infinity ? Infinity : Math.max(0, limit - soldThisWeek);
+    }
+
+    recordSell() {
+        const now = new Date();
+        const currentWeek = this.getWeekNumber(now);
+        const currentYear = now.getFullYear();
+        const lastSellWeek = localStorage.getItem('last_sell_week');
+        const lastSellYear = localStorage.getItem('last_sell_year');
+        let soldThisWeek = parseInt(localStorage.getItem('sold_week_count') || '0');
+
+        // 如果不是同一周，重置计数
+        if (lastSellWeek != currentWeek || lastSellYear != currentYear) {
+            soldThisWeek = 0;
+        }
+
+        if (this.getWeeklySellLimit() !== Infinity) {
+            soldThisWeek++;
+            localStorage.setItem('last_sell_week', currentWeek);
+            localStorage.setItem('last_sell_year', currentYear);
+            localStorage.setItem('sold_week_count', soldThisWeek.toString());
+        }
+    }
+
+    getWeekNumber(date) {
+        const d = new Date(date);
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    canSell() {
+        const remaining = this.getRemainingWeeklySellCount();
+        return remaining === Infinity || remaining > 0;
+    }
     addToSellSlot(item, itemIndex) {
+        // 检查是否还可以出售
+        if (!this.canSell() && !this.sellSlot) {
+            const limit = this.getWeeklySellLimit();
+            const limitText = limit === Infinity ? "unlimit" : limit;
+            this.showMessage(`❌ Weekly sell limit reached (${limitText} cards/week)`);
+            return false;
+        }
+
         if (!this.sellSlot) {
-            this.sellSlot = { type:item.type, rarity:item.rarity, level:item.level,
-                count:1, pricePerUnit:this.getItemSellPrice(item.type,item.rarity) };
+            this.sellSlot = {
+                type: item.type,
+                rarity: item.rarity,
+                level: item.level,
+                count: 1,
+                pricePerUnit: this.getItemSellPrice(item.type, item.rarity)
+            };
             this.sellSlotCount = 1;
-            item.count > 1 ? item.count-- : this.inventory.items.splice(itemIndex,1);
+            item.count > 1 ? item.count-- : this.inventory.items.splice(itemIndex, 1);
             this.showMessage(`✅ Added: ${item.rarity} ${item.type}`);
             return true;
-        } else if (this.sellSlot.type===item.type && this.sellSlot.rarity===item.rarity) {
+        } else if (this.sellSlot.type === item.type && this.sellSlot.rarity === item.rarity) {
             this.sellSlot.count++;
             this.sellSlotCount = this.sellSlot.count;
-            item.count > 1 ? item.count-- : this.inventory.items.splice(itemIndex,1);
+            item.count > 1 ? item.count-- : this.inventory.items.splice(itemIndex, 1);
             this.showMessage(`✅ Stacked: ${this.sellSlot.count}`);
             return true;
         }
-        this.showMessage("❌ Can only stack same items"); return false;
+        this.showMessage("❌ Can only stack same items");
+        return false;
     }
     removeFromSellSlot() {
         if (!this.sellSlot) return false;
@@ -23345,12 +23442,33 @@ class ShopSystem {
         this.showMessage("↩️ Returned"); return true;
     }
     sellAll() {
-        if (!this.sellSlot) { this.showMessage("❌ No items"); return false; }
+        if (!this.sellSlot) {
+            this.showMessage("❌ No items");
+            return false;
+        }
+
+        // 检查每周出售限制
+        if (!this.canSell()) {
+            const limit = this.getWeeklySellLimit();
+            const limitText = limit === Infinity ? "unlimit" : limit;
+            this.showMessage(`❌ Weekly sell limit reached (${limitText} cards/week)`);
+            return false;
+        }
+
         const total = this.sellSlot.count * this.sellSlot.pricePerUnit;
         this.addStars(total);
-        this.sellSlot = null; this.sellSlotCount = 0;
-        this.showMessage(`✅ Sold! +${this.formatPrice(total)} Stars`);
-        this.forceSaveAfterSell(); return true;
+
+        // 记录出售
+        this.recordSell();
+
+        const remaining = this.getRemainingWeeklySellCount();
+        const remainingText = remaining === Infinity ? "unlimit" : remaining;
+
+        this.sellSlot = null;
+        this.sellSlotCount = 0;
+        this.showMessage(`Sold! +${this.formatPrice(total)} Stars · ${remainingText} remaining this week`);
+        this.forceSaveAfterSell();
+        return true;
     }
     showMessage(msg) { this.message = msg; this.messageTimer = 180; }
 
@@ -23366,23 +23484,24 @@ class ShopSystem {
     // handleClick
     // ─────────────────────────────────────────
     handleClick(pos) {
-        // wheel event
+        // 处理滚轮事件
         if (pos && pos.type === 'wheel') {
             const dy = pos.deltaY;
-            if (this.currentTab === "buy") {
+            if (this.currentTab === "membership") {
+                const maxScroll = this.getMembershipMaxScroll();
+                this.membershipScrollOffset = Math.min(maxScroll, Math.max(0,
+                    (this.membershipScrollOffset || 0) + (dy > 0 ? 50 : -50)));
+            } else if (this.currentTab === "buy") {
                 const filtered = this.getFilteredItems();
                 const totalRows = Math.ceil(filtered.length / this.COLS);
                 const maxOffset = Math.max(0, totalRows - this.ROWS);
-                if (dy < 0) this.scrollOffset = Math.max(0, this.scrollOffset-1);
-                else        this.scrollOffset = Math.min(maxOffset, this.scrollOffset+1);
-            } else {
-                if (dy < 0) this.inventory.scrollUp?.();
-                else        this.inventory.scrollDown?.();
+                if (dy < 0) this.scrollOffset = Math.max(0, this.scrollOffset - 1);
+                else this.scrollOffset = Math.min(maxOffset, this.scrollOffset + 1);
             }
             return true;
         }
 
-        // ── array coords ──
+        // ── 数组坐标转换 ──
         const cx = Array.isArray(pos) ? pos[0] : pos.x;
         const cy = Array.isArray(pos) ? pos[1] : pos.y;
 
@@ -23393,145 +23512,244 @@ class ShopSystem {
 
         // Outside shop
         const S = this.shopArea;
-        if (cx < S[0] || cx > S[0]+S[2] || cy < S[1] || cy > S[1]+S[3]) return true;
+        if (cx < S[0] || cx > S[0] + S[2] || cy < S[1] || cy > S[1] + S[3]) {
+            this.visible = false;
+            return true;
+        }
 
         // Redeem button
-        const rBX = S[0]+S[2]-150, rBY = S[1]+S[3]-50;
-        if (cx>=rBX && cx<=rBX+120 && cy>=rBY && cy<=rBY+35) {
-            this.redeemSystem?.open(); return true;
+        const rBX = S[0] + S[2] - 150, rBY = S[1] + S[3] - 50;
+        if (cx >= rBX && cx <= rBX + 120 && cy >= rBY && cy <= rBY + 35) {
+            this.redeemSystem?.open();
+            return true;
         }
 
         // Close
-        const [cbx,cby,cbw,cbh] = this.closeButton;
-        if (cx>=cbx && cx<=cbx+cbw && cy>=cby && cy<=cby+cbh) {
-            this.visible=false; this.selectedItem=null; this.sellSlot=null; return true;
+        const [cbx, cby, cbw, cbh] = this.closeButton;
+        if (cx >= cbx && cx <= cbx + cbw && cy >= cby && cy <= cby + cbh) {
+            this.visible = false;
+            this.selectedItem = null;
+            this.sellSlot = null;
+            return true;
         }
 
-        // Buy / Sell tab buttons
-        const [bux,buy_,buw,buh] = this.buyButton;
-        if (cx>=bux && cx<=bux+buw && cy>=buy_ && cy<=buy_+buh) {
-            this.currentTab="buy"; this.selectedItem=null; this.scrollOffset=0; return true;
+        // Buy / Membership / Sell tab buttons
+        const [bux, buy_, buw, buh] = this.buyButton;
+        if (cx >= bux && cx <= bux + buw && cy >= buy_ && cy <= buy_ + buh) {
+            this.currentTab = "buy";
+            this.selectedItem = null;
+            this.scrollOffset = 0;
+            return true;
         }
-        const [sx2,sy2,sw2,sh2] = this.sellButton;
-        if (cx>=sx2 && cx<=sx2+sw2 && cy>=sy2 && cy<=sy2+sh2) {
-            this.currentTab="sell"; this.selectedItem=null; this.scrollOffset=0; return true;
+
+        const [mx2, my2, mw2, mh2] = this.membershipButton;
+        if (cx >= mx2 && cx <= mx2 + mw2 && cy >= my2 && cy <= my2 + mh2) {
+            this.currentTab = "membership";
+            this.selectedItem = null;
+            this.membershipScrollOffset = 0;
+            return true;
+        }
+
+        const [sx2, sy2, sw2, sh2] = this.sellButton;
+        if (cx >= sx2 && cx <= sx2 + sw2 && cy >= sy2 && cy <= sy2 + sh2) {
+            this.currentTab = "sell";
+            this.selectedItem = null;
+            return true;
         }
 
         // ── BUY TAB ──
         if (this.currentTab === "buy") {
             // Search box
-            const srchX=S[0]+20, srchY=S[1]+110, srchW=180, srchH=28;
-            if (cx>=srchX && cx<=srchX+srchW && cy>=srchY && cy<=srchY+srchH) {
-                this.filterSearchActive=true; return true;
-            } else { this.filterSearchActive=false; }
+            const srchX = S[0] + 20, srchY = S[1] + 115, srchW = 170, srchH = 30;
+            if (cx >= srchX && cx <= srchX + srchW && cy >= srchY && cy <= srchY + srchH) {
+                this.filterSearchActive = true;
+                return true;
+            } else {
+                this.filterSearchActive = false;
+            }
 
             // Biome dropdown button
-            const bmX=S[0]+210, bmY=S[1]+110, bmW=120, bmH=28;
-            if (cx>=bmX && cx<=bmX+bmW && cy>=bmY && cy<=bmY+bmH) {
-                this.dropdownOpen = this.dropdownOpen==="biome" ? null : "biome"; return true;
+            const bmX = S[0] + 200, bmY = S[1] + 115, bmW = 130, bmH = 30;
+            if (cx >= bmX && cx <= bmX + bmW && cy >= bmY && cy <= bmY + bmH) {
+                this.dropdownOpen = this.dropdownOpen === "biome" ? null : "biome";
+                return true;
             }
 
             // Rarity dropdown button
-            const rX=S[0]+340, rY=S[1]+110, rW=120, rH=28;
-            if (cx>=rX && cx<=rX+rW && cy>=rY && cy<=rY+rH) {
-                this.dropdownOpen = this.dropdownOpen==="rarity" ? null : "rarity"; return true;
+            const rX = S[0] + 340, rY = S[1] + 115, rW = 130, rH = 30;
+            if (cx >= rX && cx <= rX + rW && cy >= rY && cy <= rY + rH) {
+                this.dropdownOpen = this.dropdownOpen === "rarity" ? null : "rarity";
+                return true;
             }
 
             // Dropdown options
             if (this.dropdownOpen === "biome") {
-                for (let i=0; i<this.BIOME_LIST.length; i++) {
-                    const oy = bmY+bmH + i*26;
-                    if (cx>=bmX && cx<=bmX+bmW && cy>=oy && cy<=oy+26) {
-                        this.filterBiome=this.BIOME_LIST[i];
-                        this.dropdownOpen=null; this.scrollOffset=0; return true;
+                for (let i = 0; i < this.BIOME_LIST.length; i++) {
+                    const oy = bmY + bmH + i * 26;
+                    if (cx >= bmX && cx <= bmX + bmW && cy >= oy && cy <= oy + 26) {
+                        this.filterBiome = this.BIOME_LIST[i];
+                        this.dropdownOpen = null;
+                        this.scrollOffset = 0;
+                        return true;
                     }
                 }
-                this.dropdownOpen=null; return true;
+                this.dropdownOpen = null;
+                return true;
             }
+
             if (this.dropdownOpen === "rarity") {
-                for (let i=0; i<this.RARITY_FILTER_LIST.length; i++) {
-                    const oy = rY+rH + i*26;
-                    if (cx>=rX && cx<=rX+rW && cy>=oy && cy<=oy+26) {
-                        this.filterRarity=this.RARITY_FILTER_LIST[i];
-                        this.dropdownOpen=null; this.scrollOffset=0; return true;
+                for (let i = 0; i < this.RARITY_FILTER_LIST.length; i++) {
+                    const oy = rY + rH + i * 26;
+                    if (cx >= rX && cx <= rX + rW && cy >= oy && cy <= oy + 26) {
+                        this.filterRarity = this.RARITY_FILTER_LIST[i];
+                        this.dropdownOpen = null;
+                        this.scrollOffset = 0;
+                        return true;
                     }
                 }
-                this.dropdownOpen=null; return true;
+                this.dropdownOpen = null;
+                return true;
             }
-            this.dropdownOpen=null;
+            this.dropdownOpen = null;
 
             // selectedItem detail
             if (this.selectedItem) {
-                // Back
-                if (cx>=S[0]+50 && cx<=S[0]+150 && cy>=S[1]+500 && cy<=S[1]+540) {
-                    this.selectedItem=null; return true;
+                // Back button
+                if (cx >= S[0] + 50 && cx <= S[0] + 150 && cy >= S[1] + 530 && cy <= S[1] + 570) {
+                    this.selectedItem = null;
+                    return true;
                 }
-                const rarities=["Common","Unusual","Rare","Epic","Legendary","Mythic","Ultra","Super","Omega","Eternal"];
-                for (let i=0; i<rarities.length; i++) {
-                    const bx2=S[0]+200+(i%5)*110, by2=S[1]+300+Math.floor(i/5)*50;
-                    if (cx>=bx2 && cx<=bx2+100 && cy>=by2 && cy<=by2+40) {
-                        this.buyItem(this.selectedItem, rarities[i]); return true;
+
+                const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+                for (let i = 0; i < rarities.length; i++) {
+                    const bx = S[0] + 180 + (i % 5) * 110, by = S[1] + 300 + Math.floor(i / 5) * 55;
+                    if (cx >= bx && cx <= bx + 100 && cy >= by && cy <= by + 48) {
+                        this.buyItem(this.selectedItem, rarities[i]);
+                        return true;
                     }
                 }
                 return true;
             }
 
             // Grid click
-            const gStartX=S[0]+10, gStartY=S[1]+150;
-            const filtered=this.getFilteredItems();
-            const startIdx=this.scrollOffset*this.COLS;
-            for (let i=0; i<this.ROWS*this.COLS; i++) {
-                const col=i%this.COLS, row=Math.floor(i/this.COLS);
-                const gx=gStartX+col*(this.SLOT_W+this.GAP);
-                const gy=gStartY+row*(this.SLOT_H+this.GAP);
-                if (cx>=gx && cx<=gx+this.SLOT_W && cy>=gy && cy<=gy+this.SLOT_H) {
-                    const idx=startIdx+i;
-                    if (idx<filtered.length) { this.selectedItem=filtered[idx]; return true; }
+            const gridStartX = S[0] + 12, gridStartY = S[1] + 155;
+            const displayRarity = this.filterRarity !== "All" ? this.filterRarity : "Common";
+            const filtered = this.getFilteredItems();
+            const startIdx = this.scrollOffset * this.COLS;
+
+            for (let i = 0; i < this.ROWS * this.COLS; i++) {
+                const col = i % this.COLS, row = Math.floor(i / this.COLS);
+                const gx = gridStartX + col * (this.SLOT_W + this.GAP);
+                const gy = gridStartY + row * (this.SLOT_H + this.GAP);
+
+                if (cx >= gx && cx <= gx + this.SLOT_W && cy >= gy && cy <= gy + this.SLOT_H) {
+                    const idx = startIdx + i;
+                    if (idx < filtered.length) {
+                        this.selectedItem = filtered[idx];
+                        return true;
+                    }
                 }
             }
         }
 
         // ── SELL TAB ──
         if (this.currentTab === "sell") {
-            const circX=S[0]+550, circY=S[1]+150, circR=60;
-            const ddx=cx-(circX+circR), ddy=cy-(circY+circR);
-            if (Math.sqrt(ddx*ddx+ddy*ddy)<=circR) {
-                if (this.sellSlot) this.sellAll(); return true;
+            const circleX = S[0] + 580, circleY = S[1] + 140, circleR = 65;
+            const centerX = circleX + circleR;
+            const centerY = circleY + circleR;
+            const dx = cx - centerX;
+            const dy = cy - centerY;
+
+            if (Math.sqrt(dx * dx + dy * dy) <= circleR) {
+                if (this.sellSlot) this.sellAll();
+                return true;
             }
-            const invX=cx-(S[0]+50), invY=cy-(S[1]+250);
+
+            // Inventory click
+            const invX = cx - (S[0] + 40);
+            const invY = cy - (S[1] + 250);
             const [itemIndex, item] = this.inventory.getItemAtPos([invX, invY]);
-            if (itemIndex!==-1 && item && item.type!=="Star") {
-                this.addToSellSlot(item, itemIndex); return true;
+
+            if (itemIndex !== -1 && item && item.type !== "Star") {
+                this.addToSellSlot(item, itemIndex);
+                return true;
             }
         }
+
+        // ── MEMBERSHIP TAB ──
+        if (this.currentTab === "membership") {
+            for (let i = 0; i < this.MEMBERSHIP_TIERS.length; i++) {
+                const btn = this._membershipBtnRects?.[i];
+                if (!btn) continue;
+                const [bx, by, bw, bh] = btn;
+                if (cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh) {
+                    this._purchaseMembership(this.MEMBERSHIP_TIERS[i]);
+                    return true;
+                }
+            }
+        }
+
         return true;
     }
 
+    // 辅助方法：获取会员标签页最大滚动距离
+    getMembershipMaxScroll() {
+        const [sx, sy, sw, sh] = this.shopArea;
+        const contentH = sh - 140;
+        const COLS = 2;
+        const CARD_W = 280;
+        const CARD_H = 340;
+        const GAP = 25;
+        const rows = Math.ceil(this.MEMBERSHIP_TIERS.length / COLS);
+        const totalHeight = rows * (CARD_H + GAP);
+        return Math.max(0, totalHeight - contentH);
+    }
+
     // ─────────────────────────────────────────
-    // Draw
+    // 绘制辅助方法 (使用原有的白底黑边字风格)
     // ─────────────────────────────────────────
-    drawStrokedText(ctx, text, x, y, fontSize = 20, textAlign = 'center', fillColor = 'white') {
+    drawStrokedText(ctx, text, x, y, fontSize, textAlign = 'center', fillColor = 'white') {
         ctx.save();
         ctx.font = `bold ${fontSize}px "Arial Black", Arial`;
         ctx.textAlign = textAlign;
         ctx.textBaseline = 'middle';
-
-        // 黑色描边
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 4; // 适当减小一点，5在小字号下可能太粗
-        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
         ctx.strokeText(text, x, y);
-
-        // 自定义颜色填充
         ctx.fillStyle = fillColor;
         ctx.fillText(text, x, y);
         ctx.restore();
     }
-    drawStyledButton(ctx, text, rect, baseColor, fontSize = 16) {
-        // 在方法内部定义 adjust 函数
-        const adjust = (rgb, factor) => rgb.map(c => Math.min(255, Math.max(0, Math.floor(c * factor))));
 
+    drawPanel(ctx, x, y, w, h, title) {
+        // 背景
+        ctx.fillStyle = '#0a1620';
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 12);
+        ctx.fill();
+
+        // 边框
+        ctx.strokeStyle = '#2a4060';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 12);
+        ctx.stroke();
+
+        // 标题栏
+        ctx.fillStyle = '#1a2a40';
+        ctx.beginPath();
+        ctx.roundRect(x + 5, y + 5, w - 10, 45, 8);
+        ctx.fill();
+
+        // 标题文字
+        this.drawStrokedText(ctx, title, x + w / 2, y + 28, 24, 'center', '#ffd700');
+    }
+
+    drawStyledButton(ctx, text, rect, baseColor, fontSize = 16) {
         const [x, y, w, h] = rect;
+
+        const adjust = (rgb, f) => rgb.map(c => Math.min(255, Math.max(0, Math.floor(c * f))));
+
         const darkColor = `rgb(${adjust(baseColor, 0.85).join(',')})`;
         const lightColor = `rgb(${baseColor.join(',')})`;
         const strokeColor = `rgb(${adjust(baseColor, 0.5).join(',')})`;
@@ -23554,9 +23772,21 @@ class ShopSystem {
         ctx.stroke();
 
         if (text) {
-            this.drawStrokedText(ctx, text, x + w / 2, y + h / 2, fontSize);
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 4;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(text, x + w / 2, y + h / 2);
+            ctx.fillStyle = 'white';
+            ctx.fillText(text, x + w / 2, y + h / 2);
         }
     }
+
+    // ─────────────────────────────────────────
+    // draw (主绘制方法)
+    // ─────────────────────────────────────────
     draw(ctx) {
         if (!this.visible) return;
         this.checkDiscountUpdate();
@@ -23564,10 +23794,15 @@ class ShopSystem {
         const S = this.shopArea;
 
         // panel
-        ctx.fillStyle='#22C1E9';
-        ctx.beginPath(); ctx.roundRect(S[0],S[1],S[2],S[3],12); ctx.fill();
-        ctx.strokeStyle='#0B7894'; ctx.lineWidth=5;
-        ctx.beginPath(); ctx.roundRect(S[0],S[1],S[2],S[3],12); ctx.stroke();
+        ctx.fillStyle = '#22C1E9';
+        ctx.beginPath();
+        ctx.roundRect(S[0], S[1], S[2], S[3], 12);
+        ctx.fill();
+        ctx.strokeStyle = '#0B7894';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.roundRect(S[0], S[1], S[2], S[3], 12);
+        ctx.stroke();
 
         // --- 绘制标题 (Shop) ---
         ctx.font = 'bold 30px Arial';
@@ -23575,12 +23810,13 @@ class ShopSystem {
         ctx.textBaseline = 'middle';
 
         // 设置描边样式
-        ctx.strokeStyle = '#000000'; // 描边颜色（例如黑色）
-        ctx.lineWidth = 4;            // 描边宽度
-        ctx.strokeText('Shop', S[0] + S[2] / 2, S[1] + 38); // 绘制描边
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 4;
+        ctx.strokeText('Shop', S[0] + S[2] / 2, S[1] + 38);
         // 设置填充样式
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Shop', S[0] + S[2] / 2, S[1] + 38);   // 绘制填充文字
+        ctx.fillText('Shop', S[0] + S[2] / 2, S[1] + 38);
+
         ctx.font = 'bold 26px Arial';
         ctx.textAlign = 'right';
         const starText = `⭐ ${this.formatPrice(this.stars)}`;
@@ -23588,348 +23824,598 @@ class ShopSystem {
         const starY = S[1] + 38;
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 4;
-        ctx.strokeText(starText, starX, starY); // 绘制描边
+        ctx.strokeText(starText, starX, starY);
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(starText, starX, starY);   // 绘制填充文字
-        // close btn
-        const [cbx,cby,cbw,cbh]=this.closeButton;
-        ctx.fillStyle='#c0392b';
-        ctx.beginPath(); ctx.roundRect(cbx,cby,cbw,cbh,6); ctx.fill();
-        ctx.font='bold 18px Arial'; ctx.fillStyle='white'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('✕', cbx+cbw/2, cby+cbh/2);
+        ctx.fillText(starText, starX, starY);
 
-        // tabs
-        // 定义选项卡数据
+        // close btn
+        const [cbx, cby, cbw, cbh] = this.closeButton;
+        ctx.fillStyle = '#c0392b';
+        ctx.beginPath();
+        ctx.roundRect(cbx, cby, cbw, cbh, 6);
+        ctx.fill();
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✕', cbx + cbw / 2, cby + cbh / 2);
+
+        // tabs - 增加 MEMBERSHIP 标签
         const tabs = [
-            ["BUY", this.buyButton],
-            ["SELL", this.sellButton]
+            ["Buy", this.buyButton, "buy"],
+            ["Memberships", this.membershipButton, "membership"],
+            ["Sell", this.sellButton, "sell"]
         ];
 
-        for (const [label, rect] of tabs) {
-            // 1. 判断当前是否选中
-            const active = (label === "Buy" && this.currentTab === "buy") ||
-                           (label === "Sell" && this.currentTab === "sell");
+        for (const [label, rect, tabName] of tabs) {
+            // 判断当前是否选中
+            const active = this.currentTab === tabName;
 
-            // 2. 根据状态定义基础颜色 (RGB 数组格式)
             // 选中时为金色/黄色，未选中时为深蓝色
             const baseColor = active ? [255, 215, 0] : [30, 48, 80];
 
-            // 3. 调用封装的方法进行绘制
-            // 注意：fontSize 传入 18 以符合你原代码的视觉效果
+            // 调用封装的方法进行绘制
             this.drawStyledButton(ctx, label, rect, baseColor, 18);
         }
-        // redeem btn
-        const rBX=S[0]+S[2]-150, rBY=S[1]+S[3]-50;
-        ctx.fillStyle='#6c3483';
-        ctx.beginPath(); ctx.roundRect(rBX,rBY,120,35,8); ctx.fill();
-        ctx.font='bold 13px Arial'; ctx.fillStyle='white';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('Redeem Code', rBX+60, rBY+17);
 
+        // redeem btn
+        const rBX = S[0] + S[2] - 150, rBY = S[1] + S[3] - 50;
+        ctx.fillStyle = '#6c3483';
+        ctx.beginPath();
+        ctx.roundRect(rBX, rBY, 120, 35, 8);
+        ctx.fill();
+        ctx.font = 'bold 13px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Redeem Code', rBX + 60, rBY + 17);
 
         // tab content
-        if (this.currentTab==="buy") this.drawBuyTab(ctx);
+        if (this.currentTab === "buy") this.drawBuyTab(ctx);
+        else if (this.currentTab === "membership") this.drawMembershipTab(ctx);
         else this.drawSellTab(ctx);
 
         // redeem overlay
         this.redeemSystem?.draw(ctx);
 
         // message
-        if (this.messageTimer>0) {
-            ctx.save(); ctx.shadowColor='black'; ctx.shadowBlur=8;
-            ctx.font='bold 18px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-            ctx.fillStyle = this.message.includes('✅')?'#2ecc71':this.message.includes('❌')?'#e74c3c':'#ffd700';
-            ctx.fillText(this.message, WIDTH/2, S[1]+S[3]-18);
+        if (this.messageTimer > 0) {
+            ctx.save();
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 8;
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = this.message.includes('✅') ? '#2ecc71' : (this.message.includes('❌') ? '#e74c3c' : '#ffd700');
+            ctx.fillText(this.message, WIDTH / 2, S[1] + S[3] - 18);
             ctx.restore();
         }
     }
 
-    // ─────────────────────────────────────────
+
+// ─────────────────────────────────────────
     // drawBuyTab
     // ─────────────────────────────────────────
-    drawBuyTab(ctx) {
-        if (this.selectedItem) { this.drawItemDetail(ctx); return; }
+drawBuyTab(ctx) {
+    if (this.selectedItem) { this.drawItemDetail(ctx); return; }
 
-        const S = this.shopArea;
+    const S = this.shopArea;
 
-        // ── Filter bar ──
-        const srchX=S[0]+20, srchY=S[1]+110, srchW=180, srchH=28;
-        ctx.fillStyle = this.filterSearchActive ? '#d2d2d2' : '#ffffff';
-        ctx.beginPath(); ctx.roundRect(srchX,srchY,srchW,srchH,5); ctx.fill();
-        ctx.strokeStyle = this.filterSearchActive ? '#000000' : '#000000';
-        ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(srchX,srchY,srchW,srchH,5); ctx.stroke();
-        ctx.font='15px Arial'; ctx.textAlign='left'; ctx.textBaseline='middle';
-        ctx.fillStyle = this.filterSearch?(this.filterSearchActive?'#000':'#fff'):'#556';
-        ctx.fillText(this.filterSearch||'Search...', srchX+8, srchY+14);
+    // ── Filter bar ──
+    const srchX=S[0]+20, srchY=S[1]+110, srchW=180, srchH=28;
+    ctx.fillStyle = this.filterSearchActive ? '#d2d2d2' : '#ffffff';
+    ctx.beginPath(); ctx.roundRect(srchX,srchY,srchW,srchH,5); ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(srchX,srchY,srchW,srchH,5); ctx.stroke();
+    ctx.font='15px Arial'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillStyle = this.filterSearch?(this.filterSearchActive?'#000':'#333'):'#556';
+    ctx.fillText(this.filterSearch||'Search...', srchX+8, srchY+14);
 
-        const bmX=S[0]+210, bmY=S[1]+110, bmW=120, bmH=28;
-        ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.roundRect(bmX,bmY,bmW,bmH,5); ctx.fill();
-        ctx.strokeStyle='#000000'; ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(bmX,bmY,bmW,bmH,5); ctx.stroke();
-        ctx.font='15px Arial'; ctx.fillStyle='#000000'; ctx.textAlign='left';
-        ctx.fillText(`Biome: ${this.filterBiome}`, bmX+6, bmY+14);
-        ctx.fillText('▼', bmX+bmW-17, bmY+14);
+    const bmX=S[0]+210, bmY=S[1]+110, bmW=120, bmH=28;
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.roundRect(bmX,bmY,bmW,bmH,5); ctx.fill();
+    ctx.strokeStyle='#000000'; ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(bmX,bmY,bmW,bmH,5); ctx.stroke();
+    ctx.font='15px Arial'; ctx.fillStyle='#000000'; ctx.textAlign='left';
+    ctx.fillText(`Biome: ${this.filterBiome}`, bmX+6, bmY+14);
+    ctx.fillText('▼', bmX+bmW-17, bmY+14);
 
-        const rX=S[0]+340, rY=S[1]+110, rW=120, rH=28;
-        ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.roundRect(rX,rY,rW,rH,5); ctx.fill();
-        ctx.strokeStyle='#000000'; ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(rX,rY,rW,rH,5); ctx.stroke();
-        const rClr = RARITY_COLORS[this.filterRarity]||[107,107,107];
-        ctx.fillStyle=`rgb(${rClr[0]},${rClr[1]},${rClr[2]})`; ctx.textAlign='left';
-        ctx.fillText(`Rarity: ${this.filterRarity}`, rX+6, rY+14);
-        ctx.fillStyle=`rgb(${rClr[0]},${rClr[1]},${rClr[2]})`; ctx.fillText('▼', rX+rW-14, rY+14);
+    const rX=S[0]+340, rY=S[1]+110, rW=120, rH=28;
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.roundRect(rX,rY,rW,rH,5); ctx.fill();
+    ctx.strokeStyle='#000000'; ctx.lineWidth=2.0; ctx.beginPath(); ctx.roundRect(rX,rY,rW,rH,5); ctx.stroke();
+    const rClr = RARITY_COLORS[this.filterRarity]||[107,107,107];
+    ctx.fillStyle=`rgb(${rClr[0]},${rClr[1]},${rClr[2]})`; ctx.textAlign='left';
+    ctx.fillText(`Rarity: ${this.filterRarity}`, rX+6, rY+14);
+    ctx.fillText('▼', rX+rW-14, rY+14);
 
-        // ── Item count ──
-        const filtered = this.getFilteredItems();
-        const text = `${filtered.length} items`;
-        const tx = S[0] + 470;
-        const ty = S[1] + 130;
-        ctx.font = '17px Arial';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 3.0;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(text, tx, ty);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(text, tx, ty);
-        // ── Grid ──
-        const gStartX=S[0]+10, gStartY=S[1]+150;
-        const displayRarity = this.filterRarity!=="All" ? this.filterRarity : "Super";
-        const startIdx=this.scrollOffset*this.COLS;
-        const visible=filtered.slice(startIdx, startIdx+this.ROWS*this.COLS);
+    // ── Item count ──
+    const filtered = this.getFilteredItems();
+    const text = `${filtered.length} items`;
+    const tx = S[0] + 470;
+    const ty = S[1] + 130;
+    ctx.font = '17px Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3.0;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(text, tx, ty);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(text, tx, ty);
 
-        for (let i=0; i<visible.length; i++) {
-            const col=i%this.COLS, row=Math.floor(i/this.COLS);
-            const gx=gStartX+col*(this.SLOT_W+this.GAP);
-            const gy=gStartY+row*(this.SLOT_H+this.GAP);
-            const item=visible[i];
-            const isDisc=this.discountItems.some(d=>d.type===item.type);
-            const price=this.getDiscountedPrice(item.type, displayRarity);
+    // ── Grid ──
+    const gStartX=S[0]+10, gStartY=S[1]+150;
+    const startIdx=this.scrollOffset*this.COLS;
+    const visible=filtered.slice(startIdx, startIdx+this.ROWS*this.COLS);
 
-            // card bg
-            ctx.fillStyle='#78B8C9';
-            ctx.beginPath(); ctx.roundRect(gx,gy,this.SLOT_W,this.SLOT_H,6); ctx.fill();
+    for (let i=0; i<visible.length; i++) {
+        const col=i%this.COLS, row=Math.floor(i/this.COLS);
+        const gx=gStartX+col*(this.SLOT_W+this.GAP);
+        const gy=gStartY+row*(this.SLOT_H+this.GAP);
+        const item=visible[i];
 
-            // border
-            ctx.strokeStyle=isDisc?'#ffd700':'#1a3050';
-            ctx.lineWidth=isDisc?5:2;
-            ctx.beginPath(); ctx.roundRect(gx,gy,this.SLOT_W,this.SLOT_H,7); ctx.stroke();
+        // 【修正点】：使用物品真实的稀有度
+        const trueRarity = item.rarity || "Common";
+        const isDisc=this.discountItems.some(d=>d.type===item.type);
+        const price=this.getDiscountedPrice(item.type, trueRarity);
 
-            const tmp=new Item(item.type,1,displayRarity);
-            if (tmp.draw) tmp.draw(ctx, gx+15, gy-2, this.SLOT_W-30, -9999, -9999);
+        // card bg
+        ctx.fillStyle='#78B8C9';
+        ctx.beginPath(); ctx.roundRect(gx,gy,this.SLOT_W,this.SLOT_H,6); ctx.fill();
 
-            // --- 价格标签 (Price Pill) ---
-            const pillY = gy + this.SLOT_H - 20;
-            const pillRect = [gx + 3, pillY, this.SLOT_W - 5, 28];
+        // border
+        ctx.strokeStyle=isDisc?'#ffd700':'#1a3050';
+        ctx.lineWidth=isDisc?5:2;
+        ctx.beginPath(); ctx.roundRect(gx,gy,this.SLOT_W,this.SLOT_H,7); ctx.stroke();
 
-            // 定义背景色 (深红色 rgb)
-            // 原代码 #c0392b 对应的 RGB 大约是 [192, 57, 43]
-            const pillBaseColor = [253, 63, 63];
+        // 使用真实稀有度画图标
+        const tmp=new Item(item.type,1,trueRarity);
+        if (tmp.draw) tmp.draw(ctx, gx+15, gy-2, this.SLOT_W-30, -9999, -9999);
 
-            // 调用方法进行绘制
-            // 这里传入 11px 的字号，并传入价格文本
-            this.drawStyledButton(
-                ctx,
-                `⭐${this.formatPrice(price)}`,
-                pillRect,
-                pillBaseColor,
-                11
-            );
-            // sale tag
-            if (isDisc) {
-                const d=this.discountItems.find(d=>d.type===item.type);
-                if (d) {
-                    ctx.fillStyle='#e74c3c';
-                    ctx.beginPath(); ctx.roundRect(gx+this.SLOT_W-28,gy+2,26,14,4); ctx.fill();
-                    ctx.font='bold 9px Arial'; ctx.fillStyle='#fff';
-                    ctx.textAlign='center'; ctx.textBaseline='middle';
-                    ctx.fillText(`-${d.discountPercent}%`, gx+this.SLOT_W-15, gy+9);
-                }
-            }
-        }
+        // Price Pill
+        const pillY = gy + this.SLOT_H - 20;
+        const pillRect = [gx + 3, pillY, this.SLOT_W - 5, 28];
+        const pillBaseColor = [253, 63, 63];
 
-        // ── Scrollbar ──
-        const totalRows=Math.ceil(filtered.length/this.COLS);
-        const maxOff=Math.max(0,totalRows-this.ROWS);
-        if (maxOff>0) {
-            const barX=S[0]+S[2]-10, barY=gStartY;
-            const barH=this.ROWS*(this.SLOT_H+this.GAP);
-            const thumbH=Math.max(24, barH*(this.ROWS/totalRows));
-            const thumbY=barY+(maxOff>0?(this.scrollOffset/maxOff)*(barH-thumbH):0);
-            ctx.fillStyle='rgba(255,255,255,0.1)';
-            ctx.beginPath(); ctx.roundRect(barX,barY,6,barH,3); ctx.fill();
-            ctx.fillStyle='rgba(255,255,255,0.4)';
-            ctx.beginPath(); ctx.roundRect(barX,thumbY,6,thumbH,3); ctx.fill();
-        }
+        this.drawStyledButton(ctx, `⭐${this.formatPrice(price)}`, pillRect, pillBaseColor, 11);
 
-        // ── Tooltip (on top) ──
-        for (let i=0; i<visible.length; i++) {
-            const col=i%this.COLS, row=Math.floor(i/this.COLS);
-            const gx=gStartX+col*(this.SLOT_W+this.GAP), gy=gStartY+row*(this.SLOT_H+this.GAP);
-            if (this.mouseX>=gx&&this.mouseX<=gx+this.SLOT_W&&this.mouseY>=gy&&this.mouseY<=gy+this.SLOT_H) {
-                const tmp=new Item(visible[i].type,1,"Common");
-                TooltipSystem.drawItemTooltip(ctx, tmp, gx, gy, this.mouseX, this.mouseY, this.SLOT_W);
-                break;
-            }
-        }
-
-        // ── Dropdowns (always on top) ──
-        if (this.dropdownOpen==="biome") {
-            const n=this.BIOME_LIST.length;
-            ctx.fillStyle='#0a1520';
-            ctx.beginPath(); ctx.roundRect(bmX,bmY+bmH,bmW,n*26,4); ctx.fill();
-            ctx.strokeStyle='#2a4060'; ctx.lineWidth=1;
-            ctx.beginPath(); ctx.roundRect(bmX,bmY+bmH,bmW,n*26,4); ctx.stroke();
-            for (let i=0; i<n; i++) {
-                const oy=bmY+bmH+i*26;
-                if (this.BIOME_LIST[i]===this.filterBiome) {
-                    ctx.fillStyle='#1a3050'; ctx.fillRect(bmX+1,oy,bmW-2,26);
-                }
-                ctx.font='12px Arial'; ctx.fillStyle='#7ec8e3';
-                ctx.textAlign='left'; ctx.textBaseline='middle';
-                ctx.fillText(this.BIOME_LIST[i], bmX+8, oy+13);
-            }
-        }
-        if (this.dropdownOpen==="rarity") {
-            const n=this.RARITY_FILTER_LIST.length;
-            ctx.fillStyle='#0a1520';
-            ctx.beginPath(); ctx.roundRect(rX,rY+rH,rW,n*26,4); ctx.fill();
-            ctx.strokeStyle='#2a4060'; ctx.lineWidth=1;
-            ctx.beginPath(); ctx.roundRect(rX,rY+rH,rW,n*26,4); ctx.stroke();
-            for (let i=0; i<n; i++) {
-                const oy=rY+rH+i*26;
-                if (this.RARITY_FILTER_LIST[i]===this.filterRarity) {
-                    ctx.fillStyle='#1a3050'; ctx.fillRect(rX+1,oy,rW-2,26);
-                }
-                const rc=RARITY_COLORS[this.RARITY_FILTER_LIST[i]]||[200,200,200];
-                ctx.font='12px Arial';
-                ctx.fillStyle=`rgb(${rc[0]},${rc[1]},${rc[2]})`;
-                ctx.textAlign='left'; ctx.textBaseline='middle';
-                ctx.fillText(this.RARITY_FILTER_LIST[i], rX+8, oy+13);
+        // sale tag
+        if (isDisc) {
+            const d=this.discountItems.find(d=>d.type===item.type);
+            if (d) {
+                ctx.fillStyle='#e74c3c';
+                ctx.beginPath(); ctx.roundRect(gx+this.SLOT_W-28,gy+2,26,14,4); ctx.fill();
+                ctx.font='bold 9px Arial'; ctx.fillStyle='#fff';
+                ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(`-${d.discountPercent}%`, gx+this.SLOT_W-15, gy+9);
             }
         }
     }
 
-    // ─────────────────────────────────────────
-    // drawItemDetail
-    // ─────────────────────────────────────────
+    // ── Scrollbar ──
+    const totalRows=Math.ceil(filtered.length/this.COLS);
+    const maxOff=Math.max(0,totalRows-this.ROWS);
+    if (maxOff>0) {
+        const barX=S[0]+S[2]-10, barY=gStartY;
+        const barH=this.ROWS*(this.SLOT_H+this.GAP);
+        const thumbH=Math.max(24, barH*(this.ROWS/totalRows));
+        const thumbY=barY+(maxOff>0?(this.scrollOffset/maxOff)*(barH-thumbH):0);
+        ctx.fillStyle='rgba(255,255,255,0.1)';
+        ctx.beginPath(); ctx.roundRect(barX,barY,6,barH,3); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.4)';
+        ctx.beginPath(); ctx.roundRect(barX,thumbY,6,thumbH,3); ctx.fill();
+    }
+
+    // ── Tooltip (置顶显示真实稀有度) ──
+    for (let i = 0; i < visible.length; i++) {
+        const col = i % this.COLS, row = Math.floor(i / this.COLS);
+        const gx = gStartX + col * (this.SLOT_W + this.GAP), gy = gStartY + row * (this.SLOT_H + this.GAP);
+
+        if (this.mouseX >= gx && this.mouseX <= gx + this.SLOT_W &&
+            this.mouseY >= gy && this.mouseY <= gy + this.SLOT_H) {
+            const itemRarity = visible[i].rarity || "Common";
+            const tmp = new Item(visible[i].type, 1, itemRarity);
+            TooltipSystem.drawItemTooltip(ctx, tmp, gx, gy, this.mouseX, this.mouseY, this.SLOT_W);
+            break;
+        }
+    }
+
+    // ── Dropdowns ──
+    if (this.dropdownOpen==="biome") {
+        const n=this.BIOME_LIST.length;
+        ctx.fillStyle='#0a1520';
+        ctx.beginPath(); ctx.roundRect(bmX,bmY+bmH,bmW,n*26,4); ctx.fill();
+        ctx.strokeStyle='#2a4060'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bmX,bmY+bmH,bmW,n*26,4); ctx.stroke();
+        for (let i=0; i<n; i++) {
+            const oy=bmY+bmH+i*26;
+            if (this.BIOME_LIST[i]===this.filterBiome) {
+                ctx.fillStyle='#1a3050'; ctx.fillRect(bmX+1,oy,bmW-2,26);
+            }
+            ctx.font='12px Arial'; ctx.fillStyle='#7ec8e3';
+            ctx.textAlign='left'; ctx.textBaseline='middle';
+            ctx.fillText(this.BIOME_LIST[i], bmX+8, oy+13);
+        }
+    }
+    if (this.dropdownOpen==="rarity") {
+        const n=this.RARITY_FILTER_LIST.length;
+        ctx.fillStyle='#0a1520';
+        ctx.beginPath(); ctx.roundRect(rX,rY+rH,rW,n*26,4); ctx.fill();
+        ctx.strokeStyle='#2a4060'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(rX,rY+rH,rW,n*26,4); ctx.stroke();
+        for (let i=0; i<n; i++) {
+            const oy=rY+rH+i*26;
+            if (this.RARITY_FILTER_LIST[i]===this.filterRarity) {
+                ctx.fillStyle='#1a3050'; ctx.fillRect(rX+1,oy,rW-2,26);
+            }
+            const rc=RARITY_COLORS[this.RARITY_FILTER_LIST[i]]||[200,200,200];
+            ctx.font='12px Arial';
+            ctx.fillStyle=`rgb(${rc[0]},${rc[1]},${rc[2]})`;
+            ctx.textAlign='left'; ctx.textBaseline='middle';
+            ctx.fillText(this.RARITY_FILTER_LIST[i], rX+8, oy+13);
+        }
+    }
+}
+
+    drawDropdowns(ctx) {
+        const [sx, sy, sw, sh] = this.shopArea;
+
+        if (this.dropdownOpen === "biome") {
+            const biomeX = sx + 200, biomeY = sy + 115, biomeW = 130;
+            const n = this.BIOME_LIST.length;
+            ctx.fillStyle = '#0a1520';
+            ctx.beginPath();
+            ctx.roundRect(biomeX, biomeY + 30, biomeW, n * 26, 4);
+            ctx.fill();
+            ctx.strokeStyle = '#2a4060';
+            ctx.beginPath();
+            ctx.roundRect(biomeX, biomeY + 30, biomeW, n * 26, 4);
+            ctx.stroke();
+
+            for (let i = 0; i < n; i++) {
+                const oy = biomeY + 30 + i * 26;
+                if (this.BIOME_LIST[i] === this.filterBiome) {
+                    ctx.fillStyle = '#1a3050';
+                    ctx.fillRect(biomeX + 1, oy, biomeW - 2, 26);
+                }
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#7ec8e3';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.BIOME_LIST[i], biomeX + 8, oy + 13);
+            }
+        }
+
+        if (this.dropdownOpen === "rarity") {
+            const rarityX = sx + 340, rarityY = sy + 115, rarityW = 130;
+            const n = this.RARITY_FILTER_LIST.length;
+            ctx.fillStyle = '#0a1520';
+            ctx.beginPath();
+            ctx.roundRect(rarityX, rarityY + 30, rarityW, n * 26, 4);
+            ctx.fill();
+            ctx.strokeStyle = '#2a4060';
+            ctx.beginPath();
+            ctx.roundRect(rarityX, rarityY + 30, rarityW, n * 26, 4);
+            ctx.stroke();
+
+            for (let i = 0; i < n; i++) {
+                const oy = rarityY + 30 + i * 26;
+                if (this.RARITY_FILTER_LIST[i] === this.filterRarity) {
+                    ctx.fillStyle = '#1a3050';
+                    ctx.fillRect(rarityX + 1, oy, rarityW - 2, 26);
+                }
+                const rc = RARITY_COLORS[this.RARITY_FILTER_LIST[i]] || [200, 200, 200];
+                ctx.font = '12px Arial';
+                ctx.fillStyle = `rgb(${rc[0]},${rc[1]},${rc[2]})`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.RARITY_FILTER_LIST[i], rarityX + 8, oy + 13);
+            }
+        }
+    }
+
     drawItemDetail(ctx) {
-        const item=this.selectedItem;
-        const S=this.shopArea;
+        const item = this.selectedItem;
+        const [sx, sy, sw, sh] = this.shopArea;
 
-        const iconX=S[0]+150, iconY=S[1]+180, iconSize=100;
-        ctx.fillStyle='#0e1e2e'; ctx.fillRect(iconX,iconY,iconSize,iconSize);
-        ctx.strokeStyle='#ffd700'; ctx.lineWidth=2; ctx.strokeRect(iconX,iconY,iconSize,iconSize);
-        const tmp=new Item(item.type,1,"Common");
-        if (tmp.draw) tmp.draw(ctx,iconX,iconY,iconSize);
+        // 图标
+        const iconX = sx + 150, iconY = sy + 180, iconSize = 100;
+        ctx.fillStyle = '#0e1e2e';
+        ctx.fillRect(iconX, iconY, iconSize, iconSize);
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(iconX, iconY, iconSize, iconSize);
 
-        ctx.font='bold 28px Arial'; ctx.fillStyle='white';
-        ctx.textAlign='center'; ctx.textBaseline='top';
-        ctx.fillText(item.type, S[0]+S[2]/2, S[1]+150);
+        const tempItem = new Item(item.type, 1, "Common");
+        if (tempItem.draw) tempItem.draw(ctx, iconX, iconY, iconSize);
 
-        ctx.font='18px Arial'; ctx.fillStyle='#aaa';
-        ctx.fillText('Select Rarity to Purchase:', S[0]+200, S[1]+265);
+        // 名称
+        this.drawStrokedText(ctx, item.type, sx + sw / 2, sy + 150, 26, 'center', '#fff');
+        this.drawStrokedText(ctx, 'Select Rarity to Purchase:', sx + sw / 2, sy + 270, 16, 'center', '#aaa');
 
-        const rarities=["Common","Unusual","Rare","Epic","Legendary","Mythic","Ultra","Super","Omega","Eternal"];
-        for (let i=0; i<rarities.length; i++) {
-            const r=rarities[i];
-            const bx=S[0]+200+(i%5)*110, by=S[1]+295+Math.floor(i/5)*55;
-            const price=this.getDiscountedPrice(item.type,r);
-            const isDisc=(r==="Omega"||r==="Eternal")&&this.discountItems.some(d=>d.type===item.type);
+        // 稀有度按钮
+        const rarities = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        for (let i = 0; i < rarities.length; i++) {
+            const r = rarities[i];
+            const bx = sx + 180 + (i % 5) * 110, by = sy + 300 + Math.floor(i / 5) * 55;
+            const price = this.getDiscountedPrice(item.type, r);
+            const isDisc = (r === "Omega" || r === "Eternal") && this.discountItems.some(d => d.type === item.type);
+            const rc = RARITY_COLORS[r] || [255, 255, 255];
 
-            ctx.fillStyle='#1a2e45';
-            ctx.beginPath(); ctx.roundRect(bx,by,100,45,6); ctx.fill();
-            ctx.strokeStyle=isDisc?'#ffd700':(RARITY_COLORS[r]?`rgb(${RARITY_COLORS[r][0]},${RARITY_COLORS[r][1]},${RARITY_COLORS[r][2]})`:'white');
-            ctx.lineWidth=isDisc?2:1.5;
-            ctx.beginPath(); ctx.roundRect(bx,by,100,45,6); ctx.stroke();
+            ctx.fillStyle = '#1a2e45';
+            ctx.beginPath();
+            ctx.roundRect(bx, by, 100, 48, 6);
+            ctx.fill();
+            ctx.strokeStyle = isDisc ? '#ffd700' : `rgb(${rc[0]},${rc[1]},${rc[2]})`;
+            ctx.lineWidth = isDisc ? 2 : 1.5;
+            ctx.beginPath();
+            ctx.roundRect(bx, by, 100, 48, 6);
+            ctx.stroke();
 
-            const rc=RARITY_COLORS[r]||[255,255,255];
-            ctx.font='bold 12px Arial'; ctx.fillStyle=`rgb(${rc[0]},${rc[1]},${rc[2]})`;
-            ctx.textAlign='center'; ctx.textBaseline='top';
-            ctx.fillText(r, bx+50, by+6);
-
-            ctx.font='bold 14px Arial'; ctx.fillStyle='#ffd700';
-            ctx.fillText(`⭐${this.formatPrice(price)}`, bx+50, by+22);
+            this.drawStrokedText(ctx, r, bx + 50, by + 10, 12, 'center', `rgb(${rc[0]},${rc[1]},${rc[2]})`);
+            this.drawStrokedText(ctx, `⭐${this.formatPrice(price)}`, bx + 50, by + 28, 13, 'center', '#ffd700');
 
             if (isDisc) {
-                const d=this.discountItems.find(d=>d.type===item.type);
+                const d = this.discountItems.find(d => d.type === item.type);
                 if (d) {
-                    ctx.font='10px Arial'; ctx.fillStyle='#e74c3c';
-                    ctx.fillText(`-${d.discountPercent}% off`, bx+50, by+38);
+                    this.drawStrokedText(ctx, `-${d.discountPercent}%`, bx + 50, by + 42, 9, 'center', '#e74c3c');
                 }
             }
         }
 
-        ctx.fillStyle='#2c3e50';
-        ctx.beginPath(); ctx.roundRect(S[0]+50,S[1]+500,100,40,8); ctx.fill();
-        ctx.strokeStyle='white'; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.roundRect(S[0]+50,S[1]+500,100,40,8); ctx.stroke();
-        ctx.font='bold 18px Arial'; ctx.fillStyle='white';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('BACK', S[0]+100, S[1]+520);
+        // 返回按钮
+        const backRect = [sx + 50, sy + sh - 80, 100, 40];
+        this.drawStyledButton(ctx, 'BACK', backRect, [44, 60, 80], 16);
     }
 
-    // ─────────────────────────────────────────
-    // drawSellTab
-    // ─────────────────────────────────────────
     drawSellTab(ctx) {
-        const S=this.shopArea;
+        const S = this.shopArea;
         const tutorialText = 'Click inventory items → sell slot → click circle to sell';
         const tx = S[0] + 50;
-        const ty = S[1] + 120; // y从100增加到110，因为基线从 top 变成了 middle
-        this.drawStrokedText(ctx, tutorialText, tx, ty, 18, 'left', '#ffffff');
-        const cX=S[0]+550, cY=S[1]+150, cR=60;
-        ctx.beginPath(); ctx.arc(cX+cR,cY+cR,cR,0,Math.PI*2);
-        ctx.fillStyle='#00A7D1'; ctx.fill();
-        ctx.strokeStyle='#00657F'; ctx.lineWidth=5; ctx.stroke();
+        const ty = S[1] + 100;
+        this.drawStrokedText(ctx, tutorialText, tx, ty, 16, 'left', '#ffffff');
+
+        // ========== 新增：显示每周出售剩余次数 ==========
+        const remaining = this.getRemainingWeeklySellCount();
+        const limit = this.getWeeklySellLimit();
+        const limitText = limit === Infinity ? "∞" : limit;
+        const remainingText = remaining === Infinity ? "∞" : remaining;
+
+        // 获取会员等级显示
+        const membershipTier = this.getMembershipTier();
+        const tierName = membershipTier ? membershipTier.label : "Normal";
+
+        // 根据剩余数量改变颜色
+        let statusColor = '#ffd700';
+        if (remaining !== Infinity && remaining <= 3 && remaining > 0) {
+            statusColor = '#ffaa44'; // 警告色
+        } else if (remaining === 0) {
+            statusColor = '#ff6666'; // 红色表示已用完
+        }
+
+        this.drawStrokedText(ctx, `${tierName}: ${remainingText}/${limitText} cards this week`,
+            S[0] + 50, S[1] + 125, 14, 'left', statusColor);
+
+        // 出售槽位圆形
+        const cX = S[0] + 550, cY = S[1] + 150, cR = 60;
+        ctx.beginPath();
+        ctx.arc(cX + cR, cY + cR, cR, 0, Math.PI * 2);
+        ctx.fillStyle = '#00A7D1';
+        ctx.fill();
+        ctx.strokeStyle = '#00657F';
+        ctx.lineWidth = 5;
+        ctx.stroke();
 
         if (this.sellSlot) {
             const tmp = new Item(this.sellSlot.type, this.sellSlot.level, this.sellSlot.rarity);
             if (tmp.draw) tmp.draw(ctx, cX + 20, cY + 20, 80, -9999, -9999);
             if (this.sellSlot.count > 1) {
-                // 使用 middle 基线，所以 y 坐标需要微调（原本是 bottom）
                 this.drawStrokedText(ctx, `x${this.sellSlot.count}`, cX + 100, cY + 100, 18, 'right', 'white');
             }
             const tot = this.sellSlot.count * this.sellSlot.pricePerUnit;
             const priceText = `⭐${this.formatPrice(tot)}`;
             this.drawStrokedText(ctx, priceText, cX + cR, cY + cR * 2 + 20, 22, 'center', '#ffd700');
-            this.drawStrokedText(ctx, 'Click circle to sell', cX + cR, cY + cR * 2 + 45, 18, 'center', '#2ecc71');
+            this.drawStrokedText(ctx, 'Click circle to sell', cX + cR, cY + cR * 2 + 45, 16, 'center', '#2ecc71');
         } else {
             this.drawStrokedText(ctx, 'Drop items here', cX + cR, cY + cR, 16, 'center', '#ffffff');
         }
 
         ctx.save();
-        ctx.beginPath(); ctx.rect(S[0]+50,S[1]+250,400,300); ctx.clip();
-        const oldArea=this.inventory.inventoryArea;
-        this.inventory.inventoryArea=[S[0]+50,S[1]+250,400,300];
-        const omx=this.inventory.mouseX, omy=this.inventory.mouseY;
-        this.inventory.mouseX=-9999; this.inventory.mouseY=-9999;
+        ctx.beginPath();
+        ctx.rect(S[0] + 50, S[1] + 250, 400, 300);
+        ctx.clip();
+        const oldArea = this.inventory.inventoryArea;
+        this.inventory.inventoryArea = [S[0] + 50, S[1] + 250, 400, 300];
+        const omx = this.inventory.mouseX, omy = this.inventory.mouseY;
+        this.inventory.mouseX = -9999;
+        this.inventory.mouseY = -9999;
         this.inventory.draw(ctx);
-        this.inventory.mouseX=omx; this.inventory.mouseY=omy;
-        this.inventory.inventoryArea=oldArea;
+        this.inventory.mouseX = omx;
+        this.inventory.mouseY = omy;
+        this.inventory.inventoryArea = oldArea;
         ctx.restore();
 
-        ctx.strokeStyle='#2a4060'; ctx.lineWidth=1.5;
-        ctx.strokeRect(S[0]+50,S[1]+250,400,300);
-        ctx.font='bold 15px Arial'; ctx.fillStyle='#00657F';
-        ctx.textAlign='left'; ctx.textBaseline='top';
-        ctx.fillText('INVENTORY', S[0]+58, S[1]+256);
+        ctx.strokeStyle = '#2a4060';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(S[0] + 50, S[1] + 250, 400, 300);
+        ctx.font = 'bold 15px Arial';
+        ctx.fillStyle = '#00657F';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText('INVENTORY', S[0] + 58, S[1] + 256);
 
         // tooltip
-        const sorted=[...this.inventory.items].sort((a,b)=>
-            (RARITY_PRIORITY[a.rarity]||999)-(RARITY_PRIORITY[b.rarity]||999));
-        const si=this.inventory.scrollOffset*this.inventory.cols;
-        const vi=sorted.slice(si, si+this.inventory.maxVisibleRows*this.inventory.cols);
-        for (let i=0; i<vi.length; i++) {
-            const row=Math.floor(i/this.inventory.cols), col=i%this.inventory.cols;
-            const slx=S[0]+50+col*(this.inventory.slotSize+this.inventory.slotMargin)+this.inventory.slotMargin;
-            const sly=S[1]+250+row*(this.inventory.slotSize+this.inventory.slotMargin)+50;
-            if (vi[i]&&this.mouseX>=slx&&this.mouseX<=slx+this.inventory.slotSize&&
-                this.mouseY>=sly&&this.mouseY<=sly+this.inventory.slotSize) {
-                TooltipSystem.drawItemTooltip(ctx,vi[i],slx,sly,this.mouseX,this.mouseY,this.inventory.slotSize);
+        const sorted = [...this.inventory.items].sort((a, b) =>
+            (RARITY_PRIORITY[a.rarity] || 999) - (RARITY_PRIORITY[b.rarity] || 999));
+        const si = this.inventory.scrollOffset * this.inventory.cols;
+        const vi = sorted.slice(si, si + this.inventory.maxVisibleRows * this.inventory.cols);
+        for (let i = 0; i < vi.length; i++) {
+            const row = Math.floor(i / this.inventory.cols), col = i % this.inventory.cols;
+            const slx = S[0] + 50 + col * (this.inventory.slotSize + this.inventory.slotMargin) + this.inventory.slotMargin;
+            const sly = S[1] + 250 + row * (this.inventory.slotSize + this.inventory.slotMargin) + 50;
+            if (vi[i] && this.mouseX >= slx && this.mouseX <= slx + this.inventory.slotSize &&
+                this.mouseY >= sly && this.mouseY <= sly + this.inventory.slotSize) {
+                TooltipSystem.drawItemTooltip(ctx, vi[i], slx, sly, this.mouseX, this.mouseY, this.inventory.slotSize);
                 break;
             }
         }
     }
+    renderMemberCard(ctx, tier, cx, cy, CARD_W, CARD_H) {
+        const [r, g, b] = tier.color;
+        const themeColor = `rgb(${r},${g},${b})`;
+
+        // 1. 卡片背景 (浅绿色底)
+        ctx.fillStyle = '#7EE39B';
+        ctx.beginPath();
+        ctx.roundRect(cx, cy, CARD_W, CARD_H, 15);
+        ctx.fill();
+
+        // 2. 绘制上方星星区域 (三颗星)
+        const starCenterY = cy + 80;
+        // 左右小星
+        this.drawStarShape(ctx, cx + CARD_W/2 - 45, starCenterY + 20, 5, 35, 18, themeColor);
+        this.drawStarShape(ctx, cx + CARD_W/2 + 45, starCenterY + 20, 5, 35, 18, themeColor);
+        // 中间大星
+        this.drawStarShape(ctx, cx + CARD_W/2, starCenterY, 5, 55, 28, themeColor);
+
+        // 等级标签文字
+        this.drawStrokedText(ctx, tier.label, cx + CARD_W/2, starCenterY + 10, 28, 'center', '#fff', '#000', 4);
+
+        // 3. 价格条
+        const priceY = cy + 160;
+        ctx.fillStyle = '#E87474';
+        ctx.beginPath();
+        ctx.roundRect(cx + 15, priceY, CARD_W - 30, 35, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#9E4E4E';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        this.drawStrokedText(ctx, `⭐${tier.price}/mo`, cx + CARD_W/2, priceY + 23, 18, 'center', '#fff', '#000', 2);
+
+        // 4. 福利列表框
+        const descY = priceY + 50;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.beginPath();
+        ctx.roundRect(cx + 10, descY, CARD_W - 20, 110, 10);
+        ctx.fill();
+
+        // 福利文字
+        if (tier.desc) {
+            tier.desc.forEach((text, index) => {
+                this.drawStrokedText(ctx, text, cx + CARD_W/2, descY + 25 + (index * 22), 14, 'center', '#fff', '#000', 2);
+            });
+        }
+    }
+    drawMembershipTab(ctx) {
+        const [sx, sy, sw, sh] = this.shopArea;
+        this._membershipBtnRects = {};
+
+        // 1. 设置内容区域剪裁（防止滚动出面板）
+        const contentY = sy + 110;
+        const contentH = sh - 150;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(sx + 10, contentY, sw - 20, contentH);
+        ctx.clip(); // 只有在这个矩形内的东西才会被看到
+
+        // 2. 应用滚动偏移
+        const scrollY = this.membershipScrollOffset || 0;
+        ctx.translate(0, -scrollY);
+
+        // 3. 绘制卡片网格
+        const COLS = 2; // 匹配你 getMembershipMaxScroll 中的逻辑
+        const CARD_W = 280;
+        const CARD_H = 340;
+        const GAP = 30;
+        const gridX = sx + (sw - COLS * CARD_W - (COLS - 1) * GAP) / 2;
+        const gridStartY = contentY + 20;
+
+        for (let i = 0; i < this.MEMBERSHIP_TIERS.length; i++) {
+            const tier = this.MEMBERSHIP_TIERS[i];
+            const col = i % COLS, row = Math.floor(i / COLS);
+            const cx = gridX + col * (CARD_W + GAP);
+            const cy = gridStartY + row * (CARD_H + GAP);
+
+            // 调用刚才定义的渲染函数
+            this.renderMemberCard(ctx, tier, cx, cy, CARD_W, CARD_H);
+
+            // 【关键】同步点击判定区域：必须减去 scrollY
+            // 这样点击“视觉上”移动后的位置才能生效
+            this._membershipBtnRects[i] = [cx, cy - scrollY, CARD_W, CARD_H];
+        }
+
+        ctx.restore(); // 恢复画布，后续绘制不受滚动和剪裁影响
+
+        // 底部固定文字
+        this.drawStrokedText(ctx, "Scroll to see more · Upgrading replaces current tier",
+            sx + sw / 2, sy + sh - 25, 12, 'center', '#fff');
+    }
+
+    drawStarShape(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+        let rot = Math.PI / 2 * 3;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+            let x = cx + Math.cos(rot) * outerRadius;
+            let y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        ctx.closePath();
+
+        // 1. 填充原色
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // 2. 获取深色版本
+        const darkColor = this.getDarkerColor(color, 0.6);
+
+        ctx.strokeStyle = darkColor;
+        ctx.lineWidth = 5;
+        ctx.stroke();
+    }
+
+    // 辅助方法：获取更深的颜色
+    getDarkerColor(color, factor = 0.6) {
+        // 处理 rgb(r, g, b) 格式
+        if (color.startsWith('rgb')) {
+            const matches = color.match(/\d+/g);
+            if (matches && matches.length >= 3) {
+                const r = Math.max(0, Math.floor(parseInt(matches[0]) * factor));
+                const g = Math.max(0, Math.floor(parseInt(matches[1]) * factor));
+                const b = Math.max(0, Math.floor(parseInt(matches[2]) * factor));
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+
+        // 处理十六进制格式
+        if (color.startsWith('#')) {
+            let r, g, b;
+            if (color.length === 4) {
+                r = parseInt(color[1] + color[1], 16);
+                g = parseInt(color[2] + color[2], 16);
+                b = parseInt(color[3] + color[3], 16);
+            } else {
+                r = parseInt(color.slice(1, 3), 16);
+                g = parseInt(color.slice(3, 5), 16);
+                b = parseInt(color.slice(5, 7), 16);
+            }
+            r = Math.max(0, Math.floor(r * factor));
+            g = Math.max(0, Math.floor(g * factor));
+            b = Math.max(0, Math.floor(b * factor));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 处理颜色名称或其他格式，默认返回黑色半透明
+        return 'rgba(0, 0, 0, 0.5)';
+    }
+
 }
 // ==================== 概率计算器 ====================
 class ProbabilityCalculator {
@@ -28985,6 +29471,7 @@ class Enemy {
         return meleeDamage;
     }
     takeDamage(damage, source = null) {
+        if (this.isInvincible || this.isTunnel) return false;
         if (this.type === "Fly" && Math.random() < 0.95) return false;
         if (this.isSpawning || this.isDead) return false;
         if (this.isFriendly && this.friendlyDamageReduction > 0) {
@@ -32196,7 +32683,7 @@ class Petal {
             'workerAntList', 'centipedeList', 'termiteSoldierList',
             'waspList', 'stickBugList', 'mantisList', 'fireflyList',
             'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
-            'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList'
+            'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList','MudDigger List'
         ];
 
         const gameEnemies = this.player?.gameInstance?.enemies;
@@ -32477,8 +32964,16 @@ class Petal {
                 this.reloadCooldown = 0;
                 this.isBroken = false;
             }
-
             // 如果槽位变空，清除召唤物并重置重载
+            if (!item) {
+                if (this.itemType) {
+                    this._clearAllSummons();
+                    this.eggSpawned = false;  // ✅ 添加这一行
+                }
+                this.resetToDefault();
+                return;
+            }
+                        // 如果槽位变空，清除召唤物并重置重载
             if (!item) {
                 if (this.itemType) {
                     this._clearAllSummons();
@@ -33394,7 +33889,9 @@ class Petal {
     checkQuickSlotChange() {
         const currentItem = this.getCurrentItem();
         if (currentItem) {
+// 改为：
             if (this.itemType !== currentItem.type || this.rarity !== currentItem.rarity) {
+                this._clearAllSummons();          // ← 唯一新增的一行
                 this.updateFromQuickSlot(this._petalIndex);
                 return true;
             }
@@ -34456,6 +34953,27 @@ const STATUS_EFFECT_CONFIG = {
             }
         },
     },
+    bonus: {
+            label: "bonus",
+            circleColor: "rgb(255, 215, 100)", // 金色进度环
+            bgColor: "rgb(230, 185, 90)",      // 金色底圆
+            drawIcon: (ctx, cx, cy, r, effect) => {
+                // 直接绘制倍数（如 4x）
+                const m = effect.multiplier || 1;
+                ctx.font = "bold 18px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                // 黑色描边
+                ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                ctx.lineWidth = 3;
+                ctx.strokeText(`${m}x`, cx, cy + 2);
+
+                // 白色填充
+                ctx.fillStyle = "white";
+                ctx.fillText(`${m}x`, cx, cy + 2);
+            },
+        },
 };
 
 class StatusEffect {
@@ -34477,6 +34995,13 @@ class StatusBar {
         this.spongeDamage = 0;
         this.spongeDamageDuration = 0;
         this.spongeDamageMaxDuration = 0;
+    }
+
+    formatTime(seconds) {
+        if (seconds >= 60) {
+            return Math.ceil(seconds / 60) + "m";
+        }
+        return Math.ceil(seconds) + "s";
     }
 
     addSpongeDamage(damage, duration) {
@@ -34513,13 +35038,32 @@ class StatusBar {
     }
 
     update(deltaTime) {
+        // 1. 处理原本的 StatusEffect 计时
         for (const [type, effect] of this.effects) {
+            // 如果是 bonus，我们由 BonusSystem 统一管理时间，不在这里手动减
+            if (type === 'bonus') continue;
+
             effect.duration -= deltaTime;
             if (effect.duration <= 0) {
                 this.effects.delete(type);
                 this._onEffectEnd(type);
             }
         }
+
+        // 2. 同步 BonusSystem 的状态
+        const bonusSys = window.gameInstance?.bonusSystem;
+        if (bonusSys && bonusSys.bonusActive) {
+            // 将 BonusSystem 的数据同步到 StatusBar 内部展示
+            this.addEffect('bonus', bonusSys.remainingTime);
+            const effect = this.effects.get('bonus');
+            // 直接使用 bonusMultiplier，不需要再乘会员加成
+            effect.multiplier = bonusSys.bonusMultiplier;
+            effect.maxDuration = 3600; // 假设总时长 1小时
+        } else {
+            // 如果系统里已经不激活了，移除图标
+            this.effects.delete('bonus');
+        }
+
         this.updateSpongeDamage(deltaTime);
     }
 
@@ -34537,49 +35081,36 @@ class StatusBar {
         }
     }
 
-    // ── 单个图标绘制核心 ──────────────────────────────────────
     _drawIcon(ctx, cx, cy, r, bgColor, circleColor, ratio, drawIconFn, timeText) {
-        // 1. 纯色底圆（无渐变，扁平风格）
+        // 1. 底圆
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fillStyle = bgColor;
         ctx.fill();
 
-        // 2. 彩色进度环（顺时针，从顶部开始，剩余时间比例）
-        //    用完整暗环做底，彩色环做进度
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(0,0,0,0.25)";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
+        // 2. 进度环 (加粗一点更有质感)
         ctx.beginPath();
         ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
         ctx.strokeStyle = circleColor;
-        ctx.lineWidth = 4;
-        ctx.lineCap = "round";
+        ctx.lineWidth = 5;
         ctx.stroke();
 
-        // 3. 图标内容（裁剪在圆内）
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 3, 0, Math.PI * 2);
-        ctx.clip();
+        // 3. 内部倍数文字
         drawIconFn(ctx, cx, cy, r);
-        ctx.restore();
 
-        // 4. 时间数字（圆圈正上方，白色+黑描边，粗体）
-        ctx.font = "bold 13px Arial";
+        // 4. 时间文字 (59m 风格)
+        ctx.font = "bold 16px Arial"; // 稍微调大
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
 
-        ctx.lineJoin = "round";
-        ctx.strokeStyle = "rgba(0,0,0,0.85)";
-        ctx.lineWidth = 4;
-        ctx.strokeText(timeText, cx, cy - r);
+        // 黑色粗描边
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 3;
+        ctx.strokeText(timeText, cx, cy - r + 3);
 
+        // 白色填充
         ctx.fillStyle = "white";
-        ctx.fillText(timeText, cx, cy - r);
+        ctx.fillText(timeText, cx, cy - r + 3);
     }
 
     draw(ctx) {
@@ -34594,15 +35125,14 @@ class StatusBar {
 
         const totalWidth = totalIcons * diameter + (totalIcons - 1) * spacing;
 
-        // 快捷栏位置（与 QuickSlot.draw 保持一致）
+        // 快捷栏位置
         const slotSize = this.player?.quickSlot?.SLOT_SIZE || 60;
         const slotMargin = this.player?.quickSlot?.SLOT_SPACING || 5;
         const quickSlotTotalWidth = 10 * slotSize + 9 * slotMargin;
-        const quickSlotStartX = (window.WIDTH || WIDTH) / 2 - quickSlotTotalWidth / 2;
-        const quickSlotStartY = (window.HEIGHT || HEIGHT) - 100;
+        const quickSlotStartX = (window.WIDTH || window.innerWidth) / 2 - quickSlotTotalWidth / 2;
+        const quickSlotStartY = (window.HEIGHT || window.innerHeight) - 100;
 
         const barCenterX = quickSlotStartX + quickSlotTotalWidth / 2;
-        // 图标圆心 Y：快捷栏顶部往上 BAR_OFFSET_Y + r
         const cy = quickSlotStartY - this.BAR_OFFSET_Y - r;
         const startX = barCenterX - totalWidth / 2 + r;
 
@@ -34624,7 +35154,6 @@ class StatusBar {
                 "rgb(80, 200, 120)",
                 ratio,
                 (ctx, cx, cy, r) => {
-                    // 海绵：扁椭圆+小孔
                     ctx.fillStyle = "rgb(100, 200, 140)";
                     ctx.beginPath();
                     ctx.ellipse(cx, cy, r * 0.42, r * 0.32, 0, 0, Math.PI * 2);
@@ -34642,7 +35171,7 @@ class StatusBar {
             idx++;
         }
 
-        // 状态效果图标
+        // 状态效果图标（只循环一次）
         for (const effect of this.effects.values()) {
             const cfg = STATUS_EFFECT_CONFIG[effect.type] || {
                 circleColor: "rgb(180, 180, 180)",
@@ -34652,17 +35181,14 @@ class StatusBar {
 
             const cx = startX + idx * (diameter + spacing);
             const ratio = Math.min(1, effect.duration / effect.maxDuration);
-
-            const timeText = effect.duration >= 10
-                ? Math.ceil(effect.duration).toString()
-                : effect.duration.toFixed(1);
+            const timeText = this.formatTime(effect.duration);
 
             this._drawIcon(
                 ctx, cx, cy, r,
                 cfg.bgColor,
                 cfg.circleColor,
                 ratio,
-                cfg.drawIcon,
+                (ctx, cx, cy, r) => cfg.drawIcon(ctx, cx, cy, r, effect),
                 timeText
             );
 
@@ -34672,6 +35198,7 @@ class StatusBar {
         ctx.restore();
     }
 }
+
 // ==================== Spacetime Tunnel System ====================
 class SpacetimeTunnelSystem {
     constructor(gameInstance) {
@@ -34686,10 +35213,10 @@ class SpacetimeTunnelSystem {
 
     }
 
-    // Try to spawn a spacetime tunnel (1/10000 chance)
+    // Try to spawn a spacetime tunnel (1/100 chance for testing, change back to 0.0001)
     trySpawnTunnel(enemies, worldWidth, worldHeight) {
-        // 1/10000 chance (0.0001 = 0.01%)
-        if (Math.random() > 0.01) return null;
+        // 1/10000 chance (0.0001 = 0.01%) - 测试时改为 0.1
+        if (Math.random() > 0.001) return null;
 
         const player = this.game.player;
         if (!player || player.isDead) return null;
@@ -34706,11 +35233,18 @@ class SpacetimeTunnelSystem {
         // Create tunnel entity
         const tunnel = new Enemy("SpacetimeTunnel", x, y, 1, "Legendary");
         tunnel.isTunnel = true;
+        tunnel.isInvincible = true;  // ✅ 添加无敌标志
+        tunnel.isFriendly = true;     // ✅ 设为友方，不会被攻击
         tunnel.radius = 100;
         tunnel.maxHealth = 999999;
         tunnel.health = 999999;
         tunnel.name = "Spacetime Tunnel";
         tunnel.physicsBody.radius = 100;
+
+        // ✅ 禁用碰撞伤害
+        tunnel.canDamagePlayer = false;
+        tunnel.canBeDamaged = false;
+
         // Custom draw method
         tunnel.draw = (ctx, enemyDrawer, playerPos, cameraOffset, viewScale) => {
             this.drawTunnel(ctx, tunnel.physicsBody.position.x - cameraOffset.x,
@@ -36434,7 +36968,7 @@ class Player {
     gainXpFromKill(enemyRarity, enemyType = "") {
         // 获取该生物的经验配置
         const xpConfig = ENEMY_XP_TABLE[enemyType] || ENEMY_XP_TABLE.default;
-        const baseXp = xpConfig.baseXp;
+        const baseXpRaw = xpConfig.baseXp;
         const typeBonus = xpConfig.typeBonus;
 
         // 稀有度倍率（包含所有稀有度）
@@ -36451,16 +36985,27 @@ class Player {
             "Eternal": 19683
         }[enemyRarity] || 1.0;
 
-        // 计算最终经验值
-        const xp = Math.floor(baseXp * rarityMultiplier * typeBonus);
+        // 计算最终经验值（保留2位小数）
+        let calculatedXp = baseXpRaw * rarityMultiplier * typeBonus;
+        calculatedXp = Math.floor(calculatedXp * 100) / 100; // 保留2位小数
+
+        let xp = calculatedXp * this.gameInstance.shopSystem.getMembershipXpMult();
+        xp = Math.floor(xp * 100) / 100; // 保留2位小数
+
         this.xp += xp;
+        this.xp = Math.floor(this.xp * 100) / 100; // 总经验也保留2位小数
+
         const leveledUp = this.levelSystem.addXp(xp);
 
         // 升级处理
         if (leveledUp) {
             const oldMaxHp = this.baseMaxHealth;
             this.baseMaxHealth = this.levelSystem.getHpForLevel(this.levelSystem.level);
+
+            // 添加天赋点
             this.gameInstance.talentSystem.addPoints(1);
+
+            // 重新计算宠物血量加成
             let totalHealthBonus = 0;
             for (const petal of this.petals) {
                 if (!petal.isBroken && !petal.isReloading) {
@@ -36468,14 +37013,27 @@ class Player {
                 }
             }
 
-            this.maxHealth = this.baseMaxHealth + totalHealthBonus;
+            // 应用天赋血量加成
+            const talentHealthBonus = this.gameInstance.talentSystem?.trees?.health?.level || 0;
+            const healthBonusMultiplier = 1 + (talentHealthBonus * 0.05);
+
+            this.maxHealth = Math.floor((this.baseMaxHealth + totalHealthBonus) * healthBonusMultiplier);
+
+            // 恢复满血
             this._health = this.maxHealth;
 
+            // 调试输出升级信息
+            if (this.debugMode) {
+                console.log(`🎉 升级到 ${this.levelSystem.level} 级！`);
+                console.log(`❤️ 最大生命值: ${this.maxHealth}`);
+                console.log(`🔧 获得 1 天赋点`);
+            }
         }
 
         // 调试输出
         if (this.debugMode) {
-            console.log(`💀 击杀 ${enemyType} (${enemyRarity}): ${xp} XP`);
+            console.log(`💀 击杀 ${enemyType} (${enemyRarity}): ${xp.toFixed(2)} XP`);
+            console.log(`📊 当前经验: ${this.xp.toFixed(2)}/${this.levelSystem.xpToNextLevel}`);
         }
 
         return [xp, leveledUp];
@@ -36781,7 +37339,13 @@ class Player {
         }
         return false;
     }
-
+// 在 Player 类中添加
+    getMembershipInfo() {
+        if (!this.gameInstance?.shopSystem) return null;
+        const membershipTier = this.gameInstance.shopSystem.getMembershipTier();
+        if (!membershipTier) return null;
+        return membershipTier;
+    }
     // 在 Player 类中，替换 draw 方法为：
     draw(ctx, cameraOffset, viewScale = 1.0) {
         if (this.isDead) return;
@@ -36980,6 +37544,42 @@ class Player {
             ctx.restore();
 
 
+        }
+
+        const membershipTier = this.gameInstance?.shopSystem?.getMembershipTier?.();
+        if (membershipTier) {
+            const badgeY = barY + barHeight + 5;
+            const badgeText = `[${membershipTier.label}]`;
+
+            // 会员颜色映射
+            const colors = {
+                'bronze':   '#CD7F32',
+                'silver':   '#C0C0C0',
+                'gold':     '#FFD700',
+                'platinum': '#E5E4E2',
+                'diamond':  '#B9F2FF',
+                'ruby':     '#E0115F'
+            };
+            const color = colors[membershipTier.id] || '#888';
+
+            ctx.save();
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            const centerX = barX + barWidth / 2;
+
+            // 1. 先绘制黑色粗边
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round'; // 让转角更圆润，避免出现尖刺
+            ctx.strokeText(badgeText, centerX, badgeY);
+
+            // 2. 后绘制等级颜色填充
+            ctx.fillStyle = color;
+            ctx.fillText(badgeText, centerX, badgeY);
+
+            ctx.restore();
         }
     }
 
@@ -37714,14 +38314,11 @@ class MainMenu {
 
         this.otherButtons = {
             "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
             "crafting": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
             "multiplayer": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const EXTRA_BONUS_SIZE = 110;
-        this.extraBonusButton = [this.WIDTH - EXTRA_BONUS_SIZE - 10, 10, EXTRA_BONUS_SIZE, EXTRA_BONUS_SIZE];
-
+        this.extraBonusButton = [this.WIDTH - 180, 10, 170, 160];
         // ========== 设置按钮 ==========
         this.settingsButton = [this.WIDTH - 1000, 20, 40, 40];
         this.settingsPanelOpen = false;
@@ -37956,7 +38553,7 @@ class MainMenu {
         const py = (H - ph) / 4;
         return [px, py, pw, ph];
     }
-
+    // 修改 loadExtraBonusStatus 添加新字段
     loadExtraBonusStatus() {
         try {
             const saved = localStorage.getItem('extra_bonus_status');
@@ -37966,7 +38563,11 @@ class MainMenu {
                 this.extraBonusActive = data.active || false;
                 this.extraBonusExpireTime = data.expireTime || 0;
                 this.extraBonusBoughtTime = data.boughtTime || 0;
-                if (!this.extraBonusPermanent && this.extraBonusActive && Date.now() > this.extraBonusExpireTime) {
+                this.rubyMembershipActive = data.rubyMembership || false;
+                this.rubyMembershipExpireTime = data.rubyMembershipExpireTime || 0;  // 新增
+                this.lastExtraBonusActivation = data.lastExtraBonusActivation || 0;   // 新增
+
+                if (!this.extraBonusPermanent && !this.rubyMembershipActive && this.extraBonusActive && Date.now() > this.extraBonusExpireTime) {
                     this.extraBonusActive = false;
                     this.extraBonusExpireTime = 0;
                     this.saveExtraBonusStatus();
@@ -37976,27 +38577,52 @@ class MainMenu {
                 this.extraBonusActive = false;
                 this.extraBonusExpireTime = 0;
                 this.extraBonusBoughtTime = 0;
+                this.rubyMembershipActive = false;
+                this.rubyMembershipExpireTime = 0;
+                this.lastExtraBonusActivation = 0;
             }
         } catch (e) {
             this.extraBonusPermanent = false;
             this.extraBonusActive = false;
             this.extraBonusExpireTime = 0;
             this.extraBonusBoughtTime = 0;
+            this.rubyMembershipActive = false;
+            this.rubyMembershipExpireTime = 0;
+            this.lastExtraBonusActivation = 0;
         }
     }
 
+    // 修改 saveExtraBonusStatus
     saveExtraBonusStatus() {
         localStorage.setItem('extra_bonus_status', JSON.stringify({
             permanent: this.extraBonusPermanent,
             active: this.extraBonusActive,
             expireTime: this.extraBonusExpireTime,
-            boughtTime: this.extraBonusBoughtTime
+            boughtTime: this.extraBonusBoughtTime,
+            rubyMembership: this.rubyMembershipActive,
+            rubyMembershipExpireTime: this.rubyMembershipExpireTime,
+            lastExtraBonusActivation: this.lastExtraBonusActivation
         }));
     }
 
     canBuy() { return !this.extraBonusPermanent; }
 
+
+    // 修改 refreshBonus 方法
     refreshBonus() {
+        // 检查 Ruby 会员是否可以激活 Extra Bonus
+        if (this.canActivateRubyExtraBonus()) {
+            if (this.bonusSystem) {
+                this.bonusSystem.activateExtraBonus();
+                this.bonusSystem.bonusMultiplier = 4;
+                this.bonusSystem.bonusActive = true;
+            }
+            // 记录本次激活时间（可选，用于限制每日激活次数）
+            this.lastExtraBonusActivation = Date.now();
+            this.saveExtraBonusStatus();
+            return true;
+        }
+
         if (this.extraBonusPermanent) {
             if (this.bonusSystem?.activateExtraBonus) {
                 this.bonusSystem.activateExtraBonus();
@@ -38014,30 +38640,28 @@ class MainMenu {
         return false;
     }
 
-    buyWeeklyExtraBonus(shopSystem) {
-        const price = 100000;
-        if ((shopSystem?.getStarCount() || 0) >= price && shopSystem.removeStars(price)) {
-            const now = Date.now();
 
-            if (this.extraBonusActive && now < this.extraBonusExpireTime) {
-                this.extraBonusActive = true;
-                if (this.bonusSystem?.activateExtraBonus) {
-                    this.bonusSystem.activateExtraBonus();
-                }
-            } else {
-                this.extraBonusActive = true;
-                this.extraBonusExpireTime = now + 5 * 24 * 60 * 60 * 1000;
-                this.extraBonusPermanent = false;
-                this.extraBonusBoughtTime = now;
-                if (this.bonusSystem?.activateExtraBonus) {
-                    this.bonusSystem.activateExtraBonus();
-                }
-            }
+    buyRubyMembership(shopSystem) {
+    const membershipTier = shopSystem?.getMembershipTier?.();
+    const isRuby = membershipTier?.id === 'ruby';
 
-            this.saveExtraBonusStatus();
-            return true;
-        }
+    if (!isRuby) {
+        console.log('❌ 不是 Ruby 会员');
         return false;
+    }
+
+    // ✅ 关键：设置 rubyMembershipActive
+    this.rubyMembershipActive = true;
+    this.rubyMembershipExpireTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    this.saveExtraBonusStatus();
+
+    console.log('✅ Ruby 会员资格已激活，有效期30天');
+    return true;
+}
+
+    // 新增：检查是否可以激活 Ruby Extra Bonus
+    canActivateRubyExtraBonus() {
+        return this.rubyMembershipActive && Date.now() < this.rubyMembershipExpireTime;
     }
 
     buyPermanentExtraBonus(shopSystem) {
@@ -38466,7 +39090,7 @@ class MainMenu {
         }
     }
 
-    // ==================== 事件处理 ====================
+// ==================== 事件处理 ====================
     handleMouseMove(event) {
         if (event.type !== 'mousemove') return;
         const pos = [event.x, event.y];
@@ -38480,7 +39104,9 @@ class MainMenu {
 
         const loadoutHover = this.handleLoadoutHover(pos);
         if (loadoutHover) { this.hoveredButton = loadoutHover; return; }
-
+    // Bonus panel 内部按钮悬停
+        if (this._bonusClaimRect && this.isPointInRect(pos, this._bonusClaimRect)) { this.hoveredButton = 'bonus_claim'; return; }
+        if (this._bonusExtraRect && this.isPointInRect(pos, this._bonusExtraRect)) { this.hoveredButton = 'bonus_extra'; return; }
         if (this.huntingQuestPanelOpen) {
             const [px, py, pw, ph] = this._getQuestPanelRect();
             const closeSize = 46;
@@ -38521,7 +39147,6 @@ class MainMenu {
         if (!foundHover && this.isPointInRect(pos, this.changelogButton)) {
             foundHover = 'changelog';
         }
-        // ================================================
 
         if (this.isPointInRect(pos, this.mobGalleryButton)) {
             this.hoveredButton = 'mob_gallery';
@@ -38531,19 +39156,23 @@ class MainMenu {
             for (const [name, rect] of Object.entries(this.otherButtons))
                 if (this.isPointInRect(pos, rect)) { foundHover = name; break; }
         }
+
+        // ========== Extra Bonus 悬停处理 ==========
         if (!foundHover && this.isPointInRect(pos, this.extraBonusButton)) {
             foundHover = 'extra_bonus';
-            const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
-            this.showBonusTooltip = !this.extraBonusPermanent && !isActive;
+            const isActive = (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) ||
+                             this.extraBonusPermanent ||
+                             this.rubyMembershipActive;
+            this.showBonusTooltip = !isActive;
         } else if (this.showBonusTooltip) {
             const [ex, ey, ew] = this.extraBonusButton;
-            const tw = 180, th = 90;
+            const tw = 200, th = 90;
             let tx = ex - tw - 8;
             if (tx < 8) tx = ex + ew + 8;
             const tooltipRect = [tx, ey, tw, th];
             if (this.isPointInRect(pos, tooltipRect)) {
-                if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
-                    foundHover = 'bonus_buy_5d';
+                if (this._bonusBtnRuby && this.isPointInRect(pos, this._bonusBtnRuby)) {
+                    foundHover = 'bonus_buy_ruby';
                 } else if (this._bonusBtnPerm && this.isPointInRect(pos, this._bonusBtnPerm)) {
                     foundHover = 'bonus_buy_perm';
                 } else {
@@ -38555,6 +39184,19 @@ class MainMenu {
         }
         this.hoveredButton = foundHover;
     }
+    drawStrokedText(ctx, text, x, y, fontSize, textAlign = 'center', fillColor = 'white') {
+        ctx.save();
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = textAlign;
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
     handleClick(event) {
         if (event.type !== 'mousedown' || event.button !== 0) return null;
         const pos = [event.x, event.y];
@@ -38563,6 +39205,17 @@ class MainMenu {
         if (game?.talentSystem?.panelOpen) {
             const result = game.talentSystem.handleClick(pos);
             if (result) return result;
+        }
+        // Bonus panel 按钮点击
+        if (this._bonusClaimRect && this.isPointInRect(pos, this._bonusClaimRect)) {
+            const ok = this.bonusSystem?.claimBonus?.();
+            return ok ? "bonus_claimed" : "bonus_unavailable";
+        }
+        if (this._bonusExtraRect && this.isPointInRect(pos, this._bonusExtraRect)) {
+            const extraActive = (this.extraBonusActive && Date.now() < this.extraBonusExpireTime)
+                             || this.extraBonusPermanent || this.rubyMembershipActive;
+            if (extraActive) { this.refreshBonus(); return "extra_bonus_refreshed"; }
+            else { this.showBonusTooltip = !this.showBonusTooltip; return "extra_bonus_tooltip"; }
         }
         // ========== 优先检查图鉴按钮 ==========
         if (this.isPointInRect(pos, this.mobGalleryButton)) {
@@ -38605,14 +39258,13 @@ class MainMenu {
             }
         }
 
-        // ========== 新增：Changelog 按钮点击检测 ==========
+        // ========== Changelog 按钮点击检测 ==========
         if (this.isPointInRect(pos, this.changelogButton)) {
             if (this.changelog) {
                 this.changelog.toggle();
                 return "changelog";
             }
         }
-        // ================================================
 
         if (this.huntingQuestPanelOpen && this.player?.gameInstance?.huntingQuestSystem) {
             const questSystem = this.player.gameInstance.huntingQuestSystem;
@@ -38661,12 +39313,13 @@ class MainMenu {
             return "talent_toggle";
         }
 
+        // ========== Extra Bonus Tooltip 内的购买按钮 ==========
         if (this.showBonusTooltip) {
             const shopSystem = window.gameInstance?.shopSystem;
-            if (this._bonusBtn5d && this.isPointInRect(pos, this._bonusBtn5d)) {
-                const ok = this.buyWeeklyExtraBonus(shopSystem);
+            if (this._bonusBtnRuby && this.isPointInRect(pos, this._bonusBtnRuby)) {
+                const ok = this.buyRubyMembership(shopSystem);
                 if (ok) this.showBonusTooltip = false;
-                return ok ? "extra_bonus_activated" : "extra_bonus_insufficient_stars";
+                return ok ? "extra_bonus_ruby_activated" : "extra_bonus_no_ruby";
             }
             if (this._bonusBtnPerm && this.isPointInRect(pos, this._bonusBtnPerm)) {
                 const ok = this.buyPermanentExtraBonus(shopSystem);
@@ -38675,11 +39328,18 @@ class MainMenu {
             }
         }
 
+        // ========== Extra Bonus 按钮点击 ==========
         if (this.isPointInRect(pos, this.extraBonusButton)) {
-            const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
-            if (this.extraBonusPermanent) { this.refreshBonus(); return "extra_bonus_refreshed"; }
-            if (isActive) { this.refreshBonus(); return "extra_bonus_refreshed"; }
-            else { this.showBonusTooltip = true; return "extra_bonus_expired_show_tooltip"; }
+            const isActive = (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) ||
+                             this.extraBonusPermanent ||
+                             this.rubyMembershipActive;
+            if (isActive) {
+                this.refreshBonus();
+                return "extra_bonus_refreshed";
+            } else {
+                this.showBonusTooltip = true;
+                return "extra_bonus_expired_show_tooltip";
+            }
         }
 
         for (const [biome, rect] of Object.entries(this.biomeButtons)) {
@@ -38705,7 +39365,6 @@ class MainMenu {
 
         return null;
     }
-
     recalculatePositions() {
         this.WIDTH = window.WIDTH || window.innerWidth;
         this.HEIGHT = window.HEIGHT || window.innerHeight;
@@ -38751,13 +39410,11 @@ class MainMenu {
 
         this.otherButtons = {
             "inventory": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY, BUTTON_WIDTH, BUTTON_HEIGHT],
-            "bonus": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY - 65, BUTTON_WIDTH, BUTTON_HEIGHT],
             "crafting": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT],
             "multiplayer": [this.WIDTH / 2 - BUTTON_WIDTH / 2, otherStartY + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT]
         };
 
-        const EXTRA_BONUS_SIZE = 110;
-        this.extraBonusButton = [this.WIDTH - EXTRA_BONUS_SIZE - 10, 10, EXTRA_BONUS_SIZE, EXTRA_BONUS_SIZE];
+        this.extraBonusButton = [this.WIDTH - 180, 10, 170, 160];
         this.titleY = this.HEIGHT / 2 - 200;
         this.hintY = this.HEIGHT / 2 - 150;
 
@@ -38907,37 +39564,12 @@ if (this.floatingPetals.length === 0) {
         const c = this.hoveredButton === name ? this.OTHER_BUTTON_HOVER_COLORS[name] : this.OTHER_BUTTON_COLORS[name];
         drawStyledButton(labelMap[name] || name, rect, c, 14);
     }
-
+// ── Daily Bonus Panel (右上角) ──
+    this._drawBonusPanel(ctx);
     // --- 8. 图鉴按钮 (适配左侧小按钮样式) ---
     const mgc = this.hoveredButton === 'mob_gallery' ? this.MOB_GALLERY_BUTTON_HOVER_COLOR : this.MOB_GALLERY_BUTTON_COLOR;
     const [mgx, mgy, mgw, mgh] = this.mobGalleryButton;
-    // --- 8. Extra Bonus (保持特殊逻辑但应用文字样式) ---
-    const [ex, ey, ew, eh] = this.extraBonusButton;
-    let ebc = this.extraBonusPermanent ? this.EXTRA_BONUS_PERMANENT_COLOR :
-              (this.extraBonusActive ? this.EXTRA_BONUS_ACTIVE_COLOR : this.EXTRA_BONUS_COLOR);
 
-    // 绘制按钮背景
-    drawStyledButton('', this.extraBonusButton, ebc);
-
-    // 设置文字样式
-    ctx.font = 'bold 15px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round'; // 让边框圆润
-
-    // 绘制文字：第一行 EXTRA
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 5;
-    ctx.strokeText('extra', ex + ew / 2, ey + eh / 2 - 10);
-    ctx.fillStyle = 'white'; // 关键：白底
-    ctx.fillText('Extra', ex + ew / 2, ey + eh / 2 - 10);
-
-    // 绘制文字：第二行 (PERM/BONUS)
-    const secondLine = this.extraBonusPermanent ? 'Permanent' : 'Bonus';
-    // 注意：'PERMANENT' 在 110 宽的按钮里可能会出框，建议缩写为 'PERM'
-    ctx.strokeText(secondLine, ex + ew / 2, ey + eh / 2 + 10);
-    ctx.fillStyle = 'white'; // 关键：白底
-    ctx.fillText(secondLine, ex + ew / 2, ey + eh / 2 + 10);
     // 使用统一的 StyledButton 样式，文字设小一点以适应 100 宽度
     drawStyledButton('Gallery', this.mobGalleryButton, mgc, 14);
 
@@ -38973,13 +39605,125 @@ if (this.floatingPetals.length === 0) {
 
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 }
+    _drawBonusPanel(ctx) {
+        const [px, py, pw, ph] = this.extraBonusButton;
+        const bonusSys = this.bonusSystem;
 
+        if (!bonusSys) return;
+
+        const streakDays = bonusSys.bonusData?.streak_days || 0;
+        const canClaim = bonusSys.canClaimBonus();
+        const isActive = bonusSys.bonusActive;
+        const currentMult = bonusSys.bonusActive ? bonusSys.bonusMultiplier : 1;
+        const nextMult = bonusSys.getBonusMultiplier();
+
+        // ✅ 直接从 bonusSys 获取实时剩余时间
+        let remainingTime = "00:00";
+        if (bonusSys.bonusActive) {
+            const remaining = bonusSys.remainingTime;
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+            remainingTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 面板背景
+        const panelColor = [220, 170, 40];
+        const adj = (rgb, f) => rgb.map(c => Math.max(0, Math.min(255, Math.floor(c * f))));
+        ctx.fillStyle = `rgb(${adj(panelColor, 1.1).join(',')})`;
+        ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 14); ctx.fill();
+        ctx.fillStyle = `rgb(${adj(panelColor, 0.78).join(',')})`;
+        ctx.beginPath(); ctx.roundRect(px, py, pw, ph/2, 14); ctx.fill();
+        ctx.strokeStyle = `rgb(${adj(panelColor, 0.55).join(',')})`; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 14); ctx.stroke();
+
+        // 标题
+        this.drawStrokedText(ctx, `Daily Streak #${streakDays}`, px + pw/2, py + 18, 14, 'center', 'white');
+
+        // 星星 + 倍数
+        ctx.font = '28px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.strokeText('⭐', px + pw/2 - 20, py + 48);
+        ctx.fillStyle = 'white';
+        ctx.fillText('⭐', px + pw/2 - 20, py + 48);
+
+        this.drawStrokedText(ctx, `${nextMult}x`, px + pw/2 + 18, py + 48, 22, 'center', 'white');
+
+        // ── Claim Rewards 按钮 ──
+        const btnW = pw - 20, btnH = 28;
+        const btn1X = px + 10, btn1Y = py + 70;
+        this._bonusClaimRect = [btn1X, btn1Y, btnW, btnH];
+
+        const claimHover = this.hoveredButton === 'bonus_claim';
+
+        let claimColor;
+        if (canClaim) {
+            claimColor = claimHover ? [255, 235, 100] : [255, 215, 0];
+        } else {
+            claimColor = claimHover ? [180, 180, 180] : [140, 140, 140];
+        }
+
+        ctx.fillStyle = `rgb(${claimColor.join(',')})`;
+        ctx.beginPath(); ctx.roundRect(btn1X, btn1Y, btnW, btnH, 8); ctx.fill();
+
+        ctx.fillStyle = `rgb(${adj(claimColor, 0.85).join(',')})`;
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(btn1X, btn1Y, btnW, btnH, 8);
+        ctx.clip();
+        ctx.fillRect(btn1X, btn1Y, btnW, btnH/2);
+        ctx.restore();
+
+        ctx.strokeStyle = `rgb(${adj(claimColor, 0.65).join(',')})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(btn1X, btn1Y, btnW, btnH, 8);
+        ctx.stroke();
+
+        this.drawStrokedText(ctx, 'Claim Rewards', btn1X + btnW/2, btn1Y + btnH/2, 14, 'center', '#ffffff');
+
+        // ── Extra Bonus 按钮 ──
+        const btn2X = px + 10, btn2Y = py + 104;
+        this._bonusExtraRect = [btn2X, btn2Y, btnW, btnH];
+
+        const extraActive = (this.extraBonusActive && Date.now() < this.extraBonusExpireTime)
+                         || this.extraBonusPermanent || this.rubyMembershipActive;
+        const extraHover = this.hoveredButton === 'bonus_extra';
+        let extraColor, extraText;
+        if (extraActive) {
+            extraColor = extraHover ? [80,180,80] : [60,160,60];
+            extraText = `Extra Bonus (${remainingTime})`;
+        } else {
+            extraColor = extraHover ? [150,150,150] : [120,120,120];
+            extraText = 'Extra Bonus (inactive)';
+        }
+        ctx.fillStyle = `rgb(${extraColor.join(',')})`;
+        ctx.beginPath(); ctx.roundRect(btn2X, btn2Y, btnW, btnH, 8); ctx.fill();
+
+        ctx.fillStyle = `rgb(${adj(extraColor, 0.75).join(',')})`;
+        ctx.save(); ctx.beginPath(); ctx.roundRect(btn2X, btn2Y, btnW, btnH, 8); ctx.clip();
+        ctx.fillRect(btn2X, btn2Y, btnW, btnH/2); ctx.restore();
+
+        ctx.strokeStyle = `rgb(${adj(extraColor, 0.55).join(',')})`; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(btn2X, btn2Y, btnW, btnH, 8); ctx.stroke();
+
+        this.drawStrokedText(ctx, extraText, btn2X + btnW/2, btn2Y + btnH/2, 11, 'center', 'white');
+
+        // 如果 bonus 激活中，显示剩余时间
+        if (isActive) {
+            this.drawStrokedText(ctx, `Active: ${currentMult}x  ·  ${remainingTime}`, px + pw/2, py + ph - 8, 10, 'center', 'rgba(255,255,255,0.8)');
+        }
+    }
     drawBonusTooltip(ctx) {
-        const isActive = this.extraBonusActive && Date.now() < this.extraBonusExpireTime;
-        if (!this.showBonusTooltip || this.extraBonusPermanent || isActive) return;
+        const isActive = (this.extraBonusActive && Date.now() < this.extraBonusExpireTime) ||
+                         this.extraBonusPermanent ||
+                         this.rubyMembershipActive;
+        if (!this.showBonusTooltip || isActive) return;
 
         const [ex, ey, ew, eh] = this.extraBonusButton;
-        const tw = 180, th = 90;
+        const tw = 200, th = 90;
         let tx = ex - tw - 8;
         let ty = ey;
         if (tx < 8) tx = ex + ew + 8;
@@ -38990,28 +39734,40 @@ if (this.floatingPetals.length === 0) {
 
         ctx.font = 'bold 12px Arial'; ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Buy Extra Bonus', tx + tw / 2, ty + 16);
+        ctx.fillText('Get Extra Bonus', tx + tw / 2, ty + 18);
 
         ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(tx + 8, ty + 28); ctx.lineTo(tx + tw - 8, ty + 28); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 8, ty + 30); ctx.lineTo(tx + tw - 8, ty + 30); ctx.stroke();
 
-        const btn5W = tw - 16, btn5H = 22;
-        const btn5X = tx + 8, btn5Y = ty + 35;
-        this._bonusBtn5d = [btn5X, btn5Y, btn5W, btn5H];
-        ctx.fillStyle = this.hoveredButton === 'bonus_buy_5d' ? '#c8a000' : '#a07800';
-        ctx.beginPath(); ctx.roundRect(btn5X, btn5Y, btn5W, btn5H, 6); ctx.fill();
-        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('5 Days - 100K Star', btn5X + btn5W / 2, btn5Y + btn5H / 2);
+        let btnY = ty + 38;
 
-        const btnPW = tw - 16, btnPH = 22;
-        const btnPX = tx + 8, btnPY = ty + 62;
-        this._bonusBtnPerm = [btnPX, btnPY, btnPW, btnPH];
-        ctx.fillStyle = this.hoveredButton === 'bonus_buy_perm' ? '#8040c0' : '#603090';
-        ctx.beginPath(); ctx.roundRect(btnPX, btnPY, btnPW, btnPH, 6); ctx.fill();
-        ctx.font = 'bold 11px Arial'; ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('Permanent - 1T Star', btnPX + btnPW / 2, btnPY + btnPH / 2);
+        // Ruby 会员选项
+        const membershipTier = window.gameInstance?.shopSystem?.getMembershipTier?.();
+        const isRuby = membershipTier?.id === 'ruby';
+
+        if (isRuby && !this.rubyMembershipActive) {
+            const btnRubyW = tw - 16, btnRubyH = 22;
+            const btnRubyX = tx + 8, btnRubyY = btnY;
+            this._bonusBtnRuby = [btnRubyX, btnRubyY, btnRubyW, btnRubyH];
+            ctx.fillStyle = this.hoveredButton === 'bonus_buy_ruby' ? '#e0115f' : '#c01050';
+            ctx.beginPath(); ctx.roundRect(btnRubyX, btnRubyY, btnRubyW, btnRubyH, 6); ctx.fill();
+            ctx.font = 'bold 10px Arial'; ctx.fillStyle = 'white';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Ruby Member → FREE', btnRubyX + btnRubyW / 2, btnRubyY + btnRubyH / 2);
+            btnY += btnRubyH + 5;
+        }
+
+        // 永久购买选项
+        if (!this.rubyMembershipActive && !this.extraBonusPermanent) {
+            const btnPW = tw - 16, btnPH = 22;
+            const btnPX = tx + 8, btnPY = btnY;
+            this._bonusBtnPerm = [btnPX, btnPY, btnPW, btnPH];
+            ctx.fillStyle = this.hoveredButton === 'bonus_buy_perm' ? '#8040c0' : '#603090';
+            ctx.beginPath(); ctx.roundRect(btnPX, btnPY, btnPW, btnPH, 6); ctx.fill();
+            ctx.font = 'bold 10px Arial'; ctx.fillStyle = 'white';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Permanent - 1T Stars', btnPX + btnPW / 2, btnPY + btnPH / 2);
+        }
     }
 
     drawFlowerPattern(ctx) {
@@ -44128,42 +44884,56 @@ class WorldMapGame {
     }
 
     dropCard(enemy) {
-        if (this.droppedCards.length >= this.maxDroppedCards) {
-            this.droppedCards = this.droppedCards.slice(5);
-        }
+    if (this.droppedCards.length >= this.maxDroppedCards) {
+        this.droppedCards = this.droppedCards.slice(5);
+    }
 
-        const bonusMultiplier = (this.bonusSystem?.bonusActive)
-            ? this.bonusSystem.bonusMultiplier
-            : 1;
-        const dropCount = Math.max(1, Math.floor(bonusMultiplier));
+    // 获取基础掉落倍数（来自 BonusSystem）
+    const bonusMultiplier = (this.bonusSystem?.bonusActive)
+        ? this.bonusSystem.bonusMultiplier
+        : 1;
 
-        // 获取掉落表
-        const dropItems = ENEMY_DROP_TABLE[enemy.type] || ["Leaf"];
-        const enemyRarity = enemy.rarity || 'Common';
+    // ========== 直接从 shopSystem 获取会员掉落率加成 ==========
+    let dropRateBonus = 0;
+    if (window.gameInstance?.shopSystem) {
+        dropRateBonus = window.gameInstance.shopSystem.getMembershipDropRate() || 0;
+    }
 
-        // 给经验
-        if (enemy.killedByOwner === this.player.playerId || !enemy.killedByOwner) {
-            this.player.gainXpFromKill(enemyRarity, enemy.type);
-        }
+    // 应用掉落率加成到掉落数量
+    let finalMultiplier = bonusMultiplier;
+    if (dropRateBonus > 0) {
+        finalMultiplier += dropRateBonus;
+    }
 
-        // 记录图鉴
-        if (this.mobGallery && enemy.type && enemy.rarity) {
-            this.mobGallery.recordKill(enemy.type, enemy.rarity);
-        }
+    const dropCount = Math.max(1, Math.floor(finalMultiplier));
 
-        // 更新狩猎任务
-        if (this.huntingQuestSystem && enemy.type && enemy.rarity) {
-            this.huntingQuestSystem.updateProgress(enemy.type, enemy.rarity);
-        }
+    // 获取掉落表
+    const dropItems = ENEMY_DROP_TABLE[enemy.type] || ["Leaf"];
+    const enemyRarity = enemy.rarity || 'Common';
 
-        // 掉落物品
-        for (const itemType of dropItems) {
-            for (let i = 0; i < dropCount; i++) {
-                const dropRarity = getDropRarityByItem(itemType, enemyRarity);
-                this._spawnItemDrop(enemy, itemType, dropRarity, i);
-            }
+    // 给经验
+    if (enemy.killedByOwner === this.player.playerId || !enemy.killedByOwner) {
+        this.player.gainXpFromKill(enemyRarity, enemy.type);
+    }
+
+    // 记录图鉴
+    if (this.mobGallery && enemy.type && enemy.rarity) {
+        this.mobGallery.recordKill(enemy.type, enemy.rarity);
+    }
+
+    // 更新狩猎任务
+    if (this.huntingQuestSystem && enemy.type && enemy.rarity) {
+        this.huntingQuestSystem.updateProgress(enemy.type, enemy.rarity);
+    }
+
+    // 掉落物品
+    for (const itemType of dropItems) {
+        for (let i = 0; i < dropCount; i++) {
+            const dropRarity = getDropRarityByItem(itemType, enemyRarity);
+            this._spawnItemDrop(enemy, itemType, dropRarity, i);
         }
     }
+}
 
     _spawnItemDrop(enemy, itemType, rarity, dropNum = 0) {
         const angle = Math.random() * Math.PI * 2;
