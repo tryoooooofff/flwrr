@@ -2652,43 +2652,7 @@ class ChangelogPanel {
     constructor() {
         this.visible = false;
         this.scrollY = 0;
-        this.logs = [
-            { date: "12th April 2026", entries: [
-                "- Completed buttons UI design",
-                "- Finish mob gallery UI drawing",
-                "- Added flowing petals in main menu"
-            ]},
-            { date: "11th April 2026", entries: [
-                "- Battery body lightning: 69.",
-                "- Fixed Warp not teleporting.",
-                "- New map UI and better setting"
-            ]},
-            { date: "9th April 2026", entries: [
-                "- Battery flower body lightning: 120 -> 100.",
-                "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.",
-                "- Amulet now allows all eggs to spawn."
-            ]},
-            { date: "7th April 2026", entries: [
-                "- Added new Hel biome with 15+ new enemies.",
-                "- Added spacetime tunnel system.",
-                "- Improved performance with chunk-based loading.",
-                "- Fixed petal rotation issues."
-            ]},
-            { date: "5th April 2026", entries: [
-                "- New item: Opal (crit chance & damage).",
-                "- Added hunting quest system.",
-                "- Added mob gallery.",
-                "- Balance changes: reduced boss spawn rates."
-            ]},
-            { date: "3rd April 2026", entries: [
-                "- Add Void and micro world",
-                "- Add SpacetimeTunnel",
-
-            ]},
-            { date: "1st April 2026", entries: [
-                "- changelog are not available before"
-            ]}
-        ];
+        this.logs = [{ date: "14th April 2026", entries: ["- Added memberships","- Rewrote bonus system and fixed position", "- Redraw shop system", "- Reorder talent system", "- Fixed a bug in craft system"] }, { date: "12th April 2026", entries: ["- Completed buttons UI design", "- Finish mob gallery UI drawing", "- Added flowing petals in main menu"] }, { date: "11th April 2026", entries: ["- Battery body lightning: 69.", "- Fixed Warp not teleporting.", "- New map UI and better setting"] }, { date: "9th April 2026", entries: ["- Battery flower body lightning: 120 -> 100.", "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.", "- Amulet now allows all eggs to spawn."] }, { date: "7th April 2026", entries: ["- Added new Hel biome with 15+ new enemies.", "- Added spacetime tunnel system.", "- Improved performance with chunk-based loading.", "- Fixed petal rotation issues."] }, { date: "5th April 2026", entries: ["- New item: Opal (crit chance & damage).", "- Added hunting quest system.", "- Added mob gallery.", "- Balance changes: reduced boss spawn rates."] }, { date: "3rd April 2026", entries: ["- Add Void and micro world", "- Add SpacetimeTunnel"] }, { date: "1st April 2026", entries: ["- changelog are not available before"] }];
         this.panelW = 420;
         this.panelH = 460;
         this.closeRect = null;
@@ -22528,7 +22492,7 @@ class RedeemSystem {
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
-        this.addCode("vvvvvv", [
+        this.addCode("fffkkk", [
             { type: "MudDigger_egg", rarity: "Super", count: 1 },
         ], 10);
 
@@ -25834,12 +25798,6 @@ class StarCraftUI {
         if (this.craftAnimation && this.craftAnimation.startAnimation) {
             this.craftAnimation.startAnimation(1.5);
         }
-
-        // 清除锁定状态
-        this.lockedItemType = null;
-        this.lockedItemRarity = null;
-        this.lockedItemLevel = null;
-        this.inventoryClickCount = {};
 
         this.forceRedraw();
         return this.craftResult;
