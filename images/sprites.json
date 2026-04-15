@@ -35,13 +35,13 @@
     "w": 128,
     "h": 128
   },
-  "ArticSpiderCave_egg": {
+  "ArcticSpiderCave egg": {
     "x": 780,
     "y": 0,
     "w": 128,
     "h": 128
   },
-  "ArticSpider_egg": {
+  "ArcticSpider egg": {
     "x": 910,
     "y": 0,
     "w": 128,
@@ -377,7 +377,7 @@
     "w": 128,
     "h": 128
   },
-  "FrostDigger_egg": {
+  "Frost Digger egg": {
     "x": 910,
     "y": 520,
     "w": 128,
@@ -401,7 +401,7 @@
     "w": 128,
     "h": 128
   },
-  "Goldenleaf": {
+  "Golden Leaf": {
     "x": 1430,
     "y": 520,
     "w": 128,
@@ -425,13 +425,13 @@
     "w": 128,
     "h": 128
   },
-  "HelBee_egg": {
+  "Hel Bee egg": {
     "x": 130,
     "y": 650,
     "w": 128,
     "h": 128
   },
-  "HelBeekeeper_egg": {
+  "Hel Beekeeper egg": {
     "x": 260,
     "y": 650,
     "w": 128,
@@ -443,7 +443,7 @@
     "w": 128,
     "h": 128
   },
-  "HelDigger_egg": {
+  "Hel Digger egg": {
     "x": 520,
     "y": 650,
     "w": 128,
@@ -467,7 +467,7 @@
     "w": 128,
     "h": 128
   },
-  "HelQueenBee_egg": {
+  "Hel Queen Bee egg": {
     "x": 1040,
     "y": 650,
     "w": 128,
@@ -737,7 +737,7 @@
     "w": 128,
     "h": 128
   },
-  "QueenBee_egg": {
+  "Queen Bee egg": {
     "x": 1430,
     "y": 1040,
     "w": 128,
@@ -959,7 +959,7 @@
     "w": 128,
     "h": 128
   },
-  "Termite_Overmind_egg": {
+  "TermiteOvermind_egg": {
     "x": 910,
     "y": 1430,
     "w": 128,
@@ -1159,6 +1159,12 @@
   },
   "tomato": {
     "x": 1560,
+    "y": 1690,
+    "w": 128,
+    "h": 128
+  },
+  "trident": {
+    "x": 1690,
     "y": 1690,
     "w": 128,
     "h": 128
