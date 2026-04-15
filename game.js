@@ -1434,8 +1434,6 @@ const ITEM_IMAGE_URLS = {
     "FireAntOvermind egg": "images/FireAntOvermind_egg.png",
     "FireAntHole egg": "images/FireAntHole_egg.png",
     "Bacteria_egg": "images/Bacteria_egg.png",
-    "map_ocean": "images/map_ocean.png",
-    "map_sewer": "images/map_sewer.png",
     "PooStick": "images/Poostick.png",
     "Rat_egg": "images/Rat_egg.png",
     "Roach_egg": "images/Roach_egg.png",
@@ -1490,7 +1488,6 @@ const ITEM_IMAGE_URLS = {
     "Carrot": "images/Carrot.png",
     "Icicle": "images/Icicle.png",
     "Snowflake": "images/Snowflake.png",
-    "map_arctic":"images/map_arctic.png",
     "Frost Digger egg": "images/FrostDigger_egg.png",
     "Trashcan egg":"images/Trashcan_egg.png",
     "Queen Bee egg": "images/QueenBee_egg.png",
@@ -1499,7 +1496,6 @@ const ITEM_IMAGE_URLS = {
     "PirateDigger egg":"images/PirateDigger_egg.png",
     "Beetle egg": "images/Beetle_egg.png",
     "Pincer": "images/Pincer.png",
-    "map_jungle": "images/map_jungle.png",
     "Wasp egg": "images/Wasp_egg.png",
     "Worker Termite egg": "images/Worker_Termite_egg.png",
     "Soldier Termite egg": "images/Soldier_Termite_egg.png",
@@ -1573,12 +1569,13 @@ const ITEM_IMAGE_URLS = {
     "DarkMatter": "images/DarkMatter.png",
     "GraveDigger egg": "images/GraveDigger_egg.png",
     "AlienDigger egg": "images/AlienDigger_egg.png",
+    "Trident": "images/trident.png",
 
 };
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
-    "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000, dropFactor: 0.9},
+    "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000,    attack_range_reduction: {"Common": 0.90, "Unusual": 0.80,   "Rare": 0.70,  "Epic": 0.60,   "Legendary": 0.50, "Mythic": 0.40,   "Ultra": 0.30, "Super": 0.20, "Omega": 0.10,"Eternal": 0.00 }, dropFactor: 0.9},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.95},
     "Leaf": {base_attack:15, base_cooldown:180, healing:1, use_rarity_multiplier: true, base_reload_time:2500, dropFactor: 1.0},
@@ -1598,7 +1595,7 @@ export const ITEM_STATS = {
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.05},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.5},
-
+    "Trident": {base_attack:1000, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.06},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.8},
     "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
@@ -2038,12 +2035,13 @@ export const ITEM_ARMOR_MULTIPLIERS = {
     "Glass": 9,
     "Dvd": 4,
     "Orb": 9,
-    "Jelly": 0.5,     // Jelly 是基础护甲的 1 倍
+    "Jelly": 0.5,
+    "Trident": 5,
     "Controller": 10 // Controller 是基础护甲的 10 倍
 };
 
 export const ARMOR_ELIGIBLE_ITEMS = new Set([
-    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone","Glass","Dvd","Orb"
+    "Wing", "Heavy", "Pearl", "Rock", "Jelly", "Controller", "Bone","Glass","Dvd","Orb","Trident"
 ]);
 // 获取物品护甲值（考虑倍率）
 export function getItemArmorValue(itemType, rarity) {
@@ -2381,8 +2379,7 @@ class AutoSaveSystem {
         }
     }
 
-    // 🟢 新增：保存到本地
-// 在 AutoSaveSystem 类中修改 saveToLocal 方法
+    // 在 AutoSaveSystem 类中修改 saveToLocal 方法
     saveToLocal(player, gameData) {
         try {
             // 收集物品数据
@@ -2395,7 +2392,7 @@ class AutoSaveSystem {
                 }
             }
 
-            // 收集主栏快捷栏数据
+            // 收集主栏快捷栏数据（动态长度）
             const quickSlotItems = [];
             if (player.quickSlot && player.quickSlot.slots) {
                 for (let i = 0; i < player.quickSlot.slots.length; i++) {
@@ -2409,7 +2406,7 @@ class AutoSaveSystem {
                 }
             }
 
-            // ✅ 新增：收集副栏快捷栏数据
+            // 收集副栏快捷栏数据（动态长度）
             const secondarySlotItems = [];
             if (player.quickSlot && player.quickSlot.secondarySlots) {
                 for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
@@ -2423,8 +2420,12 @@ class AutoSaveSystem {
                 }
             }
 
+            // ✅ 保存当前槽位数量
+            const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
+
             const saveData = {
                 "timestamp": Date.now(),
+                "slot_count": currentSlotCount,  // 新增：保存槽位数量
                 "player_data": {
                     "player_rarity": player.playerRarity || "Common",
                     "health": player.health || 100,
@@ -2442,7 +2443,7 @@ class AutoSaveSystem {
                 },
                 "inventory": inventoryItems,
                 "quick_slot": quickSlotItems,
-                "secondary_slot": secondarySlotItems,  // ✅ 新增：保存副栏
+                "secondary_slot": secondarySlotItems,
                 "game_state": {
                     "current_wave": gameData.currentWave || 1,
                     "game_over": gameData.gameOver || false
@@ -2472,12 +2473,17 @@ class AutoSaveSystem {
 
             const saveData = JSON.parse(saveDataStr);
 
-            // ✅ 确保旧存档有 secondary_slot 字段
+            // ✅ 确保有 secondary_slot 字段
             if (!saveData.secondary_slot) {
                 saveData.secondary_slot = [];
             }
 
-            console.log("[LOAD] Local save loaded");
+            // ✅ 确保有 slot_count 字段（旧存档兼容）
+            if (!saveData.slot_count) {
+                saveData.slot_count = 10; // 旧存档默认10个槽位
+            }
+
+            console.log("[LOAD] Local save loaded, slot_count:", saveData.slot_count);
             return saveData;
         } catch (error) {
             console.error("[LOAD ERROR] Failed to load local save:", error);
@@ -2652,7 +2658,7 @@ class ChangelogPanel {
     constructor() {
         this.visible = false;
         this.scrollY = 0;
-        this.logs = [{ date: "14th April 2026", entries: ["- Added memberships","- Rewrote bonus system and fixed position", "- Redraw shop system", "- Reorder talent system", "- Fixed a bug in craft system"] }, { date: "12th April 2026", entries: ["- Completed buttons UI design", "- Finish mob gallery UI drawing", "- Added flowing petals in main menu"] }, { date: "11th April 2026", entries: ["- Battery body lightning: 69.", "- Fixed Warp not teleporting.", "- New map UI and better setting"] }, { date: "9th April 2026", entries: ["- Battery flower body lightning: 120 -> 100.", "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.", "- Amulet now allows all eggs to spawn."] }, { date: "7th April 2026", entries: ["- Added new Hel biome with 15+ new enemies.", "- Added spacetime tunnel system.", "- Improved performance with chunk-based loading.", "- Fixed petal rotation issues."] }, { date: "5th April 2026", entries: ["- New item: Opal (crit chance & damage).", "- Added hunting quest system.", "- Added mob gallery.", "- Balance changes: reduced boss spawn rates."] }, { date: "3rd April 2026", entries: ["- Add Void and micro world", "- Add SpacetimeTunnel"] }, { date: "1st April 2026", entries: ["- changelog are not available before"] }];
+        this.logs = [{ date: "15th April 2026", entries: ["- Updated physic system","- Rewrote bubble logic", "- Update slot system", "- Add new petal - Trident"] },{ date: "14th April 2026", entries: ["- Added memberships","- Rewrote bonus system and fixed position", "- Redraw shop system", "- Reorder talent system", "- Fixed a bug in craft system"] }, { date: "12th April 2026", entries: ["- Completed buttons UI design", "- Finish mob gallery UI drawing", "- Added flowing petals in main menu"] }, { date: "11th April 2026", entries: ["- Battery body lightning: 69.", "- Fixed Warp not teleporting.", "- New map UI and better setting"] }, { date: "9th April 2026", entries: ["- Battery flower body lightning: 120 -> 100.", "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.", "- Amulet now allows all eggs to spawn."] }, { date: "7th April 2026", entries: ["- Added new Hel biome with 15+ new enemies.", "- Added spacetime tunnel system.", "- Improved performance with chunk-based loading.", "- Fixed petal rotation issues."] }, { date: "5th April 2026", entries: ["- New item: Opal (crit chance & damage).", "- Added hunting quest system.", "- Added mob gallery.", "- Balance changes: reduced boss spawn rates."] }, { date: "3rd April 2026", entries: ["- Add Void and micro world", "- Add SpacetimeTunnel"] }, { date: "1st April 2026", entries: ["- changelog are not available before"] }];
         this.panelW = 420;
         this.panelH = 460;
         this.closeRect = null;
@@ -4533,6 +4539,7 @@ class AccountSystem {
             }
         }
 
+        // 主栏（动态长度）
         const quickSlotItems = [];
         if (player.quickSlot && player.quickSlot.slots) {
             for (let i = 0; i < player.quickSlot.slots.length; i++) {
@@ -4546,7 +4553,7 @@ class AccountSystem {
             }
         }
 
-        // ✅ 新增：保存副栏
+        // 副栏（动态长度）
         const secondarySlotItems = [];
         if (player.quickSlot && player.quickSlot.secondarySlots) {
             for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
@@ -4565,8 +4572,12 @@ class AccountSystem {
             starCount = window.gameInstance.shopSystem.getStarCount();
         }
 
+        // ✅ 保存当前槽位数量
+        const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
+
         return {
             timestamp: Date.now(),
+            slot_count: currentSlotCount,  // 新增
             player_data: {
                 player_rarity: player.playerRarity || "Common",
                 health: player.health || 100,
@@ -4583,7 +4594,7 @@ class AccountSystem {
             },
             inventory: inventoryItems,
             quick_slot: quickSlotItems,
-            secondary_slot: secondarySlotItems,  // ✅ 新增：保存副栏
+            secondary_slot: secondarySlotItems,
             game_data: {
                 score: gameData?.score || 0,
                 enemies_killed: gameData?.enemiesKilled || 0,
@@ -4605,6 +4616,14 @@ class AccountSystem {
             return null;
         }
 
+        // ✅ 获取保存的槽位数量
+        const savedSlotCount = saveData.slot_count || 5;
+        const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
+
+        // 如果等级已经超过保存时的等级，使用当前等级计算的槽位数
+        // 否则使用保存的槽位数
+        const targetSlotCount = Math.max(savedSlotCount, currentSlotCount);
+
         if (saveData.player_data) {
             const pd = saveData.player_data;
 
@@ -4618,9 +4637,9 @@ class AccountSystem {
                 player.health = Math.min(pd.health || player.maxHealth, player.maxHealth);
             }
 
-            const currentMinPetalCount = 10;
-            const oldPetalCount = pd.petal_count || 8;
-            player.petalCount = Math.max(currentMinPetalCount, oldPetalCount);
+            const currentMinPetalCount = 5;
+            const oldPetalCount = pd.petal_count || 5;
+            player.petalCount = Math.max(currentMinPetalCount, oldPetalCount, targetSlotCount);
 
             if (pd.player_rarity) {
                 player.playerRarity = pd.player_rarity;
@@ -4629,18 +4648,8 @@ class AccountSystem {
             if (pd.stars !== undefined && window.gameInstance && window.gameInstance.shopSystem) {
                 const targetStars = pd.stars;
                 const currentStars = window.gameInstance.shopSystem.getStarCount();
-
                 if (targetStars > currentStars) {
                     window.gameInstance.shopSystem.addStars(targetStars - currentStars);
-                } else if (targetStars < currentStars) {
-                    if (typeof window.gameInstance.shopSystem.setStars === 'function') {
-                        window.gameInstance.shopSystem.setStars(targetStars);
-                    } else {
-                        const diff = currentStars - targetStars;
-                        for (let i = 0; i < diff; i++) {
-                            window.gameInstance.shopSystem.removeStars(1);
-                        }
-                    }
                 }
             }
 
@@ -4655,10 +4664,10 @@ class AccountSystem {
             player.inventory.items = [];
         }
 
-        // 清空主栏和副栏
+        // 清空主栏和副栏（使用目标槽位数）
         if (player.quickSlot) {
-            player.quickSlot.slots = new Array(10).fill(null);
-            player.quickSlot.secondarySlots = new Array(10).fill(null);
+            player.quickSlot.slots = new Array(targetSlotCount).fill(null);
+            player.quickSlot.secondarySlots = new Array(targetSlotCount).fill(null);
         }
 
         // 加载背包物品
@@ -4666,23 +4675,19 @@ class AccountSystem {
             for (const itemData of saveData.inventory) {
                 try {
                     if (!itemData.type || !itemData.rarity) continue;
-
                     let item;
                     if (itemData.type === "DNA") {
                         item = new DNA(itemData.rarity, parseInt(itemData.level) || 1);
                     } else {
                         item = new Item(itemData.type, parseInt(itemData.level) || 1, itemData.rarity);
                     }
-
                     item.count = itemData.count || 1;
-
                     if (itemData.durability !== undefined) item.durability = itemData.durability;
                     if (itemData.maxDurability !== undefined) item.maxDurability = itemData.maxDurability;
                     if (itemData.isBroken !== undefined) item.isBroken = itemData.isBroken;
                     if (itemData.reloadTime !== undefined) item.reloadTime = itemData.reloadTime;
                     if (itemData.baseReloadTime !== undefined) item.baseReloadTime = itemData.baseReloadTime;
                     if (itemData.armor !== undefined) item.armor = itemData.armor;
-
                     player.inventory.items.push(item);
                 } catch (error) {
                     console.error('加载物品失败:', error);
@@ -4693,26 +4698,22 @@ class AccountSystem {
         // 加载主栏快捷栏
         if (saveData.quick_slot && player.quickSlot) {
             for (const slotData of saveData.quick_slot) {
-                if (slotData.slot_index !== undefined && slotData.slot_index < 10) {
+                if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
                     try {
                         if (!slotData.type || !slotData.rarity) continue;
-
                         let item;
                         if (slotData.type === "DNA") {
                             item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
                         } else {
                             item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
                         }
-
                         item.count = slotData.count || 1;
-
                         if (slotData.durability !== undefined) item.durability = slotData.durability;
                         if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
                         if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
                         if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
                         if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
                         if (slotData.armor !== undefined) item.armor = slotData.armor;
-
                         player.quickSlot.slots[slotData.slot_index] = item;
                     } catch (error) {
                         console.error('加载主栏物品失败:', error);
@@ -4721,29 +4722,25 @@ class AccountSystem {
             }
         }
 
-        // ✅ 新增：加载副栏
+        // 加载副栏
         if (saveData.secondary_slot && player.quickSlot) {
             for (const slotData of saveData.secondary_slot) {
-                if (slotData.slot_index !== undefined && slotData.slot_index < 10) {
+                if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
                     try {
                         if (!slotData.type || !slotData.rarity) continue;
-
                         let item;
                         if (slotData.type === "DNA") {
                             item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
                         } else {
                             item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
                         }
-
                         item.count = slotData.count || 1;
-
                         if (slotData.durability !== undefined) item.durability = slotData.durability;
                         if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
                         if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
                         if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
                         if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
                         if (slotData.armor !== undefined) item.armor = slotData.armor;
-
                         player.quickSlot.secondarySlots[slotData.slot_index] = item;
                     } catch (error) {
                         console.error('加载副栏物品失败:', error);
@@ -6317,7 +6314,60 @@ class PhysicsBody {
         this.position.y += this.velocity.y * dt;
     }
 }
+// ── 花瓣-敌人位置分离（最小开销版）──
+function resolvePetalEnemyCollisions(petals, enemies, viewScale) {
+    if (!petals || !enemies) return;
 
+    for (const petal of petals) {
+        // 跳过：重载中、破碎、无物品
+        if (petal.isReloading || petal.isBroken || !petal.itemType) continue;
+
+        const px = petal.worldX;
+        const py = petal.worldY;
+        const pr = petal.size * 1.0; // 花瓣碰撞半径（略大于显示尺寸）
+
+        for (const enemy of enemies) {
+            // 跳过：死亡、友方、生成保护中
+            if (enemy.isDead || enemy.isFriendly || enemy.isSpawning) continue;
+            if (!enemy.physicsBody) continue;
+
+            const ex = enemy.physicsBody.position.x;
+            const ey = enemy.physicsBody.position.y;
+            const er = enemy.physicsBody.radius;
+
+            const dx = px - ex;
+            const dy = py - ey;
+            const distSq = dx * dx + dy * dy;
+            const minDist = pr + er;
+
+            if (distSq >= minDist * minDist || distSq < 0.001) continue;
+
+            const dist = Math.sqrt(distSq);
+            const overlap = minDist - dist;
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            // 质量比：花瓣质量视为1，敌人质量用 physicsBody.mass
+            const em = enemy.physicsBody.mass || 1;
+            const totalMass = 10 + em;
+            const petalRatio  = em / totalMass;   // 敌人越重，花瓣被推越多
+            const enemyRatio  = 1  / totalMass;
+
+            // 推开花瓣（修改世界坐标，让轨道平滑跟上）
+            petal.worldX += nx * overlap * petalRatio;
+            petal.worldY += ny * overlap * petalRatio;
+            // 同步屏幕坐标
+            if (petal.player?.physicsBody) {
+                petal.screenX = WIDTH / 2 + (petal.worldX - petal.player.physicsBody.position.x);
+                petal.screenY = HEIGHT / 2 + (petal.worldY - petal.player.physicsBody.position.y);
+            }
+
+            // 推开敌人
+            enemy.physicsBody.position.x -= nx * overlap * enemyRatio;
+            enemy.physicsBody.position.y -= ny * overlap * enemyRatio;
+        }
+    }
+}
 class CollisionSystem {
     constructor(worldWidth = WORLD_WIDTH, worldHeight = WORLD_HEIGHT, cellSize = 150) {
         this.worldWidth = worldWidth;
@@ -7133,8 +7183,6 @@ class ImageLoader {
             }
             await Promise.all(cropPromises);
 
-            // 4. 加载大图（如地图）和备用图
-            await this._loadFallbackImages();
 
         } catch (err) {
             console.warn('⚠️ 雪碧图加载失败，降级为逐张加载:', err.message);
@@ -8010,27 +8058,60 @@ class Coin extends Item {
         };
     }
 }
-
 class QuickSlot {
     constructor(player) {
-        this.slots = new Array(10).fill(null);
-        this.secondarySlots = new Array(10).fill(null);
-        this.selectedIndex = 0;
         this.player = player;
+        this.baseSlotCount = 10;
+        this.selectedIndex = 0;
         this.mouseX = 0;
         this.mouseY = 0;
-        this.mimicTracker = new Map(); // key: 槽位标识, value: { originalData, displayType, isMain }
+        this.mimicTracker = new Map();
+
         // 主栏常量
         this.SLOT_SIZE = 55;
         this.SLOT_SPACING = 6;
 
-        // ✅ 副栏常量（比主栏小）
-        this.SECONDARY_SLOT_SIZE = 42;      // 副栏槽位大小
-        this.SECONDARY_SLOT_SPACING = 4;    // 副栏间距
-        this.SECONDARY_OFFSET_Y = 60;       // 副栏距离主栏的垂直偏移
-
-        // 兼容旧代码
+        // 副栏常量
+        this.SECONDARY_SLOT_SIZE = 42;
+        this.SECONDARY_SLOT_SPACING = 4;
+        this.SECONDARY_OFFSET_Y = 60;
         this.SECONDARY_OFFSET_X = 50;
+
+        // 初始化槽位
+        this.updateSlotCount();
+    }
+
+// 在 QuickSlot 类中修改
+    getCurrentSlotCount() {
+        if (!this.player || !this.player.getTotalSlotCount) {
+            return 5; // 默认5个槽位
+        }
+        return this.player.getTotalSlotCount();
+    }
+
+    // 动态更新槽位数量
+    updateSlotCount() {
+        const targetCount = this.getCurrentSlotCount();
+
+        // 扩展或收缩主栏
+        if (!this.slots || this.slots.length !== targetCount) {
+            const oldSlots = this.slots || new Array(this.baseSlotCount).fill(null);
+            const newSlots = new Array(targetCount).fill(null);
+            for (let i = 0; i < Math.min(oldSlots.length, targetCount); i++) {
+                newSlots[i] = oldSlots[i];
+            }
+            this.slots = newSlots;
+        }
+
+        // 扩展或收缩副栏
+        if (!this.secondarySlots || this.secondarySlots.length !== targetCount) {
+            const oldSecondary = this.secondarySlots || new Array(this.baseSlotCount).fill(null);
+            const newSecondary = new Array(targetCount).fill(null);
+            for (let i = 0; i < Math.min(oldSecondary.length, targetCount); i++) {
+                newSecondary[i] = oldSecondary[i];
+            }
+            this.secondarySlots = newSecondary;
+        }
     }
 
     swapSlot(slotIndex) {
@@ -8039,14 +8120,14 @@ class QuickSlot {
         const mainItem = this.slots[slotIndex];
         const secondaryItem = this.secondarySlots[slotIndex];
 
-        // 保存主栏的 Mimic 数据（如果有）
+        // 保存主栏的 Mimic 数据
         let mainMimicData = null;
         if (this.mimicTracker.has(`main_${slotIndex}`)) {
             mainMimicData = this.mimicTracker.get(`main_${slotIndex}`);
             this.mimicTracker.delete(`main_${slotIndex}`);
         }
 
-        // 保存副栏的 Mimic 数据（如果有）
+        // 保存副栏的 Mimic 数据
         let secondaryMimicData = null;
         if (this.mimicTracker.has(`sec_${slotIndex}`)) {
             secondaryMimicData = this.mimicTracker.get(`sec_${slotIndex}`);
@@ -8057,7 +8138,7 @@ class QuickSlot {
         this.slots[slotIndex] = secondaryItem;
         this.secondarySlots[slotIndex] = mainItem;
 
-        // 将数据恢复到新位置
+        // 恢复 Mimic 数据到新位置
         if (mainMimicData) {
             this.mimicTracker.set(`sec_${slotIndex}`, {
                 ...mainMimicData,
@@ -8074,7 +8155,7 @@ class QuickSlot {
             });
         }
 
-        // ✅ 关键：清除这个槽位对应的花瓣的召唤物
+        // 清除对应花瓣的召唤物
         if (this.player && this.player.petals) {
             const targetPetal = this.player.petals.find(p => p && p._petalIndex === slotIndex);
             if (targetPetal && targetPetal._clearAllSummons) {
@@ -8083,21 +8164,22 @@ class QuickSlot {
             }
         }
 
-        // 更新花瓣
         this.updatePetalFromSlot(slotIndex);
 
         if (this.player?.gameInstance?.requestRedraw) {
             this.player.gameInstance.requestRedraw();
         }
 
-        console.log(`🔄 交换槽位 ${slotIndex}: 主栏 ↔ 副栏，已更新花瓣`);
+        console.log(`🔄 交换槽位 ${slotIndex}: 主栏 ↔ 副栏`);
     }
-    // 在 QuickSlot 类中添加
+    // 在 QuickSlot 类中修改 restoreSecondarySlots 方法
     restoreSecondarySlots(saveData) {
         if (saveData && saveData.secondary_slot) {
-            this.secondarySlots = new Array(10).fill(null);
+            const targetCount = this.getCurrentSlotCount();
+            this.secondarySlots = new Array(targetCount).fill(null);
+
             for (const slotData of saveData.secondary_slot) {
-                if (slotData.slot_index !== undefined && slotData.slot_index < 10) {
+                if (slotData.slot_index !== undefined && slotData.slot_index < targetCount) {
                     try {
                         let item;
                         if (slotData.type === "DNA") {
@@ -8112,27 +8194,25 @@ class QuickSlot {
                     }
                 }
             }
-            console.log(`✅ 恢复了 ${saveData.secondary_slot.length} 个副栏物品`);
+            console.log(`✅ 恢复了 ${saveData.secondary_slot.length} 个副栏物品，目标槽位数: ${targetCount}`);
         }
     }
-        // 在 QuickSlot 类中添加
     removeSecondaryItem(slotIndex) {
-            if (slotIndex >= 0 && slotIndex < this.secondarySlots.length && this.secondarySlots[slotIndex]) {
-                const item = this.secondarySlots[slotIndex];
-                this.secondarySlots[slotIndex] = null;
-                return item;
-            }
-            return null;
+        if (slotIndex >= 0 && slotIndex < this.secondarySlots.length && this.secondarySlots[slotIndex]) {
+            const item = this.secondarySlots[slotIndex];
+            this.secondarySlots[slotIndex] = null;
+            return item;
         }
+        return null;
+    }
+
     swapAllSlots() {
-        // 保存所有 Mimic 数据
         const allMimics = [];
         for (const [key, data] of this.mimicTracker.entries()) {
             allMimics.push({ key, data });
             this.mimicTracker.delete(key);
         }
 
-        // ✅ 清除所有花瓣的召唤物
         if (this.player && this.player.petals) {
             for (const petal of this.player.petals) {
                 if (petal && petal._clearAllSummons) {
@@ -8142,7 +8222,6 @@ class QuickSlot {
             }
         }
 
-        // 交换所有槽位
         for (let i = 0; i < this.slots.length; i++) {
             const temp = this.slots[i];
             this.slots[i] = this.secondarySlots[i];
@@ -8150,7 +8229,6 @@ class QuickSlot {
             this.updatePetalFromSlot(i);
         }
 
-        // 恢复 Mimic 数据（主副栏互换）
         for (const { key, data } of allMimics) {
             const [type, slotIndex] = key.split('_');
             const newType = type === 'main' ? 'sec' : 'main';
@@ -8160,7 +8238,6 @@ class QuickSlot {
                 isMain: newType === 'main',
                 slotIndex: parseInt(slotIndex)
             });
-            console.log(`📦 移动 Mimic: ${key} → ${newKey}`);
         }
 
         console.log(`🔄 交换所有主副栏槽位完成`);
@@ -8174,7 +8251,6 @@ class QuickSlot {
                 item._isTransformedMimic = false;
             }
 
-            // 主栏该槽为空，直接放入
             if (this.slots[slotIndex] === null) {
                 this.slots[slotIndex] = item;
                 this.updatePetalFromSlot(slotIndex);
@@ -8182,26 +8258,22 @@ class QuickSlot {
                 return true;
             }
 
-            // 主栏该槽有同类型物品，堆叠
             if (this.slots[slotIndex].canStackWith(item)) {
                 this.slots[slotIndex].count += item.count;
                 return true;
             }
 
-            // 主栏该槽有不同物品，尝试放入副栏
             if (this.secondarySlots[slotIndex] === null) {
                 this.secondarySlots[slotIndex] = item;
                 console.log(`📦 主栏槽位 ${slotIndex} 已满，放入副栏`);
                 return true;
             }
 
-            // 副栏该槽有同类型物品，堆叠
             if (this.secondarySlots[slotIndex] && this.secondarySlots[slotIndex].canStackWith(item)) {
                 this.secondarySlots[slotIndex].count += item.count;
                 return true;
             }
 
-            // 都满了，覆盖主栏
             this.slots[slotIndex] = item;
             this.updatePetalFromSlot(slotIndex);
             this._triggerMimicIfNeeded(item, slotIndex);
@@ -8209,7 +8281,7 @@ class QuickSlot {
         }
         return false;
     }
-// 注册一个变形 Mimic
+
     registerMimic(slotIndex, isMain, originalData, displayType) {
         const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
         this.mimicTracker.set(key, {
@@ -8218,21 +8290,16 @@ class QuickSlot {
             isMain: isMain,
             slotIndex: slotIndex
         });
-        console.log(`📝 注册 Mimic: ${key}, 原始类型: ${originalData.type}, 显示为: ${displayType}`);
+        console.log(`📝 注册 Mimic: ${key}, 显示为: ${displayType}`);
     }
 
-    // 注销一个变形 Mimic（移动或恢复时调用）
     unregisterMimic(slotIndex, isMain) {
         const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
         const existed = this.mimicTracker.has(key);
         this.mimicTracker.delete(key);
-        if (existed) {
-            console.log(`🗑️ 注销 Mimic: ${key}`);
-        }
         return existed;
     }
 
-    // 移动 Mimic 数据（交换槽位时调用）
     moveMimic(fromSlot, fromIsMain, toSlot, toIsMain) {
         const fromKey = `${fromIsMain ? 'main' : 'sec'}_${fromSlot}`;
         const toKey = `${toIsMain ? 'main' : 'sec'}_${toSlot}`;
@@ -8245,19 +8312,16 @@ class QuickSlot {
                 slotIndex: toSlot,
                 isMain: toIsMain
             });
-            console.log(`📦 移动 Mimic: ${fromKey} → ${toKey}`);
             return true;
         }
         return false;
     }
 
-    // 获取某个槽位的 Mimic 数据
     getMimicData(slotIndex, isMain) {
         const key = `${isMain ? 'main' : 'sec'}_${slotIndex}`;
         return this.mimicTracker.get(key) || null;
     }
 
-    // 恢复所有 Mimic（返回主菜单时调用）
     restoreAllMimics() {
         const restored = [];
 
@@ -8267,12 +8331,8 @@ class QuickSlot {
             const idx = parseInt(slotIndex);
             const item = isMain ? this.slots[idx] : this.secondarySlots[idx];
 
-            // ✅ 关键：只恢复当前物品类型与显示类型不同的（说明是变形状态）
             if (item && data.originalData && data.originalData.type === "Mimic") {
-                // 只有当物品当前不是 Mimic 时才恢复（避免重复恢复）
                 if (item.type !== "Mimic") {
-                    console.log(`✅ 恢复 Mimic: ${key}, ${item.type} → ${data.originalData.type}`);
-
                     item.type = data.originalData.type;
                     item.rarity = data.originalData.rarity;
                     item.level = data.originalData.level;
@@ -8282,22 +8342,19 @@ class QuickSlot {
                     item.baseReloadTime = data.originalData.baseReloadTime;
                     item.armor = data.originalData.armor;
                     item.isBroken = data.originalData.isBroken || false;
-
                     restored.push(key);
-                } else {
-                    console.log(`⚠️ 跳过恢复 ${key}: 已经是 Mimic`);
                 }
             }
 
-            // 清除所有标记
-            item._originalMimicData = null;
-            item._isTransformedMimic = false;
-            item._mimicDisplayType = null;
+            if (item) {
+                item._originalMimicData = null;
+                item._isTransformedMimic = false;
+                item._mimicDisplayType = null;
+            }
         }
 
         this.mimicTracker.clear();
 
-        // 更新所有花瓣
         for (let i = 0; i < this.slots.length; i++) {
             this.updatePetalFromSlot(i);
         }
@@ -8337,7 +8394,6 @@ class QuickSlot {
         if (item && item.type === "Mimic" && this.player) {
             const petal = this.player.petals[slotIndex];
             if (petal && petal.autoCopyWithMimic) {
-                console.log(`🔄 游戏内放入 Mimic 在槽位 ${slotIndex}，触发复制`);
                 setTimeout(() => {
                     petal.autoCopyWithMimic(slotIndex);
                 }, 100);
@@ -8348,13 +8404,14 @@ class QuickSlot {
     removeItem(slotIndex) {
         if (slotIndex >= 0 && slotIndex < this.slots.length && this.slots[slotIndex]) {
             const item = this.slots[slotIndex];
-        // ✅ 关键修复：如果移除的是蛋类物品，清除对应的召唤物
-            if (item && this.isEggItem(item.type)) {
-                const petal = this.player?.petals[slotIndex];
-                if (petal && typeof petal._clearAllSummons === 'function') {
-                    petal._clearAllSummons();
+
+            if (this.player && this.player.petals) {
+                if (this.player.petals[slotIndex] && this.player.petals[slotIndex]._clearAllSummons) {
+                    this.player.petals[slotIndex]._clearAllSummons();
+                    this.player.petals[slotIndex].eggSpawned = false;
                 }
             }
+
             if (item && item.type !== "Mimic" && item._originalMimicData) {
                 item.type = item._originalMimicData.type;
                 item.rarity = item._originalMimicData.rarity;
@@ -8388,7 +8445,6 @@ class QuickSlot {
         return null;
     }
 
-    // ✅ 添加辅助方法：判断是否是蛋类物品
     isEggItem(itemType) {
         const EGG_ITEMS = new Set([
             "Egg", "Ant Egg", "Moon Egg",
@@ -8413,6 +8469,7 @@ class QuickSlot {
         ]);
         return EGG_ITEMS.has(itemType);
     }
+
     getItem(slotIndex) {
         if (slotIndex >= 0 && slotIndex < this.slots.length) {
             return this.slots[slotIndex];
@@ -8442,7 +8499,6 @@ class QuickSlot {
         }
 
         if (item.type === "Golden Leaf") {
-            console.log("🍃 Golden Leaf 是被动物品");
             if (this.player?.inventory?.craftingSystem) {
                 this.player.inventory.craftingSystem.showMessage("🍃 Golden Leaf: 减少所有花瓣重载时间");
             }
@@ -8467,8 +8523,6 @@ class QuickSlot {
         }
 
         const mimicItem = this.slots[mimicSlotIndex];
-
-        console.log(`Mimic: Copying ${targetItem.type} with rarity ${mimicItem.rarity}`);
 
         const newItem = new Item(targetItem.type, targetItem.level, mimicItem.rarity);
         newItem.count = 1;
@@ -8496,6 +8550,7 @@ class QuickSlot {
             this.resetPetalFromSlot(slotIndex);
         }
     }
+
     updatePetalFromSlot(slotIndex) {
         if (!this.player?.petals || slotIndex < 0 || slotIndex >= this.player.petals.length) return;
         const petal = this.player.petals[slotIndex];
@@ -8503,23 +8558,20 @@ class QuickSlot {
 
         if (item) {
             const stats = item.getStats();
-            petal.attackPower      = stats.attack_power;
+            petal.attackPower = stats.attack_power;
             petal.attackCooldownMax = stats.attack_cooldown;
-            petal.color            = stats.rarity_color;
-            petal.itemType         = item.type;
-            petal.rarity           = item.rarity;
-            petal.level            = item.level;
+            petal.color = stats.rarity_color;
+            petal.itemType = item.type;
+            petal.rarity = item.rarity;
+            petal.level = item.level;
 
-            petal.size = RARITY_LIST.includes(item.rarity)
-                ? 20 + RARITY_LIST.indexOf(item.rarity) * 1.2
-                : 8;
-
+            petal.size = RARITY_LIST.includes(item.rarity) ? 20 + RARITY_LIST.indexOf(item.rarity) * 1.2 : 8;
             petal.armor = stats.armor ?? 0.0;
 
             if (item.type === "Magnet") {
-                petal.magnetRange    = stats.magnetRange    || 100;
+                petal.magnetRange = stats.magnetRange || 100;
                 petal.magnetStrength = stats.magnetStrength || 0.5;
-                petal.magnetActive   = true;
+                petal.magnetActive = true;
             } else {
                 petal.magnetActive = false;
             }
@@ -8529,23 +8581,21 @@ class QuickSlot {
             const mimicData = this.getMimicData(slotIndex, true);
             if (mimicData) {
                 petal._isTransformedMimic = true;
-                petal._originalMimicData  = { ...mimicData.originalData };
-                petal._mimicDisplayType   = mimicData.displayType;
+                petal._originalMimicData = { ...mimicData.originalData };
+                petal._mimicDisplayType = mimicData.displayType;
             } else {
                 petal._isTransformedMimic = false;
-                petal._originalMimicData  = null;
-                petal._mimicDisplayType   = null;
+                petal._originalMimicData = null;
+                petal._mimicDisplayType = null;
             }
 
-            // ✅ 关键：让花瓣内部重新计算所有依赖 itemType 的状态
             petal.updateFromQuickSlot(slotIndex);
-
         } else {
             petal.resetToDefault();
-            // ✅ reset 之后也要同步
             petal.updateFromQuickSlot(slotIndex);
         }
     }
+
     resetPetalFromSlot(slotIndex) {
         if (this.player && this.player.petals && slotIndex >= 0 && slotIndex < this.player.petals.length) {
             const petal = this.player.petals[slotIndex];
@@ -8562,99 +8612,55 @@ class QuickSlot {
     }
 
     draw(ctx) {
-        const slotSize = this.SLOT_SIZE;  // 主栏槽位大小 (55)
-        const slotMargin = this.SLOT_SPACING;  // 主栏间距 (6)
-        const totalWidth = 10 * slotSize + 9 * slotMargin;
+        this.updateSlotCount(); // 每帧更新槽位数
 
-        // 主栏位置（底部）
+        const slotCount = this.slots.length;
+        const slotSize = this.SLOT_SIZE;
+        const slotMargin = this.SLOT_SPACING;
+        const totalWidth = slotCount * slotSize + (slotCount - 1) * slotMargin;
+
         const startX = WIDTH / 2 - totalWidth / 2;
         const startY = HEIGHT - 120;
 
-        // ✅ 副栏参数（比主栏小）
-        const secondarySlotSize = this.SECONDARY_SLOT_SIZE || 42;  // 副栏槽位大小 (42)
-        const secondarySlotMargin = this.SECONDARY_SLOT_SPACING || 4;  // 副栏间距 (4)
-        const secondaryTotalWidth = 10 * secondarySlotSize + 9 * secondarySlotMargin;
-
-        // 副栏位置（居中于主栏下方）
+        const secondarySlotSize = this.SECONDARY_SLOT_SIZE;
+        const secondarySlotMargin = this.SECONDARY_SLOT_SPACING;
+        const secondaryTotalWidth = slotCount * secondarySlotSize + (slotCount - 1) * secondarySlotMargin;
         const secStartX = WIDTH / 2 - secondaryTotalWidth / 2;
-        const secStartY = startY + this.SECONDARY_OFFSET_Y;  // 主栏下方
+        const secStartY = startY + this.SECONDARY_OFFSET_Y;
 
-        // ===== 2. 绘制副栏槽位（更小）=====
-        for (let i = 0; i < 10; i++) {
+        // 绘制副栏
+        for (let i = 0; i < slotCount; i++) {
             const slotX = secStartX + i * (secondarySlotSize + secondarySlotMargin);
             const slotY = secStartY;
 
-            // 槽位背景
             ctx.fillStyle = i === this.selectedIndex ? 'rgb(244, 244, 244)' : 'rgb(244, 244, 244)';
             ctx.fillRect(slotX, slotY, secondarySlotSize, secondarySlotSize);
-
             ctx.strokeStyle = 'rgb(203, 203, 203)';
             ctx.lineWidth = 3;
             ctx.strokeRect(slotX, slotY, secondarySlotSize, secondarySlotSize);
 
             const item = this.secondarySlots[i];
-            if (item) {
-                if (item.draw) {
-                    // 副栏物品绘制更小（留出更多边距）
-                    const padding = 0;  // 内边距更大
-                    const drawSize = secondarySlotSize - padding * 2;
-                    if (drawSize > 0) {
-                        // 创建一个临时画布来缩放绘制
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = drawSize;
-                        tempCanvas.height = drawSize;
-                        const tempCtx = tempCanvas.getContext('2d');
-
-                        // 保存原始 draw 方法，临时替换
-                        const originalDraw = item.draw;
-                        item.draw = function(ctx, x, y, size, mx, my) {
-                            // 在临时画布上以完整尺寸绘制
-                            tempCtx.clearRect(0, 0, drawSize, drawSize);
-                            originalDraw.call(item, tempCtx, 0, 0, drawSize, -1000, -1000);
-                            // 将缩放后的图像绘制到主画布
-                            ctx.drawImage(tempCanvas, slotX + padding, slotY + padding, drawSize, drawSize);
-                        };
-                        item.draw(ctx, slotX, slotY, secondarySlotSize, -1000, -1000);
-                        // 恢复原始 draw 方法
-                        item.draw = originalDraw;
-                    }
-                } else {
-                    // 备用绘制：更小的圆角矩形
-                    ctx.fillStyle = 'rgb(80, 60, 90)';
-                    const padding = 8;
-                    ctx.fillRect(slotX + padding, slotY + padding,
-                                 secondarySlotSize - padding * 2,
-                                 secondarySlotSize - padding * 2);
-                }
+            if (item && item.draw) {
+                item.draw(ctx, slotX, slotY, secondarySlotSize, -1000, -1000);
             }
         }
 
-        // ===== 4. 绘制主栏槽位 =====
-        for (let i = 0; i < 10; i++) {
+        // 绘制主栏
+        for (let i = 0; i < slotCount; i++) {
             const slotX = startX + i * (slotSize + slotMargin);
             const slotY = startY;
 
-            // 槽位背景
             ctx.fillStyle = i === this.selectedIndex ? 'rgb(244, 244, 244)' : 'rgb(244, 244, 244)';
             ctx.fillRect(slotX, slotY, slotSize, slotSize);
-
             ctx.strokeStyle = 'rgb(203, 203, 203)';
             ctx.lineWidth = 4;
             ctx.strokeRect(slotX, slotY, slotSize, slotSize);
 
-            // 绘制主栏物品
             const item = this.slots[i];
-            if (item) {
-                if (item.draw) {
-                    item.draw(ctx, slotX, slotY, slotSize, -1000, -1000);
-                } else {
-                    ctx.fillStyle = 'rgb(100, 100, 120)';
-                    ctx.fillRect(slotX + 5, slotY + 5, slotSize - 10, slotSize - 10);
-                }
+            if (item && item.draw) {
+                item.draw(ctx, slotX, slotY, slotSize, -1000, -1000);
             }
 
-
-            // 花瓣重载/伤害覆盖层
             if (i < this.player.petals.length) {
                 const petal = this.player.petals[i];
                 if (petal.isReloading) {
@@ -8668,8 +8674,8 @@ class QuickSlot {
             }
         }
 
-        // ===== 5. 绘制 Tooltip（主栏）=====
-        for (let i = 0; i < 10; i++) {
+        // Tooltip 主栏
+        for (let i = 0; i < slotCount; i++) {
             const slotX = startX + i * (slotSize + slotMargin);
             const slotY = startY;
             const item = this.slots[i];
@@ -8680,8 +8686,8 @@ class QuickSlot {
             }
         }
 
-        // ===== 6. 绘制 Tooltip（副栏）=====
-        for (let i = 0; i < 10; i++) {
+        // Tooltip 副栏
+        for (let i = 0; i < slotCount; i++) {
             const slotX = secStartX + i * (secondarySlotSize + secondarySlotMargin);
             const slotY = secStartY;
             const item = this.secondarySlots[i];
@@ -8691,11 +8697,9 @@ class QuickSlot {
                 break;
             }
         }
-
-        ctx.restore();
     }
 
-  drawDamageOverlay(ctx, x, y, size, damageRatio) {
+    drawDamageOverlay(ctx, x, y, size, damageRatio) {
         const overlay = document.createElement('canvas');
         overlay.width = size;
         overlay.height = size;
@@ -8705,7 +8709,6 @@ class QuickSlot {
         if (coverHeight > 0) {
             overlayCtx.fillStyle = 'rgba(100, 100, 100, 0.5)';
             overlayCtx.fillRect(0, size - coverHeight, size, coverHeight);
-
             for (let i = 0; i < coverHeight; i++) {
                 const alpha = 0.6 - (i * 0.4 / coverHeight);
                 overlayCtx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
@@ -8715,14 +8718,11 @@ class QuickSlot {
                 overlayCtx.lineTo(size, size - i);
                 overlayCtx.stroke();
             }
-
-
         }
-
         ctx.drawImage(overlay, x, y);
     }
 
-  drawReloadOverlay(ctx, x, y, size, petal) {
+    drawReloadOverlay(ctx, x, y, size, petal) {
         const overlay = document.createElement('canvas');
         overlay.width = size;
         overlay.height = size;
@@ -8741,7 +8741,6 @@ class QuickSlot {
 
             if (elapsedTime < 0.5) {
                 const firstPhaseProgress = elapsedTime / 0.5;
-
                 overlayCtx.save();
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(centerX, centerY);
@@ -8765,10 +8764,8 @@ class QuickSlot {
                 overlayCtx.restore();
             } else {
                 const secondPhaseProgress = Math.min(1, (elapsedTime - 0.5) / (totalReloadTime - 0.5));
-
                 overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 overlayCtx.fillRect(0, 0, size, size);
-
                 overlayCtx.save();
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(centerX, centerY);
@@ -8780,42 +8777,31 @@ class QuickSlot {
                 overlayCtx.fill();
                 overlayCtx.restore();
             }
-
-
         }
-
         ctx.drawImage(overlay, x, y);
     }
 
-
     handleClick(pos) {
         const [clickX, clickY] = pos;
-        console.log(`🖱️ 快捷栏点击: (${clickX}, ${clickY})`);
+        const slotCount = this.slots.length;
 
-        // 主栏尺寸计算
-        const totalWidth = 10 * this.SLOT_SIZE + 9 * this.SLOT_SPACING;
+        const totalWidth = slotCount * this.SLOT_SIZE + (slotCount - 1) * this.SLOT_SPACING;
         const startX = Math.floor(WIDTH / 2 - totalWidth / 2);
-        const startY = HEIGHT - 120; // 与 draw 中的 startY 一致
+        const startY = HEIGHT - 120;
 
-        // 副栏尺寸计算（使用副栏的槽位大小）
-        const secondaryTotalWidth = 10 * (this.SECONDARY_SLOT_SIZE || 42) + 9 * (this.SECONDARY_SLOT_SPACING || 4);
+        const secondaryTotalWidth = slotCount * (this.SECONDARY_SLOT_SIZE || 42) + (slotCount - 1) * (this.SECONDARY_SLOT_SPACING || 4);
         const secStartX = Math.floor(WIDTH / 2 - secondaryTotalWidth / 2);
         const secStartY = startY + (this.SECONDARY_OFFSET_Y || 70);
 
-        // ===== 1. 检查副栏点击（先检查副栏，因为副栏在主栏下方）=====
-        for (let i = 0; i < 10; i++) {
+        // 副栏点击
+        for (let i = 0; i < slotCount; i++) {
             const slotX = secStartX + i * ((this.SECONDARY_SLOT_SIZE || 42) + (this.SECONDARY_SLOT_SPACING || 4));
             const slotY = secStartY;
             const slotSize = this.SECONDARY_SLOT_SIZE || 42;
 
-            if (clickX >= slotX && clickX <= slotX + slotSize &&
-                clickY >= slotY && clickY <= slotY + slotSize) {
-
-                console.log(`🎯 点击副栏槽位 ${i}`);
+            if (clickX >= slotX && clickX <= slotX + slotSize && clickY >= slotY && clickY <= slotY + slotSize) {
                 const item = this.secondarySlots[i];
-
                 if (item) {
-                    // 创建物品副本放回背包
                     const newItem = new Item(item.type, item.level, item.rarity);
                     newItem.count = item.count;
                     newItem.durability = item.durability;
@@ -8828,43 +8814,34 @@ class QuickSlot {
                     if (this.player?.inventory) {
                         this.player.inventory.addItem(newItem);
                     }
-
-                    // 清空副栏槽位
                     this.secondarySlots[i] = null;
-
-                    console.log(`📦 副栏槽位 ${i} 物品已移回背包`);
                 }
                 return true;
             }
         }
 
-        // ===== 2. 检查主栏点击 =====
-        for (let i = 0; i < 10; i++) {
+        // 主栏点击
+        for (let i = 0; i < slotCount; i++) {
             const slotX = startX + i * (this.SLOT_SIZE + this.SLOT_SPACING);
             const slotY = startY;
 
-            if (clickX >= slotX && clickX <= slotX + this.SLOT_SIZE &&
-                clickY >= slotY && clickY <= slotY + this.SLOT_SIZE) {
-
-                console.log(`🎯 点击主栏槽位 ${i}`);
+            if (clickX >= slotX && clickX <= slotX + this.SLOT_SIZE && clickY >= slotY && clickY <= slotY + this.SLOT_SIZE) {
                 const item = this.slots[i];
                 const petal = this.player?.petals[i];
 
                 if (item) {
-                    // 检查是否是变形的 Mimic
-                    const isTransformedMimic =
-                        (petal && petal._isTransformedMimic) ||
+                    if (petal && petal._clearAllSummons) {
+                        petal._clearAllSummons();
+                        petal.eggSpawned = false;
+                    }
+
+                    const isTransformedMimic = (petal && petal._isTransformedMimic) ||
                         (item._isTransformedMimic) ||
                         (item.type !== "Mimic" && (petal?._originalMimicData || item._originalMimicData));
 
                     if (isTransformedMimic) {
-                        console.log(`⚠️ 槽位 ${i} 是变形的 Mimic (当前: ${item.type})，先恢复再移走`);
-
-                        // 查找原始数据
                         let originalData = petal?._originalMimicData || item._originalMimicData;
-
                         if (originalData) {
-                            // 恢复为原始 Mimic
                             item.type = originalData.type;
                             item.rarity = originalData.rarity;
                             item.level = originalData.level;
@@ -8873,12 +8850,9 @@ class QuickSlot {
                             item.reloadTime = originalData.reloadTime;
                             item.baseReloadTime = originalData.baseReloadTime;
                             item.armor = originalData.armor;
-
-                            console.log(`✅ 恢复为: ${item.type}`);
                         }
                     }
 
-                    // 创建物品副本放回背包
                     const newItem = new Item(item.type, item.level, item.rarity);
                     newItem.count = item.count;
                     newItem.durability = item.durability;
@@ -8892,7 +8866,6 @@ class QuickSlot {
                         this.player.inventory.addItem(newItem);
                     }
 
-                    // 清除所有 Mimic 相关标记
                     if (petal) {
                         petal._isTransformedMimic = false;
                         petal._originalMimicData = null;
@@ -8902,16 +8875,12 @@ class QuickSlot {
                         item._originalMimicData = null;
                     }
 
-                    // 清空主栏槽位
                     this.slots[i] = null;
                     this.resetPetalFromSlot(i);
-
-                    console.log(`📦 主栏槽位 ${i} 物品已移回背包`);
                 }
                 return true;
             }
         }
-
         return false;
     }
 
@@ -8920,8 +8889,6 @@ class QuickSlot {
         return x >= rx && x <= rx + rw && y >= ry && y <= ry + rh;
     }
 }
-
-
 // ==================== 简化的背包系统 ====================
 class Inventory {
     constructor(quickSlot) {
@@ -22992,7 +22959,7 @@ class ShopSystem {
                       "FireAntOvermind egg","FireAntHole egg"],
             "Ocean": ["Pearl","Coral","Shell","Jelly","Salt","Starfish egg","Bubble egg",
                       "Crab egg","Jellyfish egg","CrabHole egg","Squid egg","Shipwreck egg",
-                      "Barnacle egg","Leech Egg","Parasite Egg","Shell egg"],
+                      "Barnacle egg","Leech Egg","Parasite Egg","Shell egg","Trident"],
             "Sewer": ["Poo","PooStick","Rubber","Slime","ManHole egg","Fly_egg","Rat_egg",
                       "Roach_egg","Trashcan egg"],
             "Jungle":["Wasp egg","Worker Termite egg","Soldier Termite egg","StickBug egg",
@@ -23049,7 +23016,7 @@ class ShopSystem {
             "Wasp egg":12,"Worker Termite egg":15,"Soldier Termite egg":18,
             "StickBug egg":12,"Mantis egg":15,"Firefly egg":13,"TermiteHole egg":40,
             "TermiteOvermind egg":35,"SpiderCave egg":40,"Beetle egg":15,"Scorpion egg":10,
-            "Ladybug egg":12,"Bee egg":12,"Hive egg":45,"Queen Bee egg":40,
+            "Ladybug egg":12,"Bee egg":12,"Hive egg":45,"Queen Bee egg":40,"Trident":160,
             "Centipede egg":15,"Soldier Ant egg":12,"Worker Ant egg":10,
             "Shell egg":22,"Starfish egg":15,"Bubble egg":10,"Crab egg":18,
             "Jellyfish egg":18,"CrabHole egg":40,"Squid egg":15,"Shipwreck egg":42,
@@ -30726,6 +30693,7 @@ class Enemy {
                 this.hostTarget = null;
             }
         }
+
         // 非多节生物走原来的逻辑
         this.physicsBody.update(dt);
         this.clampPosition();
@@ -30952,7 +30920,7 @@ class Enemy {
         const strength = baseStrength * rarityMultiplier * forceScale;
 
         // 范围也随视野缩放：视野放大时范围变小（因为看到的范围变大了）
-        const maxRadius = 300 * Math.sqrt(rarityMultiplier) * viewScale;
+        const maxRadius = 300 * Math.sqrt(rarityMultiplier);
 
         const myPos = this.physicsBody.position;
 
@@ -30976,7 +30944,7 @@ class Enemy {
                     : (enemy.isFriendly === true);
 
                 if (shouldAttract) {
-                    this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, safeDt);
+                    this.applyForceToTarget(enemy.physicsBody, myPos, strength * 1.2, maxRadius, safeDt);
                 }
             }
         }
@@ -30995,7 +30963,7 @@ class Enemy {
                 if (enemy.isDead) continue;
                 if (!enemy.physicsBody) continue;
 
-                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, safeDt);
+                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 1.0, maxRadius, safeDt);
             }
         }
     }
@@ -31047,9 +31015,9 @@ class Enemy {
         // ✅ 修复：视野放大时力减弱
         const forceScale = viewScale;
 
-        const baseStrength = 80;
+        const baseStrength = 200;
         const strength = baseStrength * rarityMultiplier * forceScale;
-        const maxRadius = 250 * Math.sqrt(rarityMultiplier) * viewScale;
+        const maxRadius = 250 * Math.sqrt(rarityMultiplier);
 
         const myPos = this.physicsBody.position;
         const isFriendlyUFO = this.isFriendly === true;
@@ -31072,7 +31040,7 @@ class Enemy {
                 : (enemy.isFriendly === true);
 
             if (shouldAttract) {
-                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.5, maxRadius, dt);
+                this.applyForceToTarget(enemy.physicsBody, myPos, strength * 0.7, maxRadius, dt);
             }
         }
     }
@@ -32346,44 +32314,26 @@ class Petal {
             console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
         }
     }
-// 在 Petal.js 或 tryBreakBubble 中修改
-    tryBreakBubble(dt) {
-        const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Bubble" || this.isBroken || this.isReloading) return;
+// 在 Petal 类中修改 tryBreakBubble 方法
+tryBreakBubble(dt) {
+    const currentItem = this.getCurrentItem();
+    if (!currentItem || currentItem.type !== "Bubble" || this.isBroken || this.isReloading) return;
 
-        if (this.player && this.player.contractMode) {
-            if (this._breakingThisFrame) return;
-            this._breakingThisFrame = true;
-            setTimeout(() => { this._breakingThisFrame = false; }, 100); // 冷却
+    if (this.player && this.player.contractMode) {
+        if (this._breakingThisFrame) return;
+        this._breakingThisFrame = true;
+        setTimeout(() => { this._breakingThisFrame = false; }, 100);
 
-            const dx = this.worldX - this.player.physicsBody.position.x;
-            const dy = this.worldY - this.player.physicsBody.position.y;
-            const dist = Math.hypot(dx, dy);
+        // ✅ 调用触发方法
+        this._triggerBubbleBreak(currentItem);
 
-            if (dist > 0.01) {
-                const dirX = -dx / dist;
-                const dirY = -dy / dist;
-
-                // ✅ 改为给物理身体一个“初速度”，力度根据稀有度决定
-                const rarityMult = RARITY_MULTIPLIERS[currentItem.rarity] || 1;
-                const pushForce = 50 + Math.log(rarityMult) * 15;
-
-                // 1. 设置物理速度
-                this.player.physicsBody.velocity.x = dirX * pushForce;
-                this.player.physicsBody.velocity.y = dirY * pushForce;
-
-                // 2. 核心：标记玩家正在“反弹状态”，禁用手动移动干扰
-                this.player.isBouncing = true;
-                this.player.bounceCooldown = 1000; // 持续 0.25 秒的物理滑行
-            }
-
-            // 破碎并重载
-            this.health = 0;
-            this.durability = 0;
-            this.isBroken = true;
-            this.startReload();
-        }
+        // 破碎并重载
+        this.health = 0;
+        this.durability = 0;
+        this.isBroken = true;
+        this.startReload();
     }
+}
 
     // 提取公共的破碎状态变更
     executeBreakEffect() {
@@ -32392,13 +32342,13 @@ class Petal {
         this.isBroken = true;
         this.startReload();
     }
+// 在 Petal 类中修改 _triggerBubbleBreak 方法
     _triggerBubbleBreak(item) {
         if (!this.player?.gameInstance) return;
         const mult = RARITY_MULTIPLIERS[item.rarity] || 1;
 
-        // 降低基础力度，增加可控性
-        const basePush = 200;
-        const pushForce = basePush * mult;
+        const basePush = 500;
+        const pushForce = basePush * Math.min(2.0, mult);
 
         const dx = this.worldX - this.player.physicsBody.position.x;
         const dy = this.worldY - this.player.physicsBody.position.y;
@@ -32414,15 +32364,13 @@ class Petal {
             vy = Math.sin(angle) * pushForce;
         }
 
-        // ✅ 使用 ApplyForce 或直接设置速度，而不是减去一个巨大的数字
-        // 这样物理引擎会自动处理“撞墙后停止”
-        this.player.physicsBody.velocity.x = vx;
-        this.player.physicsBody.velocity.y = vy;
+        // ✅ 调用 Player 的 applyBubbleForce 方法
+        this.player.applyBubbleForce(vx, vy);
 
-        this.player.isBouncing = true;
-        // 关键：给一个摩擦力大的状态，让玩家慢慢停下，而不是永远滑行
-        setTimeout(() => { this.player.isBouncing = false; }, 400);
-
+        // 显示特效
+        if (this.player.gameInstance?.addDamageNumber) {
+            this.player.gameInstance.addDamageNumber(this.worldX, this.worldY, "💨", "heal");
+        }
     }
     // 在 Petal 类中添加
     applyFlameToEnemy(enemy, baseDamage = null, duration = null, initialMultiplier = null, rampUpMultiplier = null) {
@@ -32617,55 +32565,60 @@ class Petal {
         }
         return null;
     }
-
+ static SUMMON_LISTS = [
+        'goldenAntList', 'rockList', 'sandstormList', 'whiteBloodCellList',
+        'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
+        'beeList', 'ladybugList', 'beetleList', 'scorpionList',
+        'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
+        'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
+        'scallopList', 'starfishList', 'bubbleList', 'crabList',
+        'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
+        'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
+        'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
+        'virusList', 'squareList', 'helWormList', 'helSpiderList',
+        'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
+        'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
+        'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
+        'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
+        'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
+        'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
+        'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
+        'workerAntList', 'centipedeList', 'termiteSoldierList',
+        'waspList', 'stickBugList', 'mantisList', 'fireflyList',
+        'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
+        'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList',
+        'photonList', 'electronList', 'electronCloudList', 'protonList',
+        'atomList', 'blackHoleList', 'whiteHoleList', 'neutronStarList',
+        'starList', 'asteroidList', 'alienList', 'ufoAlienList',
+        'graveGhostList', 'ghostList', 'graveDiggerList', 'alienDiggerList',
+        'mudDiggerList'  // 添加泥浆挖掘者
+    ];
     _clearAllSummons() {
-        // 清除所有召唤物列表
-        const summonLists = [
-            'goldenAntList', 'rockList', 'sandstormList', 'whiteBloodCellList',
-            'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
-            'beeList', 'ladybugList', 'beetleList', 'scorpionList',
-            'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
-            'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
-            'scallopList', 'starfishList', 'bubbleList', 'crabList',
-            'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
-            'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
-            'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
-            'virusList', 'squareList', 'helWormList', 'helSpiderList',
-            'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
-            'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
-            'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
-            'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
-            'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
-            'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
-            'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
-            'workerAntList', 'centipedeList', 'termiteSoldierList',
-            'waspList', 'stickBugList', 'mantisList', 'fireflyList',
-            'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
-            'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList','MudDigger List'
-        ];
-
         const gameEnemies = this.player?.gameInstance?.enemies;
         if (!gameEnemies) return;
 
         let removedCount = 0;
 
-        for (const listName of summonLists) {
+        // ✅ 使用静态属性中的列表
+        for (const listName of Petal.SUMMON_LISTS) {
             if (this[listName] && Array.isArray(this[listName])) {
-                for (const summon of this[listName]) {
+                const summonList = this[listName];
+                for (const summon of summonList) {
                     if (summon && !summon.isDead) {
                         const index = gameEnemies.indexOf(summon);
                         if (index !== -1) {
-                            // 标记为死亡并从游戏中移除
                             summon.isDead = true;
                             gameEnemies.splice(index, 1);
                             removedCount++;
                         }
                     }
                 }
-                // 清空列表
                 this[listName] = [];
             }
         }
+
+        this.eggSpawned = false;
+        this.spawnCooldown = 0;
 
         if (removedCount > 0) {
             console.log(`🗑️ 清除 ${removedCount} 个旧召唤物`);
@@ -32958,8 +32911,15 @@ class Petal {
                 this.attackCooldownMax = stats.attack_cooldown || 200;
                 this.color = stats.rarity_color || WHITE;
                 const rarityIndex = RARITY_LIST.indexOf(this.rarity);
-                this.size = 20;  // 固定大小，所有稀有度一样
-
+                if (item.type === "Trident") {
+                    this.size = 45;
+                    this.tridentWidth = 20 * 1.5;   // 宽度 30
+                    this.tridentHeight = 20 * 2.5;  // 高度 50
+                } else {
+                    this.size = 20;
+                    this.tridentWidth = null;
+                    this.tridentHeight = null;
+                }
                 if (item.durability !== undefined && item.maxDurability !== undefined) {
                     this.durability = item.durability;
                     this.maxDurability = item.maxDurability;
@@ -34673,6 +34633,7 @@ class Petal {
             const scale = 1 - this.absorbProgress * 0.5;
             const scaledSize = this.size * viewScale * 2.5 * scale;
             const currentItem = this.getCurrentItem();
+
             if (currentItem) {
                 const itemImg = window.imageLoader?.getImage(currentItem.type, currentItem.rarity, [scaledSize, scaledSize]);
                 if (itemImg) {
@@ -35668,7 +35629,7 @@ class Player {
             this.baseMaxHealth = this.levelSystem.getHpForLevel(this.levelSystem.level);
             this.maxHealth = this.baseMaxHealth;
             this._health = this.maxHealth;
-            this.petalCount = 10;
+            this.petalCount = 5;
             this.isAngry = false;
             this.baseSpeed = 80;
             this.speed = this.baseSpeed;
@@ -35698,7 +35659,7 @@ class Player {
             this._lastWorldPos = new Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
             this.thirdEyeItem = null;
             this.thirdEyeRangeBonus = 0;
-
+            this.impulseVelocity = new Vector2(0, 0);
             this.petals = [];
             for (let i = 0; i < this.petalCount; i++) {
                 // 传入正确的总花瓣数
@@ -35798,20 +35759,45 @@ class Player {
             this.isDead = true;
         }
     }
+    // 在 Player 类中添加方法
+    // 在 Player 类中修改
+    getExtraSlotCount() {
+        const level = this.levelSystem.level;
 
-    // 修改 applyBounce
-    applyBounce(bounceDirection, bounceSpeed = 25) {
-        if (this.isDead || this.isBouncing) return;
+        // 基础槽位 5 个
+        // 每 20 级增加 1 个槽位
+        // 20级: +1 (共6), 40级: +2 (共7), 60级: +3 (共8), 80级: +4 (共9), 100级: +5 (共10)
+        // 120级: +6 (共11), 140级: +7 (共12), 160级: +8 (共13), 180级: +9 (共14), 200级: +10 (共15)
+        if (level < 20) return 0;
+        if (level < 40) return 1;
+        if (level < 60) return 2;
+        if (level < 80) return 3;
+        if (level < 100) return 4;
+        if (level < 120) return 5;
+        if (level < 140) return 6;
+        if (level < 160) return 7;
+        if (level < 180) return 8;
+        if (level < 200) return 9;
+        return 10; // 200级以上最多 +10 槽位
+    }
+
+    // 获取当前总槽位数（基础5 + 额外）
+    getTotalSlotCount() {
+        return 5 + this.getExtraSlotCount();
+    }
+
+    applyBounce(bounceDirection, bounceSpeed = 400) {
+        if (this.isDead) return;
 
         this.isBouncing = true;
         this.bounceCooldown = 200;
 
         const normalizedDirection = bounceDirection.normalize();
-        this.physicsBody.velocity = new Vector2(
-            normalizedDirection.x * bounceSpeed,
-            normalizedDirection.y * bounceSpeed
-        );
-        this.speed = 0;
+        // ✅ 只写冲量，不动 speed，不动 physicsBody.velocity
+        this.impulseVelocity.x += normalizedDirection.x * bounceSpeed;
+        this.impulseVelocity.y += normalizedDirection.y * bounceSpeed;
+        // ✅ 确保 speed 保持正常值
+        if (this.speed <= 0) this.speed = this.baseSpeed;
     }
     getTotalRotationSpeedBonus() {
         let totalBonus = 0;
@@ -35934,15 +35920,13 @@ class Player {
         let compassPetal = null;
         const normalPetals = [];
 
-        // 1. 分类花瓣（排除 ThirdEye 和 Antennae）
+        // 1. 分类花瓣
         for (let i = 0; i < this.petals.length; i++) {
             const petal = this.petals[i];
             if (!petal) continue;
             const item = petal.getCurrentItem();
 
-            // ThirdEye 和 Antennae 不参与排列（固定在玩家身上）
             if (item && (item.type === "ThirdEye" || item.type === "Antennae")) {
-                // 这些物品固定在玩家中心，半径设为 0
                 petal.angle = 0;
                 petal.radius = 0;
                 petal.screenX = WIDTH / 2;
@@ -35967,11 +35951,25 @@ class Player {
         const mouseY = this.mousePosition?.y || HEIGHT / 2;
         const mouseAngle = Math.atan2(mouseY - HEIGHT / 2, mouseX - WIDTH / 2);
 
+        // 3. 获取 Compass 的攻击范围减少比例
+        const item = compassPetal.getCurrentItem();
+        const reduction = ITEM_STATS["Compass"]?.attack_range_reduction?.[item?.rarity] || 0;
+
+        // ✅ 半径范围：28px（最小贴边）到 45px（最大）
+        const MIN_RADIUS = 28;
+        const MAX_RADIUS = 60;
+        const radiusRange = MAX_RADIUS - MIN_RADIUS;  // 17px
+
+        // ✅ 根据 reduction 线性插值：reduction 越大，半径越小
+        // reduction = 0.9 时 radius = MIN_RADIUS
+        // reduction = 0.0 时 radius = MAX_RADIUS
+        const finalRadius = MAX_RADIUS - (radiusRange * reduction);
+
         compassPetal.compassAngle = mouseAngle + Math.PI;
         compassPetal.angle = compassPetal.compassAngle;
-        compassPetal.radius = 40;
+        compassPetal.radius = finalRadius;
 
-        // 3. 计算其他花瓣排列
+        // 4. 计算其他花瓣排列
         const n = normalPetals.length;
         if (n > 0) {
             const angleStep = (Math.PI * 2) / (n + 1);
@@ -35980,7 +35978,7 @@ class Player {
             for (let i = 0; i < n; i++) {
                 const petal = normalPetals[i];
                 petal.angle = baseAngle + (i + 1) * angleStep;
-                petal.radius = 45;
+                petal.radius = finalRadius;
             }
         }
     }
@@ -36008,6 +36006,39 @@ class Player {
 
         if (needsSync) {
             this.recalculatePetalAngles();
+        }
+    }
+    // 在 Player 类中修改
+    syncPetalsWithSlotCount() {
+        const targetCount = this.getTotalSlotCount();
+
+        if (this.petalCount !== targetCount) {
+            const oldCount = this.petalCount;
+            this.petalCount = targetCount;
+
+            // 重新创建花瓣数组
+            const newPetals = [];
+            for (let i = 0; i < targetCount; i++) {
+                if (i < this.petals.length) {
+                    // 复用旧花瓣
+                    const petal = this.petals[i];
+                    petal._petalIndex = i;
+                    petal.totalPetals = targetCount;
+                    newPetals.push(petal);
+                } else {
+                    // 创建新花瓣
+                    const newPetal = new Petal(this, i, targetCount);
+                    // 从快捷栏同步物品
+                    if (i < this.quickSlot.slots.length && this.quickSlot.slots[i]) {
+                        newPetal.updateFromQuickSlot(i);
+                    }
+                    newPetals.push(newPetal);
+                }
+            }
+            this.petals = newPetals;
+            this.recalculatePetalAngles();
+
+            console.log(`✨ 槽位数量更新: ${oldCount} → ${targetCount} (等级 ${this.levelSystem.level})`);
         }
     }
     updateStatsFromPetals() {
@@ -36243,60 +36274,41 @@ class Player {
 
     moveTowardsMouse(dt, cameraOffset) {
         if (this.isDead) return;
+        // ✅ 删掉原来 isBouncing 的提前返回或速度限制，直接走正常逻辑
+        this._applyMouseMovement(dt, 1.0);
+    }
 
-        // 记录移动前的世界位置
-        const oldWorldX = this.physicsBody.position.x;
-        const oldWorldY = this.physicsBody.position.y;
-
-        // 如果正在反弹/被击退，不要手动设置坐标，让物理引擎自己滑行
-        if (this.isBouncing) {
-            this.keepInBounds();
-            return;
-        }
-
-        // 计算相对于屏幕中心的鼠标位置
+    // 提取移动逻辑为单独方法
+    _applyMouseMovement(dt, speedMult) {
         const screenCenterX = WIDTH / 2;
         const screenCenterY = HEIGHT / 2;
 
         let dx = this.mousePosition.x - screenCenterX;
         let dy = this.mousePosition.y - screenCenterY;
         const deadZone = 30;
+
         if (Math.abs(dx) < deadZone && Math.abs(dy) < deadZone) {
             return;
         }
 
-        // 计算移动向量
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance > 0) {
             const normDx = dx / distance;
             const normDy = dy / distance;
-            let speedMult = this.getSpeedMultiplier();
+            let moveSpeed = this.speed * speedMult;
 
             // 应用减速效果
             if (this.slowMultiplier < 1.0) {
-                speedMult *= this.slowMultiplier;
-            }
-
-            // 磁铁减速
-            let hasMagnet = false;
-            for (const petal of this.petals) {
-                if (petal.itemType === "Magnet" && !petal.isBroken && !petal.isReloading) {
-                    hasMagnet = true;
-                    break;
-                }
-            }
-            if (hasMagnet) {
-                speedMult *= 0.9;
+                moveSpeed *= this.slowMultiplier;
             }
 
             const distanceFactor = Math.min(2.0, distance / 100.0);
-            const moveSpeed = this.speed * speedMult * distanceFactor * dt;
+            const finalSpeed = moveSpeed * distanceFactor * dt;
 
-            // 计算预期新位置
-            const nextX = this.physicsBody.position.x + normDx * moveSpeed;
-            const nextY = this.physicsBody.position.y + normDy * moveSpeed;
+            const nextX = this.physicsBody.position.x + normDx * finalSpeed;
+            const nextY = this.physicsBody.position.y + normDy * finalSpeed;
 
-            // 检查迷宫碰撞
+            // 迷宫碰撞检测
             if (this.gameInstance && typeof this.gameInstance.isInMazeWall === 'function') {
                 if (!this.gameInstance.isInMazeWall(nextX, nextY)) {
                     this.physicsBody.position.x = nextX;
@@ -36307,18 +36319,15 @@ class Player {
                 this.physicsBody.position.y = nextY;
             }
 
-            // 边界限制
             this.keepInBounds();
-
-            // 更新朝向角度
             this.facingAngle = Math.atan2(normDy, normDx);
         }
-
-        // 保存当前世界位置
-        this._lastWorldPos.x = this.physicsBody.position.x;
-        this._lastWorldPos.y = this.physicsBody.position.y;
     }
-
+    applyBubbleForce(forceX, forceY) {
+        // ✅ 添加到冲量向量，而不是直接加到 physicsBody.velocity
+        this.impulseVelocity.x += forceX;
+        this.impulseVelocity.y += forceY;
+    }
     // 专门处理边界，防止瞬移到 (0,0)
     keepInBounds() {
         const r = this.physicsBody.radius;
@@ -36396,43 +36405,39 @@ class Player {
             }
         }
 
-        // ===== ✅ 核心逻辑：处理 Bubble 破碎后的物理反弹/冲刺 =====
-        if (this.isBouncing) {
-            // 1. 倒计时
-            this.bounceCooldown -= dt * 1000;
 
-            // 2. 模拟物理位移
-            const friction = 0.45;
-            this.physicsBody.velocity.x *= friction;
-            this.physicsBody.velocity.y *= friction;
+    this.moveTowardsMouse(dt, cameraOffset);  // 始终执行
+// 处理冲量衰减（独立于鼠标移动）
+    if (this.impulseVelocity.x !== 0 || this.impulseVelocity.y !== 0) {
+        // ✅ 乘以 dt 使位移帧率无关（dt≈0.016，impulse=25 → 每帧约 0.4px，太小）
+        // 所以 applyBounce 里 bounceSpeed 要调大，建议改为 400
+        this.physicsBody.position.x += this.impulseVelocity.x * dt;
+        this.physicsBody.position.y += this.impulseVelocity.y * dt;
 
-            this.physicsBody.position.x += this.physicsBody.velocity.x;
-            this.physicsBody.position.y += this.physicsBody.velocity.y;
+        // 摩擦衰减（每帧乘以 0.88，约0.4s停止）
+        const friction = Math.pow(0.88, dt * 60); // 帧率无关的衰减
+        this.impulseVelocity.x *= friction;
+        this.impulseVelocity.y *= friction;
 
-            // 3. 边界检查
-            const r = this.physicsBody.radius || 20;
-            this.physicsBody.position.x = Math.max(r, Math.min(WORLD_WIDTH - r, this.physicsBody.position.x));
-            this.physicsBody.position.y = Math.max(r, Math.min(WORLD_HEIGHT - r, this.physicsBody.position.y));
+        // 边界
+        const r = this.physicsBody.radius;
+        this.physicsBody.position.x = Math.max(r, Math.min(WORLD_WIDTH - r, this.physicsBody.position.x));
+        this.physicsBody.position.y = Math.max(r, Math.min(WORLD_HEIGHT - r, this.physicsBody.position.y));
 
-            // 4. 状态恢复
-            if (this.bounceCooldown <= 0) {
-                this.isBouncing = false;
-                this.bounceCooldown = 0;
-                this.physicsBody.velocity.x = 0;
-                this.physicsBody.velocity.y = 0;
-                this.speed = this.baseSpeed;
-            }
-
-            // 检查血量
-            if (this._health <= 0) {
-                this._health = 0;
-                this.isDead = true;
-                this.spongeDamageQueue = [];
-                return;
-            }
-        } else {
-            this.moveTowardsMouse(dt, cameraOffset);
+        if (Math.abs(this.impulseVelocity.x) < 0.5 && Math.abs(this.impulseVelocity.y) < 0.5) {
+            this.impulseVelocity.x = 0;
+            this.impulseVelocity.y = 0;
+            this.isBouncing = false;
         }
+    }
+
+    if (this.isBouncing) {
+        this.bounceCooldown -= dt * 1000;
+        if (this.bounceCooldown <= 0) {
+            this.isBouncing = false;
+            this.bounceCooldown = 0;
+        }
+    }
 
         // ===== ✅ 更新毒伤和火焰系统 =====
         if (this.gameInstance) {
@@ -36468,7 +36473,14 @@ class Player {
         if (this.statusBar) {
             this.statusBar.update(dt);
         }
-
+        if (this.quickSlot && this.levelSystem) {
+            const expectedCount = this.getTotalSlotCount();
+            if (this.quickSlot.slots.length !== expectedCount) {
+                this.quickSlot.updateSlotCount();
+                // 重新初始化花瓣数量
+                this.syncPetalsWithSlotCount();
+            }
+        }
         // === 检查是否持有 DNA ===
         const hasDna = this.petals.some(petal => {
             const currentItem = petal.getCurrentItem();
@@ -36488,7 +36500,7 @@ class Player {
 
             const worldPos = this.getWorldPosition();
 
-            // 召唤逻辑...
+            // 召唤逻辑
             if (petal.itemType === "Ant Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnGoldenAnts(this.gameInstance.enemies, worldPos, hasDna);
             } else if (petal.itemType === "Egg" && petal.spawnCooldown <= 0) {
@@ -36979,7 +36991,16 @@ class Player {
 
             // 恢复满血
             this._health = this.maxHealth;
+            const newExtraSlots = this.getExtraSlotCount();
+            const oldExtraSlots = this.getExtraSlotCount() - 1; // 粗略计算
 
+            if (newExtraSlots > oldExtraSlots) {
+                console.log(`🎉 等级 ${this.levelSystem.level}！获得 +1 快捷栏槽位！`);
+                if (this.quickSlot) {
+                    this.quickSlot.updateSlotCount();
+                }
+                this.syncPetalsWithSlotCount();
+            }
             // 调试输出升级信息
             if (this.debugMode) {
                 console.log(`🎉 升级到 ${this.levelSystem.level} 级！`);
@@ -38669,6 +38690,7 @@ class MainMenu {
             const panelY = (this.HEIGHT - panelH) / 2;  // 垂直居中
 
             this.loadoutPanelRect = [panelX, panelY, panelW, panelH];
+             this._saveBtnRect = [panelX + panelW - 120, panelY + 16, 100, 32];
         } else {
             // 默认位置
             const btnW = 70;
@@ -38968,58 +38990,85 @@ class MainMenu {
     }
 
     handleLoadoutClick(pos) {
+        // 确保按钮位置是最新的
         this._recalcLoadoutButtonRect();
-        if (this.isPointInRect(pos, this.loadoutButton)) {
-            this.loadoutPanelOpen = !this.loadoutPanelOpen;
-            return 'loadout_toggle';
-        }
-        if (!this.loadoutPanelOpen) return null;
 
-        if (this._saveBtnRect && this.isPointInRect(pos, this._saveBtnRect)) {
-            this.loadouts.push({
-                name: `Unnamed ${this.loadouts.length + 1}`,
-                active: false,
-                slots: this._snapshotCurrentSlots()
-            });
-            this.saveLoadouts();
-            this._loadoutScrollIdx = Math.max(0, this.loadouts.length - 4);
-            return 'loadout_saved';
-        }
+        // ========== 1. 检查 Loadout 面板内的点击（如果面板打开）==========
+        if (this.loadoutPanelOpen && this.loadoutPanelRect) {
+            const [px, py, pw, ph] = this.loadoutPanelRect;
 
-        if (this._scrollUpRect && this.isPointInRect(pos, this._scrollUpRect)) {
-            this._loadoutScrollIdx = Math.max(0, this._loadoutScrollIdx - 1);
-            return 'loadout_scroll';
-        }
-        if (this._scrollDownRect && this.isPointInRect(pos, this._scrollDownRect)) {
-            this._loadoutScrollIdx = Math.min(
-                Math.max(0, this.loadouts.length - 4),
-                this._loadoutScrollIdx + 1
-            );
-            return 'loadout_scroll';
-        }
+            // 如果点击在面板区域内
+            if (this.isPointInRect(pos, [px, py, pw, ph])) {
 
-        for (const item of (this._loadoutItemRects || [])) {
-            if (!item.key) continue;
-            if (this.isPointInRect(pos, item.rect)) {
-                if (item.key === 'update') {
-                    this.loadouts[item.idx].slots = this._snapshotCurrentSlots();
+                // 1.1 检查保存按钮
+                if (this._saveBtnRect && this.isPointInRect(pos, this._saveBtnRect)) {
+                    const newLoadout = {
+                        name: `Unnamed ${this.loadouts.length + 1}`,
+                        active: false,
+                        slots: this._snapshotCurrentSlots()
+                    };
+                    this.loadouts.push(newLoadout);
                     this.saveLoadouts();
-                    return 'loadout_updated';
+                    // 滚动到最新
+                    const maxVisible = 4;
+                    this._loadoutScrollIdx = Math.max(0, this.loadouts.length - maxVisible);
+                    console.log(`✅ 保存 Loadout ${this.loadouts.length}`);
+                    return 'loadout_saved';
                 }
-                if (item.key === 'load') {
-                    this.loadouts.forEach((l, i) => l.active = i === item.idx);
-                    this.saveLoadouts();
-                    this._applyLoadout(this.loadouts[item.idx]);
-                    this._pendingLoadout = this.loadouts[item.idx];
-                    return 'loadout_loaded';
+
+                // 1.2 检查滚动按钮
+                if (this._scrollUpRect && this.isPointInRect(pos, this._scrollUpRect)) {
+                    this._loadoutScrollIdx = Math.max(0, this._loadoutScrollIdx - 1);
+                    return 'loadout_scroll';
                 }
-                if (item.key === 'del') {
-                    this.loadouts.splice(item.idx, 1);
-                    this.saveLoadouts();
-                    return 'loadout_deleted';
+                if (this._scrollDownRect && this.isPointInRect(pos, this._scrollDownRect)) {
+                    const maxVisible = 4;
+                    this._loadoutScrollIdx = Math.min(
+                        Math.max(0, this.loadouts.length - maxVisible),
+                        this._loadoutScrollIdx + 1
+                    );
+                    return 'loadout_scroll';
                 }
+
+                // 1.3 检查列表项中的按钮（Update/Load/Delete）
+                for (const item of (this._loadoutItemRects || [])) {
+                    if (!item.key) continue;
+                    if (this.isPointInRect(pos, item.rect)) {
+                        if (item.key === 'update') {
+                            this.loadouts[item.idx].slots = this._snapshotCurrentSlots();
+                            this.saveLoadouts();
+                            console.log(`✅ 更新 Loadout ${item.idx + 1}`);
+                            return 'loadout_updated';
+                        }
+                        if (item.key === 'load') {
+                            this.loadouts.forEach((l, i) => l.active = i === item.idx);
+                            this.saveLoadouts();
+                            this._applyLoadout(this.loadouts[item.idx]);
+                            this._pendingLoadout = this.loadouts[item.idx];
+                            console.log(`✅ 加载 Loadout ${item.idx + 1}`);
+                            return 'loadout_loaded';
+                        }
+                        if (item.key === 'del') {
+                            this.loadouts.splice(item.idx, 1);
+                            this.saveLoadouts();
+                            console.log(`✅ 删除 Loadout ${item.idx + 1}`);
+                            return 'loadout_deleted';
+                        }
+                    }
+                }
+
+                // 1.4 点击在面板空白区域，消耗点击，不穿透
+                return 'loadout_panel_click';
             }
         }
+
+        // ========== 2. 检查 Loadout 入口按钮 ==========
+        if (this.loadoutButton && this.isPointInRect(pos, this.loadoutButton)) {
+            this.loadoutPanelOpen = !this.loadoutPanelOpen;
+            console.log(`Loadout 面板状态: ${this.loadoutPanelOpen ? '打开' : '关闭'}`);
+            return 'loadout_toggle';
+        }
+
         return null;
     }
 
@@ -39164,6 +39213,13 @@ class MainMenu {
             const result = game.talentSystem.handleClick(pos);
             if (result) return result;
         }
+
+        // ========== ✅ 优先处理 Loadout 面板（包括入口按钮和面板内点击）==========
+        const loadoutResult = this.handleLoadoutClick(pos);
+        if (loadoutResult) return loadoutResult;
+
+        // ========== 以下代码只在 Loadout 没有处理时才执行 ==========
+
         // Bonus panel 按钮点击
         if (this._bonusClaimRect && this.isPointInRect(pos, this._bonusClaimRect)) {
             const ok = this.bonusSystem?.claimBonus?.();
@@ -39175,6 +39231,7 @@ class MainMenu {
             if (extraActive) { this.refreshBonus(); return "extra_bonus_refreshed"; }
             else { this.showBonusTooltip = !this.showBonusTooltip; return "extra_bonus_tooltip"; }
         }
+
         // ========== 优先检查图鉴按钮 ==========
         if (this.isPointInRect(pos, this.mobGalleryButton)) {
             if (window.gameInstance && window.gameInstance.mobGallery) {
@@ -39182,11 +39239,7 @@ class MainMenu {
             }
             return "mob_gallery";
         }
-        // ========== Loadout 按钮点击检测 ==========
-        if (this.loadoutButton && this.isPointInRect(pos, this.loadoutButton)) {
-            this.loadoutPanelOpen = !this.loadoutPanelOpen;
-            return "loadout_toggle";
-        }
+
         // 检查设置按钮
         if (this.isPointInRect(pos, this.settingsButton)) {
             this.settingsPanelOpen = !this.settingsPanelOpen;
@@ -39253,9 +39306,6 @@ class MainMenu {
                 return "hunting_quest_panel_click";
             }
         }
-
-        const loadoutResult = this.handleLoadoutClick(pos);
-        if (loadoutResult) return loadoutResult;
 
         const currentTime = Date.now();
         this.lastClickTime = currentTime;
@@ -41874,14 +41924,6 @@ class WorldMapGame {
         this.dt = Math.min(0.1, (currentTime - (this.lastUpdateTime || currentTime)) / 1000.0);
         this.lastUpdateTime = currentTime;
 
-        // 更新玩家反弹状态
-        if (this.player.isBouncing) {
-            this.player.bounceCooldown -= this.dt * 1000;
-            if (this.player.bounceCooldown <= 0) {
-                this.player.isBouncing = false;
-                this.player.speed = 150;
-            }
-        }
 
         // 更新玩家属性（从花瓣获取加成）
         this.player.updateStatsFromPetals();
@@ -42257,7 +42299,7 @@ class WorldMapGame {
                         }
                     }
                 }
-
+                resolvePetalEnemyCollisions(this.player.petals, this.enemies, this.viewScale || 1);
                 // 清除死亡的敌人
                 for (const deadEnemy of enemiesToRemove) {
                     const index = this.enemies.indexOf(deadEnemy);
@@ -42816,6 +42858,7 @@ class WorldMapGame {
 
                 if (aliveHostileEnemies.length > 0) {
                     const [hitEnemies, totalDamage, totalHeal] = this.player.attack(aliveHostileEnemies);
+                    resolvePetalEnemyCollisions(this.player.petals, this.enemies, this.viewScale || 1);
                     for (const hitEnemy of hitEnemies) {
                         if (hitEnemy.health <= 0 && !hitEnemy.isDead) {
                             hitEnemy.markAsDead();
@@ -42829,6 +42872,7 @@ class WorldMapGame {
                         }
                     }
                 }
+
             }
 
             // 清除死亡的敌人
@@ -43102,15 +43146,6 @@ class WorldMapGame {
         const currentTime = Date.now();
         this.dt = Math.min(0.1, (currentTime - (this.lastUpdateTime || currentTime)) / 1000.0);
         this.lastUpdateTime = currentTime;
-
-        // 更新玩家反弹状态
-        if (this.player.isBouncing) {
-            this.player.bounceCooldown -= this.dt * 1000;
-            if (this.player.bounceCooldown <= 0) {
-                this.player.isBouncing = false;
-                this.player.speed = 150;
-            }
-        }
 
         // 首先更新玩家属性（从花瓣获取加成）
         this.player.updateStatsFromPetals();
