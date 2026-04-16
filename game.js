@@ -4,7 +4,7 @@ export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //后期会增加wave room ---无尽波次，每波敌人增强，每10波生成一次特殊波次（单一生物）。wave room只有常规地图，但是更快刷新速度而且敌方生物血量减少10%，但是玩家在一个2000*2000的空间里面
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
-//后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton egg+ 1 charge组成1 electronCloud egg...
+//后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton Egg+ 1 charge组成1 Electron Cloud Egg...
 //可能增加新地图error：所有生物使用黑白紫色
 // ============================================================
 // Performance Optimization Configuration
@@ -868,13 +868,11 @@ export const SPECIAL_ZONES = {
             },
             // 完全自定义生成规则
             spawnRules: [
-                ["FireStorm", 100, 1, 5, ["Ultra","Super"]],
-                ["FireStorm", 10, 1, 5, ["Ultra","Mythic"]],
+                ["FireStorm", 10, 1, 5, ["Super"]],
                 ["FireStorm", 0.01, 1, 5, ["Super","Omega"]],
-                ["HelWorm", 1, 2, 5, ["Ultra", "Super"]],
                 ["HelBeetle", 1, 2, 5, ["Ultra", "Super"]]
             ],
-            spawnRate: 3.0,                    // 生成速度倍率
+            spawnRate: 1.0,                    // 生成速度倍率
             maxEnemies: 15                     // 最大敌人数
         },
         {
@@ -1372,7 +1370,7 @@ export const ORACLE_RULES = {
 const ITEM_IMAGE_URLS = {
     // 基础攻击类
     "Air" : "images/Air.png",
-    "Bubble egg": "images/Bubble_egg.png",
+    "Bubble Egg": "images/Bubble_egg.png",
     "Bubble": "images/Bubble.png",
     "Wing": "images/Wing.png",
     "Bubonic Plague": "images/Bubonic Plague.png",
@@ -1384,7 +1382,7 @@ const ITEM_IMAGE_URLS = {
     "Coin":"images/Coin.png",
     // 特殊功能类
     "Antennae": "images/Antennae.png",
-    "ThirdEye": "images/ThirdEye.png",
+    "Third Eye": "images/Third Eye.png",
     "Cactus": "images/Cactus.png",
     "Magnet": "images/Magnet.png",
     "Egg": "images/Egg.png",
@@ -1403,84 +1401,84 @@ const ITEM_IMAGE_URLS = {
     "Sponge": "images/Sponge.png",
     "Salt": "images/Salt.png",
     "Sand": "images/Sand.png",
-    "Starfish egg": "images/Starfish_egg.png",
+    "Starfish Egg": "images/Starfish_egg.png",
     "Jelly": "images/Jelly.png",
     "Lightning": "images/Lightning.png",
-    "Jellyfish egg": "images/Jellyfish_egg.png",
+    "Jellyfish Egg": "images/Jellyfish_egg.png",
     "Shell": "images/Shell.png",
     "Leaf": "images/Leaf.png",
     "Pearl": "images/Pearl.png",
-    "Shell egg": "images/Shell_egg.png",
+    "Shell Egg": "images/Shell_egg.png",
     "Coral": "images/Coral.png",
-    "Crab egg": "images/Crab_egg.png",
-    "CrabHole egg": "images/CrabHole_egg.png",
+    "Crab Egg": "images/Crab_egg.png",
+    "Crab Hole Egg": "images/CrabHole_egg.png",
     "Cotton": "images/Cotton.png",
     "Starfish":"images/Starfish.png",
     "Cancer": "images/Cancer.png",
-    "Cancer egg":"images/Cancer_egg.png",
+    "Cancer Egg":"images/Cancer_egg.png",
     // 其他（如有）
     "Stinger": "images/Stinger.png",
     "Pollen": "images/Pollen.png",
     "Honey": "images/Honey.png",
     "Sand": "images/Sand.png",
-    "WhiteBloodCell egg": "images/WhiteBloodCell_egg.png",
-    "StemCell egg": "images/StemCell_egg.png",
-    "Spider egg": "images/Spider_egg.png",
-    "RedBloodCell egg": "images/RedBloodCell_egg.png",
-    "queen ant egg": "images/QueenAnt_egg.png",
-    "SoldierFireAnt egg": "images/SoldierFireAnt_egg.png",
-    "WorkerFireAnt egg": "images/WorkerFireAnt_egg.png",
-    "BabyFireAnt egg": "images/BabyFireAnt_egg.png",
-    "FireAntOvermind egg": "images/FireAntOvermind_egg.png",
-    "FireAntHole egg": "images/FireAntHole_egg.png",
-    "Bacteria_egg": "images/Bacteria_egg.png",
-    "PooStick": "images/Poostick.png",
-    "Rat_egg": "images/Rat_egg.png",
-    "Roach_egg": "images/Roach_egg.png",
-    "ManHole egg": "images/Manhole_egg.png",
-    "Fly_egg": "images/Fly_egg.png",
+    "White Blood Cell Egg": "images/WhiteBloodCell_egg.png",
+    "Stem Cell Egg": "images/StemCell_egg.png",
+    "Spider Egg": "images/Spider_egg.png",
+    "Red Blood Cell Egg": "images/RedBloodCell_egg.png",
+    "Queen Ant Egg": "images/QueenAnt_egg.png",
+    "Soldier Fire Ant Egg": "images/SoldierFireAnt_egg.png",
+    "Worker Fire Ant Egg": "images/WorkerFireAnt_egg.png",
+    "Baby Fire Ant Egg": "images/BabyFireAnt_egg.png",
+    "Fire Ant Overmind Egg": "images/FireAntOvermind_egg.png",
+    "Fire Ant Hole Egg": "images/FireAntHole_egg.png",
+    "Bacteria Egg": "images/Bacteria Egg.png",
+    "Poo Stick": "images/Poo Stick.png",
+    "Rat Egg": "images/Rat Egg.png",
+    "Roach Egg": "images/Roach Egg.png",
+    "Manhole Egg": "images/Manhole_egg.png",
+    "Fly Egg": "images/Fly Egg.png",
     "Poo": "images/Poo.png",
     "Basil": "images/Basil.png",
     "Golden Leaf":"images/Goldenleaf.png",
     "Cutter": "images/Cutter.png",
     // 在 ITEM_IMAGE_URLS 中
-    "TrashDigger egg": "images/TrashDigger_egg.png",
-    "Digger egg": "images/Digger_egg.png",
-    "MudDigger_egg": "images/MudDigger_egg.png",
-    "Biologist egg": "images/Biologist_egg.png",
+    "Trash Digger Egg": "images/TrashDigger_egg.png",
+    "Digger Egg": "images/Digger_egg.png",
+    "Mud Digger Egg": "images/Mud Digger Egg.png",
+    "Biologist Egg": "images/Biologist_egg.png",
     "Square Egg":"images/Square_egg.png",
     "Leech Egg":"images/Leech_egg.png",
     "Parasite Egg":"images/Parasite_egg.png",
     "Chromosome":"images/Chromosome.png",
     "Controller":"images/Controller.png",
-    "Bacteriophage egg":"images/Bacteriophage_egg.png",
-    "Virus egg":"images/Virus_egg.png",
+    "Bacteriophage Egg":"images/Bacteriophage_egg.png",
+    "Virus Egg":"images/Virus_egg.png",
     "Suger":"images/Suger.png",
     "Mimic":"images/Mimic.png",
-    "Ladybug egg":"images/Ladybug_egg.png",
-    "Bee egg":"images/Bee_egg.png",
+    "Ladybug Egg":"images/Ladybug_egg.png",
+    "Bee Egg":"images/Bee_egg.png",
     "Bomb":"images/Bomb.png",
     "Rose": "images/rose.png",
-    "Hive egg":"images/Hive_egg.png",
-    "Beekeeper egg": "images/Beekeeper_egg.png",
-    "Soldier Ant egg":"images/Soldier ant_egg.png",
-    "Worker Ant egg":"images/Worker ant_egg.png",
+    "Hive Egg":"images/Hive_egg.png",
+    "Beekeeper Egg": "images/Beekeeper_egg.png",
+    "Soldier Ant Egg":"images/Soldier ant_egg.png",
+    "Worker Ant Egg":"images/Worker ant_egg.png",
     "Centipede egg":"images/Centipede_egg.png",
     "Bubble Bomb": "images/Bubble_Bomb.png",
     "Fission": "images/Fission.png", // 如果没有图片，会使用占位符
     "Fusion": "images/Fussion.png",
-    "Barnacle egg": "images/Barnacle_egg.png",
-    "Scorpion egg": "images/Scorpion_egg.png",
+    "Barnacle Egg": "images/Barnacle_egg.png",
+    "Scorpion Egg": "images/Scorpion_egg.png",
     // 北极生物蛋
-    "SlagMight egg": "images/SlagMight_egg.png",
-    "Ice Cube egg": "images/Ice Cube_egg.png",
-    "Ice Dragon egg": "images/Ice Dragon_egg.png",
-    "Igloo egg": "images/Igloo_egg.png",
-    "Tick egg": "images/Tick_egg.png",
-    "ArcticSpiderCave egg": "images/ArticSpiderCave_egg.png",
-    "ArcticSpider egg": "images/ArticSpider_egg.png",
-    "SnowStick": "images/SnowStick.png",
-    "Snowman egg": "images/Snowman_egg.png",
+    "Stalagmite Egg": "images/SlagMight_egg.png",
+    "Ice Cube Egg": "images/Ice Cube_egg.png",
+    "Ice Dragon Egg": "images/Ice Dragon_egg.png",
+    "Igloo Egg": "images/Igloo_egg.png",
+    "Tick Egg": "images/Tick_egg.png",
+    "Arctic Spider Cave Egg": "images/ArticSpiderCave_egg.png",
+    "Arctic Spider Egg": "images/ArticSpider_egg.png",
+    "Snow Stick": "images/Snow Stick.png",
+    "Snowman Egg": "images/Snowman_egg.png",
     "Bone": "images/bone.png",
     "Ice Cube": "images/Ice Cube.png",
     "Snowball": "images/Snowball.png",
@@ -1488,24 +1486,24 @@ const ITEM_IMAGE_URLS = {
     "Carrot": "images/Carrot.png",
     "Icicle": "images/Icicle.png",
     "Snowflake": "images/Snowflake.png",
-    "Frost Digger egg": "images/FrostDigger_egg.png",
-    "Trashcan egg":"images/Trashcan_egg.png",
-    "Queen Bee egg": "images/QueenBee_egg.png",
-    "Shipwreck egg": "images/Shipwreck_egg.png",
-    "Squid egg": "images/Squid_egg.png",
-    "PirateDigger egg":"images/PirateDigger_egg.png",
-    "Beetle egg": "images/Beetle_egg.png",
+    "Frost Digger Egg": "images/FrostDigger_egg.png",
+    "Trashcan Egg":"images/Trashcan_egg.png",
+    "Queen Bee Egg": "images/QueenBee_egg.png",
+    "Shipwreck Egg": "images/Shipwreck_egg.png",
+    "Squid Egg": "images/Squid_egg.png",
+    "Pirate Digger Egg":"images/PirateDigger_egg.png",
+    "Beetle Egg": "images/Beetle_egg.png",
     "Pincer": "images/Pincer.png",
-    "Wasp egg": "images/Wasp_egg.png",
-    "Worker Termite egg": "images/Worker_Termite_egg.png",
-    "Soldier Termite egg": "images/Soldier_Termite_egg.png",
-    "StickBug egg": "images/Stickbug_egg.png",
-    "Mantis egg": "images/Mantis_egg.png",
-    "Firefly egg": "images/Firefly_egg.png",
-    "TermiteHole egg": "images/TermiteHole_egg.png",
-    "TermiteOvermind egg": "images/Termite_Overmind_egg.png",
+    "Wasp Egg": "images/Wasp_egg.png",
+    "Worker Termite Egg": "images/Worker_Termite_egg.png",
+    "Soldier Termite Egg": "images/Soldier_Termite_egg.png",
+    "Stickbug Egg": "images/Stickbug_egg.png",
+    "Mantis Egg": "images/Mantis_egg.png",
+    "Firefly Egg": "images/Firefly Egg.png",
+    "Termite Hole Egg": "images/TermiteHole_egg.png",
+    "Termite Overmind Egg": "images/Termite_Overmind_egg.png",
     "Compass": "images/compass.png",
-    "SpiderCave egg": "images/SpiderCave_egg.png",
+    "Spider Cave Egg": "images/SpiderCave_egg.png",
     "Relic": "images/relic.png",
     "Plank": "images/plank.png",
     "Pea": "images/Peas.png",
@@ -1513,68 +1511,69 @@ const ITEM_IMAGE_URLS = {
     "Tomato": "images/tomato.png",
     "Rubber": "images/rubber.png",
     // ========== 🔥 Hel 系列物品图片 ==========
-    "HelWorm egg": "images/HelWorm_egg.png",
-    "HelSpider egg": "images/HelSpider_egg.png",
-    "Hel Bee egg": "images/HelBee_egg.png",
-    "HelHornet egg": "images/HelHornet_egg.png",
-    "HelBeetle egg": "images/HelBeetle_egg.png",
-    "Dragon egg": "images/Dragon_egg.png",
-    "DragonNest egg": "images/DragonNest_egg.png",
-    "HelHive egg": "images/HelHive_egg.png",
-    "HelJellyfish egg": "images/HelJellyfish_egg.png",
-    "Hel Queen Bee egg": "images/HelQueenBee_egg.png",
+    "Hel Worm Egg": "images/HelWorm_egg.png",
+    "Hel Spider Egg": "images/HelSpider_egg.png",
+    "Hel Bee Egg": "images/HelBee_egg.png",
+    "Hel Hornet Egg": "images/HelHornet_egg.png",
+    "Hel Beetle Egg": "images/HelBeetle_egg.png",
+    "Dragon Egg": "images/Dragon_egg.png",
+    "Dragon Nest Egg": "images/DragonNest_egg.png",
+    "Hel Hive Egg": "images/HelHive_egg.png",
+    "Hel Jellyfish Egg": "images/HelJellyfish_egg.png",
+    "Hel Queen Bee Egg": "images/HelQueenBee_egg.png",
     "Faster": "images/faster.png",
     "Blood Stinger": "images/blood_stinger.png",
     "Missile": "images/missile.png",
     "Glass": "images/glass.png",
-    "FireStick": "images/FireStick.png",
+    "Fire Stick": "images/Fire Stick.png",
     "Hel Honey": "images/Hel_Honey.png",
     "Hel Lighting": "images/Hel_Lighting.png",
-    "Hel Digger egg": "images/HelDigger_egg.png",
-    "Hel Beekeeper egg": "images/HelBeekeeper_egg.png",
-    "ToxicDragon egg": "images/ToxicDragon_egg.png",
+    "Hel Digger Egg": "images/HelDigger_egg.png",
+    "Hel Beekeeper Egg": "images/HelBeekeeper_egg.png",
+    "Toxic Dragon Egg": "images/ToxicDragon_egg.png",
      // 微观世界
     "Photon": "images/Photon.png",
-    "Photon egg": "images/Photon_egg.png",
+    "Photon Egg": "images/Photon_egg.png",
     "Electron": "images/Electron.png",
-    "Electron egg": "images/Electron_egg.png",
-    "ElectronCloud egg": "images/ElectronCloud_egg.png",
-    "Proton egg": "images/Proton_egg.png",
-    "Atom egg": "images/Atom_egg.png",
+    "Electron Egg": "images/Electron_egg.png",
+    "Electron Cloud Egg": "images/ElectronCloud_egg.png",
+    "Proton Egg": "images/Proton_egg.png",
+    "Atom Egg": "images/Atom_egg.png",
     "Quark": "images/Quark.png",
     "Quantum": "images/Quantum.png",
     "Charge": "images/Charge.png",
     "Nucleus": "images/Nucleus.png",
 
     // 宇宙世界
-    "BlackHole egg": "images/BlackHole_egg.png",
-    "WhiteHole egg": "images/WhiteHole_egg.png",
-    "NeutronStar egg": "images/NeutronStar_egg.png",
-    "Star egg": "images/Star_egg.png",
-    "Asteroid egg": "images/Asteroid_egg.png",
-    "Alien egg": "images/Alien_egg.png",
-    "UFO egg": "images/UFO_egg.png",
-    "Ghost egg": "images/Ghost_egg.png",
-    "GraveStone egg": "images/GraveStone_egg.png",
+    "Black Hole Egg": "images/BlackHole_egg.png",
+    "White Hole Egg": "images/WhiteHole_egg.png",
+    "Neutron Star Egg": "images/NeutronStar_egg.png",
+    "Star Egg": "images/Star_egg.png",
+    "Asteroid Egg": "images/Asteroid_egg.png",
+    "Alien Egg": "images/Alien_egg.png",
+    "UFO Egg": "images/UFO_egg.png",
+    "Ghost Egg": "images/Ghost_egg.png",
+    "Grave Stone Egg": "images/GraveStone_egg.png",
     "Plasma": "images/Plasma.png",
     "Orb": "images/Orb.png",
     "Slime": "images/Slime.png",
     "Dvd": "images/Dvd.png",
-    "FireBomb": "images/FireBomb.png",
+    "Fire Bomb": "images/Fire Bomb.png",
     "Stardust": "images/Stardust.png",
     "Opal": "images/Opal.png",
     "Gamma Ray": "images/Gamma Ray.png",
     "Dust": "images/Dust.png",
     "Singularity": "images/Singularity.png",
     "DarkMatter": "images/DarkMatter.png",
-    "GraveDigger egg": "images/GraveDigger_egg.png",
-    "AlienDigger egg": "images/AlienDigger_egg.png",
+    "Grave Digger Egg": "images/GraveDigger_egg.png",
+    "Alien Digger Egg": "images/AlienDigger_egg.png",
     "Trident": "images/trident.png",
 
 };
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
+    "Mud": {base_cooldown: 200,is_mud: true,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 5,base_fixed_damage: 10,fluid_speed: 10,fluid_duration: 3,fluid_color: "#946C10",use_rarity_multiplier: true,},
     "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000,    attack_range_reduction: {"Common": 0.90, "Unusual": 0.80,   "Rare": 0.70,  "Epic": 0.60,   "Legendary": 0.50, "Mythic": 0.40,   "Ultra": 0.30, "Super": 0.20, "Omega": 0.10,"Eternal": 0.00 }, dropFactor: 0.9},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.95},
@@ -1582,7 +1581,7 @@ export const ITEM_STATS = {
     "Claw": {base_attack:20, base_cooldown:250, crit_chance:0.1, use_rarity_multiplier: true, base_reload_time:3500, dropFactor: 0.9},
     "Stinger": {base_attack:300, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Pollen": {base_attack:30, base_cooldown:300, healing:0.5, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
-    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, poison_initial_multiplier:1.3, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 1.0},
+    "Iris": {base_attack:25, base_cooldown:200, poison_damage:8, poison_duration:3.0, poison_initial_multiplier:1.3, poison_stable_multiplier:0.3, use_rarity_multiplier:true, base_reload_time:2500, dropFactor: 1.0},
     "Pincer": {base_attack:15, base_cooldown:500, poison_damage:12, poison_duration:4.0, poison_initial_multiplier:1.2, poison_stable_multiplier:0.5, web_slow:0.5, use_rarity_multiplier:true, base_reload_time:2000, dropFactor: 0.9},
     "Honey": {base_attack:15, base_cooldown:250, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.9},
     "Fang": {base_attack:22, base_cooldown:200, lifesteal:2, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
@@ -1595,10 +1594,10 @@ export const ITEM_STATS = {
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.05},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.5},
-    "Trident": {base_attack:1000, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.06},
+    "Trident": {base_attack:1000, base_cooldown:90, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.06},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.8},
-    "ThirdEye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
+    "Third Eye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
     "Cactus": {base_attack:10, base_cooldown:200, health_bonus:100, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.8},
     "Magnet": {base_attack:5, base_cooldown:300, magnet_range:100, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.8},
     "Egg": {base_attack:1, base_cooldown:22000, spawn_anthill:true, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.85},
@@ -1606,70 +1605,70 @@ export const ITEM_STATS = {
     "Stick": {base_attack:1, base_cooldown:6000, summon_sandstorm:true, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
     "Moon Egg": {base_attack:1, base_cooldown:250, summon_rock:true, use_rarity_multiplier: true, base_reload_time:5000, dropFactor: 0.85},
     "Centipede egg": {base_attack:1, base_cooldown:250,spawn_centipede:true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
-    "Beetle egg": {base_attack:1, base_cooldown:250,spawn_beetle:true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
-    "Scorpion egg": {base_attack:1, base_cooldown:250,spawn_scorpion: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time:1500, dropFactor: 0.8},
-    "Worker Ant egg": {base_attack:1, base_cooldown:250, spawn_worker_ant: true, use_rarity_multiplier: true,spawn_count: 4, base_reload_time:12000, dropFactor: 0.85},
-    "Barnacle egg": {base_attack:1, base_cooldown:250,spawn_barnacle: true, use_rarity_multiplier: true,spawn_count: 2, base_reload_time:10000, dropFactor: 0.8},
-    "Soldier Ant egg": {base_attack:1, base_cooldown:250,  spawn_soldier_ant: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
-    "Hive egg": {base_attack:1, base_cooldown:250, spawn_hive_bees: true,spawn_count: 10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.8},
+    "Beetle Egg": {base_attack:1, base_cooldown:250,spawn_beetle:true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
+    "Scorpion Egg": {base_attack:1, base_cooldown:250,spawn_scorpion: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time:1500, dropFactor: 0.8},
+    "Worker Ant Egg": {base_attack:1, base_cooldown:250, spawn_worker_ant: true, use_rarity_multiplier: true,spawn_count: 4, base_reload_time:12000, dropFactor: 0.85},
+    "Barnacle Egg": {base_attack:1, base_cooldown:250,spawn_barnacle: true, use_rarity_multiplier: true,spawn_count: 2, base_reload_time:10000, dropFactor: 0.8},
+    "Soldier Ant Egg": {base_attack:1, base_cooldown:250,  spawn_soldier_ant: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
+    "Hive Egg": {base_attack:1, base_cooldown:250, spawn_hive_bees: true,spawn_count: 10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.8},
     "Rock": {base_attack:15, base_cooldown:300, health_bonus:0, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
     "DNA": {base_attack:0, base_cooldown:10, is_dna:true, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.2},
     "Clover": {base_attack:10, base_cooldown:1, is_clover:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.85},
     "Lotus": {base_attack:5, base_cooldown:300, poison_resistance:0.8, use_rarity_multiplier: true, base_reload_time:1500, dropFactor: 0.9},
     "Heavy": {base_attack:6, base_cooldown:400, health_bonus:100, knockback_power:480, use_rarity_multiplier: true, base_reload_time:4500, dropFactor: 0.9},
     "Controller": {base_attack:100000, base_cooldown:100, durability_bonus:780, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.4},
-    "Trashcan egg": {base_attack:1, base_cooldown:250, spawn_fly: true,spawn_count: 12, use_rarity_multiplier: true, base_reload_time:22000, dropFactor: 0.8},
-    "Queen Bee egg": {base_attack:1, base_cooldown:250, spawn_queen_bee: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:11000, dropFactor: 0.8},
+    "Trashcan Egg": {base_attack:1, base_cooldown:250, spawn_fly: true,spawn_count: 12, use_rarity_multiplier: true, base_reload_time:22000, dropFactor: 0.8},
+    "Queen Bee Egg": {base_attack:1, base_cooldown:250, spawn_queen_bee: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:11000, dropFactor: 0.8},
     "Golden Leaf": {base_attack:5, base_cooldown:180, healing:1, is_golden_leaf: true, reload_reduction: {"Mythic":0.12,"Ultra":0.16,"Super":0.20,"Omega":0.28,"Eternal":0.40}, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.2},
     "Cutter": {base_attack:35, base_cooldown:120, use_rarity_multiplier: true, base_reload_time:1800, dropFactor: 0.7},
 
     // ========== 生物蛋类 ==========
-    "WhiteBloodCell egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
-    "Shipwreck egg": {base_attack:1, base_cooldown:250,  spawn_shipwreck_Jellyfish: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.7},
-    "Spider egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
-    "RedBloodCell egg": {base_attack:1, base_cooldown:8000, spawn_redbloodcell:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
-    "StemCell egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.7},
-    "queen ant egg": {base_attack:1, base_cooldown:6000, spawn_queenant:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
-    "WorkerFireAnt egg": {base_attack:1, base_cooldown:10000, spawn_workerfireant:true, spawn_count:4, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
-    "SoldierFireAnt egg": {base_attack:1, base_cooldown:15000, spawn_soldierfireant:true, spawn_count:5, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.8},
-    "BabyFireAnt egg": {base_attack:1, base_cooldown:6000, spawn_babyfireant:true, spawn_count:3, durability_bonus:20, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.85},
-    "FireAntOvermind egg": {base_attack:1, base_cooldown:9000, spawn_fireantovermind:true, spawn_count:2, durability_bonus:60, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
-    "FireAntHole egg": {base_attack:1, base_cooldown:18000, spawn_fireanthole:true, spawn_count:10, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.7},
+    "White Blood Cell Egg": {base_attack:1, base_cooldown:6000, spawn_whitebloodcell:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
+    "Shipwreck Egg": {base_attack:1, base_cooldown:250,  spawn_shipwreck_Jellyfish: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.7},
+    "Spider Egg": {base_attack:1, base_cooldown:6000, spawn_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Red Blood Cell Egg": {base_attack:1, base_cooldown:8000, spawn_redbloodcell:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Stem Cell Egg": {base_attack:1, base_cooldown:20000, spawn_stemcell:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.7},
+    "Queen Ant Egg": {base_attack:1, base_cooldown:6000, spawn_queenant:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Worker Fire Ant Egg": {base_attack:1, base_cooldown:10000, spawn_workerfireant:true, spawn_count:4, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Soldier Fire Ant Egg": {base_attack:1, base_cooldown:15000, spawn_soldierfireant:true, spawn_count:5, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.8},
+    "Baby Fire Ant Egg": {base_attack:1, base_cooldown:6000, spawn_babyfireant:true, spawn_count:3, durability_bonus:20, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.85},
+    "Fire Ant Overmind Egg": {base_attack:1, base_cooldown:9000, spawn_fireantovermind:true, spawn_count:2, durability_bonus:60, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
+    "Fire Ant Hole Egg": {base_attack:1, base_cooldown:18000, spawn_fireanthole:true, spawn_count:10, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.7},
     "Cancer": {base_attack:25, base_cooldown:300, is_cancer:true, cancer_clone_chance:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.5},
-    "Cancer egg": {base_attack:1, base_cooldown:8000, spawn_cancer:true, spawn_count:2, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
-    "Bacteria_egg": {base_attack:1, base_cooldown:8000, spawn_bacteria:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.85},
+    "Cancer Egg": {base_attack:1, base_cooldown:8000, spawn_cancer:true, spawn_count:2, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
+    "Bacteria Egg": {base_attack:1, base_cooldown:8000, spawn_bacteria:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.85},
     "Square Egg": {base_attack:50, base_cooldown:2000, base_reload_time:20000, spawn_square:true, spawn_count:1, health_bonus:5000, durability_bonus:5000, use_rarity_multiplier: true, dropFactor: 0.3},
-    "Virus egg": {base_attack:1, base_cooldown:8000, spawn_virus:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:5000, dropFactor: 0.85},
-    "Bee egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:1, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
-    "Ladybug egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
-    "Squid egg": {base_attack:1, base_cooldown:250, spawn_squid: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Virus Egg": {base_attack:1, base_cooldown:8000, spawn_virus:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:5000, dropFactor: 0.85},
+    "Bee Egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:1, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
+    "Ladybug Egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Squid Egg": {base_attack:1, base_cooldown:250, spawn_squid: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
 
     // ========== Digger 系列蛋 ==========
-    "TrashDigger egg": {base_attack:1, base_cooldown:6000, spawn_trashdigger:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
-    "Digger egg": {base_attack:1, base_cooldown:6000, spawn_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
-    "MudDigger_egg": {base_attack:1, base_cooldown:8000, spawn_muddigger:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:7000, dropFactor: 0.7},
-    "Biologist egg": {base_attack:1, base_cooldown:6000, spawn_biologist:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
-    "Beekeeper egg": {base_attack:1, base_cooldown:6000, spawn_beekeeper:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
-    "Frost Digger egg": {base_attack:1, base_cooldown:6000, spawn_frostDigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
-    "PirateDigger egg": {base_attack:1, base_cooldown:6000, spawn_pirate_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
-    "GraveDigger egg": {base_attack:1, base_cooldown:6000, spawn_gravedigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5500, dropFactor: 0.7},
-    "AlienDigger egg": {base_attack:1, base_cooldown:6000, spawn_aliendigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
+    "Trash Digger Egg": {base_attack:1, base_cooldown:6000, spawn_trashdigger:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
+    "Digger Egg": {base_attack:1, base_cooldown:6000, spawn_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
+    "Mud Digger Egg": {base_attack:1, base_cooldown:8000, spawn_muddigger:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:7000, dropFactor: 0.7},
+    "Biologist Egg": {base_attack:1, base_cooldown:6000, spawn_biologist:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
+    "Beekeeper Egg": {base_attack:1, base_cooldown:6000, spawn_beekeeper:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
+    "Frost Digger Egg": {base_attack:1, base_cooldown:6000, spawn_frostDigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
+    "Pirate Digger Egg": {base_attack:1, base_cooldown:6000, spawn_pirate_digger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
+    "Grave Digger Egg": {base_attack:1, base_cooldown:6000, spawn_gravedigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:5500, dropFactor: 0.7},
+    "Alien Digger Egg": {base_attack:1, base_cooldown:6000, spawn_aliendigger:true, spawn_count:1, durability_bonus:40, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
 
     // ========== 🔥 Hel 系列蛋类物品 ==========
-    "HelWorm egg": {base_attack: 1, base_cooldown: 250, spawn_helworm: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.8},
-    "HelSpider egg": {base_attack: 1, base_cooldown: 250, spawn_helspider: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.8},
-    "Hel Bee egg": {base_attack: 1, base_cooldown: 250, spawn_helbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.8},
-    "HelHornet egg": {base_attack: 1, base_cooldown: 250, spawn_helhornet: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.8},
-    "HelBeetle egg": {base_attack: 1, base_cooldown: 250, spawn_helbeetle: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.75},
-    "Dragon egg": {base_attack: 1, base_cooldown: 250, spawn_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7},
-    "DragonNest egg": {base_attack: 1, base_cooldown: 250, spawn_nest_dragon: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 30000, dropFactor: 0.6},
-    "HelHive egg": {base_attack: 1, base_cooldown: 250, spawn_helbees: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.65},
-    "HelJellyfish egg": {base_attack: 1, base_cooldown: 250, spawn_heljellyfish: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.8},
-    "Hel Queen Bee egg": {base_attack: 1, base_cooldown: 250, spawn_helqueenbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.7},
-    "ToxicDragon egg": {base_attack: 1, base_cooldown: 250, spawn_toxic_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000, dropFactor: 0.65},
-    "Hel Digger egg": {base_attack: 1, base_cooldown: 250, spawn_hel_digger: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 18000, dropFactor: 0.7},
-    "Hel Beekeeper egg": {base_attack: 1, base_cooldown: 250, spawn_hel_beekeeper: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7},
-    "FireStick": {base_attack: 1, base_cooldown: 250, spawn_firestorm: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 8000, dropFactor: 0.7},
+    "Hel Worm Egg": {base_attack: 1, base_cooldown: 250, spawn_helworm: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.8},
+    "Hel Spider Egg": {base_attack: 1, base_cooldown: 250, spawn_helspider: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.8},
+    "Hel Bee Egg": {base_attack: 1, base_cooldown: 250, spawn_helbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.8},
+    "Hel Hornet Egg": {base_attack: 1, base_cooldown: 250, spawn_helhornet: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.8},
+    "Hel Beetle Egg": {base_attack: 1, base_cooldown: 250, spawn_helbeetle: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.75},
+    "Dragon Egg": {base_attack: 1, base_cooldown: 250, spawn_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7},
+    "Dragon Nest Egg": {base_attack: 1, base_cooldown: 250, spawn_nest_dragon: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 30000, dropFactor: 0.6},
+    "Hel Hive Egg": {base_attack: 1, base_cooldown: 250, spawn_helbees: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.65},
+    "Hel Jellyfish Egg": {base_attack: 1, base_cooldown: 250, spawn_heljellyfish: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.8},
+    "Hel Queen Bee Egg": {base_attack: 1, base_cooldown: 250, spawn_helqueenbee: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.7},
+    "Toxic Dragon Egg": {base_attack: 1, base_cooldown: 250, spawn_toxic_dragon: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000, dropFactor: 0.65},
+    "Hel Digger Egg": {base_attack: 1, base_cooldown: 250, spawn_hel_digger: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 18000, dropFactor: 0.7},
+    "Hel Beekeeper Egg": {base_attack: 1, base_cooldown: 250, spawn_hel_beekeeper: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7},
+    "Fire Stick": {base_attack: 1, base_cooldown: 250, spawn_firestorm: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 8000, dropFactor: 0.7},
 
     // ========== 🔥 Hel 系列武器物品 ==========
     "Faster": {base_attack: 12, base_cooldown: 80, speed_bonus: 0.15, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.75},
@@ -1684,44 +1683,44 @@ export const ITEM_STATS = {
     "Salt": {base_attack:5, base_cooldown:100, bonus_vs_soft:3, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Sand": {base_attack:8, base_cooldown:150, slow_effect:0.3, slow_duration:2.0, use_rarity_multiplier: true, base_reload_time:2500, dropFactor: 0.9},
     "Starfish": {base_attack:15, base_cooldown:250, healing_starfish:3, heal_threshold:0.6, use_rarity_multiplier: true, base_reload_time:4000, dropFactor: 0.8},
-    "Starfish egg": {base_attack:1, base_cooldown:8000, spawn_starfish:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Starfish Egg": {base_attack:1, base_cooldown:8000, spawn_starfish:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
     "Jelly": {base_attack:10, base_cooldown:180, knockback_power:300, knockback_duration:0.5, slow_effect:0.5, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Lightning": {base_attack:30,lightningBounces: 3, base_cooldown:500, lightning_bonus:5, chain_damage_reduction:0.2, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
-    "Jellyfish egg": {base_attack:1, base_cooldown:9000, spawn_jellyfish:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.8},
+    "Jellyfish Egg": {base_attack:1, base_cooldown:9000, spawn_jellyfish:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.8},
     "Shell": {base_attack:0, base_cooldown:0, is_shell:true, shield_value:2, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.85},
     "Pearl": {base_attack:20, base_cooldown:350, value_multiplier:1, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.9},
-    "Shell egg": {base_attack:1, base_cooldown:10000, spawn_scallop:true, spawn_count:4, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.85},
+    "Shell Egg": {base_attack:1, base_cooldown:10000, spawn_scallop:true, spawn_count:4, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.85},
     "Coral": {base_attack:15, base_cooldown:250, thorn_damage:8, thorn_percentage:0.15, use_rarity_multiplier: true, base_reload_time:4000, dropFactor: 1.0},
-    "Crab egg": {base_attack:1, base_cooldown:8000, spawn_crab:true, spawn_count:3, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
-    "CrabHole egg": {base_attack:1, base_cooldown:18000, spawn_crabhole:true, spawn_count:10, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.7},
+    "Crab Egg": {base_attack:1, base_cooldown:8000, spawn_crab:true, spawn_count:3, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
+    "Crab Hole Egg": {base_attack:1, base_cooldown:18000, spawn_crabhole:true, spawn_count:10, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.7},
     "Cotton": {base_attack:0, base_cooldown:0, is_cotton:true, damage_absorption:15, absorption_multiplier:3, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.8},
-    "Bubble egg": {base_attack:1, base_cooldown:5000, spawn_bubble:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
+    "Bubble Egg": {base_attack:1, base_cooldown:5000, spawn_bubble:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
 
     // ========== 🆕 下水道生物 ==========
-    "ManHole egg": {base_attack:1, base_cooldown:20000, spawn_manhole:true, spawn_count:1, durability_bonus:100, use_rarity_multiplier: true, base_reload_time:22000, dropFactor: 0.6},
-    "Fly_egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:3, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
-    "Rat_egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:21000, dropFactor: 0.7},
-    "Roach_egg": {base_attack:1, base_cooldown:6000, spawn_roach:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
-    "PooStick": {base_attack:1, base_cooldown:8000, spawn_poostorm:true, spawn_count:3, durability_bonus:10, slow_effect:0.4, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
+    "Manhole Egg": {base_attack:1, base_cooldown:20000, spawn_manhole:true, spawn_count:1, durability_bonus:100, use_rarity_multiplier: true, base_reload_time:22000, dropFactor: 0.6},
+    "Fly Egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:3, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
+    "Rat Egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:21000, dropFactor: 0.7},
+    "Roach Egg": {base_attack:1, base_cooldown:6000, spawn_roach:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Poo Stick": {base_attack:1, base_cooldown:8000, spawn_poostorm:true, spawn_count:3, durability_bonus:10, slow_effect:0.4, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
     "Poo": {base_attack:8, base_cooldown:120, slow_effect:0.3, slow_duration:2.0, poison_damage:2, poison_duration:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.9},
     "Basil": {base_attack:12, base_cooldown:160, healing:3, poison_resistance:0.5, clean_effect: true, heal_speed_bonus: {"Common":0.05,"Unusual":0.10,"Rare":0.12,"Epic":0.14,"Legendary":0.16,"Mythic":0.20,"Ultra":0.25,"Super":0.30,"Omega":0.40,"Eternal":0.50}, use_rarity_multiplier: true, dropFactor: 0.85},
     "Bubonic Plague": {base_attack:15, base_cooldown:200, poison_damage:30, poison_duration:30.0, poison_initial_multiplier:1.5, poison_stable_multiplier:0.2, use_rarity_multiplier:true, base_reload_time:5000,canStack: true , dropFactor: 0.09},
 
     // ========== 🆕 噬菌体蛋 ==========
-    "Bacteriophage egg": {base_attack:1, base_cooldown:8000, spawn_bacteriophage:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
+    "Bacteriophage Egg": {base_attack:1, base_cooldown:8000, spawn_bacteriophage:true, spawn_count:1, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
 
     // ========== 🧊 北极蛋类物品 ==========
-    "SlagMight egg": {base_attack:1, base_cooldown:8000, spawn_slagmight:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
-    "Ice Cube egg": {base_attack:1, base_cooldown:5000, spawn_ice_cube:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
-    "Ice Dragon egg": {base_attack:1, base_cooldown:20000, spawn_ice_dragon:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.6},
-    "Igloo egg": {base_attack:1, base_cooldown:15000, spawn_igloo_snowman:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.65},
-    "Tick egg": {base_attack:1, base_cooldown:6000, spawn_tick:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
-    "ArcticSpiderCave egg": {base_attack:1, base_cooldown:12000, spawn_arctic_cave_spider:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:18000, dropFactor: 0.65},
-    "ArcticSpider egg": {base_attack:1, base_cooldown:6000, spawn_arctic_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
-    "Snowman egg": {base_attack:1, base_cooldown:8000, spawn_snowman:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
+    "Stalagmite Egg": {base_attack:1, base_cooldown:8000, spawn_slagmight:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
+    "Ice Cube Egg": {base_attack:1, base_cooldown:5000, spawn_ice_cube:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
+    "Ice Dragon Egg": {base_attack:1, base_cooldown:20000, spawn_ice_dragon:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.6},
+    "Igloo Egg": {base_attack:1, base_cooldown:15000, spawn_igloo_snowman:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.65},
+    "Tick Egg": {base_attack:1, base_cooldown:6000, spawn_tick:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.8},
+    "Arctic Spider Cave Egg": {base_attack:1, base_cooldown:12000, spawn_arctic_cave_spider:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:18000, dropFactor: 0.65},
+    "Arctic Spider Egg": {base_attack:1, base_cooldown:6000, spawn_arctic_spider:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Snowman Egg": {base_attack:1, base_cooldown:8000, spawn_snowman:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
 
     // ========== 🧊 北极特殊物品 ==========
-    "SnowStick": {base_attack:1, base_cooldown:8000, spawn_snowstorm:true, spawn_count:3, slow_effect:0.5, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
+    "Snow Stick": {base_attack:1, base_cooldown:8000, spawn_snowstorm:true, spawn_count:3, slow_effect:0.5, slow_duration:3.0, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.7},
 
     // ========== 🧊 北极基础物品 ==========
     "Bone": {base_attack:18, base_cooldown:150, armor_bonus:3, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.8},
@@ -1733,15 +1732,15 @@ export const ITEM_STATS = {
     "Snowflake": {base_attack:15, base_cooldown:60, slow_effect:0.2, slow_duration:0.5, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 1.0},
 
     // ========== Jungle 蛋类 ==========
-    "Wasp egg": {base_attack:1, base_cooldown:8000, spawn_wasp:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
-    "Worker Termite egg": {base_attack:1, base_cooldown:6000, spawn_worker_termite:true, spawn_count:4, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
-    "Soldier Termite egg": {base_attack:1, base_cooldown:8000, spawn_soldier_termite:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
-    "StickBug egg": {base_attack:1, base_cooldown:10000, spawn_stickbug:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
-    "Mantis egg": {base_attack:1, base_cooldown:12000, spawn_mantis:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.75},
-    "Firefly egg": {base_attack:1, base_cooldown:5000, spawn_firefly:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:14000, dropFactor: 0.8},
-    "TermiteHole egg": {base_attack:1, base_cooldown:15000, spawn_hole_soldier_termite:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:18000, dropFactor: 0.65},
-    "TermiteOvermind egg": {base_attack:1, base_cooldown:20000, spawn_termite_overmind:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.6},
-    "SpiderCave egg": {base_attack:1, base_cooldown:12000, spawn_cave_spider:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.65},
+    "Wasp Egg": {base_attack:1, base_cooldown:8000, spawn_wasp:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Worker Termite Egg": {base_attack:1, base_cooldown:6000, spawn_worker_termite:true, spawn_count:4, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.85},
+    "Soldier Termite Egg": {base_attack:1, base_cooldown:8000, spawn_soldier_termite:true, spawn_count:3, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
+    "Stickbug Egg": {base_attack:1, base_cooldown:10000, spawn_stickbug:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
+    "Mantis Egg": {base_attack:1, base_cooldown:12000, spawn_mantis:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.75},
+    "Firefly Egg": {base_attack:1, base_cooldown:5000, spawn_firefly:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:14000, dropFactor: 0.8},
+    "Termite Hole Egg": {base_attack:1, base_cooldown:15000, spawn_hole_soldier_termite:true, spawn_count:10, use_rarity_multiplier: true, base_reload_time:18000, dropFactor: 0.65},
+    "Termite Overmind Egg": {base_attack:1, base_cooldown:20000, spawn_termite_overmind:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.6},
+    "Spider Cave Egg": {base_attack:1, base_cooldown:12000, spawn_cave_spider:true, spawn_count:1, use_rarity_multiplier: true, base_reload_time:19000, dropFactor: 0.65},
 
     // ========== Jungle 特殊物品 ==========
     "Relic": {base_attack:1, base_cooldown:200, healing:1, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
@@ -1752,12 +1751,12 @@ export const ITEM_STATS = {
     "Rubber": {base_attack:10, base_cooldown:120, damage_reduction:0.15, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.8},
 
     // ========== 微观世界物品 ==========
-    "Photon egg": { base_attack: 1, base_cooldown: 8000, spawn_photon: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.85 },
+    "Photon Egg": { base_attack: 1, base_cooldown: 8000, spawn_photon: true, spawn_count: 2, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.85 },
     "Electron": { base_attack: 12, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 600, dropFactor: 0.8 },
-    "Electron egg": { base_attack: 1, base_cooldown: 7000, spawn_electron: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 6000, dropFactor: 0.8 },
-    "ElectronCloud egg": { base_attack: 1, base_cooldown: 12000, spawn_cloud_electron: true, spawn_count: 8, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7 },
-    "Proton egg": { base_attack: 1, base_cooldown: 9000, spawn_proton: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 8000, dropFactor: 0.8 },
-    "Atom egg": { base_attack: 1, base_cooldown: 15000, spawn_atom: true, spawn_count: 5, use_rarity_multiplier: true, base_reload_time: 18000, dropFactor: 0.75 },
+    "Electron Egg": { base_attack: 1, base_cooldown: 7000, spawn_electron: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 6000, dropFactor: 0.8 },
+    "Electron Cloud Egg": { base_attack: 1, base_cooldown: 12000, spawn_cloud_electron: true, spawn_count: 8, use_rarity_multiplier: true, base_reload_time: 20000, dropFactor: 0.7 },
+    "Proton Egg": { base_attack: 1, base_cooldown: 9000, spawn_proton: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 8000, dropFactor: 0.8 },
+    "Atom Egg": { base_attack: 1, base_cooldown: 15000, spawn_atom: true, spawn_count: 5, use_rarity_multiplier: true, base_reload_time: 18000, dropFactor: 0.75 },
     "Quark": { base_attack: 25, base_cooldown: 60, use_rarity_multiplier: true, base_reload_time: 500, dropFactor: 0.8 },
 
     // ========== 宇宙世界物品 ==========
@@ -1765,7 +1764,7 @@ export const ITEM_STATS = {
     "Orb": { base_attack: 20, base_cooldown: 180, use_rarity_multiplier: true, base_reload_time: 2000, dropFactor: 0.6 },
     "Slime": { base_attack: 8, base_cooldown: 80, slow_effect: 0.3, slow_duration: 1.5, use_rarity_multiplier: true, base_reload_time: 800, dropFactor: 1.0 },
     "Dvd": { base_attack: 30, base_cooldown: 100, fire_damage: 20, fire_duration: 3, use_rarity_multiplier: true, base_reload_time: 3000, dropFactor: 0.65 },
-    "FireBomb": { base_attack: 10, base_cooldown: 500, is_bomb: true, fire_damage: 30, fire_duration: 3, use_rarity_multiplier: true, base_reload_time: 4000, dropFactor: 0.5 },
+    "Fire Bomb": { base_attack: 10, base_cooldown: 500, is_bomb: true, fire_damage: 30, fire_duration: 3, use_rarity_multiplier: true, base_reload_time: 4000, dropFactor: 0.5 },
     "Stardust": { base_attack: 15, base_cooldown: 60, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.8 },
     "Gamma Ray": { base_attack: 50, base_cooldown: 300, fire_damage: 30, fire_duration: 3, penetration: true, use_rarity_multiplier: true, base_reload_time: 3000, dropFactor: 0.75 },
     "Dust": { base_attack: 15, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 500, dropFactor: 1.0 },
@@ -1776,15 +1775,15 @@ export const ITEM_STATS = {
     "Nucleus": { base_attack: 40, base_cooldown: 200, can_heal_friendly: true, heal_amount: 50, use_rarity_multiplier: true, base_reload_time: 2500, dropFactor: 0.45 },
 
     // ========== 宇宙世界蛋 ==========
-    "BlackHole egg": { base_attack: 1, base_cooldown: 20000, spawn_blackhole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.5 },
-    "WhiteHole egg": { base_attack: 1, base_cooldown: 18000, spawn_whitehole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000, dropFactor: 0.55 },
-    "NeutronStar egg": { base_attack: 1, base_cooldown: 16000, spawn_neutronstar: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 28000, dropFactor: 0.5 },
-    "Star egg": { base_attack: 1, base_cooldown: 12000, spawn_star: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.65 },
-    "Asteroid egg": { base_attack: 1, base_cooldown: 8000, spawn_asteroid: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.75 },
-    "Alien egg": { base_attack: 1, base_cooldown: 10000, spawn_alien: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.7 },
-    "UFO egg": { base_attack: 1, base_cooldown: 14000, spawn_ufo_alien: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 28000, dropFactor: 0.55 },
-    "Ghost egg": { base_attack: 1, base_cooldown: 9000, spawn_ghost: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.8 },
-    "GraveStone egg": { base_attack: 1, base_cooldown: 12000, spawn_grave_ghost: true, spawn_count: 15, use_rarity_multiplier: true, base_reload_time: 24000, dropFactor: 0.6 },
+    "Black Hole Egg": { base_attack: 1, base_cooldown: 20000, spawn_blackhole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 25000, dropFactor: 0.5 },
+    "White Hole Egg": { base_attack: 1, base_cooldown: 18000, spawn_whitehole: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 22000, dropFactor: 0.55 },
+    "Neutron Star Egg": { base_attack: 1, base_cooldown: 16000, spawn_neutronstar: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 28000, dropFactor: 0.5 },
+    "Star Egg": { base_attack: 1, base_cooldown: 12000, spawn_star: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.65 },
+    "Asteroid Egg": { base_attack: 1, base_cooldown: 8000, spawn_asteroid: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.75 },
+    "Alien Egg": { base_attack: 1, base_cooldown: 10000, spawn_alien: true, spawn_count: 1, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.7 },
+    "UFO Egg": { base_attack: 1, base_cooldown: 14000, spawn_ufo_alien: true, spawn_count: 10, use_rarity_multiplier: true, base_reload_time: 28000, dropFactor: 0.55 },
+    "Ghost Egg": { base_attack: 1, base_cooldown: 9000, spawn_ghost: true, spawn_count: 3, use_rarity_multiplier: true, base_reload_time: 15000, dropFactor: 0.8 },
+    "Grave Stone Egg": { base_attack: 1, base_cooldown: 12000, spawn_grave_ghost: true, spawn_count: 15, use_rarity_multiplier: true, base_reload_time: 24000, dropFactor: 0.6 },
 
     // ========== Opal ==========
     "Opal": {
@@ -1837,93 +1836,93 @@ export function getCancerCloneRarity(originalRarity) {
 }
 // ========== 添加到 ENEMY_DROP_TABLE ==========
 export const ENEMY_DROP_TABLE = {
-    "Spider": ["Web", "Fang", "ThirdEye","Spider egg"],
+    "Spider": ["Web", "Fang", "Third Eye","Spider Egg"],
     "Crab": ["Claw", "Powder"],
-    "Soldier Ant": ["Wing", "Clover","Soldier Ant egg"],
-    "Worker Ant": ["Leaf", "Corn","Worker Ant egg"],
+    "Soldier Ant": ["Wing", "Clover","Soldier Ant Egg"],
+    "Worker Ant": ["Leaf", "Corn","Worker Ant Egg"],
     "Bush": ["Leaf", "Root","Cotton"],
     "Centipede": ["Leaf", "Antennae","Centipede egg"],
     "Cactus": ["Cactus", "Lotus"],
     "Anthill": ["Magnet", "Egg"],
     "Sandstorm": ["Stick","Rock"],
     "Rock": ["Moon Egg", "Rock", "Heavy"],
-    "Squid": ["Fang", "Starfish", "Squid egg"],
-    "StemCell": ["Iris", "DNA","StemCell egg", "Chromosome"],
-    "RedBloodCell": ["Iris","Suger","RedBloodCell egg"],
-    "WhiteBloodCell": ["Iris", "Suger","WhiteBloodCell egg","Chromosome"],
-    "Bee": ["Stinger","Pollen","Honey","Bee egg"],
-    "QueenAnt": ["queen ant egg","Leaf","Corn"],
-    "WorkerFireAnt": ["Corn","Yucca","WorkerFireAnt egg"],
-    "SoldierFireAnt": ["Clover", "Wing", "SoldierFireAnt egg"],
-    "BabyFireAnt": ["Leaf","BabyFireAnt egg","Honey"],
-    "FireAntOvermind": ["FireAntOvermind egg","Leaf","Heavy"],
-    "FireAntHole": ["FireAntHole egg", "Magnet", "Corn"],
-    "Bacteria": ["Iris", "Bacteria_egg", "Chromosome"],
-    "Bubble": ["Bubble", "Air", "Bubble egg"],
-    "QueenBee": ["Queen Bee egg", "Bee egg", "Honey","Pollen"],
-    "Cancer": ["Cancer","Cancer egg","DNA","Iris","Chromosome"],
-    "Shipwreck": ["Pearl", "Bubble Bomb", "Shipwreck egg", "Cotton", "Coin"],
+    "Squid": ["Fang", "Starfish", "Squid Egg"],
+    "StemCell": ["Iris", "DNA","Stem Cell Egg", "Chromosome"],
+    "RedBloodCell": ["Iris","Suger","Red Blood Cell Egg"],
+    "WhiteBloodCell": ["Iris", "Suger","White Blood Cell Egg","Chromosome"],
+    "Bee": ["Stinger","Pollen","Honey","Bee Egg"],
+    "QueenAnt": ["Queen Ant Egg","Leaf","Corn"],
+    "WorkerFireAnt": ["Corn","Yucca","Worker Fire Ant Egg"],
+    "SoldierFireAnt": ["Clover", "Wing", "Soldier Fire Ant Egg"],
+    "BabyFireAnt": ["Leaf","Baby Fire Ant Egg","Honey"],
+    "FireAntOvermind": ["Fire Ant Overmind Egg","Leaf","Heavy"],
+    "FireAntHole": ["Fire Ant Hole Egg", "Magnet", "Corn"],
+    "Bacteria": ["Iris", "Bacteria Egg", "Chromosome"],
+    "Bubble": ["Bubble", "Air", "Bubble Egg"],
+    "QueenBee": ["Queen Bee Egg", "Bee Egg", "Honey","Pollen"],
+    "Cancer": ["Cancer","Cancer Egg","DNA","Iris","Chromosome"],
+    "Shipwreck": ["Pearl", "Bubble Bomb", "Shipwreck Egg", "Cotton", "Coin"],
     // 在 ENEMY_DROP_TABLE 中，在下水道生物后面添加
     // ========== 🐛 Hel 系列生物掉落 ==========
-    "HelWorm": ["Fang", "Bur", "HelWorm egg"],
-    "HelSpider": ["Web", "Faster", "ThirdEye", "HelSpider egg"],
-    "HelBee": ["Blood Stinger", "Pollen", "Hel Bee egg"],
-    "HelHornet": ["Missile", "HelHornet egg", "Antennae"],
-    "HelBeetle": ["HelBeetle egg", "Pincer", "Bone"],
-    "Dragon": ["Dragon egg", "Bone", "Bur"],
-    "DragonNest": ["DragonNest egg", "Golden Leaf"],
-    "HelHive": ["Hel Honey", "Pollen", "HelHive egg"],
-    "HelJellyfish": ["Hel Lighting", "Lightning", "HelJellyfish egg"],
-    "ToxicDragon": ["ToxicDragon egg", "Iris", "Hel Honey",],
-    "FireStorm": ["FireStick", "Glass", "Sand"],
-    "HelQueenBee": ["Hel Queen Bee egg", "Hel Honey", "Pollen","Blood Stinger"],
-    "Wasp": ["Iris", "Antennae", "Wasp egg"],
-    "Worker Termite": ["Leaf", "Relic", "Worker Termite egg"],
-    "Soldier Termite": ["Clover", "Wing", "Soldier Termite egg","Relic"],
-    "StickBug": ["Stick", "StickBug egg", "Plank"],
-    "Mantis": ["Mantis egg", "Bur", "Pea"],
-    "Firefly": ["Lightning", "Wing", "Firefly egg"],
-    "TermiteHole": ["TermiteHole egg", "Magnet", "Soil"],
-    "TermiteOvermind": ["TermiteOvermind egg", "Tomato", "Soil","Compass"],
-    "SpiderCave": ["Web","Iris", "SpiderCave egg","Rubber"],
-    "TrashDigger": ["TrashDigger egg", "Poo", "Iris", "Cutter"],
-    "PirateDigger": ["PirateDigger egg", "Coin", "Cutter", "Pearl"],
-    "Beekeeper": ["Cutter", "Beekeeper egg", "Honey", "Bee egg"],
-    "Digger": ["Digger egg", "Cutter", "Heavy", "Bur"],
-    "MudDigger": ["MudDigger_egg", "Claw", "Root", "Heavy","Cutter"],
-    "Biologist": ["Biologist egg", "DNA", "Iris", "Cancer"],
-    "Frost Digger": ["Cutter", "Snowflake", "Frost Digger egg", "Icicle","Snowball"],
+    "HelWorm": ["Fang", "Bur", "Hel Worm Egg"],
+    "HelSpider": ["Web", "Faster", "Third Eye", "Hel Spider Egg"],
+    "HelBee": ["Blood Stinger", "Pollen", "Hel Bee Egg"],
+    "HelHornet": ["Missile", "Hel Hornet Egg", "Antennae"],
+    "HelBeetle": ["Hel Beetle Egg", "Pincer", "Bone"],
+    "Dragon": ["Dragon Egg", "Bone", "Bur"],
+    "DragonNest": ["Dragon Nest Egg", "Golden Leaf"],
+    "HelHive": ["Hel Honey", "Pollen", "Hel Hive Egg"],
+    "HelJellyfish": ["Hel Lighting", "Lightning", "Hel Jellyfish Egg"],
+    "ToxicDragon": ["Toxic Dragon Egg", "Iris", "Hel Honey",],
+    "FireStorm": ["Fire Stick", "Glass", "Sand"],
+    "HelQueenBee": ["Hel Queen Bee Egg", "Hel Honey", "Pollen","Blood Stinger"],
+    "Wasp": ["Iris", "Antennae", "Wasp Egg"],
+    "Worker Termite": ["Leaf", "Relic", "Worker Termite Egg"],
+    "Soldier Termite": ["Clover", "Wing", "Soldier Termite Egg","Relic"],
+    "StickBug": ["Stick", "Stickbug Egg", "Plank"],
+    "Mantis": ["Mantis Egg", "Bur", "Peas"],
+    "Firefly": ["Lightning", "Wing", "Firefly Egg"],
+    "TermiteHole": ["Termite Hole Egg", "Magnet", "Soil"],
+    "TermiteOvermind": ["Termite Overmind Egg", "Tomato", "Soil","Compass"],
+    "SpiderCave": ["Web","Iris", "Spider Cave Egg","Rubber"],
+    "TrashDigger": ["Trash Digger Egg", "Poo", "Iris", "Cutter"],
+    "PirateDigger": ["Pirate Digger Egg", "Coin", "Cutter", "Pearl"],
+    "Beekeeper": ["Cutter", "Beekeeper Egg", "Honey", "Bee Egg"],
+    "Digger": ["Digger Egg", "Cutter", "Heavy", "Bur"],
+    "MudDigger": ["Mud Digger Egg", "Mud", "Root", "Heavy","Cutter"],
+    "Biologist": ["Biologist Egg", "DNA", "Iris", "Cancer"],
+    "Frost Digger": ["Cutter", "Snowflake", "Frost Digger Egg", "Icicle","Snowball"],
     "Leech": ["Fang", "Leech Egg", "Faster"],  // Leech 可能掉落 Chromosome
     "Parasite": ["Suger", "Parasite Egg", "Chromosome", "Iris"],
-    "Bacteriophage": ["Lotus", "Bacteriophage egg", "Iris"],
-    "Virus":["Iris","Virus egg","Chromosome","Suger"],
-    "Ladybug": ["Rose", "Honey", "Ladybug egg"],
-    "Hive": ["Honey", "Pollen", "Hive egg"],
-    "Beetle": ["Bone", "Beetle egg", "Pincer"],
-    "Barnacle": ["Rock", "Coral", "Barnacle egg","Bubble Bomb","Shell"],
-    "Trashcan": ["Basil", "Cotton", "Trashcan egg","Poo","Web"],
-    "Scorpion": ["Iris", "Scorpion egg", "Pincer"],
-    "HelDigger": ["Heavy", "Cutter","Hel Digger egg","Bomb"],
-    "HelBeekeeper": ["Hel Honey", "Hel Beekeeper egg", "Cutter","Honey"],
+    "Bacteriophage": ["Lotus", "Bacteriophage Egg", "Iris"],
+    "Virus":["Iris","Virus Egg","Chromosome","Suger"],
+    "Ladybug": ["Rose", "Honey", "Ladybug Egg"],
+    "Hive": ["Honey", "Pollen", "Hive Egg"],
+    "Beetle": ["Bone", "Beetle Egg", "Pincer"],
+    "Barnacle": ["Rock", "Coral", "Barnacle Egg","Bubble Bomb","Shell"],
+    "Trashcan": ["Basil", "Cotton", "Trashcan Egg","Poo","Web"],
+    "Scorpion": ["Iris", "Scorpion Egg", "Pincer"],
+    "HelDigger": ["Heavy", "Cutter","Hel Digger Egg","Bomb"],
+    "HelBeekeeper": ["Hel Honey", "Hel Beekeeper Egg", "Cutter","Honey"],
     // ========== 🌊 新增海洋生物掉落 ==========
     "Starfish": [
         "Starfish",      // 海星
         "Salt",          // 盐
         "Sand",          // 沙子
-        "Starfish egg"   // 海星蛋
+        "Starfish Egg"   // 海星蛋
     ],
 
     "Jellyfish": [
         "Jelly",         // 果冻/胶质
         "Lightning",     // 闪电（水母放电）
-        "Jellyfish egg"  // 水母蛋
+        "Jellyfish Egg"  // 水母蛋
     ],
 
     "Scallop": [
         "Shell",         // 贝壳
         "Magnet",        // 磁铁（50%概率，因为是洞类掉落）
         "Pearl",         // 珍珠
-        "Shell egg"      // 扇贝壳蛋
+        "Shell Egg"      // 扇贝壳蛋
     ],
 
     "Sponge": [
@@ -1934,19 +1933,19 @@ export const ENEMY_DROP_TABLE = {
     "Crab": [
         "Claw",          // 原有的
         "Powder",        // 原有的
-        "Crab egg",
+        "Crab Egg",
         "Sand"
     ],
 
     "CrabHole": [
         "Magnet",        // 磁铁（洞类）
-        "CrabHole egg",  // 蟹洞蛋
+        "Crab Hole Egg",  // 蟹洞蛋
         "Cotton",
         "Sand"
     ],
         // ========== 🆕 下水道生物掉落 ==========
     "ManHole": [
-        "ManHole egg",  // 下水道井盖蛋
+        "Manhole Egg",  // 下水道井盖蛋
         "Poo",          // 粪便
         "Cotton",       // 棉花
         "Basil"         // 罗勒
@@ -1954,12 +1953,12 @@ export const ENEMY_DROP_TABLE = {
 
     "Fly": [
         "Wing",         // 翅膀
-        "Fly_egg",      // 苍蝇蛋
+        "Fly Egg",      // 苍蝇蛋
         "Poo"           // 粪便
     ],
 
     "Rat": [
-        "Rat_egg",      // 老鼠蛋
+        "Rat Egg",      // 老鼠蛋
         "Poo",          // 粪便
         "Iris",
         "Bubonic Plague"
@@ -1967,43 +1966,43 @@ export const ENEMY_DROP_TABLE = {
 
     "Roach": [
         "Lotus",        // 莲花
-        "Roach_egg",    // 蟑螂蛋
+        "Roach Egg",    // 蟑螂蛋
         "Antennae",     // 触角
         "Powder"        // 粉末
     ],
 
     "PooStorm": [
-        "PooStick",     // 粪棒
+        "Poo Stick",     // 粪棒
         "Poo",          // 粪便
         "Iris"          // 虹膜
     ],
-    "SlagMight": ["Icicle", "SlagMight egg"],
-    "Ice Cube": ["Ice Cube","Icicle", "Ice Cube egg","Rock"],
-    "Ice Dragon": ["Mimic", "Icicle", "Ice Dragon egg","Bone"],
-    "Igloo": ["Bomb", "Snowball", "Igloo egg"],
-    "Tick": ["Snowball", "Ice Rose", "Tick egg"],
-    "ArcticSpiderCave": ["Web", "Ice Cube", "Icicle", "ArcticSpiderCave egg","Snowflake"],
-    "ArcticSpider": ["Web", "Snowball", "ArcticSpider egg"],
-    "Snowman": ["Carrot", "Snowball", "Stick", "Snowman egg"],
-    "SnowStorm": ["SnowStick", "Snowflake","Icicle"],
+    "SlagMight": ["Icicle", "Stalagmite Egg"],
+    "Ice Cube": ["Ice Cube","Icicle", "Ice Cube Egg","Rock"],
+    "Ice Dragon": ["Mimic", "Icicle", "Ice Dragon Egg","Bone"],
+    "Igloo": ["Bomb", "Snowball", "Igloo Egg"],
+    "Tick": ["Snowball", "Ice Rose", "Tick Egg"],
+    "ArcticSpiderCave": ["Web", "Ice Cube", "Icicle", "Arctic Spider Cave Egg","Snowflake"],
+    "ArcticSpider": ["Web", "Snowball", "Arctic Spider Egg"],
+    "Snowman": ["Carrot", "Snowball", "Stick", "Snowman Egg"],
+    "SnowStorm": ["Snow Stick", "Snowflake","Icicle"],
         // ========== 微观世界掉落 ==========
-    "Atom": ["Atom egg", "Bomb", "Electron"],
-    "Electron": ["Electron egg", "Electron", "Quantum","Charge"],
-    "Proton": ["Proton egg", "Quark","Quantum"],
-    "ElectronCloud": ["ElectronCloud egg", "Electron", "Quantum","Charge"],
-    "Photon": ["Photon egg", "Singularity", "Faster", "Photon"],
+    "Atom": ["Atom Egg", "Bomb", "Electron"],
+    "Electron": ["Electron Egg", "Electron", "Quantum","Charge"],
+    "Proton": ["Proton Egg", "Quark","Quantum"],
+    "ElectronCloud": ["Electron Cloud Egg", "Electron", "Quantum","Charge"],
+    "Photon": ["Photon Egg", "Singularity", "Faster", "Photon"],
      // ========== 宇宙世界掉落 ==========
-    "BlackHole": ["BlackHole egg", "DarkMatter", "Gamma Ray","Opal"],
-    "WhiteHole": ["WhiteHole egg", "DarkMatter", "Gamma Ray","Stardust","Singularity"],
-    "NeutronStar": ["NeutronStar egg", "Singularity", "Nucleus"],
-    "Star": ["Stardust", "Star egg", "Dust","FireBomb"],
-    "Asteroid": ["Asteroid egg", "Dust","Rock"],
-    "Alien": ["Alien egg", "Dvd","Slime","Bomb"],
-    "UFO": ["UFO egg",  "Plasma","Orb", "FireBomb"],
-    "Ghost": ["Ghost egg", "Air", "Slime"],
-    "GraveStone": ["GraveStone egg", "Opal", "Rock","Air"],
-    "GraveDigger": ["GraveDigger egg", "Cutter", "Air", "Bone"],
-    "AlienDigger": ["AlienDigger egg", "Cutter", "Dvd", "Opal","Quantum"],
+    "BlackHole": ["Black Hole Egg", "DarkMatter", "Gamma Ray","Opal"],
+    "WhiteHole": ["White Hole Egg", "DarkMatter", "Gamma Ray","Stardust","Singularity"],
+    "NeutronStar": ["Neutron Star Egg", "Singularity", "Nucleus"],
+    "Star": ["Stardust", "Star Egg", "Dust","Fire Bomb"],
+    "Asteroid": ["Asteroid Egg", "Dust","Rock"],
+    "Alien": ["Alien Egg", "Dvd","Slime","Bomb"],
+    "UFO": ["UFO Egg",  "Plasma","Orb", "Fire Bomb"],
+    "Ghost": ["Ghost Egg", "Air", "Slime"],
+    "GraveStone": ["Grave Stone Egg", "Opal", "Rock","Air"],
+    "GraveDigger": ["Grave Digger Egg", "Cutter", "Air", "Bone"],
+    "AlienDigger": ["Alien Digger Egg", "Cutter", "Dvd", "Opal","Quantum"],
 };
 
 export const PROGRESSIVE_RARITY_MULTIPLIERS = {
@@ -2036,7 +2035,7 @@ export const ITEM_ARMOR_MULTIPLIERS = {
     "Dvd": 4,
     "Orb": 9,
     "Jelly": 0.5,
-    "Trident": 5,
+    "Trident": 6,
     "Controller": 10 // Controller 是基础护甲的 10 倍
 };
 
@@ -2141,7 +2140,7 @@ export const RARITY_MULTIPLIERS = {
     "Eternal": 31415
 };
 
-// ThirdEye range bonus (pixels)
+// Third Eye range bonus (pixels)
 export const THIRD_EYE_RANGE_BONUS = {
     "Common": 20,
     "Unusual": 30,
@@ -2165,8 +2164,8 @@ export const THIRD_EYE_RANGE_BONUS = {
     "Quantum_Eternal": 250
 };
 
-// Allow ThirdEye to provide armor (if desired)
-ARMOR_ELIGIBLE_ITEMS.add("ThirdEye");  // If you want it to have armor too
+// Allow Third Eye to provide armor (if desired)
+ARMOR_ELIGIBLE_ITEMS.add("Third Eye");  // If you want it to have armor too
 
 // 原始掉落率数据（总和100%）
 const RARITY_DROP_RATES = {
@@ -2206,9 +2205,9 @@ const RARITY_DROP_RATES = {
         "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
         "Legendary": 0.0, "Mythic": 0.15, "Ultra": 0.845, "Super": 0.005, "Omega": 0.0, "Unique": 0.0
     },
-    "Unique": {
+    "Eternal": {
         "Common": 0.0, "Unusual": 0.0, "Rare": 0.0, "Epic": 0.0,
-        "Legendary": 0.0, "Mythic": 0.01, "Ultra": 0.96, "Super": 0.03, "Omega": 0.0, "Unique": 0.0
+        "Legendary": 0.0, "Mythic": 0.01, "Ultra": 0.96, "Super": 0.02, "Omega": 0.0, "Unique": 0.0
     }
 };
 // 物品因子表（从 ITEM_STATS 读取 dropFactor）
@@ -2240,19 +2239,24 @@ export function getDropRarityByItem(itemType, mobRarity) {
     // 1. 获取所有可用稀有度
     let availableRarities = Object.keys(modifiedBase).filter(r => modifiedBase[r] > 0);
 
-    // ========== 新增：当 factor < 0.85 时，禁止 Super 掉落 ==========
-    const isSuperDisabled = factor < 0.85;
+    // ========== 修改后的逻辑：排除 Omega 和 Eternal 生物 ==========
+    const isSuperDisabled = factor < 0.9;
+    const isSpecialMob = mobRarity === "Omega" || mobRarity === "Eternal";
 
-    if (isSuperDisabled && modifiedBase["Super"] !== undefined && modifiedBase["Super"] > 0) {
+    // 只有当 factor < 0.9 且 生物不是 Omega 或 Eternal 时，才执行屏蔽
+    if (isSuperDisabled && !isSpecialMob && modifiedBase["Super"] !== undefined && modifiedBase["Super"] > 0) {
         const superProb = modifiedBase["Super"];
+
         // 从可用稀有度中移除 Super
         availableRarities = availableRarities.filter(r => r !== "Super");
-        // 将 Super 的概率加到 Ultra 上（不影响 Omega 和 Eternal）
+
+        // 将 Super 的概率加到 Ultra 上
         if (modifiedBase["Ultra"] !== undefined) {
             modifiedBase["Ultra"] = (modifiedBase["Ultra"] || 0) + superProb;
         } else {
             modifiedBase["Ultra"] = superProb;
         }
+
         // 将 Super 概率设为 0
         modifiedBase["Super"] = 0;
     }
@@ -2356,7 +2360,6 @@ export const GameState = {
     GAME_OVER: "game_over"
 };
 
-// ==================== 自动保存系统 ====================
 class AutoSaveSystem {
     constructor() {
         this.saveDir = "saves";
@@ -2364,11 +2367,16 @@ class AutoSaveSystem {
         this.useGist = false;
         this.gistId = null;
 
+        // 分页存储配置
+        this.ITEMS_PER_PAGE = 500;
+        this.MAX_PAGES = 20;
+        this.CURRENT_VERSION = "3.0";
+
         this.init();
+        this.migrateOldSave();
     }
 
     init() {
-        // 检查是否有 Gist ID
         const urlGist = window.URL_PARAMS?.gistId;
         const savedGist = localStorage.getItem('flwrr_last_gist');
         this.gistId = urlGist || savedGist;
@@ -2379,281 +2387,512 @@ class AutoSaveSystem {
         }
     }
 
-    // 在 AutoSaveSystem 类中修改 saveToLocal 方法
+    // ========== 兼容旧接口 ==========
+    saveGame(player, gameData) {
+        return this.saveToLocal(player, gameData);
+    }
+
+    loadGame(player) {
+        return this.loadFromLocal();
+    }
+
+    hasSaveData() {
+        return localStorage.getItem('game_meta') !== null || localStorage.getItem('autosave') !== null;
+    }
+
+    getSaveInfo() {
+        try {
+            const meta = localStorage.getItem('game_meta');
+            if (meta) {
+                const data = JSON.parse(meta);
+                return {
+                    timestamp: data.ts,
+                    formatted_time: new Date(data.ts).toLocaleString(),
+                    player_level: data.pd?.l || 1,
+                    player_rarity: data.pd?.pr || "Common",
+                    score: data.gs?.s || 0,
+                    wave: data.gs?.w || 1,
+                    inventory_count: this._getItemCount(),
+                    slot_count: data.slotCount || 10,
+                    version: data.ver
+                };
+            }
+
+            const oldSave = localStorage.getItem('autosave');
+            if (oldSave) {
+                const data = JSON.parse(oldSave);
+                return {
+                    timestamp: data.timestamp || 0,
+                    formatted_time: new Date(data.timestamp || 0).toLocaleString(),
+                    player_level: data.player_data?.level || 1,
+                    player_rarity: data.player_data?.player_rarity || "Common",
+                    score: data.player_data?.score || 0,
+                    wave: data.game_state?.current_wave || 1,
+                    inventory_count: data.inventory?.length || 0,
+                    slot_count: data.slot_count || 10,
+                    version: data.version || "1.0"
+                };
+            }
+
+            return null;
+        } catch(e) {
+            console.error("获取存档信息失败:", e);
+            return null;
+        }
+    }
+
+    // ========== 自动迁移旧存档 ==========
+    migrateOldSave() {
+        try {
+            const oldSave = localStorage.getItem('autosave');
+            if (!oldSave) return;
+
+            const oldData = JSON.parse(oldSave);
+
+            if (oldData.version !== this.CURRENT_VERSION) {
+                console.log("🔄 检测到旧版本存档，正在迁移...");
+
+                const tempPlayer = this._convertOldToNew(oldData);
+
+                this.saveToLocal(tempPlayer, {
+                    score: oldData.player_data?.score || 0,
+                    enemiesKilled: oldData.game_state?.enemies_killed || 0,
+                    currentWave: oldData.game_state?.current_wave || 1
+                });
+
+                localStorage.setItem('autosave_backup', oldSave);
+
+                console.log("✅ 存档迁移完成");
+            }
+        } catch(e) {
+            console.warn("存档迁移失败:", e);
+        }
+    }
+
+    _convertOldToNew(oldData) {
+        const tempPlayer = {
+            inventory: { items: [] },
+            quickSlot: { slots: [], secondarySlots: [] },
+            levelSystem: { level: oldData.player_data?.level || 1 },
+            health: oldData.player_data?.health || 100,
+            maxHealth: oldData.player_data?.max_health || 100,
+            playerRarity: oldData.player_data?.player_rarity || "Common",
+            physicsBody: { position: { x: oldData.player_data?.player_position?.x || 5000, y: oldData.player_data?.player_position?.y || 5000 } }
+        };
+
+        if (oldData.inventory) {
+            for (const itemData of oldData.inventory) {
+                try {
+                    const item = Item.fromDict(itemData);
+                    tempPlayer.inventory.items.push(item);
+                } catch(e) {}
+            }
+        }
+
+        // 恢复快捷栏（兼容旧格式）
+        const slotCount = oldData.slot_count || 10;
+        tempPlayer.quickSlot.slots = new Array(slotCount).fill(null);
+        if (oldData.quick_slot) {
+            for (const slot of oldData.quick_slot) {
+                if (slot.slot_index !== undefined && slot.slot_index < slotCount) {
+                    try {
+                        const item = Item.fromDict(slot);
+                        tempPlayer.quickSlot.slots[slot.slot_index] = item;
+                    } catch(e) {}
+                }
+            }
+        }
+
+        tempPlayer.quickSlot.secondarySlots = new Array(slotCount).fill(null);
+        if (oldData.secondary_slot) {
+            for (const slot of oldData.secondary_slot) {
+                if (slot.slot_index !== undefined && slot.slot_index < slotCount) {
+                    try {
+                        const item = Item.fromDict(slot);
+                        tempPlayer.quickSlot.secondarySlots[slot.slot_index] = item;
+                    } catch(e) {}
+                }
+            }
+        }
+
+        return tempPlayer;
+    }
+
+    // ========== 物品合并压缩 ==========
+    _mergeItems(items) {
+        const merged = new Map();
+
+        for (const item of items) {
+            if (!item || !item.type) continue;
+
+            const key = `${item.type}_${item.rarity}_${item.level || 1}`;
+
+            if (merged.has(key)) {
+                const existing = merged.get(key);
+                existing.count += item.count || 1;
+                existing.durability = Math.max(existing.durability, item.durability || 0);
+                existing.maxDurability = Math.max(existing.maxDurability, item.maxDurability || 0);
+                existing.isBroken = existing.isBroken && (item.isBroken || false);
+            } else {
+                merged.set(key, {
+                    type: item.type,
+                    rarity: item.rarity,
+                    level: item.level || 1,
+                    count: item.count || 1,
+                    durability: item.durability || 0,
+                    maxDurability: item.maxDurability || 0,
+                    isBroken: item.isBroken || false,
+                    reloadTime: item.reloadTime,
+                    baseReloadTime: item.baseReloadTime,
+                    armor: item.armor || 0
+                });
+            }
+        }
+
+        return Array.from(merged.values());
+    }
+
+    _expandItems(mergedItems) {
+        const items = [];
+        for (const merged of mergedItems) {
+            try {
+                const item = new Item(merged.type, merged.level, merged.rarity);
+                item.count = merged.count;
+                item.durability = merged.durability;
+                item.maxDurability = merged.maxDurability;
+                item.isBroken = merged.isBroken;
+                if (merged.reloadTime) item.reloadTime = merged.reloadTime;
+                if (merged.baseReloadTime) item.baseReloadTime = merged.baseReloadTime;
+                if (merged.armor) item.armor = merged.armor;
+                items.push(item);
+            } catch(e) {
+                console.warn("解压物品失败:", merged, e);
+            }
+        }
+        return items;
+    }
+
+    // ========== 分页存储 ==========
+    _saveToPages(key, items) {
+        if (!items || items.length === 0) {
+            localStorage.setItem(`${key}_meta`, JSON.stringify({ totalItems: 0, totalPages: 0 }));
+            return 0;
+        }
+
+        const totalPages = Math.ceil(items.length / this.ITEMS_PER_PAGE);
+
+        const meta = {
+            totalItems: items.length,
+            totalPages: totalPages,
+            pageSize: this.ITEMS_PER_PAGE,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(`${key}_meta`, JSON.stringify(meta));
+
+        for (let i = 0; i < totalPages; i++) {
+            const page = items.slice(i * this.ITEMS_PER_PAGE, (i + 1) * this.ITEMS_PER_PAGE);
+            localStorage.setItem(`${key}_page_${i}`, JSON.stringify(page));
+        }
+
+        for (let i = totalPages; i < this.MAX_PAGES; i++) {
+            localStorage.removeItem(`${key}_page_${i}`);
+        }
+
+        return totalPages;
+    }
+
+    _loadFromPages(key) {
+        const metaStr = localStorage.getItem(`${key}_meta`);
+        if (!metaStr) return null;
+
+        try {
+            const meta = JSON.parse(metaStr);
+            if (meta.totalPages === 0) return [];
+
+            const items = [];
+            for (let i = 0; i < meta.totalPages; i++) {
+                const pageStr = localStorage.getItem(`${key}_page_${i}`);
+                if (pageStr) {
+                    const page = JSON.parse(pageStr);
+                    items.push(...page);
+                }
+            }
+            return items;
+        } catch(e) {
+            console.error(`加载分页 ${key} 失败:`, e);
+            return null;
+        }
+    }
+
+    _getItemCount() {
+        try {
+            const inv = this._loadFromPages('inventory');
+            return inv ? inv.length : 0;
+        } catch(e) {
+            return 0;
+        }
+    }
+
+    // ========== 槽位压缩/解压（支持动态槽位）==========
+    _compressSlotArray(slots) {
+        if (!slots) return [];
+        const compressed = [];
+        for (let i = 0; i < slots.length; i++) {
+            const slot = slots[i];
+            if (slot && slot.type) {
+                compressed.push({
+                    i: i,
+                    t: slot.type,
+                    r: slot.rarity,
+                    l: slot.level || 1,
+                    c: slot.count || 1,
+                    d: slot.durability || 0,
+                    md: slot.maxDurability || 0,
+                    b: slot.isBroken || false,
+                    rt: slot.reloadTime,
+                    brt: slot.baseReloadTime,
+                    a: slot.armor || 0
+                });
+            }
+        }
+        return compressed;
+    }
+
+    _decompressSlotArray(compressed, slotCount = null) {
+        if (!compressed) return [];
+
+        let maxSlot = 0;
+        for (const s of compressed) {
+            if (s.i > maxSlot) maxSlot = s.i;
+        }
+        const targetCount = slotCount || (maxSlot + 1);
+
+        const slots = new Array(targetCount).fill(null);
+        for (const s of compressed) {
+            try {
+                const item = new Item(s.t, s.l, s.r);
+                item.count = s.c;
+                item.durability = s.d;
+                item.maxDurability = s.md;
+                item.isBroken = s.b;
+                if (s.rt) item.reloadTime = s.rt;
+                if (s.brt) item.baseReloadTime = s.brt;
+                if (s.a) item.armor = s.a;
+                slots[s.i] = item;
+            } catch(e) {
+                console.warn("解压槽位失败:", s, e);
+            }
+        }
+        return slots;
+    }
+
+    // ========== 保存游戏 ==========
     saveToLocal(player, gameData) {
         try {
-            // 收集物品数据
-            const inventoryItems = [];
-            if (player.inventory && player.inventory.items) {
-                for (const item of player.inventory.items) {
-                    if (item && typeof item.toDict === 'function') {
-                        inventoryItems.push(item.toDict());
-                    }
-                }
+            if (!player) {
+                console.error("[SAVE ERROR] Player is null");
+                return false;
             }
 
-            // 收集主栏快捷栏数据（动态长度）
-            const quickSlotItems = [];
-            if (player.quickSlot && player.quickSlot.slots) {
-                for (let i = 0; i < player.quickSlot.slots.length; i++) {
-                    const item = player.quickSlot.slots[i];
-                    if (item && typeof item.toDict === 'function') {
-                        quickSlotItems.push({
-                            slot_index: i,
-                            ...item.toDict()
-                        });
-                    }
-                }
-            }
+            const mergedInventory = this._mergeItems(player.inventory?.items || []);
 
-            // 收集副栏快捷栏数据（动态长度）
-            const secondarySlotItems = [];
-            if (player.quickSlot && player.quickSlot.secondarySlots) {
-                for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
-                    const item = player.quickSlot.secondarySlots[i];
-                    if (item && typeof item.toDict === 'function') {
-                        secondarySlotItems.push({
-                            slot_index: i,
-                            ...item.toDict()
-                        });
-                    }
-                }
-            }
-
-            // ✅ 保存当前槽位数量
-            const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
-
-            const saveData = {
-                "timestamp": Date.now(),
-                "slot_count": currentSlotCount,  // 新增：保存槽位数量
-                "player_data": {
-                    "player_rarity": player.playerRarity || "Common",
-                    "health": player.health || 100,
-                    "max_health": player.maxHealth || 100,
-                    "petal_count": player.petalCount || 5,
-                    "score": gameData.score || 0,
-                    "enemies_killed": gameData.enemiesKilled || 0,
-                    "level": player.levelSystem ? player.levelSystem.level : 1,
-                    "current_xp": player.levelSystem ? player.levelSystem.currentXp : 0,
-                    "total_xp": player.xp || 0,
-                    "player_position": {
-                        "x": player.physicsBody ? player.physicsBody.position.x : WORLD_WIDTH / 2,
-                        "y": player.physicsBody ? player.physicsBody.position.y : WORLD_HEIGHT / 2
-                    }
-                },
-                "inventory": inventoryItems,
-                "quick_slot": quickSlotItems,
-                "secondary_slot": secondarySlotItems,
-                "game_state": {
-                    "current_wave": gameData.currentWave || 1,
-                    "game_over": gameData.gameOver || false
-                },
-                "version": "1.0.0",
-                "save_type": "autosave"
+            const playerData = {
+                l: player.levelSystem?.level || 1,
+                x: player.levelSystem?.currentXp || 0,
+                tx: player.xp || 0,
+                h: player.health || 100,
+                mh: player.maxHealth || 100,
+                pc: player.petalCount || 5,
+                pr: player.playerRarity || "Common",
+                px: player.physicsBody?.position?.x || WORLD_WIDTH / 2,
+                py: player.physicsBody?.position?.y || WORLD_HEIGHT / 2
             };
 
-            localStorage.setItem('autosave', JSON.stringify(saveData));
+            const gameState = {
+                s: gameData?.score || 0,
+                ek: gameData?.enemiesKilled || 0,
+                w: gameData?.currentWave || 1
+            };
+
+            // ✅ 保存所有槽位（不限制数量）
+            const quickSlotData = this._compressSlotArray(player.quickSlot?.slots || []);
+            const secondarySlotData = this._compressSlotArray(player.quickSlot?.secondarySlots || []);
+
+            // ✅ 保存当前槽位数量
+            const slotCount = player.quickSlot?.slots?.length || 10;
+
+            const saveId = `save_${Date.now()}`;
+            const saveData = {
+                id: saveId,
+                ver: this.CURRENT_VERSION,
+                ts: Date.now(),
+                slotCount: slotCount,
+                pd: playerData,
+                gs: gameState,
+                qs: quickSlotData,
+                ss: secondarySlotData
+            };
+
+            localStorage.setItem('game_meta', JSON.stringify(saveData));
+            this._saveToPages('inventory', mergedInventory);
+            this._updateSaveIndex(saveId);
+            this._cleanOldSaves();
+
+            const savedCount = player.inventory?.items?.length || 0;
+            const mergedCount = mergedInventory.length;
+            if (savedCount > 100) {
+                console.log(`💾 保存成功: ${mergedCount} 种物品 (原始 ${savedCount} 个, 节省 ${((1 - mergedCount/savedCount)*100).toFixed(1)}%), 槽位数: ${slotCount}`);
+            }
             return true;
+
         } catch (error) {
             console.error("[SAVE ERROR] Failed to save game locally:", error);
             return false;
         }
     }
 
+    _updateSaveIndex(saveId) {
+        let index = [];
+        try {
+            const existing = localStorage.getItem('save_index');
+            if (existing) index = JSON.parse(existing);
+        } catch(e) {}
 
+        index.unshift({
+            id: saveId,
+            timestamp: Date.now(),
+            itemCount: this._getItemCount()
+        });
 
-    // 在 AutoSaveSystem 类中修改 loadFromLocal 方法
+        localStorage.setItem('save_index', JSON.stringify(index.slice(0, 10)));
+    }
+
+    _cleanOldSaves() {
+        try {
+            const index = JSON.parse(localStorage.getItem('save_index') || '[]');
+            if (index.length > 5) {
+                const toDelete = index.slice(5);
+                for (const save of toDelete) {
+                    localStorage.removeItem(`save_${save.id}`);
+                }
+            }
+        } catch(e) {}
+    }
+
+    // ========== 加载游戏 ==========
     loadFromLocal() {
         try {
-            const saveDataStr = localStorage.getItem('autosave');
-            if (!saveDataStr) {
-                console.log("[LOAD] No local save file found");
-                return null;
+            const saveDataStr = localStorage.getItem('game_meta');
+            if (saveDataStr) {
+                const saveData = JSON.parse(saveDataStr);
+
+                const mergedInventory = this._loadFromPages('inventory') || [];
+                const inventory = this._expandItems(mergedInventory);
+
+                // ✅ 使用保存的槽位数量恢复
+                const savedSlotCount = saveData.slotCount || 10;
+                const quickSlot = this._decompressSlotArray(saveData.qs || [], savedSlotCount);
+                const secondarySlot = this._decompressSlotArray(saveData.ss || [], savedSlotCount);
+
+                const pd = saveData.pd || {};
+                const gs = saveData.gs || {};
+
+                const result = {
+                    timestamp: saveData.ts || Date.now(),
+                    slot_count: savedSlotCount,
+                    player_data: {
+                        level: pd.l || 1,
+                        current_xp: pd.x || 0,
+                        total_xp: pd.tx || 0,
+                        health: pd.h || 100,
+                        max_health: pd.mh || 100,
+                        petal_count: pd.pc || 5,
+                        player_rarity: pd.pr || "Common",
+                        player_position: { x: pd.px || WORLD_WIDTH / 2, y: pd.py || WORLD_HEIGHT / 2 },
+                        score: gs.s || 0,
+                        enemies_killed: gs.ek || 0
+                    },
+                    inventory: inventory,
+                    quick_slot: quickSlot,
+                    secondary_slot: secondarySlot,
+                    game_state: {
+                        score: gs.s || 0,
+                        enemies_killed: gs.ek || 0,
+                        current_wave: gs.w || 1
+                    },
+                    version: saveData.ver || this.CURRENT_VERSION,
+                    save_type: "autosave"
+                };
+
+                console.log(`📦 加载成功: ${inventory.length} 种物品, ${savedSlotCount} 个槽位`);
+                return result;
             }
 
-            const saveData = JSON.parse(saveDataStr);
-
-            // ✅ 确保有 secondary_slot 字段
-            if (!saveData.secondary_slot) {
-                saveData.secondary_slot = [];
+            const oldSave = localStorage.getItem('autosave');
+            if (oldSave) {
+                console.log("📦 加载旧格式存档");
+                return JSON.parse(oldSave);
             }
 
-            // ✅ 确保有 slot_count 字段（旧存档兼容）
-            if (!saveData.slot_count) {
-                saveData.slot_count = 10; // 旧存档默认10个槽位
-            }
+            console.log("[LOAD] No local save file found");
+            return null;
 
-            console.log("[LOAD] Local save loaded, slot_count:", saveData.slot_count);
-            return saveData;
         } catch (error) {
             console.error("[LOAD ERROR] Failed to load local save:", error);
             return null;
         }
     }
 
-    async saveGame(player, gameData) {
-        // 先保存到本地
-        const localSuccess = this.saveToLocal(player, gameData);
+    // ========== 存储信息 ==========
+    getStorageInfo() {
+        let totalSize = 0;
+        let itemCount = 0;
 
-        // 如果启用了 Gist，也保存到云端
-        if (this.useGist && window.dataManager) {
-            try {
-                const playerData = this.preparePlayerData(player, gameData);
-                await window.dataManager.savePlayerData(player.playerId, playerData);
-                console.log('☁️ 云存档保存成功');
-            } catch (error) {
-                console.error('☁️ 云存档保存失败:', error);
+        try {
+            const meta = localStorage.getItem('game_meta');
+            if (meta) totalSize += meta.length;
+
+            const inv = this._loadFromPages('inventory');
+            if (inv) itemCount = inv.length;
+
+            for (let i = 0; i < 20; i++) {
+                const page = localStorage.getItem(`inventory_page_${i}`);
+                if (page) totalSize += page.length;
             }
-        }
 
-        return localSuccess;
-    }
+            const index = localStorage.getItem('save_index');
+            if (index) totalSize += index.length;
 
-    preparePlayerData(player, gameData) {
-        // 收集物品数据
-        const inventoryItems = [];
-        if (player.inventory && player.inventory.items) {
-            for (const item of player.inventory.items) {
-                if (item && typeof item.toDict === 'function') {
-                    inventoryItems.push(item.toDict());
-                }
-            }
-        }
-
-        const quickSlotItems = [];
-        if (player.quickSlot && player.quickSlot.slots) {
-            for (let i = 0; i < player.quickSlot.slots.length; i++) {
-                const item = player.quickSlot.slots[i];
-                if (item && typeof item.toDict === 'function') {
-                    quickSlotItems.push({
-                        slot_index: i,
-                        ...item.toDict()
-                    });
-                }
-            }
-        }
+        } catch(e) {}
 
         return {
-            playerId: player.playerId,
-            playerName: player.playerName || 'Unknown',
-            lastSave: new Date().toISOString(),
-            player_data: {
-                level: player.levelSystem?.level || 1,
-                health: player.health,
-                maxHealth: player.maxHealth,
-                xp: player.xp,
-                playerRarity: player.playerRarity || "Common",
-                position: {
-                    x: player.physicsBody?.position?.x || WORLD_WIDTH / 2,
-                    y: player.physicsBody?.position?.y || WORLD_HEIGHT / 2
-                }
-            },
-            inventory: inventoryItems,
-            quick_slot: quickSlotItems,
-            game_data: {
-                score: gameData.score || 0,
-                enemiesKilled: gameData.enemiesKilled || 0
-            }
+            itemTypes: itemCount,
+            totalSize: (totalSize / 1024).toFixed(2) + ' KB',
+            estimatedOriginalItems: itemCount * 10,
+            version: this.CURRENT_VERSION
         };
     }
 
-    async loadGame(player) {
-        // 先尝试从本地加载
-        const localData = this.loadFromLocal(); // 🟢 现在这个方法存在了
-
-        // 如果启用了 Gist，从云端加载
-        if (this.useGist && window.dataManager) {
-            try {
-                const cloudData = await window.dataManager.loadPlayerData(player.playerId);
-                if (cloudData) {
-                    console.log('☁️ 从云端加载存档');
-                    return this.applyCloudData(player, cloudData);
-                }
-            } catch (error) {
-                console.error('☁️ 云端加载失败，使用本地存档:', error);
-            }
-        }
-
-        return localData;
-    }
-
-    applyCloudData(player, cloudData) {
-        // 应用云端数据到玩家
-        if (cloudData.player_data) {
-            const pd = cloudData.player_data;
-            if (player.levelSystem) {
-                player.levelSystem.level = pd.level || 1;
-                player.xp = pd.xp || 0;
-                player.maxHealth = pd.maxHealth || 100;
-                player.health = Math.min(pd.health || 100, player.maxHealth);
-            }
-
-            if (pd.position && player.physicsBody) {
-                player.physicsBody.position.x = pd.position.x || WORLD_WIDTH / 2;
-                player.physicsBody.position.y = pd.position.y || WORLD_HEIGHT / 2;
-            }
-        }
-
-        // 加载背包
-        if (cloudData.inventory && player.inventory) {
-            try {
-                player.inventory.items = [];
-                for (const itemData of cloudData.inventory) {
-                    if (typeof Item.fromDict === 'function') {
-                        const item = Item.fromDict(itemData);
-                        player.inventory.items.push(item);
-                    }
-                }
-            } catch (error) {
-                console.error('加载背包失败:', error);
-            }
-        }
-
-        return cloudData.game_data || {};
-    }
-
-    hasSaveData() {
+    clearAllSaves() {
         try {
-            const saveDataStr = localStorage.getItem('autosave');
-            if (!saveDataStr) return false;
-            JSON.parse(saveDataStr);
+            localStorage.removeItem('game_meta');
+
+            for (let i = 0; i < this.MAX_PAGES; i++) {
+                localStorage.removeItem(`inventory_page_${i}`);
+            }
+            localStorage.removeItem('inventory_meta');
+            localStorage.removeItem('save_index');
+            localStorage.removeItem('autosave');
+            localStorage.removeItem('autosave_backup');
+
+            console.log("🗑️ 所有存档已清除");
             return true;
-        } catch {
+        } catch(e) {
+            console.error("清除存档失败:", e);
             return false;
         }
     }
-
-    getSaveInfo() {
-        if (!this.hasSaveData()) {
-            return null;
-        }
-
-        try {
-            const saveDataStr = localStorage.getItem('autosave');
-            const saveData = JSON.parse(saveDataStr);
-
-            const timestamp = saveData.timestamp || 0;
-            const date = new Date(timestamp);
-            const formattedTime = date.toLocaleString();
-
-            const info = {
-                "timestamp": timestamp,
-                "formatted_time": formattedTime,
-                "player_level": saveData.player_data?.level || 1,
-                "player_rarity": saveData.player_data?.player_rarity || "Common",
-                "score": saveData.player_data?.score || 0,
-                "wave": saveData.game_state?.current_wave || 1,
-                "inventory_count": saveData.inventory?.length || 0,
-                "version": saveData.version || "unknown"
-            };
-
-            return info;
-        } catch {
-            return null;
-        }
-    }
 }
-
 class ChangelogPanel {
     constructor() {
         this.visible = false;
@@ -4382,8 +4621,11 @@ class AccountSystem {
         this.users = new Map();
         this.autoSaveEnabled = true;
         this.STORAGE_KEY = 'flwrr_accounts_data';
+        this.LAST_USER_KEY = 'flwrr_last_user';      // 最后登录用户
+        this.LOGIN_COUNT_KEY = 'flwrr_login_counts';  // 登录次数统计
 
         this.loadAllUsers();
+        this.loadLoginCounts();
 
         // 每30秒自动保存一次
         setInterval(() => {
@@ -4391,6 +4633,9 @@ class AccountSystem {
                 this.saveAllUsers();
             }
         }, 30000);
+
+        // 延迟自动登录（等待游戏初始化完成）
+        setTimeout(() => this.autoLogin(), 500);
     }
 
     // 从 localStorage 加载所有用户
@@ -4408,6 +4653,104 @@ class AccountSystem {
             console.error('加载用户数据失败:', error);
             this.users = new Map();
         }
+    }
+
+    // 加载登录次数统计
+    loadLoginCounts() {
+        try {
+            const saved = localStorage.getItem(this.LOGIN_COUNT_KEY);
+            if (saved) {
+                this.loginCounts = JSON.parse(saved);
+            } else {
+                this.loginCounts = {};
+            }
+        } catch (e) {
+            this.loginCounts = {};
+        }
+    }
+
+    // 保存登录次数统计
+    saveLoginCounts() {
+        try {
+            localStorage.setItem(this.LOGIN_COUNT_KEY, JSON.stringify(this.loginCounts));
+        } catch (e) {}
+    }
+
+    // 记录登录
+    recordLogin(username) {
+        this.loginCounts[username] = (this.loginCounts[username] || 0) + 1;
+        this.saveLoginCounts();
+        localStorage.setItem(this.LAST_USER_KEY, username);
+    }
+
+    // 获取最常使用的账号
+    getMostUsedAccount() {
+        let mostUsed = null;
+        let maxCount = 0;
+
+        for (const [username, count] of Object.entries(this.loginCounts)) {
+            if (this.users.has(username) && count > maxCount) {
+                maxCount = count;
+                mostUsed = username;
+            }
+        }
+
+        return mostUsed;
+    }
+
+    // 获取最后登录的账号
+    getLastLoginAccount() {
+        return localStorage.getItem(this.LAST_USER_KEY);
+    }
+
+    // 自动登录
+    async autoLogin() {
+        if (this.currentUser) return;
+
+        let username = this.getLastLoginAccount();
+        if (!username) {
+            username = this.getMostUsedAccount();
+        }
+
+        if (!username) {
+            console.log("没有可自动登录的账号");
+            return;
+        }
+
+        const userData = this.users.get(username);
+        if (!userData) return;
+
+        this.currentUser = username;
+        userData.lastLogin = Date.now();
+        this.saveAllUsers();
+
+        console.log(`🔐 自动登录成功: ${username}`);
+
+        if (window.gameInstance && window.gameInstance.onLoginSuccess) {
+            window.gameInstance.onLoginSuccess(userData.gameData);
+        }
+
+        this.updateUIAfterLogin();
+
+        return { success: true, message: '自动登录成功', gameData: userData.gameData };
+    }
+
+    // 登录后更新UI
+    updateUIAfterLogin() {
+        const ud = document.getElementById('current-user');
+        if (ud) {
+            ud.style.display = 'block';
+            ud.innerHTML = `👤 ${this.currentUser}`;
+        }
+
+        if (window.gameInstance?.mainMenu) {
+            window.gameInstance.mainMenu.recalculatePositions();
+        }
+    }
+
+    // 清除自动登录记录
+    clearAutoLogin() {
+        localStorage.removeItem(this.LAST_USER_KEY);
     }
 
     // 保存所有用户到 localStorage
@@ -4477,6 +4820,9 @@ class AccountSystem {
         this.currentUser = username;
         this.saveAllUsers();
 
+        // 记录登录次数和最后登录
+        this.recordLogin(username);
+
         return {
             success: true,
             message: '登录成功',
@@ -4528,56 +4874,76 @@ class AccountSystem {
         return userData.gameData;
     }
 
-    // 在 AccountSystem 类中修改 prepareGameData 方法
     prepareGameData(player, gameData) {
-        const inventoryItems = [];
+        const autoSave = window.gameInstance?.autoSaveSystem;
+
+        // 获取当前槽位数量
+        const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
+
+        // ========== 1. 压缩背包物品 ==========
+        let inventoryItems = [];
         if (player.inventory && player.inventory.items) {
-            for (const item of player.inventory.items) {
-                if (item && typeof item.toDict === 'function') {
-                    inventoryItems.push(item.toDict());
+            if (autoSave && typeof autoSave.compressItemsForCloud === 'function') {
+                inventoryItems = autoSave.compressItemsForCloud(player.inventory.items);
+                console.log(`📦 压缩背包: ${player.inventory.items.length} 个物品 → ${inventoryItems.length} 种`);
+            } else {
+                for (const item of player.inventory.items) {
+                    if (item && typeof item.toDict === 'function') {
+                        inventoryItems.push(item.toDict());
+                    }
                 }
             }
         }
 
-        // 主栏（动态长度）
-        const quickSlotItems = [];
+        // ========== 2. 压缩快捷栏（主栏）==========
+        let quickSlotItems = [];
         if (player.quickSlot && player.quickSlot.slots) {
-            for (let i = 0; i < player.quickSlot.slots.length; i++) {
-                const item = player.quickSlot.slots[i];
-                if (item && typeof item.toDict === 'function') {
-                    quickSlotItems.push({
-                        slot_index: i,
-                        ...item.toDict()
-                    });
+            if (autoSave && typeof autoSave.compressSlotsForCloud === 'function') {
+                quickSlotItems = autoSave.compressSlotsForCloud(player.quickSlot.slots);
+                console.log(`📦 压缩主栏: ${player.quickSlot.slots.length} 个槽位, 有物品: ${quickSlotItems.length} 个`);
+            } else {
+                for (let i = 0; i < player.quickSlot.slots.length; i++) {
+                    const item = player.quickSlot.slots[i];
+                    if (item && typeof item.toDict === 'function') {
+                        quickSlotItems.push({
+                            slot_index: i,
+                            ...item.toDict()
+                        });
+                    }
                 }
             }
         }
 
-        // 副栏（动态长度）
-        const secondarySlotItems = [];
+        // ========== 3. 压缩快捷栏（副栏）==========
+        let secondarySlotItems = [];
         if (player.quickSlot && player.quickSlot.secondarySlots) {
-            for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
-                const item = player.quickSlot.secondarySlots[i];
-                if (item && typeof item.toDict === 'function') {
-                    secondarySlotItems.push({
-                        slot_index: i,
-                        ...item.toDict()
-                    });
+            if (autoSave && typeof autoSave.compressSlotsForCloud === 'function') {
+                secondarySlotItems = autoSave.compressSlotsForCloud(player.quickSlot.secondarySlots);
+                console.log(`📦 压缩副栏: ${player.quickSlot.secondarySlots.length} 个槽位, 有物品: ${secondarySlotItems.length} 个`);
+            } else {
+                for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
+                    const item = player.quickSlot.secondarySlots[i];
+                    if (item && typeof item.toDict === 'function') {
+                        secondarySlotItems.push({
+                            slot_index: i,
+                            ...item.toDict()
+                        });
+                    }
                 }
             }
         }
 
+        // ========== 4. 星星数量 ==========
         let starCount = 0;
         if (window.gameInstance && window.gameInstance.shopSystem) {
             starCount = window.gameInstance.shopSystem.getStarCount();
         }
 
-        // ✅ 保存当前槽位数量
-        const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
-
+        // ========== 5. 构建保存数据 ==========
         return {
             timestamp: Date.now(),
-            slot_count: currentSlotCount,  // 新增
+            slot_count: currentSlotCount,
+            compressed: true,
             player_data: {
                 player_rarity: player.playerRarity || "Common",
                 health: player.health || 100,
@@ -4606,24 +4972,23 @@ class AccountSystem {
                 last_play_time: Date.now(),
                 game_mode: gameData?.multiplayerData ? 'multiplayer' : 'single'
             },
-            version: "1.0.0"
+            version: "2.0.0"
         };
     }
 
-    // 在 AccountSystem 类中修改 applyGameData 方法
     applyGameData(player, saveData) {
         if (!saveData) {
             return null;
         }
 
-        // ✅ 获取保存的槽位数量
+        const autoSave = window.gameInstance?.autoSaveSystem;
+        const isCompressed = saveData.compressed === true;
+
         const savedSlotCount = saveData.slot_count || 5;
         const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
-
-        // 如果等级已经超过保存时的等级，使用当前等级计算的槽位数
-        // 否则使用保存的槽位数
         const targetSlotCount = Math.max(savedSlotCount, currentSlotCount);
 
+        // ========== 1. 恢复玩家基础数据 ==========
         if (saveData.player_data) {
             const pd = saveData.player_data;
 
@@ -4637,9 +5002,7 @@ class AccountSystem {
                 player.health = Math.min(pd.health || player.maxHealth, player.maxHealth);
             }
 
-            const currentMinPetalCount = 5;
-            const oldPetalCount = pd.petal_count || 5;
-            player.petalCount = Math.max(currentMinPetalCount, oldPetalCount, targetSlotCount);
+            player.petalCount = Math.max(5, pd.petal_count || 5, targetSlotCount);
 
             if (pd.player_rarity) {
                 player.playerRarity = pd.player_rarity;
@@ -4659,98 +5022,134 @@ class AccountSystem {
             }
         }
 
-        // 清空背包
+        // ========== 2. 清空现有数据 ==========
         if (player.inventory) {
             player.inventory.items = [];
         }
 
-        // 清空主栏和副栏（使用目标槽位数）
         if (player.quickSlot) {
             player.quickSlot.slots = new Array(targetSlotCount).fill(null);
             player.quickSlot.secondarySlots = new Array(targetSlotCount).fill(null);
         }
 
-        // 加载背包物品
+        // ========== 3. 恢复背包物品 ==========
         if (saveData.inventory && player.inventory) {
-            for (const itemData of saveData.inventory) {
-                try {
-                    if (!itemData.type || !itemData.rarity) continue;
-                    let item;
-                    if (itemData.type === "DNA") {
-                        item = new DNA(itemData.rarity, parseInt(itemData.level) || 1);
-                    } else {
-                        item = new Item(itemData.type, parseInt(itemData.level) || 1, itemData.rarity);
-                    }
-                    item.count = itemData.count || 1;
-                    if (itemData.durability !== undefined) item.durability = itemData.durability;
-                    if (itemData.maxDurability !== undefined) item.maxDurability = itemData.maxDurability;
-                    if (itemData.isBroken !== undefined) item.isBroken = itemData.isBroken;
-                    if (itemData.reloadTime !== undefined) item.reloadTime = itemData.reloadTime;
-                    if (itemData.baseReloadTime !== undefined) item.baseReloadTime = itemData.baseReloadTime;
-                    if (itemData.armor !== undefined) item.armor = itemData.armor;
+            if (isCompressed && autoSave && typeof autoSave.decompressItemsForCloud === 'function') {
+                const items = autoSave.decompressItemsForCloud(saveData.inventory);
+                for (const item of items) {
                     player.inventory.items.push(item);
-                } catch (error) {
-                    console.error('加载物品失败:', error);
+                }
+                console.log(`📦 从压缩格式恢复背包: ${items.length} 种物品`);
+            } else {
+                for (const itemData of saveData.inventory) {
+                    try {
+                        if (!itemData.type || !itemData.rarity) continue;
+                        let item;
+                        if (itemData.type === "DNA") {
+                            item = new DNA(itemData.rarity, parseInt(itemData.level) || 1);
+                        } else {
+                            item = new Item(itemData.type, parseInt(itemData.level) || 1, itemData.rarity);
+                        }
+                        item.count = itemData.count || 1;
+                        if (itemData.durability !== undefined) item.durability = itemData.durability;
+                        if (itemData.maxDurability !== undefined) item.maxDurability = itemData.maxDurability;
+                        if (itemData.isBroken !== undefined) item.isBroken = itemData.isBroken;
+                        if (itemData.reloadTime !== undefined) item.reloadTime = itemData.reloadTime;
+                        if (itemData.baseReloadTime !== undefined) item.baseReloadTime = itemData.baseReloadTime;
+                        if (itemData.armor !== undefined) item.armor = itemData.armor;
+                        player.inventory.items.push(item);
+                    } catch (error) {
+                        console.error('加载背包物品失败:', error);
+                    }
                 }
             }
         }
 
-        // 加载主栏快捷栏
+        // ========== 4. 恢复主栏快捷栏 ==========
         if (saveData.quick_slot && player.quickSlot) {
-            for (const slotData of saveData.quick_slot) {
-                if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
-                    try {
-                        if (!slotData.type || !slotData.rarity) continue;
-                        let item;
-                        if (slotData.type === "DNA") {
-                            item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
-                        } else {
-                            item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
+            if (isCompressed && autoSave && typeof autoSave.decompressSlotsForCloud === 'function') {
+                const slots = autoSave.decompressSlotsForCloud(saveData.quick_slot, targetSlotCount);
+                for (let i = 0; i < slots.length && i < player.quickSlot.slots.length; i++) {
+                    if (slots[i]) {
+                        player.quickSlot.slots[i] = slots[i];
+                    }
+                }
+                console.log(`📦 从压缩格式恢复主栏: ${slots.filter(s => s).length} 个物品, 目标槽位数: ${targetSlotCount}`);
+            } else {
+                for (const slotData of saveData.quick_slot) {
+                    if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
+                        try {
+                            if (!slotData.type || !slotData.rarity) continue;
+                            let item;
+                            if (slotData.type === "DNA") {
+                                item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
+                            } else {
+                                item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
+                            }
+                            item.count = slotData.count || 1;
+                            if (slotData.durability !== undefined) item.durability = slotData.durability;
+                            if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
+                            if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
+                            if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
+                            if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
+                            if (slotData.armor !== undefined) item.armor = slotData.armor;
+                            player.quickSlot.slots[slotData.slot_index] = item;
+                        } catch (error) {
+                            console.error('加载主栏物品失败:', error);
                         }
-                        item.count = slotData.count || 1;
-                        if (slotData.durability !== undefined) item.durability = slotData.durability;
-                        if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
-                        if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
-                        if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
-                        if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
-                        if (slotData.armor !== undefined) item.armor = slotData.armor;
-                        player.quickSlot.slots[slotData.slot_index] = item;
-                    } catch (error) {
-                        console.error('加载主栏物品失败:', error);
                     }
                 }
             }
         }
 
-        // 加载副栏
+        // ========== 5. 恢复副栏 ==========
         if (saveData.secondary_slot && player.quickSlot) {
-            for (const slotData of saveData.secondary_slot) {
-                if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
-                    try {
-                        if (!slotData.type || !slotData.rarity) continue;
-                        let item;
-                        if (slotData.type === "DNA") {
-                            item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
-                        } else {
-                            item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
+            if (isCompressed && autoSave && typeof autoSave.decompressSlotsForCloud === 'function') {
+                const slots = autoSave.decompressSlotsForCloud(saveData.secondary_slot, targetSlotCount);
+                for (let i = 0; i < slots.length && i < player.quickSlot.secondarySlots.length; i++) {
+                    if (slots[i]) {
+                        player.quickSlot.secondarySlots[i] = slots[i];
+                    }
+                }
+                console.log(`📦 从压缩格式恢复副栏: ${slots.filter(s => s).length} 个物品`);
+            } else {
+                for (const slotData of saveData.secondary_slot) {
+                    if (slotData.slot_index !== undefined && slotData.slot_index < targetSlotCount) {
+                        try {
+                            if (!slotData.type || !slotData.rarity) continue;
+                            let item;
+                            if (slotData.type === "DNA") {
+                                item = new DNA(slotData.rarity, parseInt(slotData.level) || 1);
+                            } else {
+                                item = new Item(slotData.type, parseInt(slotData.level) || 1, slotData.rarity);
+                            }
+                            item.count = slotData.count || 1;
+                            if (slotData.durability !== undefined) item.durability = slotData.durability;
+                            if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
+                            if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
+                            if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
+                            if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
+                            if (slotData.armor !== undefined) item.armor = slotData.armor;
+                            player.quickSlot.secondarySlots[slotData.slot_index] = item;
+                        } catch (error) {
+                            console.error('加载副栏物品失败:', error);
                         }
-                        item.count = slotData.count || 1;
-                        if (slotData.durability !== undefined) item.durability = slotData.durability;
-                        if (slotData.maxDurability !== undefined) item.maxDurability = slotData.maxDurability;
-                        if (slotData.isBroken !== undefined) item.isBroken = slotData.isBroken;
-                        if (slotData.reloadTime !== undefined) item.reloadTime = slotData.reloadTime;
-                        if (slotData.baseReloadTime !== undefined) item.baseReloadTime = slotData.baseReloadTime;
-                        if (slotData.armor !== undefined) item.armor = slotData.armor;
-                        player.quickSlot.secondarySlots[slotData.slot_index] = item;
-                    } catch (error) {
-                        console.error('加载副栏物品失败:', error);
                     }
                 }
             }
         }
 
+        // ========== 6. 重建花瓣并同步 ==========
         this.recreatePetals(player);
         player.updateStatsFromPetals();
+
+        if (player.quickSlot) {
+            for (let i = 0; i < player.quickSlot.slots.length; i++) {
+                player.quickSlot.updatePetalFromSlot(i);
+            }
+        }
+
+        console.log(`✅ 加载完成: 槽位数=${targetSlotCount}, 主栏物品=${player.quickSlot.slots.filter(s => s).length}, 背包种类=${player.inventory.items.length}`);
 
         return saveData.game_data || {};
     }
@@ -6036,7 +6435,7 @@ class TooltipSystem {
             "Magnet": "Attracts dropped items from a distance",
             "Cactus": "Increases maximum health significantly",
             "Antennae": "Expands your view range",
-            "ThirdEye": "Increases petal attack range",
+            "Third Eye": "Increases petal attack range",
             "Heavy": "Knocks back enemies with great force",
             "Rock": "Very durable with high defense",
             "DNA": "1% chance to upgrade summoned mob rarity",
@@ -6070,16 +6469,16 @@ class TooltipSystem {
             "Carrot": "Heals and increases movement speed",
             "Icicle": "Pierces through enemies with freeze chance (35%)",
             "Snowflake": "Quick attacking with slow effect (20% slow)",
-            "SnowStick": "Summons Snowstorms to freeze enemies",
-            "Ice Dragon egg": "Summons an Ice Dragon that freezes enemies",
-            "Ice Cube egg": "Summons an Ice Cube that can freeze",
-            "Igloo egg": "Summons Snowmen from an Igloo",
-            "SlagMight egg": "Summons a Slag Might minion",
-            "Tick egg": "Summons a Tick that latches onto enemies",
-            "ArcticSpider egg": "Summons Arctic Spiders",
-            "ArcticSpiderCave egg": "Summons multiple Arctic Spiders",
-            "Snowman egg": "Summons a Snowman",
-            "Frost Digger egg": "Summons a Frost Digger that freezes enemies",
+            "Snow Stick": "Summons Snowstorms to freeze enemies",
+            "Ice Dragon Egg": "Summons an Ice Dragon that freezes enemies",
+            "Ice Cube Egg": "Summons an Ice Cube that can freeze",
+            "Igloo Egg": "Summons Snowmen from an Igloo",
+            "Stalagmite Egg": "Summons a Slag Might minion",
+            "Tick Egg": "Summons a Tick that latches onto enemies",
+            "Arctic Spider Egg": "Summons Arctic Spiders",
+            "Arctic Spider Cave Egg": "Summons multiple Arctic Spiders",
+            "Snowman Egg": "Summons a Snowman",
+            "Frost Digger Egg": "Summons a Frost Digger that freezes enemies",
 
             // ==================== Hel 地狱物品 ====================
             "Faster": "Increases attack speed significantly",
@@ -6088,20 +6487,20 @@ class TooltipSystem {
             "Glass": "High critical chance (25%) and damage (2.5x)",
             "Hel Honey": "Heals and slows enemies (20% slow)",
             "Hel Lighting": "Chains lightning between 4 enemies",
-            "FireStick": "Summons Firestorms to burn enemies",
-            "HelWorm egg": "Summons a Hel Worm that burrows",
-            "HelSpider egg": "Summons a Hel Spider with web attack",
-            "Hel Bee egg": "Summons a Hel Bee that stings",
-            "HelHornet egg": "Summons a Hel Hornet with ranged attack",
-            "HelBeetle egg": "Summons a Hel Beetle that charges",
-            "Dragon egg": "Summons a Dragon",
-            "DragonNest egg": "Summons Dragons from a nest",
-            "HelHive egg": "Summons Hel Bees from a hive",
-            "HelJellyfish egg": "Summons a Hel Jellyfish",
-            "Hel Queen Bee egg": "Summons a Hel Queen Bee",
-            "ToxicDragon egg": "Summons a Toxic Dragon that poisons",
-            "Hel Digger egg": "Summons a Hel Digger",
-            "Hel Beekeeper egg": "Summons a Hel Beekeeper",
+            "Fire Stick": "Summons Firestorms to burn enemies",
+            "Hel Worm Egg": "Summons a Hel Worm that burrows",
+            "Hel Spider Egg": "Summons a Hel Spider with web attack",
+            "Hel Bee Egg": "Summons a Hel Bee that stings",
+            "Hel Hornet Egg": "Summons a Hel Hornet with ranged attack",
+            "Hel Beetle Egg": "Summons a Hel Beetle that charges",
+            "Dragon Egg": "Summons a Dragon",
+            "Dragon Nest Egg": "Summons Dragons from a nest",
+            "Hel Hive Egg": "Summons Hel Bees from a hive",
+            "Hel Jellyfish Egg": "Summons a Hel Jellyfish",
+            "Hel Queen Bee Egg": "Summons a Hel Queen Bee",
+            "Toxic Dragon Egg": "Summons a Toxic Dragon that poisons",
+            "Hel Digger Egg": "Summons a Hel Digger",
+            "Hel Beekeeper Egg": "Summons a Hel Beekeeper",
 
             // ==================== Jungle 丛林物品 ====================
             "Relic": "Mysterious ancient item with unknown power",
@@ -6110,24 +6509,24 @@ class TooltipSystem {
             "Soil": "Slows enemies with dirt particles",
             "Tomato": "High damage with minor healing",
             "Rubber": "Provides damage reduction (15%)",
-            "Wasp egg": "Summons a Wasp that stings from range",
-            "Worker Termite egg": "Summons Worker Termites",
-            "Soldier Termite egg": "Summons Soldier Termites",
-            "StickBug egg": "Summons a Stick Bug that camouflages",
-            "Mantis egg": "Summons a Mantis that strikes fast",
-            "Firefly egg": "Summons Fireflies that light the way",
-            "TermiteHole egg": "Summons Soldier Termites from a hole",
-            "TermiteOvermind egg": "Summons a Termite Overmind",
-            "SpiderCave egg": "Summons Spiders from a cave",
-            "Beetle egg": "Summons a Beetle that charges",
-            "Scorpion egg": "Summons a Scorpion that poisons",
-            "Ladybug egg": "Summons a Ladybug",
-            "Bee egg": "Summons a Bee",
-            "Hive egg": "Summons Bees from a Hive",
-            "Queen Bee egg": "Summons a Queen Bee that heals allies",
+            "Wasp Egg": "Summons a Wasp that stings from range",
+            "Worker Termite Egg": "Summons Worker Termites",
+            "Soldier Termite Egg": "Summons Soldier Termites",
+            "Stickbug Egg": "Summons a Stick Bug that camouflages",
+            "Mantis Egg": "Summons a Mantis that strikes fast",
+            "Firefly Egg": "Summons Fireflies that light the way",
+            "Termite Hole Egg": "Summons Soldier Termites from a hole",
+            "Termite Overmind Egg": "Summons a Termite Overmind",
+            "Spider Cave Egg": "Summons Spiders from a cave",
+            "Beetle Egg": "Summons a Beetle that charges",
+            "Scorpion Egg": "Summons a Scorpion that poisons",
+            "Ladybug Egg": "Summons a Ladybug",
+            "Bee Egg": "Summons a Bee",
+            "Hive Egg": "Summons Bees from a Hive",
+            "Queen Bee Egg": "Summons a Queen Bee that heals allies",
             "Centipede egg": "Summons a Centipede",
-            "Soldier Ant egg": "Summons Soldier Ants",
-            "Worker Ant egg": "Summons Worker Ants",
+            "Soldier Ant Egg": "Summons Soldier Ants",
+            "Worker Ant Egg": "Summons Worker Ants",
 
             // ==================== 海洋物品 ====================
             "Sponge": "Absorbs damage and returns it slowly",
@@ -6140,50 +6539,50 @@ class TooltipSystem {
             "Coral": "Reflects damage back to attackers",
             "Starfish": "Heals 3x when below 60% health",
             "Bubble": "Floating bubble that pops on contact",
-            "Squid egg": "Summons a Squid that inks enemies",
-            "Shipwreck egg": "Summons Jellyfish from a shipwreck",
-            "Barnacle egg": "Summons Barnacles that attach to enemies",
-            "Shell egg": "Summons Scallops that provide shells",
-            "Starfish egg": "Summons Starfish that heal",
-            "Bubble egg": "Summons floating Bubbles",
-            "Crab egg": "Summons Crabs with powerful claws",
-            "Jellyfish egg": "Summons Jellyfish that shock",
-            "CrabHole egg": "Summons multiple Crabs",
+            "Squid Egg": "Summons a Squid that inks enemies",
+            "Shipwreck Egg": "Summons Jellyfish from a shipwreck",
+            "Barnacle Egg": "Summons Barnacles that attach to enemies",
+            "Shell Egg": "Summons Scallops that provide shells",
+            "Starfish Egg": "Summons Starfish that heal",
+            "Bubble Egg": "Summons floating Bubbles",
+            "Crab Egg": "Summons Crabs with powerful claws",
+            "Jellyfish Egg": "Summons Jellyfish that shock",
+            "Crab Hole Egg": "Summons multiple Crabs",
             "Leech Egg": "Summons Leeches that drain health",
             "Parasite Egg": "Summons Parasites that latch on",
 
             // ==================== 沙漠/火蚁物品 ====================
-            "WorkerFireAnt egg": "Summons Worker Fire Ants",
-            "SoldierFireAnt egg": "Summons Soldier Fire Ants",
-            "BabyFireAnt egg": "Summons Baby Fire Ants",
-            "FireAntOvermind egg": "Summons a Fire Ant Overmind",
-            "FireAntHole egg": "Summons Soldier Fire Ants from a hole",
+            "Worker Fire Ant Egg": "Summons Worker Fire Ants",
+            "Soldier Fire Ant Egg": "Summons Soldier Fire Ants",
+            "Baby Fire Ant Egg": "Summons Baby Fire Ants",
+            "Fire Ant Overmind Egg": "Summons a Fire Ant Overmind",
+            "Fire Ant Hole Egg": "Summons Soldier Fire Ants from a hole",
 
             // ==================== 细胞类物品 ====================
-            "WhiteBloodCell egg": "Summons White Blood Cells to fight infections",
-            "Spider egg": "Summons Spiders to web enemies",
-            "RedBloodCell egg": "Summons Red Blood Cells for support",
-            "StemCell egg": "Summons Stem Cells that can differentiate",
-            "Bacteria_egg": "Summons Bacteria to swarm enemies",
-            "Cancer egg": "Summons Cancer cells that multiply",
-            "Virus egg": "Summons Viruses that infect enemies",
-            "Bacteriophage egg": "Summons Bacteriophages that hunt bacteria",
+            "White Blood Cell Egg": "Summons White Blood Cells to fight infections",
+            "Spider Egg": "Summons Spiders to web enemies",
+            "Red Blood Cell Egg": "Summons Red Blood Cells for support",
+            "Stem Cell Egg": "Summons Stem Cells that can differentiate",
+            "Bacteria Egg": "Summons Bacteria to swarm enemies",
+            "Cancer Egg": "Summons Cancer cells that multiply",
+            "Virus Egg": "Summons Viruses that infect enemies",
+            "Bacteriophage Egg": "Summons Bacteriophages that hunt bacteria",
 
             // ==================== 下水道物品 ====================
-            "ManHole egg": "Summons a Manhole that spawns Rats",
-            "Fly_egg": "Summons Flies that annoy enemies",
-            "Rat_egg": "Summons Rats that swarm and bite",
-            "Roach_egg": "Summons a resilient Roach",
-            "PooStick": "Summons PooStorms to devastate enemies",
-            "Trashcan egg": "Summons Flies from a Trashcan",
+            "Manhole Egg": "Summons a Manhole that spawns Rats",
+            "Fly Egg": "Summons Flies that annoy enemies",
+            "Rat Egg": "Summons Rats that swarm and bite",
+            "Roach Egg": "Summons a resilient Roach",
+            "Poo Stick": "Summons PooStorms to devastate enemies",
+            "Trashcan Egg": "Summons Flies from a Trashcan",
 
             // ==================== Digger 系列物品 ====================
-            "TrashDigger egg": "Summons a Trash Digger that scavenges",
-            "MudDigger_egg": "Summons a Mud Digger that slows enemies",
-            "Digger egg": "Summons a Digger that tunnels through",
-            "Biologist egg": "Summons a Biologist that studies enemies",
-            "Beekeeper egg": "Summons a Beekeeper that controls bees",
-            "PirateDigger egg": "Summons a Pirate Digger with treasure",
+            "Trash Digger Egg": "Summons a Trash Digger that scavenges",
+            "Mud Digger Egg": "Summons a Mud Digger that slows enemies",
+            "Digger Egg": "Summons a Digger that tunnels through",
+            "Biologist Egg": "Summons a Biologist that studies enemies",
+            "Beekeeper Egg": "Summons a Beekeeper that controls bees",
+            "Pirate Digger Egg": "Summons a Pirate Digger with treasure",
 
             // ==================== 基础蛋类 ====================
             "Egg": "Summons Golden Ants to fight for you",
@@ -6211,10 +6610,10 @@ class TooltipSystem {
         // 特殊物品的稀有度映射
         const specialRarityMap = {
             "Square Egg": "Legendary",
-            "Cancer egg": "Epic",
-            "FireAntOvermind egg": "Mythic",
-            "CrabHole egg": "Ultra",
-            "ManHole egg": "Super"
+            "Cancer Egg": "Epic",
+            "Fire Ant Overmind Egg": "Mythic",
+            "Crab Hole Egg": "Ultra",
+            "Manhole Egg": "Super"
         };
 
         if (specialRarityMap[itemType]) {
@@ -6240,17 +6639,17 @@ class TooltipSystem {
     static _isEggItem(itemType) {
         const eggItems = new Set([
             "Egg", "Ant Egg", "Moon Egg",
-            "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg", "Bacteria_egg",
-            "queen ant egg",
-            "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-            "FireAntOvermind egg", "FireAntHole egg",
-            "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-            "Cancer egg",
-            "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-            "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
+            "White Blood Cell Egg", "Stem Cell Egg", "Spider Egg", "Red Blood Cell Egg", "Bacteria Egg",
+            "Queen Ant Egg",
+            "Worker Fire Ant Egg", "Soldier Fire Ant Egg", "Baby Fire Ant Egg",
+            "Fire Ant Overmind Egg", "Fire Ant Hole Egg",
+            "Shell Egg", "Starfish Egg", "Bubble Egg", "Crab Egg", "Jellyfish Egg", "Crab Hole Egg",
+            "Cancer Egg",
+            "Manhole Egg", "Fly Egg", "Rat Egg", "Roach Egg",
+            "Trash Digger Egg", "Mud Digger Egg", "Digger Egg", "Biologist Egg",
             "Square Egg",
-            "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-            "Stick", "PooStick"
+            "Leech Egg", "Parasite Egg", "Bacteriophage Egg", "Virus Egg",
+            "Stick", "Poo Stick"
         ]);
         return eggItems.has(itemType);
     }
@@ -6262,38 +6661,38 @@ class TooltipSystem {
             "Ant Egg": { petType: "GoldenAnt", count: 4 },
             "Moon Egg": { petType: "Rock", count: 1 },
             "Stick": { petType: "Sandstorm", count: 2 },
-            "PooStick": { petType: "PooStorm", count: 3 },
-            "WhiteBloodCell egg": { petType: "WhiteBloodCell", count: 1 },
-            "Spider egg": { petType: "Spider", count: 3 },
-            "RedBloodCell egg": { petType: "RedBloodCell", count: 2 },
-            "StemCell egg": { petType: "StemCell", count: 10 },
-            "queen ant egg": { petType: "QueenAnt", count: 2 },
-            "WorkerFireAnt egg": { petType: "WorkerFireAnt", count: 4 },
-            "SoldierFireAnt egg": { petType: "SoldierFireAnt", count: 5 },
-            "BabyFireAnt egg": { petType: "BabyFireAnt", count: 3 },
-            "FireAntOvermind egg": { petType: "FireAntOvermind", count: 2 },
-            "FireAntHole egg": { petType: "SoldierFireAnt", count: 10 },
-            "Shell egg": { petType: "Scallop", count: 4 },
-            "Starfish egg": { petType: "Starfish", count: 2 },
-            "Bubble egg": { petType: "Bubble", count: 3 },
-            "Crab egg": { petType: "Crab", count: 3 },
-            "Jellyfish egg": { petType: "Jellyfish", count: 3 },
-            "CrabHole egg": { petType: "Crab", count: 10 },
-            "Cancer egg": { petType: "Cancer", count: 2 },
-            "ManHole egg": { petType: "ManHole", count: 1 },
-            "Fly_egg": { petType: "Fly", count: 3 },
-            "Rat_egg": { petType: "Rat", count: 2 },
-            "Roach_egg": { petType: "Roach", count: 1 },
-            "TrashDigger egg": { petType: "TrashDigger", count: 1 },
-            "MudDigger_egg": { petType: "MudDigger", count: 1 },
-            "Digger egg": { petType: "Digger", count: 1 },
-            "Biologist egg": { petType: "Biologist", count: 1 },
+            "Poo Stick": { petType: "PooStorm", count: 3 },
+            "White Blood Cell Egg": { petType: "WhiteBloodCell", count: 1 },
+            "Spider Egg": { petType: "Spider", count: 3 },
+            "Red Blood Cell Egg": { petType: "RedBloodCell", count: 2 },
+            "Stem Cell Egg": { petType: "StemCell", count: 10 },
+            "Queen Ant Egg": { petType: "QueenAnt", count: 2 },
+            "Worker Fire Ant Egg": { petType: "WorkerFireAnt", count: 4 },
+            "Soldier Fire Ant Egg": { petType: "SoldierFireAnt", count: 5 },
+            "Baby Fire Ant Egg": { petType: "BabyFireAnt", count: 3 },
+            "Fire Ant Overmind Egg": { petType: "FireAntOvermind", count: 2 },
+            "Fire Ant Hole Egg": { petType: "SoldierFireAnt", count: 10 },
+            "Shell Egg": { petType: "Scallop", count: 4 },
+            "Starfish Egg": { petType: "Starfish", count: 2 },
+            "Bubble Egg": { petType: "Bubble", count: 3 },
+            "Crab Egg": { petType: "Crab", count: 3 },
+            "Jellyfish Egg": { petType: "Jellyfish", count: 3 },
+            "Crab Hole Egg": { petType: "Crab", count: 10 },
+            "Cancer Egg": { petType: "Cancer", count: 2 },
+            "Manhole Egg": { petType: "ManHole", count: 1 },
+            "Fly Egg": { petType: "Fly", count: 3 },
+            "Rat Egg": { petType: "Rat", count: 2 },
+            "Roach Egg": { petType: "Roach", count: 1 },
+            "Trash Digger Egg": { petType: "TrashDigger", count: 1 },
+            "Mud Digger Egg": { petType: "MudDigger", count: 1 },
+            "Digger Egg": { petType: "Digger", count: 1 },
+            "Biologist Egg": { petType: "Biologist", count: 1 },
             "Square Egg": { petType: "Square", count: 1 },
             "Leech Egg": { petType: "Leech", count: 2 },
             "Parasite Egg": { petType: "Parasite", count: 1 },
-            "Bacteriophage egg": { petType: "Bacteriophage", count: 1 },
-            "Virus egg": { petType: "Virus", count: 1 },
-            "Bacteria_egg": { petType: "Bacteria", count: 3 }
+            "Bacteriophage Egg": { petType: "Bacteriophage", count: 1 },
+            "Virus Egg": { petType: "Virus", count: 1 },
+            "Bacteria Egg": { petType: "Bacteria", count: 3 }
         };
         return petMap[itemType] || null;
     }
@@ -7487,7 +7886,7 @@ class Item {
             "Cotton": 2.5,     // 棉花耐久很高
             "Poo": 1.5,        // 粪便耐久很低
             "Basil": 1.2,      // 罗勒耐久较高
-            "PooStick": 0.6,   // 粪棒耐久很低
+            "Poo Stick": 0.6,   // 粪棒耐久很低
             "Golden Leaf": 2.0, // 金叶子耐久翻倍
             "Cutter": 1.1,
             "Bone": 2.0,
@@ -8253,6 +8652,7 @@ class QuickSlot {
 
             if (this.slots[slotIndex] === null) {
                 this.slots[slotIndex] = item;
+                this.unregisterMimic(slotIndex, true);
                 this.updatePetalFromSlot(slotIndex);
                 this._triggerMimicIfNeeded(item, slotIndex);
                 return true;
@@ -8440,6 +8840,7 @@ class QuickSlot {
 
             this.slots[slotIndex] = null;
             this.resetPetalFromSlot(slotIndex);
+            this.unregisterMimic(slotIndex, true);
             return item;
         }
         return null;
@@ -8448,24 +8849,24 @@ class QuickSlot {
     isEggItem(itemType) {
         const EGG_ITEMS = new Set([
             "Egg", "Ant Egg", "Moon Egg",
-            "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
-            "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-            "FireAntOvermind egg", "FireAntHole egg",
-            "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-            "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-            "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-            "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-            "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
-            "Bee egg", "Hive egg", "Beetle egg", "Queen Bee egg",
-            "SlagMight egg", "Ice Cube egg", "Ice Dragon egg", "Igloo egg",
-            "Tick egg", "ArcticSpider egg", "ArcticSpiderCave egg", "Snowman egg",
-            "Wasp egg", "Worker Termite egg", "Soldier Termite egg", "StickBug egg",
-            "Mantis egg", "Firefly egg", "TermiteHole egg", "TermiteOvermind egg",
-            "SpiderCave egg", "Barnacle egg", "Scorpion egg",
-            "HelWorm egg", "HelSpider egg", "Hel Bee egg", "HelHornet egg",
-            "HelBeetle egg", "Dragon egg", "DragonNest egg", "HelHive egg",
-            "HelJellyfish egg", "Hel Queen Bee egg", "ToxicDragon egg",
-            "Hel Digger egg", "Hel Beekeeper egg", "FireStick", "PooStick", "SnowStick"
+            "White Blood Cell Egg", "Stem Cell Egg", "Spider Egg", "Red Blood Cell Egg",
+            "Queen Ant Egg", "Worker Fire Ant Egg", "Soldier Fire Ant Egg", "Baby Fire Ant Egg",
+            "Fire Ant Overmind Egg", "Fire Ant Hole Egg",
+            "Shell Egg", "Starfish Egg", "Bubble Egg", "Crab Egg", "Jellyfish Egg", "Crab Hole Egg",
+            "Cancer Egg", "Manhole Egg", "Fly Egg", "Rat Egg", "Roach Egg",
+            "Trash Digger Egg", "Mud Digger Egg", "Digger Egg", "Biologist Egg",
+            "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage Egg", "Virus Egg",
+            "Soldier Ant Egg", "Worker Ant Egg", "Centipede egg", "Ladybug Egg",
+            "Bee Egg", "Hive Egg", "Beetle Egg", "Queen Bee Egg",
+            "Stalagmite Egg", "Ice Cube Egg", "Ice Dragon Egg", "Igloo Egg",
+            "Tick Egg", "Arctic Spider Egg", "Arctic Spider Cave Egg", "Snowman Egg",
+            "Wasp Egg", "Worker Termite Egg", "Soldier Termite Egg", "Stickbug Egg",
+            "Mantis Egg", "Firefly Egg", "Termite Hole Egg", "Termite Overmind Egg",
+            "Spider Cave Egg", "Barnacle Egg", "Scorpion Egg",
+            "Hel Worm Egg", "Hel Spider Egg", "Hel Bee Egg", "Hel Hornet Egg",
+            "Hel Beetle Egg", "Dragon Egg", "Dragon Nest Egg", "Hel Hive Egg",
+            "Hel Jellyfish Egg", "Hel Queen Bee Egg", "Toxic Dragon Egg",
+            "Hel Digger Egg", "Hel Beekeeper Egg", "Fire Stick", "Poo Stick", "Snow Stick"
         ]);
         return EGG_ITEMS.has(itemType);
     }
@@ -9367,7 +9768,6 @@ class Inventory {
         this.scrollButtonRect[3] = buttonHeight;
     }
 
-// 在 Inventory 类中修改 addItemToQuickSlot 方法
     addItemToQuickSlot(item, itemIndex) {
         const quickSlot = this.quickSlot;
         const items = this.items;
@@ -9376,9 +9776,17 @@ class Inventory {
 
         console.log(`[添加到快捷栏] 物品=${item.type}(${item.rarity}), 索引=${itemIndex}, 数量=${item.count}`);
 
-        // 1. 先尝试放入主栏空槽
-        for (let i = 0; i < quickSlot.slots.length; i++) {
-            if (!quickSlot.slots[i]) {
+        // ========== 1. 先尝试放入主栏空槽 ==========
+        for (let slotIdx = 0; slotIdx < quickSlot.slots.length; slotIdx++) {
+            if (!quickSlot.slots[slotIdx]) {
+                // ✅ 即使是空槽，也要清除该槽位的变形状态
+                const mimicData = quickSlot.getMimicData(slotIdx, true);
+                if (mimicData) {
+                    console.log(`⚠️ 主栏槽位 ${slotIdx} 有变形状态但物品为空，清除变形记录`);
+                    quickSlot.unregisterMimic(slotIdx, true);
+                }
+
+                // 空槽，直接放入
                 if (items[itemIndex].count > 1) {
                     items[itemIndex].count--;
                     const newItem = new Item(item.type, item.level, item.rarity);
@@ -9389,23 +9797,38 @@ class Inventory {
                     newItem.reloadTime = item.reloadTime;
                     newItem.baseReloadTime = item.baseReloadTime;
                     newItem.armor = item.armor;
-                    quickSlot.slots[i] = newItem;
+                    quickSlot.slots[slotIdx] = newItem;
                 } else {
                     const movedItem = items.splice(itemIndex, 1)[0];
                     movedItem.count = 1;
-                    quickSlot.slots[i] = movedItem;
+                    quickSlot.slots[slotIdx] = movedItem;
                 }
-                quickSlot.updatePetalFromSlot(i);  // ✅ 确保更新
+
+                // 清除该槽位原来的召唤物
+                const petal = this.player?.petals[slotIdx];
+                if (petal && typeof petal._clearAllSummons === 'function') {
+                    petal._clearAllSummons();
+                    petal.eggSpawned = false;
+                }
+
+                quickSlot.updatePetalFromSlot(slotIdx);
                 this.cacheDirty = true;
-                console.log(`✅ 物品放入主栏槽位 ${i}，已更新花瓣`);
+                console.log(`✅ 物品放入主栏空槽 ${slotIdx}`);
                 return true;
             }
         }
 
-        // 2. 主栏满后，尝试放入副栏空槽
+        // ========== 2. 主栏满后，尝试放入副栏空槽 ==========
         if (quickSlot.secondarySlots) {
-            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
-                if (!quickSlot.secondarySlots[i]) {
+            for (let slotIdx = 0; slotIdx < quickSlot.secondarySlots.length; slotIdx++) {
+                if (!quickSlot.secondarySlots[slotIdx]) {
+                    // ✅ 副栏空槽也要清除变形状态
+                    const mimicData = quickSlot.getMimicData(slotIdx, false);
+                    if (mimicData) {
+                        console.log(`⚠️ 副栏槽位 ${slotIdx} 有变形状态但物品为空，清除变形记录`);
+                        quickSlot.unregisterMimic(slotIdx, false);
+                    }
+
                     if (items[itemIndex].count > 1) {
                         items[itemIndex].count--;
                         const newItem = new Item(item.type, item.level, item.rarity);
@@ -9416,27 +9839,147 @@ class Inventory {
                         newItem.reloadTime = item.reloadTime;
                         newItem.baseReloadTime = item.baseReloadTime;
                         newItem.armor = item.armor;
-                        quickSlot.secondarySlots[i] = newItem;
+                        quickSlot.secondarySlots[slotIdx] = newItem;
                     } else {
                         const movedItem = items.splice(itemIndex, 1)[0];
                         movedItem.count = 1;
-                        quickSlot.secondarySlots[i] = movedItem;
+                        quickSlot.secondarySlots[slotIdx] = movedItem;
                     }
-                    // ✅ 副栏物品不需要更新花瓣，但需要刷新UI
+
                     if (this.player?.gameInstance?.requestRedraw) {
                         this.player.gameInstance.requestRedraw();
                     }
                     this.cacheDirty = true;
-                    console.log(`✅ 物品放入副栏槽位 ${i}`);
+                    console.log(`✅ 物品放入副栏空槽 ${slotIdx}`);
                     return true;
                 }
+            }
+        }
+
+        // ========== 3. 没有空槽，尝试堆叠到同类型物品（主栏）==========
+        for (let slotIdx = 0; slotIdx < quickSlot.slots.length; slotIdx++) {
+            const existingItem = quickSlot.slots[slotIdx];
+            if (existingItem && existingItem.canStackWith(item)) {
+                if (items[itemIndex].count > 1) {
+                    items[itemIndex].count--;
+                    existingItem.count++;
+                } else {
+                    items.splice(itemIndex, 1);
+                    existingItem.count++;
+                }
+                this.cacheDirty = true;
+                console.log(`✅ 物品堆叠到主栏槽位 ${slotIdx}`);
+                return true;
+            }
+        }
+
+        // ========== 4. 堆叠到副栏 ==========
+        for (let slotIdx = 0; slotIdx < quickSlot.secondarySlots.length; slotIdx++) {
+            const existingItem = quickSlot.secondarySlots[slotIdx];
+            if (existingItem && existingItem.canStackWith(item)) {
+                if (items[itemIndex].count > 1) {
+                    items[itemIndex].count--;
+                    existingItem.count++;
+                } else {
+                    items.splice(itemIndex, 1);
+                    existingItem.count++;
+                }
+                this.cacheDirty = true;
+                console.log(`✅ 物品堆叠到副栏槽位 ${slotIdx}`);
+                return true;
+            }
+        }
+
+        // ========== 5. 没有空槽也没有同类型，覆盖主栏第一个非空槽位 ==========
+        for (let slotIdx = 0; slotIdx < quickSlot.slots.length; slotIdx++) {
+            if (quickSlot.slots[slotIdx]) {
+                console.log(`⚠️ 覆盖主栏槽位 ${slotIdx}，当前物品: ${quickSlot.slots[slotIdx].type}`);
+
+                // ✅ 清除该槽位的变形状态
+                const mimicData = quickSlot.getMimicData(slotIdx, true);
+                if (mimicData) {
+                    console.log(`   清除槽位 ${slotIdx} 的变形状态`);
+                    quickSlot.unregisterMimic(slotIdx, true);
+                }
+
+                // 移除旧物品放回背包
+                const oldItem = quickSlot.removeItem(slotIdx);
+                if (oldItem) {
+                    this.addItem(oldItem);
+                    console.log(`   旧物品 ${oldItem.type} 放回背包`);
+                }
+
+                // 放入新物品
+                let newItem;
+                if (items[itemIndex].count > 1) {
+                    items[itemIndex].count--;
+                    newItem = new Item(item.type, item.level, item.rarity);
+                    newItem.count = 1;
+                    newItem.durability = item.durability;
+                    newItem.maxDurability = item.maxDurability;
+                    newItem.isBroken = item.isBroken;
+                    newItem.reloadTime = item.reloadTime;
+                    newItem.baseReloadTime = item.baseReloadTime;
+                    newItem.armor = item.armor;
+                } else {
+                    newItem = items.splice(itemIndex, 1)[0];
+                    newItem.count = 1;
+                }
+
+                quickSlot.slots[slotIdx] = newItem;
+                quickSlot.updatePetalFromSlot(slotIdx);
+                this.cacheDirty = true;
+                console.log(`✅ 物品 ${newItem.type} 覆盖主栏槽位 ${slotIdx}`);
+                return true;
+            }
+        }
+
+        // ========== 6. 覆盖副栏第一个非空槽位 ==========
+        for (let slotIdx = 0; slotIdx < quickSlot.secondarySlots.length; slotIdx++) {
+            if (quickSlot.secondarySlots[slotIdx]) {
+                console.log(`⚠️ 覆盖副栏槽位 ${slotIdx}，当前物品: ${quickSlot.secondarySlots[slotIdx].type}`);
+
+                // ✅ 清除该槽位的变形状态
+                const mimicData = quickSlot.getMimicData(slotIdx, false);
+                if (mimicData) {
+                    console.log(`   清除副栏槽位 ${slotIdx} 的变形状态`);
+                    quickSlot.unregisterMimic(slotIdx, false);
+                }
+
+                // 移除旧物品放回背包
+                const oldItem = quickSlot.removeSecondaryItem(slotIdx);
+                if (oldItem) {
+                    this.addItem(oldItem);
+                    console.log(`   旧物品 ${oldItem.type} 放回背包`);
+                }
+
+                // 放入新物品
+                let newItem;
+                if (items[itemIndex].count > 1) {
+                    items[itemIndex].count--;
+                    newItem = new Item(item.type, item.level, item.rarity);
+                    newItem.count = 1;
+                    newItem.durability = item.durability;
+                    newItem.maxDurability = item.maxDurability;
+                    newItem.isBroken = item.isBroken;
+                    newItem.reloadTime = item.reloadTime;
+                    newItem.baseReloadTime = item.baseReloadTime;
+                    newItem.armor = item.armor;
+                } else {
+                    newItem = items.splice(itemIndex, 1)[0];
+                    newItem.count = 1;
+                }
+
+                quickSlot.secondarySlots[slotIdx] = newItem;
+                this.cacheDirty = true;
+                console.log(`✅ 物品 ${newItem.type} 覆盖副栏槽位 ${slotIdx}`);
+                return true;
             }
         }
 
         console.log(`❌ 无法添加物品，所有槽位已满`);
         return false;
     }
-
     // ========== 处理点击 (修复版) ==========
     handleClick(pos) {
         if (!this.isPointInRect(pos, this.inventoryArea)) {
@@ -22450,27 +22993,28 @@ class RedeemSystem {
         this.loadUsedRecords();
 
         this.addCode("WAGES22", [
-            { type: "Alien egg", rarity: "Super", count: 1 },
-            { type: "Photon egg", rarity: "Super", count: 1 },
-             { stars: 4500000 }
+            { type: "Alien Egg", rarity: "Super", count: 1 },
+            { type: "Photon Egg", rarity: "Super", count: 1 },
+            { stars: 4500000 }
         ], 10);
 
         this.addCode("123TRY", [
             { type: "DNA", rarity: "Mythic", count: 1 },
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
+
         this.addCode("fffkkk", [
-            { type: "MudDigger_egg", rarity: "Super", count: 1 },
+            { type: "Mud Digger Egg", rarity: "Super", count: 1 },
         ], 10);
 
         this.addCode("WAGE2", [
-            { type: "Alien egg", rarity: "Super", count: 1 },
-            { type: "Photon egg", rarity: "Super", count: 1 },
-             { stars: 11451.4 }
+            { type: "Alien Egg", rarity: "Super", count: 1 },
+            { type: "Photon Egg", rarity: "Super", count: 1 },
+            { stars: 11451.4 }
         ], 10);
 
         // ===== 星星兑换码 =====
-        this.addCode("ADDITIONAL", [
+        this.addCode("XXY30391F", [
             { stars: 100000 }
         ], 30);
 
@@ -22481,6 +23025,18 @@ class RedeemSystem {
             { stars: 50 }
         ], 30);
 
+        // ========== ✅ 会员兑换码示例 ==========
+        this.addCode("1354679", [
+            { membership: "ruby", duration: 1, stars: 5000 }
+        ], 30);
+
+        this.addCode("12354", [
+            { membership: "diamond", duration: 30, stars: 2000 }
+        ], 30);
+
+        this.addCode("GOLD2029", [
+            { membership: "gold", duration: 15, stars: 500 }
+        ], 30);
 
     }
 
@@ -22503,7 +23059,6 @@ class RedeemSystem {
     // 保存已使用的记录到 localStorage
     saveUsedRecords() {
         try {
-            // 将 Map 转为普通对象存储
             const data = Object.fromEntries(this.usedRecords);
             localStorage.setItem('redeem_used_records', JSON.stringify(data));
         } catch (e) {
@@ -22513,7 +23068,6 @@ class RedeemSystem {
 
     // 获取稳定的玩家标识符
     getPlayerIdentifier() {
-        // 尝试使用账号系统的用户名（最稳定）
         if (window.gameInstance?.accountSystem?.isLoggedIn()) {
             const username = window.gameInstance.accountSystem.getCurrentUser();
             if (username) {
@@ -22521,7 +23075,6 @@ class RedeemSystem {
             }
         }
 
-        // 如果没有登录，使用存储在 localStorage 的设备 ID
         let deviceId = localStorage.getItem('device_id');
         if (!deviceId) {
             deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -22535,7 +23088,7 @@ class RedeemSystem {
         this.codes.set(code.toUpperCase(), {
             items: items,
             expires: Date.now() + expireDays * 24 * 60 * 60 * 1000,
-            maxUses: 1 // 总共能用几次
+            maxUses: 1
         });
     }
 
@@ -22568,35 +23121,77 @@ class RedeemSystem {
         this.saveUsedRecords();
     }
 
+    // ✅ 发放会员的方法
+    grantMembership(tierId, durationDays = 30) {
+        if (!this.shop) return false;
+
+        // 获取会员配置
+        const tiers = this.shop.MEMBERSHIP_TIERS;
+        const tier = tiers.find(t => t.id === tierId);
+        if (!tier) {
+            console.error(`会员等级 ${tierId} 不存在`);
+            return false;
+        }
+
+        // 计算过期时间
+        const expiresAt = Date.now() + durationDays * 24 * 60 * 60 * 1000;
+
+        // 保存会员信息
+        const membership = {
+            tierId: tierId,
+            purchasedAt: Date.now(),
+            expiresAt: expiresAt
+        };
+
+        try {
+            localStorage.setItem('flwrr_membership', JSON.stringify(membership));
+            console.log(`✅ 已激活 ${tierId.toUpperCase()} 会员，有效期 ${durationDays} 天`);
+
+            // 更新主菜单的会员状态
+            if (window.gameInstance?.mainMenu) {
+                if (tierId === 'ruby') {
+                    window.gameInstance.mainMenu.rubyMembershipActive = true;
+                    window.gameInstance.mainMenu.rubyMembershipExpireTime = expiresAt;
+                }
+                window.gameInstance.mainMenu.saveExtraBonusStatus();
+            }
+
+            // 更新 shopSystem 的 activeMembership
+            if (this.shop) {
+                this.shop.activeMembership = membership;
+            }
+
+            return true;
+        } catch(e) {
+            console.error('保存会员失败:', e);
+            return false;
+        }
+    }
+
     // 使用兑换码
     redeem(code, player) {
         const upperCode = code.toUpperCase().trim();
         const redeemData = this.codes.get(upperCode);
 
-        // 检查是否存在
         if (!redeemData) {
             this.showMessage("❌ 无效的兑换码", 3000);
             return false;
         }
 
-        // 检查是否过期
         if (Date.now() > redeemData.expires) {
             this.codes.delete(upperCode);
             this.showMessage("❌ 兑换码已过期", 3000);
             return false;
         }
 
-        // 获取稳定的玩家标识符
         const playerId = this.getPlayerIdentifier();
 
-        // 检查玩家是否已经用过
         const canUse = this.canPlayerUse(upperCode, playerId);
         if (!canUse.allowed) {
             this.showMessage(`❌ ${canUse.reason}`, 3000);
             return false;
         }
 
-        // 检查兑换码总使用次数
         let totalUsed = 0;
         for (const [key] of this.usedRecords) {
             if (key.startsWith(upperCode + '_')) {
@@ -22609,17 +23204,22 @@ class RedeemSystem {
             return false;
         }
 
-        // 发放奖励
+        // ========== ✅ 发放奖励 ==========
         let rewardList = [];
         let totalStars = 0;
+        let membershipTier = null;
+        let membershipDuration = 30;
 
         for (const reward of redeemData.items) {
             if (reward.stars !== undefined) {
-                // 星星奖励
                 totalStars += reward.stars;
                 rewardList.push(`${reward.stars} ⭐`);
+            } else if (reward.membership) {
+                // ✅ 会员奖励
+                membershipTier = reward.membership;
+                membershipDuration = reward.duration || 30;
+                rewardList.push(`${reward.membership.toUpperCase()} 会员 ${membershipDuration}天`);
             } else if (reward.type) {
-                // 物品奖励
                 const item = new Item(reward.type, 1, reward.rarity);
                 item.count = reward.count;
                 player.inventory.addItem(item);
@@ -22632,10 +23232,14 @@ class RedeemSystem {
             this.shop.addStars(totalStars);
         }
 
+        // ✅ 发放会员
+        if (membershipTier) {
+            this.grantMembership(membershipTier, membershipDuration);
+        }
+
         // 记录已使用
         this.recordUse(upperCode, playerId);
 
-        // 显示成功消息
         this.showMessage(`✅ 获得: ${rewardList.join(', ')}`, 5000);
         return true;
     }
@@ -22669,36 +23273,32 @@ class RedeemSystem {
 
         ctx.save();
 
-        // 半透明背景
         ctx.fillStyle = 'rgba(34, 193, 233, 0.99)';
         ctx.fillRect(x, y, width, height);
 
-        // 边框
         ctx.strokeStyle = '#0B7894';
         ctx.lineWidth = 3;
         ctx.strokeRect(x, y, width, height);
 
         ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle'; // 建议加上基线对齐，方便定位
+        ctx.textBaseline = 'middle';
         const text = 'Code';
         const tx = centerX;
         const ty = y + 40;
-        ctx.strokeStyle = '#000000'; // 黑色边框
-        ctx.lineWidth = 4;            // 描边宽度
-        ctx.lineJoin = 'round';      // 防止拐角出现尖刺
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 4;
+        ctx.lineJoin = 'round';
         ctx.strokeText(text, tx, ty);
-        // 2. 绘制填充
         ctx.fillStyle = '#ffffff';
         ctx.fillText(text, tx, ty);
-        // 输入框
+
         ctx.fillStyle = this.inputActive ? '#ffffff' : '#808080';
         ctx.fillRect(x + 50, y + 80, width - 100, 40);
         ctx.strokeStyle = this.inputActive ? '#000000' : '#000000';
         ctx.lineWidth = this.inputActive ? 4 : 2;
         ctx.strokeRect(x + 50, y + 80, width - 100, 40);
 
-        // 输入文字
         ctx.font = '20px Arial';
         ctx.fillStyle = 'Black';
         ctx.textAlign = 'left';
@@ -22709,14 +23309,12 @@ class RedeemSystem {
         }
         ctx.fillText(displayText, x + 60, y + 100);
 
-        // 光标闪烁
         if (this.inputActive && Date.now() % 1000 < 500) {
             const textWidth = ctx.measureText(this.inputText).width;
             ctx.fillStyle = 'black';
             ctx.fillRect(x + 60 + textWidth, y + 85, 2, 30);
         }
 
-        // 兑换按钮
         const btnX = x + width/2 - 60;
         const btnY = y + 140;
         ctx.fillStyle = '#64929E';
@@ -22729,7 +23327,6 @@ class RedeemSystem {
         ctx.textAlign = 'center';
         ctx.fillText('enter', btnX + 60, btnY + 20);
 
-        // 关闭按钮
         ctx.fillStyle = '#e74c3c';
         ctx.beginPath();
         ctx.arc(x + width - 25, y + 25, 12, 0, Math.PI * 2);
@@ -22741,7 +23338,6 @@ class RedeemSystem {
         ctx.textBaseline = 'middle';
         ctx.fillText('×', x + width - 25, y + 25);
 
-        // 提示消息
         if (this.message) {
             ctx.font = '16px Arial';
             ctx.fillStyle = this.message.includes('✅') ? '#2ecc71' : '#e74c3c';
@@ -22768,7 +23364,6 @@ class RedeemSystem {
 
         if (x >= dialogX && x <= dialogX + width && y >= dialogY && y <= dialogY + height) {
 
-            // 检查关闭按钮
             const closeX = dialogX + width - 25;
             const closeY = dialogY + 25;
             const distance = Math.sqrt((x - closeX) ** 2 + (y - closeY) ** 2);
@@ -22779,7 +23374,6 @@ class RedeemSystem {
                 return true;
             }
 
-            // 检查兑换按钮
             const btnX = dialogX + width/2 - 60;
             const btnY = dialogY + 140;
             const btnW = 120;
@@ -22795,7 +23389,6 @@ class RedeemSystem {
                 return true;
             }
 
-            // 检查输入框区域
             const inputX = dialogX + 50;
             const inputY = dialogY + 80;
             const inputW = width - 100;
@@ -22850,17 +23443,14 @@ class RedeemSystem {
         return false;
     }
 
-    // 在 open() 方法中
     open() {
         this.inputVisible = true;
         this.inputText = '';
         this.inputActive = true;
-        // 延时确保 DOM 渲染后再聚焦
         setTimeout(() => {
             const input = document.getElementById('redeem-input');
             if (input) input.focus();
             else {
-                // 如果还没有真实 input 元素，可以临时创建一个
                 this.createTempInput();
             }
         }, 100);
@@ -22947,39 +23537,39 @@ class ShopSystem {
                       "Powder","Compass","Suger","Cutter","Bubble Bomb","Bomb","Missile","Glass","Faster",
                       "Lightning","Jelly","Pearl","Coral","Shell","Salt","Sand","Poo","Basil","Golden Leaf",
                       "Chromosome","Mimic","Rose","Bubble","Clover","Iris","Lotus","Cancer","DNA","Antennae",
-                      "ThirdEye","Cactus","Magnet","Heavy","Rock","Sponge","Cotton","Starfish","Coin","Egg",
+                      "Third Eye","Cactus","Magnet","Heavy","Rock","Sponge","Cotton","Starfish","Coin","Egg",
                       "Ant Egg","Moon Egg","Stick","Rubber","Slime","Blood Stinger",
-                      "Soldier Ant egg","Worker Ant egg","Beetle egg","Ladybug egg","Bee egg",
-                      "Centipede egg","Hive egg","Queen Bee egg","Scorpion egg","Spider egg"],
-            "Bio":   ["Chromosome","Cancer","DNA","Photon egg","Electron egg","ElectronCloud egg",
-                      "Proton egg","Atom egg","Photon","Electron","Quark","Quantum","Charge","Nucleus",
-                      "WhiteBloodCell egg","RedBloodCell egg","StemCell egg","Bacteria_egg",
-                      "Cancer egg","Virus egg","Bacteriophage egg"],
-            "Desert":["Sand","Yucca","Root","WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg",
-                      "FireAntOvermind egg","FireAntHole egg"],
-            "Ocean": ["Pearl","Coral","Shell","Jelly","Salt","Starfish egg","Bubble egg",
-                      "Crab egg","Jellyfish egg","CrabHole egg","Squid egg","Shipwreck egg",
-                      "Barnacle egg","Leech Egg","Parasite Egg","Shell egg","Trident"],
-            "Sewer": ["Poo","PooStick","Rubber","Slime","ManHole egg","Fly_egg","Rat_egg",
-                      "Roach_egg","Trashcan egg"],
-            "Jungle":["Wasp egg","Worker Termite egg","Soldier Termite egg","StickBug egg",
-                      "Firefly egg","TermiteHole egg","TermiteOvermind egg","SpiderCave egg",
-                      "Scorpion egg","Mantis egg","Beetle egg","Bee egg","Hive egg","Queen Bee egg",
-                      "Centipede egg","Ladybug egg"],
-            "Arctic":["Ice Rose","Ice Cube","Snowball","Carrot","Icicle","Snowflake","SnowStick",
-                      "SlagMight egg","Ice Cube egg","Ice Dragon egg","Igloo egg","Tick egg",
-                      "ArcticSpider egg","ArcticSpiderCave egg","Snowman egg","Frost Digger egg"],
-            "Hel":   ["Hel Lighting","Hel Honey","FireBomb","FireStick","HelWorm egg","HelSpider egg",
-                      "Hel Bee egg","HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg",
-                      "HelHive egg","HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg",
-                      "Hel Digger egg","Hel Beekeeper egg"],
+                      "Soldier Ant Egg","Worker Ant Egg","Beetle Egg","Ladybug Egg","Bee Egg",
+                      "Centipede egg","Hive Egg","Queen Bee Egg","Scorpion Egg","Spider Egg"],
+            "Bio":   ["Chromosome","Cancer","DNA","Photon Egg","Electron Egg","Electron Cloud Egg",
+                      "Proton Egg","Atom Egg","Photon","Electron","Quark","Quantum","Charge","Nucleus",
+                      "White Blood Cell Egg","Red Blood Cell Egg","Stem Cell Egg","Bacteria Egg",
+                      "Cancer Egg","Virus Egg","Bacteriophage Egg"],
+            "Desert":["Sand","Yucca","Root","Worker Fire Ant Egg","Soldier Fire Ant Egg","Baby Fire Ant Egg",
+                      "Fire Ant Overmind Egg","Fire Ant Hole Egg"],
+            "Ocean": ["Pearl","Coral","Shell","Jelly","Salt","Starfish Egg","Bubble Egg",
+                      "Crab Egg","Jellyfish Egg","Crab Hole Egg","Squid Egg","Shipwreck Egg",
+                      "Barnacle Egg","Leech Egg","Parasite Egg","Shell Egg","Trident"],
+            "Sewer": ["Poo","Poo Stick","Rubber","Slime","Manhole Egg","Fly Egg","Rat Egg",
+                      "Roach Egg","Trashcan Egg"],
+            "Jungle":["Wasp Egg","Worker Termite Egg","Soldier Termite Egg","Stickbug Egg",
+                      "Firefly Egg","Termite Hole Egg","Termite Overmind Egg","Spider Cave Egg",
+                      "Scorpion Egg","Mantis Egg","Beetle Egg","Bee Egg","Hive Egg","Queen Bee Egg",
+                      "Centipede egg","Ladybug Egg"],
+            "Arctic":["Ice Rose","Ice Cube","Snowball","Carrot","Icicle","Snowflake","Snow Stick",
+                      "Stalagmite Egg","Ice Cube Egg","Ice Dragon Egg","Igloo Egg","Tick Egg",
+                      "Arctic Spider Egg","Arctic Spider Cave Egg","Snowman Egg","Frost Digger Egg"],
+            "Hel":   ["Hel Lighting","Hel Honey","Fire Bomb","Fire Stick","Hel Worm Egg","Hel Spider Egg",
+                      "Hel Bee Egg","Hel Hornet Egg","Hel Beetle Egg","Dragon Egg","Dragon Nest Egg",
+                      "Hel Hive Egg","Hel Jellyfish Egg","Hel Queen Bee Egg","Toxic Dragon Egg",
+                      "Hel Digger Egg","Hel Beekeeper Egg"],
             "Space": ["Plasma","Orb","Dvd","Stardust","Opal","Gamma Ray","Dust","Singularity",
-                      "BlackHole egg","GraveDigger egg","AlienDigger egg","WhiteHole egg",
-                      "NeutronStar egg","Star egg","Asteroid egg","Alien egg","UFO egg",
-                      "Ghost egg","GraveStone egg"],
-            "Digger":["Digger egg","Biologist egg","Beekeeper egg","PirateDigger egg",
-                      "MudDigger_egg","TrashDigger egg","Frost Digger egg","Hel Digger egg",
-                      "Hel Beekeeper egg","Bubonic Plague","PooStick"],
+                      "Black Hole Egg","Grave Digger Egg","Alien Digger Egg","White Hole Egg",
+                      "Neutron Star Egg","Star Egg","Asteroid Egg","Alien Egg","UFO Egg",
+                      "Ghost Egg","Grave Stone Egg"],
+            "Digger":["Digger Egg","Biologist Egg","Beekeeper Egg","Pirate Digger Egg",
+                      "Mud Digger Egg","Trash Digger Egg","Frost Digger Egg","Hel Digger Egg",
+                      "Hel Beekeeper Egg","Bubonic Plague","Poo Stick"],
         };
 
         // ── Prices ──
@@ -22997,42 +23587,42 @@ class ShopSystem {
             "Golden Leaf":105,"Chromosome":6,"Mimic":240,"Rose":8,"Ice Rose":5,"Bone":7,
             "Ice Cube":5,"Snowball":3,"Carrot":4,"Icicle":4,"Snowflake":5,"Relic":3,
             "Plank":4,"Peas":4,"Soil":5,"Tomato":7,"Rubber":6,"Cancer":20,"DNA":190,
-            "Clover":5,"Iris":2,"Lotus":3,"Photon egg":35,"Electron egg":28,
-            "ElectronCloud egg":40,"Proton egg":30,"Atom egg":20,"Photon":25,"Electron":30,
+            "Clover":5,"Iris":2,"Lotus":3,"Photon Egg":35,"Electron Egg":28,
+            "Electron Cloud Egg":40,"Proton Egg":30,"Atom Egg":20,"Photon":25,"Electron":30,
             "Quark":35,"Quantum":45,"Charge":20,"Nucleus":60,
-            "BlackHole egg":110,"GraveDigger egg":115,"AlienDigger egg":109,
-            "WhiteHole egg":99,"NeutronStar egg":100,"Star egg":60,"Asteroid egg":30,
-            "Alien egg":30,"UFO egg":80,"Ghost egg":15,"GraveStone egg":45,
-            "Plasma":30,"Orb":30,"Slime":12,"Dvd":20,"FireBomb":100,"Stardust":18,
+            "Black Hole Egg":110,"Grave Digger Egg":115,"Alien Digger Egg":109,
+            "White Hole Egg":99,"Neutron Star Egg":100,"Star Egg":60,"Asteroid Egg":30,
+            "Alien Egg":30,"UFO Egg":80,"Ghost Egg":15,"Grave Stone Egg":45,
+            "Plasma":30,"Orb":30,"Slime":12,"Dvd":20,"Fire Bomb":100,"Stardust":18,
             "Opal":50,"Gamma Ray":40,"Dust":10,"Singularity":90,
-            "Antennae":12,"ThirdEye":15,"Cactus":4,"Magnet":10,"Heavy":5,"Rock":5,
+            "Antennae":12,"Third Eye":15,"Cactus":4,"Magnet":10,"Heavy":5,"Rock":5,
             "Sponge":7,"Cotton":4,"Starfish":5,
-            "HelWorm egg":15,"HelSpider egg":15,"Hel Bee egg":15,"HelHornet egg":14,
-            "HelBeetle egg":16,"Dragon egg":20,"DragonNest egg":50,"HelHive egg":45,
-            "HelJellyfish egg":15,"Hel Queen Bee egg":45,"ToxicDragon egg":28,"FireStick":20,
-            "SlagMight egg":12,"Ice Cube egg":10,"Ice Dragon egg":40,"Igloo egg":40,
-            "Tick egg":12,"ArcticSpider egg":12,"ArcticSpiderCave egg":42,"Snowman egg":10,
-            "SnowStick":18,
-            "Wasp egg":12,"Worker Termite egg":15,"Soldier Termite egg":18,
-            "StickBug egg":12,"Mantis egg":15,"Firefly egg":13,"TermiteHole egg":40,
-            "TermiteOvermind egg":35,"SpiderCave egg":40,"Beetle egg":15,"Scorpion egg":10,
-            "Ladybug egg":12,"Bee egg":12,"Hive egg":45,"Queen Bee egg":40,"Trident":160,
-            "Centipede egg":15,"Soldier Ant egg":12,"Worker Ant egg":10,
-            "Shell egg":22,"Starfish egg":15,"Bubble egg":10,"Crab egg":18,
-            "Jellyfish egg":18,"CrabHole egg":40,"Squid egg":15,"Shipwreck egg":42,
-            "Barnacle egg":18,"Leech Egg":12,"Parasite Egg":12,
-            "WorkerFireAnt egg":12,"SoldierFireAnt egg":15,"BabyFireAnt egg":10,
-            "FireAntOvermind egg":16,"FireAntHole egg":42,
-            "WhiteBloodCell egg":12,"Spider egg":12,"RedBloodCell egg":18,
-            "StemCell egg":45,"Bacteria_egg":10,"Cancer egg":20,"Virus egg":10,
-            "Bacteriophage egg":12,
-            "ManHole egg":55,"Fly_egg":12,"Rat_egg":35,"Roach_egg":25,
-            "PooStick":35,"Trashcan egg":40,
-            "TrashDigger egg":102,"MudDigger_egg":104,"Digger egg":95,
-            "Biologist egg":102,"Beekeeper egg":100,"PirateDigger egg":103,
-            "Frost Digger egg":105,"Hel Digger egg":108,"Hel Beekeeper egg":104,
+            "Hel Worm Egg":15,"Hel Spider Egg":15,"Hel Bee Egg":15,"Hel Hornet Egg":14,
+            "Hel Beetle Egg":16,"Dragon Egg":20,"Dragon Nest Egg":50,"Hel Hive Egg":45,
+            "Hel Jellyfish Egg":15,"Hel Queen Bee Egg":45,"Toxic Dragon Egg":28,"Fire Stick":20,
+            "Stalagmite Egg":12,"Ice Cube Egg":10,"Ice Dragon Egg":40,"Igloo Egg":40,
+            "Tick Egg":12,"Arctic Spider Egg":12,"Arctic Spider Cave Egg":42,"Snowman Egg":10,
+            "Snow Stick":18,
+            "Wasp Egg":12,"Worker Termite Egg":15,"Soldier Termite Egg":18,
+            "Stickbug Egg":12,"Mantis Egg":15,"Firefly Egg":13,"Termite Hole Egg":40,
+            "Termite Overmind Egg":35,"Spider Cave Egg":40,"Beetle Egg":15,"Scorpion Egg":10,
+            "Ladybug Egg":12,"Bee Egg":12,"Hive Egg":45,"Queen Bee Egg":40,"Trident":160,
+            "Centipede egg":15,"Soldier Ant Egg":12,"Worker Ant Egg":10,
+            "Shell Egg":22,"Starfish Egg":15,"Bubble Egg":10,"Crab Egg":18,
+            "Jellyfish Egg":18,"Crab Hole Egg":40,"Squid Egg":15,"Shipwreck Egg":42,
+            "Barnacle Egg":18,"Leech Egg":12,"Parasite Egg":12,
+            "Worker Fire Ant Egg":12,"Soldier Fire Ant Egg":15,"Baby Fire Ant Egg":10,
+            "Fire Ant Overmind Egg":16,"Fire Ant Hole Egg":42,
+            "White Blood Cell Egg":12,"Spider Egg":12,"Red Blood Cell Egg":18,
+            "Stem Cell Egg":45,"Bacteria Egg":10,"Cancer Egg":20,"Virus Egg":10,
+            "Bacteriophage Egg":12,
+            "Manhole Egg":55,"Fly Egg":12,"Rat Egg":35,"Roach Egg":25,
+            "Poo Stick":35,"Trashcan Egg":40,
+            "Trash Digger Egg":102,"Mud Digger Egg":104,"Digger Egg":95,
+            "Biologist Egg":102,"Beekeeper Egg":100,"Pirate Digger Egg":103,
+            "Frost Digger Egg":105,"Hel Digger Egg":108,"Hel Beekeeper Egg":104,
             "Bubonic Plague":120,
-            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2
+            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,"Mud":15
         };
 
         this.shopItems = [];
@@ -31879,7 +32469,343 @@ class PoisonManager {
         return null;
     }
 }
+class FluidBlob {
+    constructor(
+        x, y,
+        color = '#FF6F00',
+        damage = 1,
+        rarity = "Common",
+        baseSpeed = 10
+    ) {
+        this.x = x;
+        this.y = y;
 
+        // =========================
+        // 稀有度系统
+        // =========================
+        const RARITY_LIST = [
+            "Common", "Unusual", "Rare", "Epic",
+            "Legendary", "Mythic", "Ultra",
+            "Super", "Omega", "Eternal"
+        ];
+
+        const rarityIndex = RARITY_LIST.indexOf(rarity);
+
+        // =========================
+        // 生命周期（固定 5 秒）
+        // =========================
+        this.duration = 5;
+        this.startTime = Date.now() / 1000;
+
+        // =========================
+        // 扩散速度（核心）
+        // base + 每级 +5 px/s
+        // =========================
+        this.expandSpeed = baseSpeed + (rarityIndex * 5);
+
+        this.currentRadius = 5;
+
+        // =========================
+        // 基础属性
+        // =========================
+        this.color = color;
+        this.damage = damage;
+
+        this.lastDamageTime = 0;
+
+        this.state = 'GROWING';
+        this.opacity = 1;
+
+        // =========================
+        // 波动控制（noise）
+        // =========================
+        this.waveSpeed = 0.6 + rarityIndex * 0.1;
+
+        // =========================
+        // 粒子
+        // =========================
+        this.particles = [];
+        this.initParticles();
+    }
+
+    // =========================
+    // 粒子初始化
+    // =========================
+    initParticles() {
+        this.particles = [];
+        const count = 16;
+
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                angle: (i / count) * Math.PI * 2,
+                noiseOffset: Math.random() * 100,
+                x: 0,
+                y: 0
+            });
+        }
+    }
+
+    // =========================
+    // noise
+    // =========================
+    noise(t) {
+        return (
+            Math.sin(t * 1.2) * 0.4 +
+            Math.sin(t * 2.0) * 0.2
+        );
+    }
+
+    // =========================
+    // 更新（核心改造）
+    // =========================
+    update(dt) {
+        if (this.state === 'DEAD') return;
+
+        const now = Date.now() / 1000;
+        const elapsed = now - this.startTime;
+
+        // =========================
+        // 1. 无限制扩散
+        // =========================
+        if (this.state === 'GROWING') {
+            this.currentRadius = elapsed * this.expandSpeed;
+
+            if (elapsed >= this.duration) {
+                this.state = 'FADING';
+            }
+        }
+
+        // =========================
+        // 2. 消失
+        // =========================
+        else if (this.state === 'FADING') {
+            this.opacity -= dt * 0.8;
+            this.currentRadius *= 0.8;
+
+            if (this.opacity <= 0 || this.currentRadius < 2) {
+                this.state = 'DEAD';
+            }
+        }
+
+        // =========================
+        // 3. noise 粒子边缘
+        // =========================
+        const time = now * this.waveSpeed;
+
+        for (let p of this.particles) {
+            const t = time + p.noiseOffset;
+
+            const wave =
+                this.noise(t) * (this.currentRadius * 0.15);
+
+            const finalDist = this.currentRadius + wave;
+
+            p.x = Math.cos(p.angle) * finalDist;
+            p.y = Math.sin(p.angle) * finalDist;
+        }
+    }
+
+    // =========================
+    // 绘制
+    // =========================
+    draw(ctx, screenX, screenY) {
+        if (this.state === 'DEAD' || this.currentRadius < 2) return;
+
+        ctx.save();
+        ctx.translate(screenX, screenY);
+
+        ctx.globalAlpha = 1;
+
+        ctx.beginPath();
+
+        let p0 = this.particles[this.particles.length - 1];
+        let p1 = this.particles[0];
+
+        ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+
+        for (let i = 0; i < this.particles.length; i++) {
+            p1 = this.particles[i];
+            const p2 = this.particles[(i + 1) % this.particles.length];
+
+            ctx.quadraticCurveTo(
+                p1.x, p1.y,
+                (p1.x + p2.x) / 2,
+                (p1.y + p2.y) / 2
+            );
+        }
+
+        ctx.closePath();
+
+        // =========================
+        // 填充（无透明）
+        // =========================
+        ctx.fillStyle = this.color;
+        ctx.fill();
+
+        // =========================
+        // 深色描边
+        // =========================
+        ctx.strokeStyle = this.darkenColor(this.color, 0.45);
+        ctx.lineWidth = 6;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // =========================
+    // 伤害逻辑（保留原结构）
+    // =========================
+    applyEffect(target, dt) {
+        const now = Date.now() / 1000;
+
+        if (now - this.lastDamageTime < 0.3) return false;
+
+        this.lastDamageTime = now;
+
+        if (this.effectType === 'poison') {
+            if (target.takeDamage) {
+                target.takeDamage(this.damage, "fluid");
+            } else {
+                target.health -= this.damage;
+            }
+
+            if (target.poisonTimer !== undefined) {
+                target.poisonTimer = 3000;
+                target.poisonDamagePerSec =
+                    (target.poisonDamagePerSec || 0) + this.poisonDamage;
+            }
+        } else {
+            if (target.takeDamage) {
+                target.takeDamage(this.damage, "fluid");
+            } else {
+                target.health -= this.damage;
+            }
+        }
+
+        return true;
+    }
+
+    // =========================
+    // 工具：颜色变暗
+    // =========================
+    darkenColor(hex, factor = 0.5) {
+        const num = parseInt(hex.replace("#", ""), 16);
+
+        let r = (num >> 16) * factor;
+        let g = ((num >> 8) & 0x00FF) * factor;
+        let b = (num & 0x0000FF) * factor;
+
+        return `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
+    }
+}
+class FluidManager {
+    constructor(gameInstance) {
+        this.game = gameInstance;
+        this.fluids = [];
+        this.maxFluids = 50;
+    }
+
+    addFluid(x, y, color, damage, duration = 5, rarity = "Common", effectType = 'damage') {
+        if (this.fluids.length >= this.maxFluids) {
+            this.fluids.shift();
+        }
+
+        const fluid = new FluidBlob(x, y, color, damage, rarity);
+
+        fluid.effectType = effectType;
+
+        // =========================
+        // 只设置 item_stat baseSpeed
+        // =========================
+        if (this.game?.itemStats?.fluidBaseSpeed !== undefined) {
+            fluid.baseSpeed = this.game.itemStats.fluidBaseSpeed;
+
+            const RARITY_BONUS = {
+                Common: 0, Unusual: 1, Rare: 2, Epic: 3,
+                Legendary: 4, Mythic: 5, Ultra: 6,
+                Super: 7, Omega: 8, Eternal: 9
+            };
+
+            const level = RARITY_BONUS[rarity] || 0;
+
+            // ✅ 关键：直接影响 expandSpeed（不是 fluid.speed）
+            fluid.expandSpeed = fluid.baseSpeed + level * 5;
+        }
+
+        this.fluids.push(fluid);
+        return fluid;
+    }
+    update(dt) {
+        for (let i = 0; i < this.fluids.length; i++) {
+            const fluid = this.fluids[i];
+            fluid.update(dt);
+
+            const attackRadius = fluid.currentRadius;
+
+            for (const enemy of this.game.enemies) {
+                if (enemy.isDead) continue;
+                if (enemy.isFriendly) continue;
+
+                const dx = enemy.physicsBody.position.x - fluid.x;
+                const dy = enemy.physicsBody.position.y - fluid.y;
+                if (dx * dx + dy * dy < attackRadius * attackRadius) {
+                    // ✅ 修改前：伤害 × dt（每秒伤害）
+                    // const damageThisFrame = fluid.damage * dt;
+
+                    // ✅ 修改后：每帧直接造成完整伤害
+                    const damageThisFrame = fluid.damage;
+
+                    enemy.health -= damageThisFrame;
+
+                    // 显示伤害数字
+                    if (!fluid._damageAccumulator) fluid._damageAccumulator = {};
+                    fluid._damageAccumulator[enemy.id] = (fluid._damageAccumulator[enemy.id] || 0) + damageThisFrame;
+                    if (fluid._damageAccumulator[enemy.id] >= 1) {
+                        if (this.game.addDamageNumber) {
+                            this.game.addDamageNumber(
+                                enemy.physicsBody.position.x,
+                                enemy.physicsBody.position.y,
+                                Math.floor(fluid._damageAccumulator[enemy.id]),
+                                "mud"
+                            );
+                        }
+                        fluid._damageAccumulator[enemy.id] = 0;
+                    }
+
+                    // 检查死亡
+                    if (enemy.health <= 0 && !enemy.isDead) {
+                        enemy.health = 0;
+                        enemy.isDead = true;
+                        if (this.game.dropCard) {
+                            this.game.dropCard(enemy);
+                        }
+                    }
+                }
+            }
+
+            if (fluid.state === 'DEAD') {
+                this.fluids.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+
+    // 绘制所有流体
+    draw(ctx, cameraOffset) {
+        for (const fluid of this.fluids) {
+            const screenX = fluid.x - cameraOffset.x;
+            const screenY = fluid.y - cameraOffset.y;
+            fluid.draw(ctx, screenX, screenY);
+        }
+    }
+
+    // 清除所有流体
+    clear() {
+        this.fluids = [];
+    }
+}
 class Petal {
     constructor(player, petalIndex = 0, totalPetals = 10) {
         this.player = player;
@@ -32367,10 +33293,6 @@ tryBreakBubble(dt) {
         // ✅ 调用 Player 的 applyBubbleForce 方法
         this.player.applyBubbleForce(vx, vy);
 
-        // 显示特效
-        if (this.player.gameInstance?.addDamageNumber) {
-            this.player.gameInstance.addDamageNumber(this.worldX, this.worldY, "💨", "heal");
-        }
     }
     // 在 Petal 类中添加
     applyFlameToEnemy(enemy, baseDamage = null, duration = null, initialMultiplier = null, rampUpMultiplier = null) {
@@ -32631,7 +33553,7 @@ tryBreakBubble(dt) {
 
         // ========== 判断炸弹类型 ==========
         const isBubbleBomb = item.type === "Bubble Bomb";
-        const isFireBomb = item.type === "FireBomb";
+        const isFireBomb = item.type === "Fire Bomb";
         const isBubble = item.type === "Bubble";
         let radius, damage, knockback;
 
@@ -32668,7 +33590,7 @@ tryBreakBubble(dt) {
                 // 造成直接伤害
                 enemy.health -= damage;
 
-                // ========== 🆕 FireBomb 附加燃烧效果 ==========
+                // ========== 🆕 Fire Bomb 附加燃烧效果 ==========
                 if (isFireBomb && !enemy.isDead) {
                     const fireDamage = 30 * mult;
                     const fireDuration = 3000;
@@ -32994,18 +33916,18 @@ tryBreakBubble(dt) {
 
                 const EGG_ITEMS = new Set([
                     "Egg", "Ant Egg", "Moon Egg",
-                    "WhiteBloodCell egg", "StemCell egg", "Spider egg", "RedBloodCell egg",
-                    "queen ant egg", "WorkerFireAnt egg", "SoldierFireAnt egg", "BabyFireAnt egg",
-                    "FireAntOvermind egg", "FireAntHole egg",
-                    "Shell egg", "Starfish egg", "Bubble egg", "Crab egg", "Jellyfish egg", "CrabHole egg",
-                    "Cancer egg", "ManHole egg", "Fly_egg", "Rat_egg", "Roach_egg",
-                    "TrashDigger egg", "MudDigger_egg", "Digger egg", "Biologist egg",
-                    "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage egg", "Virus egg",
-                    "Soldier Ant egg", "Worker ant egg", "Centipede egg", "Ladybug egg",
-                    "Bee egg", "Hive egg", "Beetle egg",
-                    "Photon egg", "Electron egg", "ElectronCloud egg", "Proton egg", "Atom egg",
-                    "BlackHole egg", "WhiteHole egg", "NeutronStar egg", "Star egg", "Asteroid egg",
-                    "Alien egg", "UFO egg", "Ghost egg", "GraveStone egg",
+                    "White Blood Cell Egg", "Stem Cell Egg", "Spider Egg", "Red Blood Cell Egg",
+                    "Queen Ant Egg", "Worker Fire Ant Egg", "Soldier Fire Ant Egg", "Baby Fire Ant Egg",
+                    "Fire Ant Overmind Egg", "Fire Ant Hole Egg",
+                    "Shell Egg", "Starfish Egg", "Bubble Egg", "Crab Egg", "Jellyfish Egg", "Crab Hole Egg",
+                    "Cancer Egg", "Manhole Egg", "Fly Egg", "Rat Egg", "Roach Egg",
+                    "Trash Digger Egg", "Mud Digger Egg", "Digger Egg", "Biologist Egg",
+                    "Square Egg", "Leech Egg", "Parasite Egg", "Bacteriophage Egg", "Virus Egg",
+                    "Soldier Ant Egg", "Worker Ant Egg", "Centipede egg", "Ladybug Egg",
+                    "Bee Egg", "Hive Egg", "Beetle Egg",
+                    "Photon Egg", "Electron Egg", "Electron Cloud Egg", "Proton Egg", "Atom Egg",
+                    "Black Hole Egg", "White Hole Egg", "Neutron Star Egg", "Star Egg", "Asteroid Egg",
+                    "Alien Egg", "UFO Egg", "Ghost Egg", "Grave Stone Egg",
                 ]);
                 this.isEggItem = EGG_ITEMS.has(item.type);
 
@@ -33049,115 +33971,115 @@ tryBreakBubble(dt) {
     _registerSpawnMethods() {
         const SPAWN_CONFIGS = [
             // ── Hel / Dragon ─────────────────────────────────────────────────
-            { listName:"helWormList",       maxName:"maxHelWorms",          maxDefault:2,  spawnCount:2,  enemyType:"HelWorm",        eggType:"HelWorm egg",          cooldown:10000, spawnMethod:"HelWorm",             cleanMethod:"HelWorm",             updateMethod:"HelWorm" },
-            { listName:"helSpiderList",     maxName:"maxHelSpiders",        maxDefault:3,  spawnCount:3,  enemyType:"HelSpider",      eggType:"HelSpider egg",        cooldown:12000, spawnMethod:"HelSpider",           cleanMethod:"HelSpider",           updateMethod:"HelSpider" },
-            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
-            { listName:"helHornetList",     maxName:"maxHelHornets",        maxDefault:1,  spawnCount:1,  enemyType:"HelHornet",      eggType:"HelHornet egg",        cooldown:12000, spawnMethod:"HelHornet",           cleanMethod:"HelHornet",           updateMethod:"HelHornet" },
-            { listName:"helBeetleList",     maxName:"maxHelBeetles",        maxDefault:1,  spawnCount:1,  enemyType:"HelBeetle",      eggType:"HelBeetle egg",        cooldown:15000, spawnMethod:"HelBeetle",           cleanMethod:"HelBeetle",           updateMethod:"HelBeetle" },
-            { listName:"dragonList",        maxName:"maxDragons",           maxDefault:1,  spawnCount:1,  enemyType:"Dragon",         eggType:"Dragon egg",           cooldown:20000, spawnMethod:"Dragon",              cleanMethod:"Dragon",              updateMethod:"Dragon" },
-            { listName:"NestDragonList",    maxName:"maxNestDragons",       maxDefault:10, spawnCount:10, enemyType:"Dragon",         eggType:"DragonNest egg",       cooldown:28000, spawnMethod:"NestDragon",          cleanMethod:"NestDragon",          updateMethod:"NestDragon" },
-            { listName:"dragonNestList",    maxName:"maxDragonNests",       maxDefault:1,  spawnCount:10, enemyType:"DragonNest",     eggType:"DragonNest egg",       cooldown:28000, spawnMethod:"DragonNest",          cleanMethod:"DragonNest",          updateMethod:"DragonNest" },
-            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
-            { listName:"HiveHelBeeList",    maxName:"maxHiveHelBees",       maxDefault:10, spawnCount:10, enemyType:"HelBee",         eggType:"HelHive egg",          cooldown:25000, spawnMethod:"HiveHelBee",          cleanMethod:"HiveHelBee",          updateMethod:"HiveHelBee" },
+            { listName:"helWormList",       maxName:"maxHelWorms",          maxDefault:2,  spawnCount:2,  enemyType:"HelWorm",        eggType:"Hel Worm Egg",          cooldown:10000, spawnMethod:"HelWorm",             cleanMethod:"HelWorm",             updateMethod:"HelWorm" },
+            { listName:"helSpiderList",     maxName:"maxHelSpiders",        maxDefault:3,  spawnCount:3,  enemyType:"HelSpider",      eggType:"Hel Spider Egg",        cooldown:12000, spawnMethod:"HelSpider",           cleanMethod:"HelSpider",           updateMethod:"HelSpider" },
+            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee Egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
+            { listName:"helHornetList",     maxName:"maxHelHornets",        maxDefault:1,  spawnCount:1,  enemyType:"HelHornet",      eggType:"Hel Hornet Egg",        cooldown:12000, spawnMethod:"HelHornet",           cleanMethod:"HelHornet",           updateMethod:"HelHornet" },
+            { listName:"helBeetleList",     maxName:"maxHelBeetles",        maxDefault:1,  spawnCount:1,  enemyType:"HelBeetle",      eggType:"Hel Beetle Egg",        cooldown:15000, spawnMethod:"HelBeetle",           cleanMethod:"HelBeetle",           updateMethod:"HelBeetle" },
+            { listName:"dragonList",        maxName:"maxDragons",           maxDefault:1,  spawnCount:1,  enemyType:"Dragon",         eggType:"Dragon Egg",           cooldown:20000, spawnMethod:"Dragon",              cleanMethod:"Dragon",              updateMethod:"Dragon" },
+            { listName:"NestDragonList",    maxName:"maxNestDragons",       maxDefault:10, spawnCount:10, enemyType:"Dragon",         eggType:"Dragon Nest Egg",       cooldown:28000, spawnMethod:"NestDragon",          cleanMethod:"NestDragon",          updateMethod:"NestDragon" },
+            { listName:"dragonNestList",    maxName:"maxDragonNests",       maxDefault:1,  spawnCount:10, enemyType:"DragonNest",     eggType:"Dragon Nest Egg",       cooldown:28000, spawnMethod:"DragonNest",          cleanMethod:"DragonNest",          updateMethod:"DragonNest" },
+            { listName:"helBeeList",        maxName:"maxHelBees",           maxDefault:1,  spawnCount:1,  enemyType:"HelBee",         eggType:"Hel Bee Egg",          cooldown:10000, spawnMethod:"HelBee",              cleanMethod:"HelBee",              updateMethod:"HelBee" },
+            { listName:"HiveHelBeeList",    maxName:"maxHiveHelBees",       maxDefault:10, spawnCount:10, enemyType:"HelBee",         eggType:"Hel Hive Egg",          cooldown:25000, spawnMethod:"HiveHelBee",          cleanMethod:"HiveHelBee",          updateMethod:"HiveHelBee" },
             // 在 SPAWN_CONFIGS 数组中添加
             { listName: "graveDiggerList", maxName: "maxGraveDiggers", maxDefault: 1, spawnCount: 1,
-              enemyType: "GraveDigger", eggType: "GraveDigger egg", cooldown: 5500,
+              enemyType: "GraveDigger", eggType: "Grave Digger Egg", cooldown: 5500,
               spawnMethod: "GraveDigger", cleanMethod: "GraveDigger", updateMethod: "GraveDigger" },
             { listName: "alienDiggerList", maxName: "maxAlienDiggers", maxDefault: 1, spawnCount: 1,
-              enemyType: "AlienDigger", eggType: "AlienDigger egg", cooldown: 6000,
+              enemyType: "AlienDigger", eggType: "Alien Digger Egg", cooldown: 6000,
               spawnMethod: "AlienDigger", cleanMethod: "AlienDigger", updateMethod: "AlienDigger" },
-            { listName:"helHiveList",       maxName:"maxHelHives",          maxDefault:1,  spawnCount:10, enemyType:"HelHive",        eggType:"HelHive egg",          cooldown:25000, spawnMethod:"HelHive",             cleanMethod:"HelHive",             updateMethod:"HelHive" },
+            { listName:"helHiveList",       maxName:"maxHelHives",          maxDefault:1,  spawnCount:10, enemyType:"HelHive",        eggType:"Hel Hive Egg",          cooldown:25000, spawnMethod:"HelHive",             cleanMethod:"HelHive",             updateMethod:"HelHive" },
 
-            { listName:"helJellyfishList",  maxName:"maxHelJellyfish",      maxDefault:2,  spawnCount:2,  enemyType:"HelJellyfish",   eggType:"HelJellyfish egg",     cooldown:15000, spawnMethod:"HelJellyfish",        cleanMethod:"HelJellyfish",        updateMethod:"HelJellyfish" },
-            { listName:"helQueenBeeList",   maxName:"maxHelQueenBees",      maxDefault:1,  spawnCount:1,  enemyType:"HelQueenBee",    eggType:"Hel Queen Bee egg",    cooldown:25000, spawnMethod:"HelQueenBee",         cleanMethod:"HelQueenBee",         updateMethod:"HelQueenBee" },
-            { listName:"toxicDragonList",   maxName:"maxToxicDragons",      maxDefault:1,  spawnCount:1,  enemyType:"ToxicDragon",    eggType:"ToxicDragon egg",      cooldown:22000, spawnMethod:"ToxicDragon",         cleanMethod:"ToxicDragon",         updateMethod:"ToxicDragon" },
-            { listName:"helDiggerList",     maxName:"maxHelDiggers",        maxDefault:1,  spawnCount:1,  enemyType:"HelDigger",      eggType:"Hel Digger egg",       cooldown:6000, spawnMethod:"HelDigger",           cleanMethod:"HelDigger",           updateMethod:"HelDigger" },
-            { listName:"helBeekeeperList",  maxName:"maxHelBeekeepers",     maxDefault:1,  spawnCount:1,  enemyType:"HelBeekeeper",   eggType:"Hel Beekeeper egg",    cooldown:20000, spawnMethod:"HelBeekeeper",        cleanMethod:"HelBeekeeper",        updateMethod:"HelBeekeeper" },
-            { listName:"firestormList",     maxName:"maxFirestorms",        maxDefault:3,  spawnCount:3,  enemyType:"FireStorm",      eggType:"FireStick",            cooldown:8000,  spawnMethod:"Firestorm",           cleanMethod:"Firestorm",           updateMethod:"Firestorm" },
+            { listName:"helJellyfishList",  maxName:"maxHelJellyfish",      maxDefault:2,  spawnCount:2,  enemyType:"HelJellyfish",   eggType:"Hel Jellyfish Egg",     cooldown:15000, spawnMethod:"HelJellyfish",        cleanMethod:"HelJellyfish",        updateMethod:"HelJellyfish" },
+            { listName:"helQueenBeeList",   maxName:"maxHelQueenBees",      maxDefault:1,  spawnCount:1,  enemyType:"HelQueenBee",    eggType:"Hel Queen Bee Egg",    cooldown:25000, spawnMethod:"HelQueenBee",         cleanMethod:"HelQueenBee",         updateMethod:"HelQueenBee" },
+            { listName:"toxicDragonList",   maxName:"maxToxicDragons",      maxDefault:1,  spawnCount:1,  enemyType:"ToxicDragon",    eggType:"Toxic Dragon Egg",      cooldown:22000, spawnMethod:"ToxicDragon",         cleanMethod:"ToxicDragon",         updateMethod:"ToxicDragon" },
+            { listName:"helDiggerList",     maxName:"maxHelDiggers",        maxDefault:1,  spawnCount:1,  enemyType:"HelDigger",      eggType:"Hel Digger Egg",       cooldown:6000, spawnMethod:"HelDigger",           cleanMethod:"HelDigger",           updateMethod:"HelDigger" },
+            { listName:"helBeekeeperList",  maxName:"maxHelBeekeepers",     maxDefault:1,  spawnCount:1,  enemyType:"HelBeekeeper",   eggType:"Hel Beekeeper Egg",    cooldown:20000, spawnMethod:"HelBeekeeper",        cleanMethod:"HelBeekeeper",        updateMethod:"HelBeekeeper" },
+            { listName:"firestormList",     maxName:"maxFirestorms",        maxDefault:3,  spawnCount:3,  enemyType:"FireStorm",      eggType:"Fire Stick",            cooldown:8000,  spawnMethod:"Firestorm",           cleanMethod:"Firestorm",           updateMethod:"Firestorm" },
 
             // ── Ocean ─────────────────────────────────────────────────────────
-            { listName:"scallopList",       maxName:"maxScallops",          maxDefault:4,  spawnCount:4,  enemyType:"Scallop",        eggType:"Shell egg",            cooldown:7000,  spawnMethod:"ScallopsWithDna",     cleanMethod:"Scallops",            updateMethod:"Scallops" },
-            { listName:"starfishList",      maxName:"maxStarfish",          maxDefault:2,  spawnCount:2,  enemyType:"Starfish",       eggType:"Starfish egg",         cooldown:8000,  spawnMethod:"StarfishWithDna",     cleanMethod:"Starfish",            updateMethod:"Starfish" },
-            { listName:"bubbleList",        maxName:"maxBubbles",           maxDefault:3,  spawnCount:3,  enemyType:"Bubble",         eggType:"Bubble egg",           cooldown:5000,  spawnMethod:"BubblesWithDna",      cleanMethod:"Bubbles",             updateMethod:"Bubbles" },
-            { listName:"crabList",          maxName:"maxCrabs",             maxDefault:3,  spawnCount:3,  enemyType:"Crab",           eggType:"Crab egg",             cooldown:6000,  spawnMethod:"CrabsWithDna",        cleanMethod:"Crabs",               updateMethod:"Crabs" },
-            { listName:"jellyfishList",     maxName:"maxJellyfish",         maxDefault:3,  spawnCount:3,  enemyType:"Jellyfish",      eggType:"Jellyfish egg",        cooldown:10000, spawnMethod:"JellyfishWithDna",    cleanMethod:"Jellyfish",           updateMethod:"Jellyfish" },
-            { listName:"crabHoleCrabs",     maxName:"maxCrabHoleCrabs",     maxDefault:10, spawnCount:10, enemyType:"Crab",           eggType:"CrabHole egg",         cooldown:15000, spawnMethod:"CrabHoleWithDna",     cleanMethod:"CrabHoleCrabs",       updateMethod:"CrabHoles" },
-            { listName:"squidList",         maxName:"maxSquid",             maxDefault:1,  spawnCount:1,  enemyType:"Squid",          eggType:"Squid egg",            cooldown:10000, spawnMethod:"SquidWithDNA",        cleanMethod:"Squid",               updateMethod:"Squid" },
-            { listName:"shipwreckJellyfishList", maxName:"maxShipwreckJellyfish", maxDefault:10, spawnCount:10, enemyType:"Jellyfish", eggType:"Shipwreck egg",       cooldown:19000, spawnMethod:"ShipwreckJellyfish",  cleanMethod:"ShipwreckJellyfish",  updateMethod:"ShipwreckJellyfish" },
-            { listName:"barnacleList",      maxName:"maxBarnacles",         maxDefault:2,  spawnCount:2,  enemyType:"Barnacle",       eggType:"Barnacle egg",         cooldown:12000, spawnMethod:"BarnaclesWithDNA",    cleanMethod:"Barnacles",           updateMethod:"Barnacles" },
+            { listName:"scallopList",       maxName:"maxScallops",          maxDefault:4,  spawnCount:4,  enemyType:"Scallop",        eggType:"Shell Egg",            cooldown:7000,  spawnMethod:"ScallopsWithDna",     cleanMethod:"Scallops",            updateMethod:"Scallops" },
+            { listName:"starfishList",      maxName:"maxStarfish",          maxDefault:2,  spawnCount:2,  enemyType:"Starfish",       eggType:"Starfish Egg",         cooldown:8000,  spawnMethod:"StarfishWithDna",     cleanMethod:"Starfish",            updateMethod:"Starfish" },
+            { listName:"bubbleList",        maxName:"maxBubbles",           maxDefault:3,  spawnCount:3,  enemyType:"Bubble",         eggType:"Bubble Egg",           cooldown:5000,  spawnMethod:"BubblesWithDna",      cleanMethod:"Bubbles",             updateMethod:"Bubbles" },
+            { listName:"crabList",          maxName:"maxCrabs",             maxDefault:3,  spawnCount:3,  enemyType:"Crab",           eggType:"Crab Egg",             cooldown:6000,  spawnMethod:"CrabsWithDna",        cleanMethod:"Crabs",               updateMethod:"Crabs" },
+            { listName:"jellyfishList",     maxName:"maxJellyfish",         maxDefault:3,  spawnCount:3,  enemyType:"Jellyfish",      eggType:"Jellyfish Egg",        cooldown:10000, spawnMethod:"JellyfishWithDna",    cleanMethod:"Jellyfish",           updateMethod:"Jellyfish" },
+            { listName:"crabHoleCrabs",     maxName:"maxCrabHoleCrabs",     maxDefault:10, spawnCount:10, enemyType:"Crab",           eggType:"Crab Hole Egg",         cooldown:15000, spawnMethod:"CrabHoleWithDna",     cleanMethod:"CrabHoleCrabs",       updateMethod:"CrabHoles" },
+            { listName:"squidList",         maxName:"maxSquid",             maxDefault:1,  spawnCount:1,  enemyType:"Squid",          eggType:"Squid Egg",            cooldown:10000, spawnMethod:"SquidWithDNA",        cleanMethod:"Squid",               updateMethod:"Squid" },
+            { listName:"shipwreckJellyfishList", maxName:"maxShipwreckJellyfish", maxDefault:10, spawnCount:10, enemyType:"Jellyfish", eggType:"Shipwreck Egg",       cooldown:19000, spawnMethod:"ShipwreckJellyfish",  cleanMethod:"ShipwreckJellyfish",  updateMethod:"ShipwreckJellyfish" },
+            { listName:"barnacleList",      maxName:"maxBarnacles",         maxDefault:2,  spawnCount:2,  enemyType:"Barnacle",       eggType:"Barnacle Egg",         cooldown:12000, spawnMethod:"BarnaclesWithDNA",    cleanMethod:"Barnacles",           updateMethod:"Barnacles" },
 
             // ── Insects ───────────────────────────────────────────────────────
-            { listName:"beetleList",        maxName:"maxBeetles",           maxDefault:1,  spawnCount:1,  enemyType:"Beetle",         eggType:"Beetle egg",           cooldown:8000,  spawnMethod:"BeetleWithDna",       cleanMethod:"Beetles",             updateMethod:"Beetles" },
-            { listName:"scorpionList",      maxName:"maxScorpions",         maxDefault:2,  spawnCount:2,  enemyType:"Scorpion",       eggType:"Scorpion egg",         cooldown:20000, spawnMethod:"ScorpionsWithDNA",    cleanMethod:"Scorpions",           updateMethod:"Scorpions" },
-            { listName:"beeList",           maxName:"maxBees",              maxDefault:1,  spawnCount:1,  enemyType:"Bee",            eggType:"Bee egg",              cooldown:10000, spawnMethod:"BeesWithDNA",         cleanMethod:"Bees",                updateMethod:"Bees" },
-            { listName:"ladybugList",       maxName:"maxLadybugs",          maxDefault:2,  spawnCount:2,  enemyType:"Ladybug",        eggType:"Ladybug egg",          cooldown:12000, spawnMethod:"LadybugsWithDNA",     cleanMethod:"Ladybugs",            updateMethod:"Ladybugs" },
-            { listName:"hiveBeeList",       maxName:"maxHiveBees",          maxDefault:10, spawnCount:10, enemyType:"Bee",            eggType:"Hive egg",             cooldown:20000, spawnMethod:"HiveBeesWithDNA",     cleanMethod:"HiveBees",            updateMethod:"HiveBees" },
-            { listName:"beekeeperList",     maxName:"maxBeekeepers",        maxDefault:1,  spawnCount:1,  enemyType:"Beekeeper",      eggType:"Beekeeper egg",        cooldown:20000, spawnMethod:"BeekeeperWithDNA",    cleanMethod:"Beekeepers",          updateMethod:"Beekeepers" },
-            { listName:"queenBeeList",      maxName:"maxQueenBees",         maxDefault:1,  spawnCount:1,  enemyType:"QueenBee",       eggType:"Queen Bee egg",        cooldown:15000, spawnMethod:"QueenBeeWithDNA",     cleanMethod:"QueenBees",           updateMethod:"QueenBees" },
+            { listName:"beetleList",        maxName:"maxBeetles",           maxDefault:1,  spawnCount:1,  enemyType:"Beetle",         eggType:"Beetle Egg",           cooldown:8000,  spawnMethod:"BeetleWithDna",       cleanMethod:"Beetles",             updateMethod:"Beetles" },
+            { listName:"scorpionList",      maxName:"maxScorpions",         maxDefault:2,  spawnCount:2,  enemyType:"Scorpion",       eggType:"Scorpion Egg",         cooldown:20000, spawnMethod:"ScorpionsWithDNA",    cleanMethod:"Scorpions",           updateMethod:"Scorpions" },
+            { listName:"beeList",           maxName:"maxBees",              maxDefault:1,  spawnCount:1,  enemyType:"Bee",            eggType:"Bee Egg",              cooldown:10000, spawnMethod:"BeesWithDNA",         cleanMethod:"Bees",                updateMethod:"Bees" },
+            { listName:"ladybugList",       maxName:"maxLadybugs",          maxDefault:2,  spawnCount:2,  enemyType:"Ladybug",        eggType:"Ladybug Egg",          cooldown:12000, spawnMethod:"LadybugsWithDNA",     cleanMethod:"Ladybugs",            updateMethod:"Ladybugs" },
+            { listName:"hiveBeeList",       maxName:"maxHiveBees",          maxDefault:10, spawnCount:10, enemyType:"Bee",            eggType:"Hive Egg",             cooldown:20000, spawnMethod:"HiveBeesWithDNA",     cleanMethod:"HiveBees",            updateMethod:"HiveBees" },
+            { listName:"beekeeperList",     maxName:"maxBeekeepers",        maxDefault:1,  spawnCount:1,  enemyType:"Beekeeper",      eggType:"Beekeeper Egg",        cooldown:20000, spawnMethod:"BeekeeperWithDNA",    cleanMethod:"Beekeepers",          updateMethod:"Beekeepers" },
+            { listName:"queenBeeList",      maxName:"maxQueenBees",         maxDefault:1,  spawnCount:1,  enemyType:"QueenBee",       eggType:"Queen Bee Egg",        cooldown:15000, spawnMethod:"QueenBeeWithDNA",     cleanMethod:"QueenBees",           updateMethod:"QueenBees" },
 
             // ── Jungle ────────────────────────────────────────────────────────
-            { listName:"waspList",          maxName:"maxWasps",             maxDefault:1,  spawnCount:1,  enemyType:"Wasp",           eggType:"Wasp egg",             cooldown:10000, spawnMethod:"Wasp",                cleanMethod:"Wasps",               updateMethod:"Wasps" },
-            { listName:"workerTermiteList", maxName:"maxWorkerTermites",    maxDefault:4,  spawnCount:4,  enemyType:"Worker Termite", eggType:"Worker Termite egg",   cooldown:12000, spawnMethod:"WorkerTermite",       cleanMethod:"WorkerTermites",      updateMethod:"WorkerTermites" },
-            { listName:"soldierTermiteList",maxName:"maxSoldierTermites",   maxDefault:3,  spawnCount:3,  enemyType:"Soldier Termite",eggType:"Soldier Termite egg",  cooldown:12000, spawnMethod:"SoldierTermite",      cleanMethod:"SoldierTermites",     updateMethod:"SoldierTermites" },
-            { listName:"stickBugList",      maxName:"maxStickBugs",         maxDefault:1,  spawnCount:1,  enemyType:"StickBug",       eggType:"StickBug egg",         cooldown:6000,  spawnMethod:"StickBug",            cleanMethod:"StickBugs",           updateMethod:"StickBugs" },
-            { listName:"mantisList",        maxName:"maxMantises",          maxDefault:1,  spawnCount:1,  enemyType:"Mantis",         eggType:"Mantis egg",           cooldown:10000, spawnMethod:"Mantis",              cleanMethod:"Mantises",            updateMethod:"Mantises" },
-            { listName:"fireflyList",       maxName:"maxFireflies",         maxDefault:2,  spawnCount:2,  enemyType:"Firefly",        eggType:"Firefly egg",          cooldown:14000, spawnMethod:"Firefly",             cleanMethod:"Fireflies",           updateMethod:"Fireflies" },
-            { listName:"termiteSoldierList",maxName:"maxTermiteSoldiers",   maxDefault:10, spawnCount:10, enemyType:"Soldier Termite",eggType:"TermiteHole egg",      cooldown:18000, spawnMethod:"TermiteHoleSoldiers", cleanMethod:"TermiteSoldiers",     updateMethod:"TermiteSoldiers" },
-            { listName:"termiteOvermindList",maxName:"maxTermiteOverminds", maxDefault:1,  spawnCount:1,  enemyType:"TermiteOvermind",eggType:"TermiteOvermind egg",  cooldown:20000, spawnMethod:"TermiteOvermind",     cleanMethod:"TermiteOverminds",    updateMethod:"TermiteOverminds" },
-            { listName:"spiderCaveSpiders", maxName:"maxSpiderCaveSpiders", maxDefault:10, spawnCount:10, enemyType:"Spider",         eggType:"SpiderCave egg",       cooldown:19000, spawnMethod:"SpiderCave",          cleanMethod:"SpiderCaveSpiders",   updateMethod:"SpiderCaveSpiders" },
+            { listName:"waspList",          maxName:"maxWasps",             maxDefault:1,  spawnCount:1,  enemyType:"Wasp",           eggType:"Wasp Egg",             cooldown:10000, spawnMethod:"Wasp",                cleanMethod:"Wasps",               updateMethod:"Wasps" },
+            { listName:"workerTermiteList", maxName:"maxWorkerTermites",    maxDefault:4,  spawnCount:4,  enemyType:"Worker Termite", eggType:"Worker Termite Egg",   cooldown:12000, spawnMethod:"WorkerTermite",       cleanMethod:"WorkerTermites",      updateMethod:"WorkerTermites" },
+            { listName:"soldierTermiteList",maxName:"maxSoldierTermites",   maxDefault:3,  spawnCount:3,  enemyType:"Soldier Termite",eggType:"Soldier Termite Egg",  cooldown:12000, spawnMethod:"SoldierTermite",      cleanMethod:"SoldierTermites",     updateMethod:"SoldierTermites" },
+            { listName:"stickBugList",      maxName:"maxStickBugs",         maxDefault:1,  spawnCount:1,  enemyType:"StickBug",       eggType:"Stickbug Egg",         cooldown:6000,  spawnMethod:"StickBug",            cleanMethod:"StickBugs",           updateMethod:"StickBugs" },
+            { listName:"mantisList",        maxName:"maxMantises",          maxDefault:1,  spawnCount:1,  enemyType:"Mantis",         eggType:"Mantis Egg",           cooldown:10000, spawnMethod:"Mantis",              cleanMethod:"Mantises",            updateMethod:"Mantises" },
+            { listName:"fireflyList",       maxName:"maxFireflies",         maxDefault:2,  spawnCount:2,  enemyType:"Firefly",        eggType:"Firefly Egg",          cooldown:14000, spawnMethod:"Firefly",             cleanMethod:"Fireflies",           updateMethod:"Fireflies" },
+            { listName:"termiteSoldierList",maxName:"maxTermiteSoldiers",   maxDefault:10, spawnCount:10, enemyType:"Soldier Termite",eggType:"Termite Hole Egg",      cooldown:18000, spawnMethod:"TermiteHoleSoldiers", cleanMethod:"TermiteSoldiers",     updateMethod:"TermiteSoldiers" },
+            { listName:"termiteOvermindList",maxName:"maxTermiteOverminds", maxDefault:1,  spawnCount:1,  enemyType:"TermiteOvermind",eggType:"Termite Overmind Egg",  cooldown:20000, spawnMethod:"TermiteOvermind",     cleanMethod:"TermiteOverminds",    updateMethod:"TermiteOverminds" },
+            { listName:"spiderCaveSpiders", maxName:"maxSpiderCaveSpiders", maxDefault:10, spawnCount:10, enemyType:"Spider",         eggType:"Spider Cave Egg",       cooldown:19000, spawnMethod:"SpiderCave",          cleanMethod:"SpiderCaveSpiders",   updateMethod:"SpiderCaveSpiders" },
 
             // ── Arctic ────────────────────────────────────────────────────────
-            { listName:"slagMightList",     maxName:"maxSlagMight",         maxDefault:1,  spawnCount:1,  enemyType:"SlagMight",      eggType:"SlagMight egg",        cooldown:8000,  spawnMethod:"SlagMight",           cleanMethod:"SlagMight",           updateMethod:"SlagMight" },
-            { listName:"iceCubeList",       maxName:"maxIceCubes",          maxDefault:1,  spawnCount:1,  enemyType:"Ice Cube",       eggType:"Ice Cube egg",         cooldown:6000,  spawnMethod:"IceCube",             cleanMethod:"IceCube",             updateMethod:"IceCube" },
-            { listName:"iceDragonList",     maxName:"maxIceDragons",        maxDefault:1,  spawnCount:1,  enemyType:"Ice Dragon",     eggType:"Ice Dragon egg",       cooldown:10000, spawnMethod:"IceDragon",           cleanMethod:"IceDragon",           updateMethod:"IceDragon" },
-            { listName:"iglooSnowmenList",  maxName:"maxIglooSnowmen",      maxDefault:10, spawnCount:10, enemyType:"Snowman",        eggType:"Igloo egg",            cooldown:20000, spawnMethod:"IglooSnowmen",        cleanMethod:"IglooSnowmen",        updateMethod:"IglooSnowmen" },
-            { listName:"tickList",          maxName:"maxTicks",             maxDefault:1,  spawnCount:1,  enemyType:"Tick",           eggType:"Tick egg",             cooldown:6000,  spawnMethod:"Tick",                cleanMethod:"Tick",                updateMethod:"Tick" },
-            { listName:"arcticSpiderList",  maxName:"maxArcticSpiders",     maxDefault:3,  spawnCount:3,  enemyType:"ArcticSpider",   eggType:"ArcticSpider egg",     cooldown:12000, spawnMethod:"ArcticSpiders",       cleanMethod:"ArcticSpiders",       updateMethod:"ArcticSpiders" },
-            { listName:"arcticCaveSpiderList",maxName:"maxArcticCaveSpiders",maxDefault:10,spawnCount:10, enemyType:"ArcticSpider",   eggType:"ArcticSpiderCave egg", cooldown:18000, spawnMethod:"ArcticCaveSpiders",   cleanMethod:"ArcticCaveSpiders",   updateMethod:"ArcticCaveSpiders" },
-            { listName:"snowmanList",       maxName:"maxSnowmen",           maxDefault:1,  spawnCount:1,  enemyType:"Snowman",        eggType:"Snowman egg",          cooldown:6000,  spawnMethod:"Snowman",             cleanMethod:"Snowman",             updateMethod:"Snowman" },
-            { listName:"snowstormList",     maxName:"maxSnowstorms",        maxDefault:3,  spawnCount:3,  enemyType:"SnowStorm",      eggType:"SnowStick",            cooldown:8000,  spawnMethod:"Snowstorm",           cleanMethod:"Snowstorm",           updateMethod:"Snowstorm" },
-            { listName:"frostDiggerList",   maxName:"maxFrostDiggers",      maxDefault:1,  spawnCount:1,  enemyType:"Frost Digger",   eggType:"Frost Digger egg",     cooldown:15000, spawnMethod:"FrostDiggerWithDNA",  cleanMethod:"FrostDiggers",        updateMethod:"FrostDiggers" },
+            { listName:"slagMightList",     maxName:"maxSlagMight",         maxDefault:1,  spawnCount:1,  enemyType:"SlagMight",      eggType:"Stalagmite Egg",        cooldown:8000,  spawnMethod:"SlagMight",           cleanMethod:"SlagMight",           updateMethod:"SlagMight" },
+            { listName:"iceCubeList",       maxName:"maxIceCubes",          maxDefault:1,  spawnCount:1,  enemyType:"Ice Cube",       eggType:"Ice Cube Egg",         cooldown:6000,  spawnMethod:"IceCube",             cleanMethod:"IceCube",             updateMethod:"IceCube" },
+            { listName:"iceDragonList",     maxName:"maxIceDragons",        maxDefault:1,  spawnCount:1,  enemyType:"Ice Dragon",     eggType:"Ice Dragon Egg",       cooldown:10000, spawnMethod:"IceDragon",           cleanMethod:"IceDragon",           updateMethod:"IceDragon" },
+            { listName:"iglooSnowmenList",  maxName:"maxIglooSnowmen",      maxDefault:10, spawnCount:10, enemyType:"Snowman",        eggType:"Igloo Egg",            cooldown:20000, spawnMethod:"IglooSnowmen",        cleanMethod:"IglooSnowmen",        updateMethod:"IglooSnowmen" },
+            { listName:"tickList",          maxName:"maxTicks",             maxDefault:1,  spawnCount:1,  enemyType:"Tick",           eggType:"Tick Egg",             cooldown:6000,  spawnMethod:"Tick",                cleanMethod:"Tick",                updateMethod:"Tick" },
+            { listName:"arcticSpiderList",  maxName:"maxArcticSpiders",     maxDefault:3,  spawnCount:3,  enemyType:"ArcticSpider",   eggType:"Arctic Spider Egg",     cooldown:12000, spawnMethod:"ArcticSpiders",       cleanMethod:"ArcticSpiders",       updateMethod:"ArcticSpiders" },
+            { listName:"arcticCaveSpiderList",maxName:"maxArcticCaveSpiders",maxDefault:10,spawnCount:10, enemyType:"ArcticSpider",   eggType:"Arctic Spider Cave Egg", cooldown:18000, spawnMethod:"ArcticCaveSpiders",   cleanMethod:"ArcticCaveSpiders",   updateMethod:"ArcticCaveSpiders" },
+            { listName:"snowmanList",       maxName:"maxSnowmen",           maxDefault:1,  spawnCount:1,  enemyType:"Snowman",        eggType:"Snowman Egg",          cooldown:6000,  spawnMethod:"Snowman",             cleanMethod:"Snowman",             updateMethod:"Snowman" },
+            { listName:"snowstormList",     maxName:"maxSnowstorms",        maxDefault:3,  spawnCount:3,  enemyType:"SnowStorm",      eggType:"Snow Stick",            cooldown:8000,  spawnMethod:"Snowstorm",           cleanMethod:"Snowstorm",           updateMethod:"Snowstorm" },
+            { listName:"frostDiggerList",   maxName:"maxFrostDiggers",      maxDefault:1,  spawnCount:1,  enemyType:"Frost Digger",   eggType:"Frost Digger Egg",     cooldown:15000, spawnMethod:"FrostDiggerWithDNA",  cleanMethod:"FrostDiggers",        updateMethod:"FrostDiggers" },
 
             // ── Misc ──────────────────────────────────────────────────────────
-            { listName:"pirateDiggerList",  maxName:"maxPirateDiggers",     maxDefault:1,  spawnCount:1,  enemyType:"PirateDigger",   eggType:"PirateDigger egg",     cooldown:18000, spawnMethod:"PirateDiggerWithDNA", cleanMethod:"PirateDiggers",       updateMethod:"PirateDiggers" },
-            { listName:"soldierAntList",    maxName:"maxSoldierAnts",       maxDefault:3,  spawnCount:3,  enemyType:"Soldier Ant",    eggType:"Soldier Ant egg",      cooldown:10000, spawnMethod:"SoldierAntsWithDNA",  cleanMethod:"SoldierAnts",         updateMethod:"SoldierAnts" },
-            { listName:"workerAntList",     maxName:"maxWorkerAnts",        maxDefault:4,  spawnCount:4,  enemyType:"Worker Ant",     eggType:"Worker Ant egg",       cooldown:8000,  spawnMethod:"WorkerAntsWithDNA",   cleanMethod:"WorkerAnts",          updateMethod:"WorkerAnts" },
+            { listName:"pirateDiggerList",  maxName:"maxPirateDiggers",     maxDefault:1,  spawnCount:1,  enemyType:"PirateDigger",   eggType:"Pirate Digger Egg",     cooldown:18000, spawnMethod:"PirateDiggerWithDNA", cleanMethod:"PirateDiggers",       updateMethod:"PirateDiggers" },
+            { listName:"soldierAntList",    maxName:"maxSoldierAnts",       maxDefault:3,  spawnCount:3,  enemyType:"Soldier Ant",    eggType:"Soldier Ant Egg",      cooldown:10000, spawnMethod:"SoldierAntsWithDNA",  cleanMethod:"SoldierAnts",         updateMethod:"SoldierAnts" },
+            { listName:"workerAntList",     maxName:"maxWorkerAnts",        maxDefault:4,  spawnCount:4,  enemyType:"Worker Ant",     eggType:"Worker Ant Egg",       cooldown:8000,  spawnMethod:"WorkerAntsWithDNA",   cleanMethod:"WorkerAnts",          updateMethod:"WorkerAnts" },
             { listName:"centipedeList",     maxName:"maxCentipedes",        maxDefault:1,  spawnCount:1,  enemyType:"Centipede",      eggType:"Centipede egg",        cooldown:15000, spawnMethod:"CentipedeWithDNA",    cleanMethod:"Centipedes",          updateMethod:"Centipedes" },
             { listName:"leechList",         maxName:"maxLeeches",           maxDefault:2,  spawnCount:2,  enemyType:"Leech",          eggType:"Leech Egg",            cooldown:10000, spawnMethod:"LeechWithDNA",        cleanMethod:"Leeches",             updateMethod:"Leeches" },
             { listName:"parasiteList",      maxName:"maxParasites",         maxDefault:1,  spawnCount:1,  enemyType:"Parasite",       eggType:"Parasite Egg",         cooldown:9000,  spawnMethod:"ParasiteWithDNA",     cleanMethod:"Parasites",           updateMethod:"Parasites" },
-            { listName:"bacteriophageList", maxName:"maxBacteriophages",    maxDefault:1,  spawnCount:1,  enemyType:"Bacteriophage",  eggType:"Bacteriophage egg",    cooldown:15000, spawnMethod:"BacteriophageWithDNA",cleanMethod:"Bacteriophages",      updateMethod:"Bacteriophages" },
-            { listName:"virusList",         maxName:"maxVirus",             maxDefault:1,  spawnCount:1,  enemyType:"Virus",          eggType:"Virus egg",            cooldown:5000,  spawnMethod:"VirusWithDNA",        cleanMethod:"Virus",               updateMethod:"Virus" },
+            { listName:"bacteriophageList", maxName:"maxBacteriophages",    maxDefault:1,  spawnCount:1,  enemyType:"Bacteriophage",  eggType:"Bacteriophage Egg",    cooldown:15000, spawnMethod:"BacteriophageWithDNA",cleanMethod:"Bacteriophages",      updateMethod:"Bacteriophages" },
+            { listName:"virusList",         maxName:"maxVirus",             maxDefault:1,  spawnCount:1,  enemyType:"Virus",          eggType:"Virus Egg",            cooldown:5000,  spawnMethod:"VirusWithDNA",        cleanMethod:"Virus",               updateMethod:"Virus" },
             { listName:"squareList",        maxName:"maxSquare",            maxDefault:1,  spawnCount:1,  enemyType:"Square",         eggType:"Square Egg",           cooldown:15000, spawnMethod:"SquareWithDNA",       cleanMethod:"Square",              updateMethod:"Square" },
-            { listName:"cancerList",        maxName:"maxCancer",            maxDefault:2,  spawnCount:2,  enemyType:"Cancer",         eggType:"Cancer egg",           cooldown:12000, spawnMethod:"CancerWithDNA",       cleanMethod:"Cancer",              updateMethod:"Cancer" },
-            { listName:"bacteriaList",      maxName:"maxBacteria",          maxDefault:2,  spawnCount:3,  enemyType:"Bacteria",       eggType:"Bacteria_egg",         cooldown:10000, spawnMethod:"BacteriaWithDna",     cleanMethod:"Bacteria",            updateMethod:"Bacteria" },
-            { listName:"whiteBloodCellList",maxName:"maxWhiteBloodCells",   maxDefault:1,  spawnCount:2,  enemyType:"WhiteBloodCell", eggType:"WhiteBloodCell egg",   cooldown:5000,  spawnMethod:"WhiteBloodCellsWithDna",cleanMethod:"WhiteBloodCells",   updateMethod:"WhiteBloodCells" },
-            { listName:"spiderList",        maxName:"maxSpiders",           maxDefault:3,  spawnCount:3,  enemyType:"Spider",         eggType:"Spider egg",           cooldown:6000,  spawnMethod:"SpidersWithDna",      cleanMethod:"Spiders",             updateMethod:"Spiders" },
-            { listName:"redBloodCellList",  maxName:"maxRedBloodCells",     maxDefault:2,  spawnCount:2,  enemyType:"RedBloodCell",   eggType:"RedBloodCell egg",     cooldown:8000,  spawnMethod:"RedBloodCellsWithDna",cleanMethod:"RedBloodCells",       updateMethod:"RedBloodCells" },
-            { listName:"stemCellList",      maxName:"maxStemCells",         maxDefault:10, spawnCount:10, enemyType:"WhiteBloodCell", eggType:"StemCell egg",         cooldown:15000, spawnMethod:"StemCellsWithDna",    cleanMethod:"StemCells",           updateMethod:"StemCells" },
+            { listName:"cancerList",        maxName:"maxCancer",            maxDefault:2,  spawnCount:2,  enemyType:"Cancer",         eggType:"Cancer Egg",           cooldown:12000, spawnMethod:"CancerWithDNA",       cleanMethod:"Cancer",              updateMethod:"Cancer" },
+            { listName:"bacteriaList",      maxName:"maxBacteria",          maxDefault:2,  spawnCount:3,  enemyType:"Bacteria",       eggType:"Bacteria Egg",         cooldown:10000, spawnMethod:"BacteriaWithDna",     cleanMethod:"Bacteria",            updateMethod:"Bacteria" },
+            { listName:"whiteBloodCellList",maxName:"maxWhiteBloodCells",   maxDefault:1,  spawnCount:2,  enemyType:"WhiteBloodCell", eggType:"White Blood Cell Egg",   cooldown:5000,  spawnMethod:"WhiteBloodCellsWithDna",cleanMethod:"WhiteBloodCells",   updateMethod:"WhiteBloodCells" },
+            { listName:"spiderList",        maxName:"maxSpiders",           maxDefault:3,  spawnCount:3,  enemyType:"Spider",         eggType:"Spider Egg",           cooldown:6000,  spawnMethod:"SpidersWithDna",      cleanMethod:"Spiders",             updateMethod:"Spiders" },
+            { listName:"redBloodCellList",  maxName:"maxRedBloodCells",     maxDefault:2,  spawnCount:2,  enemyType:"RedBloodCell",   eggType:"Red Blood Cell Egg",     cooldown:8000,  spawnMethod:"RedBloodCellsWithDna",cleanMethod:"RedBloodCells",       updateMethod:"RedBloodCells" },
+            { listName:"stemCellList",      maxName:"maxStemCells",         maxDefault:10, spawnCount:10, enemyType:"WhiteBloodCell", eggType:"Stem Cell Egg",         cooldown:15000, spawnMethod:"StemCellsWithDna",    cleanMethod:"StemCells",           updateMethod:"StemCells" },
             { listName:"sandstormList",     maxName:"maxSandstorms",        maxDefault:2,  spawnCount:2,  enemyType:"Sandstorm",      eggType:"Stick",                cooldown:8000,  spawnMethod:"SandstormsWithDna",   cleanMethod:"Sandstorms",          updateMethod:"Sandstorms" },
 
             // ── Sewer ─────────────────────────────────────────────────────────
-            { listName:"manHoleList",       maxName:"maxManHoles",          maxDefault:1,  spawnCount:1,  enemyType:"ManHole",        eggType:"ManHole egg",          cooldown:20000, spawnMethod:"ManHoleWithDna",      cleanMethod:"ManHoles",            updateMethod:"ManHoles" },
-            { listName:"flyList",           maxName:"maxFlies",             maxDefault:3,  spawnCount:3,  enemyType:"Fly",            eggType:"Fly_egg",              cooldown:10000, spawnMethod:"FlyWithDna",          cleanMethod:"Flies",               updateMethod:"Flies" },
-            { listName:"ratList",           maxName:"maxRats",              maxDefault:2,  spawnCount:2,  enemyType:"Rat",            eggType:"Rat_egg",              cooldown:20000, spawnMethod:"RatWithDna",          cleanMethod:"Rats",                updateMethod:"Rats" },
-            { listName:"roachList",         maxName:"maxRoaches",           maxDefault:1,  spawnCount:1,  enemyType:"Roach",          eggType:"Roach_egg",            cooldown:6000,  spawnMethod:"RoachWithDna",        cleanMethod:"Roaches",             updateMethod:"Roaches" },
-            { listName:"pooStormList",      maxName:"maxPooStorms",         maxDefault:3,  spawnCount:3,  enemyType:"PooStorm",       eggType:"PooStick",             cooldown:8000,  spawnMethod:"PooStormWithDna",     cleanMethod:"PooStorms",           updateMethod:"PooStorms" },
-            { listName: "photonList", maxName: "maxPhotons", maxDefault: 2, spawnCount: 2, enemyType: "Photon", eggType: "Photon egg", cooldown: 10000, spawnMethod: "Photon", cleanMethod: "Photon", updateMethod: "Photon" },
-            { listName: "electronList", maxName: "maxElectrons", maxDefault: 1, spawnCount: 1, enemyType: "Electron", eggType: "Electron egg", cooldown: 6000, spawnMethod: "Electron", cleanMethod: "Electron", updateMethod: "Electron" },
-            { listName: "electronCloudList", maxName: "maxElectronClouds", maxDefault: 8, spawnCount: 8, enemyType: "ElectronCloud", eggType: "ElectronCloud egg", cooldown: 20000, spawnMethod: "ElectronCloud", cleanMethod: "ElectronCloud", updateMethod: "ElectronCloud" },
-            { listName: "protonList", maxName: "maxProtons", maxDefault: 1, spawnCount: 1, enemyType: "Proton", eggType: "Proton egg", cooldown: 8000, spawnMethod: "Proton", cleanMethod: "Proton", updateMethod: "Proton" },
-            { listName: "atomList", maxName: "maxAtoms", maxDefault: 5, spawnCount: 5, enemyType: "Atom", eggType: "Atom egg", cooldown: 18000, spawnMethod: "Atom", cleanMethod: "Atom", updateMethod: "Atom" },
+            { listName:"manHoleList",       maxName:"maxManHoles",          maxDefault:1,  spawnCount:1,  enemyType:"ManHole",        eggType:"Manhole Egg",          cooldown:20000, spawnMethod:"ManHoleWithDna",      cleanMethod:"ManHoles",            updateMethod:"ManHoles" },
+            { listName:"flyList",           maxName:"maxFlies",             maxDefault:3,  spawnCount:3,  enemyType:"Fly",            eggType:"Fly Egg",              cooldown:10000, spawnMethod:"FlyWithDna",          cleanMethod:"Flies",               updateMethod:"Flies" },
+            { listName:"ratList",           maxName:"maxRats",              maxDefault:2,  spawnCount:2,  enemyType:"Rat",            eggType:"Rat Egg",              cooldown:20000, spawnMethod:"RatWithDna",          cleanMethod:"Rats",                updateMethod:"Rats" },
+            { listName:"roachList",         maxName:"maxRoaches",           maxDefault:1,  spawnCount:1,  enemyType:"Roach",          eggType:"Roach Egg",            cooldown:6000,  spawnMethod:"RoachWithDna",        cleanMethod:"Roaches",             updateMethod:"Roaches" },
+            { listName:"pooStormList",      maxName:"maxPooStorms",         maxDefault:3,  spawnCount:3,  enemyType:"PooStorm",       eggType:"Poo Stick",             cooldown:8000,  spawnMethod:"PooStormWithDna",     cleanMethod:"PooStorms",           updateMethod:"PooStorms" },
+            { listName: "photonList", maxName: "maxPhotons", maxDefault: 2, spawnCount: 2, enemyType: "Photon", eggType: "Photon Egg", cooldown: 10000, spawnMethod: "Photon", cleanMethod: "Photon", updateMethod: "Photon" },
+            { listName: "electronList", maxName: "maxElectrons", maxDefault: 1, spawnCount: 1, enemyType: "Electron", eggType: "Electron Egg", cooldown: 6000, spawnMethod: "Electron", cleanMethod: "Electron", updateMethod: "Electron" },
+            { listName: "electronCloudList", maxName: "maxElectronClouds", maxDefault: 8, spawnCount: 8, enemyType: "ElectronCloud", eggType: "Electron Cloud Egg", cooldown: 20000, spawnMethod: "ElectronCloud", cleanMethod: "ElectronCloud", updateMethod: "ElectronCloud" },
+            { listName: "protonList", maxName: "maxProtons", maxDefault: 1, spawnCount: 1, enemyType: "Proton", eggType: "Proton Egg", cooldown: 8000, spawnMethod: "Proton", cleanMethod: "Proton", updateMethod: "Proton" },
+            { listName: "atomList", maxName: "maxAtoms", maxDefault: 5, spawnCount: 5, enemyType: "Atom", eggType: "Atom Egg", cooldown: 18000, spawnMethod: "Atom", cleanMethod: "Atom", updateMethod: "Atom" },
 
             // ========== 宇宙世界蛋 ==========
-            { listName: "blackHoleList", maxName: "maxBlackHoles", maxDefault: 1, spawnCount: 1, enemyType: "BlackHole", eggType: "BlackHole egg", cooldown: 25000, spawnMethod: "BlackHole", cleanMethod: "BlackHole", updateMethod: "BlackHole" },
-            { listName: "whiteHoleList", maxName: "maxWhiteHoles", maxDefault: 1, spawnCount: 1, enemyType: "WhiteHole", eggType: "WhiteHole egg", cooldown: 22000, spawnMethod: "WhiteHole", cleanMethod: "WhiteHole", updateMethod: "WhiteHole" },
-            { listName: "neutronStarList", maxName: "maxNeutronStars", maxDefault: 1, spawnCount: 1, enemyType: "NeutronStar", eggType: "NeutronStar egg", cooldown: 28000, spawnMethod: "NeutronStar", cleanMethod: "NeutronStar", updateMethod: "NeutronStar" },
-            { listName: "starList", maxName: "maxStars", maxDefault: 1, spawnCount: 1, enemyType: "Star", eggType: "Star egg", cooldown: 15000, spawnMethod: "Star", cleanMethod: "Star", updateMethod: "Star" },
-            { listName: "asteroidList", maxName: "maxAsteroids", maxDefault: 1, spawnCount: 1, enemyType: "Asteroid", eggType: "Asteroid egg", cooldown: 10000, spawnMethod: "Asteroid", cleanMethod: "Asteroid", updateMethod: "Asteroid" },
-            { listName: "alienList", maxName: "maxAliens", maxDefault: 1, spawnCount: 1, enemyType: "Alien", eggType: "Alien egg", cooldown: 12000, spawnMethod: "Alien", cleanMethod: "Alien", updateMethod: "Alien" },
-            { listName: "ufoAlienList", maxName: "maxUFOAliens", maxDefault: 10, spawnCount: 10, enemyType: "Alien", eggType: "UFO egg", cooldown: 28000, spawnMethod: "UFOAlien", cleanMethod: "UFOAlien", updateMethod: "UFOAlien" },
-            { listName: "graveGhostList", maxName: "maxGraveGhosts", maxDefault: 15, spawnCount: 15, enemyType: "Ghost", eggType: "GraveStone egg", cooldown: 24000, spawnMethod: "GraveGhost", cleanMethod: "GraveGhost", updateMethod: "GraveGhost" },
-            { listName: "ghostList", maxName: "maxGhosts", maxDefault: 3, spawnCount: 3, enemyType: "Ghost", eggType: "Ghost egg", cooldown: 15000, spawnMethod: "Ghost", cleanMethod: "Ghost", updateMethod: "Ghost" },
+            { listName: "blackHoleList", maxName: "maxBlackHoles", maxDefault: 1, spawnCount: 1, enemyType: "BlackHole", eggType: "Black Hole Egg", cooldown: 25000, spawnMethod: "BlackHole", cleanMethod: "BlackHole", updateMethod: "BlackHole" },
+            { listName: "whiteHoleList", maxName: "maxWhiteHoles", maxDefault: 1, spawnCount: 1, enemyType: "WhiteHole", eggType: "White Hole Egg", cooldown: 22000, spawnMethod: "WhiteHole", cleanMethod: "WhiteHole", updateMethod: "WhiteHole" },
+            { listName: "neutronStarList", maxName: "maxNeutronStars", maxDefault: 1, spawnCount: 1, enemyType: "NeutronStar", eggType: "Neutron Star Egg", cooldown: 28000, spawnMethod: "NeutronStar", cleanMethod: "NeutronStar", updateMethod: "NeutronStar" },
+            { listName: "starList", maxName: "maxStars", maxDefault: 1, spawnCount: 1, enemyType: "Star", eggType: "Star Egg", cooldown: 15000, spawnMethod: "Star", cleanMethod: "Star", updateMethod: "Star" },
+            { listName: "asteroidList", maxName: "maxAsteroids", maxDefault: 1, spawnCount: 1, enemyType: "Asteroid", eggType: "Asteroid Egg", cooldown: 10000, spawnMethod: "Asteroid", cleanMethod: "Asteroid", updateMethod: "Asteroid" },
+            { listName: "alienList", maxName: "maxAliens", maxDefault: 1, spawnCount: 1, enemyType: "Alien", eggType: "Alien Egg", cooldown: 12000, spawnMethod: "Alien", cleanMethod: "Alien", updateMethod: "Alien" },
+            { listName: "ufoAlienList", maxName: "maxUFOAliens", maxDefault: 10, spawnCount: 10, enemyType: "Alien", eggType: "UFO Egg", cooldown: 28000, spawnMethod: "UFOAlien", cleanMethod: "UFOAlien", updateMethod: "UFOAlien" },
+            { listName: "graveGhostList", maxName: "maxGraveGhosts", maxDefault: 15, spawnCount: 15, enemyType: "Ghost", eggType: "Grave Stone Egg", cooldown: 24000, spawnMethod: "GraveGhost", cleanMethod: "GraveGhost", updateMethod: "GraveGhost" },
+            { listName: "ghostList", maxName: "maxGhosts", maxDefault: 3, spawnCount: 3, enemyType: "Ghost", eggType: "Ghost Egg", cooldown: 15000, spawnMethod: "Ghost", cleanMethod: "Ghost", updateMethod: "Ghost" },
         ];
 
         for (const cfg of SPAWN_CONFIGS) {
@@ -33369,7 +34291,53 @@ tryBreakBubble(dt) {
         this.updateReloadTimeWithGoldenLeaf();
         this.updateSpawnCooldownWithGoldenLeaf();
 
-        // ===== ✅ 关键修改：强制更新角度（无论是否有物品）=====
+        if (currentItem && currentItem.type === "Mud" && !this.isReloading && !this.isBroken) {
+            if (this.attackCooldown <= 0 && this.player && this.player.gameInstance) {
+
+                this.attackCooldown = this.attackCooldownMax;
+
+                const rarity = currentItem.rarity;
+
+                // 使用你原有的稀有度倍数系统
+                const multiplier = RARITY_MULTIPLIERS[rarity] || 1;
+
+                // =========================
+                // 从 item_stat 获取配置
+                // =========================
+                const itemStat = currentItem.item_stat || {};
+
+                const basePoisonDamage = itemStat.base_poison_damage || 5;
+                const baseFixedDamage = itemStat.base_fixed_damage || 10;
+                const fluidDuration = itemStat.fluid_duration || 3;
+                const fluidSpeed = itemStat.fluid_speed || 20;
+                const fluidColor = itemStat.fluid_color || "#8B5A2B";
+
+                // 应用稀有度倍数
+                const poisonDamage = basePoisonDamage * multiplier;
+                const fixedDamage = baseFixedDamage * multiplier;
+                const finalSpeed = fluidSpeed * multiplier;
+
+                // =========================
+                // 创建流体
+                // =========================
+                const fluid = this.player.gameInstance.fluidManager.addFluid(
+                    this.worldX,
+                    this.worldY,
+                    fluidColor,
+                    fixedDamage,      // 直接伤害
+                    fluidDuration,    // 持续时间（秒）
+                    rarity,
+                    "poison",         // 效果类型
+                    finalSpeed        // 扩散速度
+                );
+
+                // 设置毒伤
+                fluid.poisonDamage = poisonDamage;
+                fluid.effectType = "poison";
+
+                this.startReload();
+            }
+        }
         // 所有花瓣都持续旋转，不受任何条件限制
             const ANGLE_INCREMENT = 0.08; // 固定增量，确保旋转可见
         this.angle += ANGLE_INCREMENT;
@@ -33474,31 +34442,31 @@ tryBreakBubble(dt) {
             }
         } else {
             // 正常模式 - 计算半径和屏幕位置
-            let thirdEyeBonus = 0;
+            let ThirdEyeBonus = 0;
             if (this.player && typeof this.player.updateThirdEye === 'function') {
                 this.player.updateThirdEye();
-                thirdEyeBonus = this.player.thirdEyeRangeBonus || 0;
+                ThirdEyeBonus = this.player.ThirdEyeRangeBonus || 0;
             }
 
             const EGG_ITEMS = new Set([
-                "Egg","Ant Egg","Moon Egg","Squid egg","WhiteBloodCell egg","StemCell egg","Spider egg",
-                "RedBloodCell egg","Bacteria_egg","Stick","PooStick","queen ant egg","Hive Egg",
-                "WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg","FireAntOvermind egg",
-                "FireAntHole egg","Shell egg","Starfish egg","Bubble egg","Crab egg","Jellyfish egg",
-                "CrabHole egg","Cancer egg","ManHole egg","Fly_egg","Rat_egg","Roach_egg",
-                "TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg","Square Egg",
-                "Leech Egg","Parasite Egg","Bacteriophage egg","Virus egg","Bee egg","Ladybug egg",
-                "Hive egg","Beekeeper egg","Barnacle egg","Centipede egg","Soldier Ant egg",
-                "Worker Ant egg","SlagMight egg","Frost Digger egg","Tick egg","Ice Cube egg",
-                "Igloo egg","Ice Dragon egg","ArcticSpider egg","ArcticSpiderCave egg","SnowStick",
-                "Queen Bee egg","Snowman egg","Wasp egg","Worker Termite egg","Soldier Termite egg",
-                "StickBug egg","Mantis egg","Firefly egg","TermiteHole egg","TermiteOvermind egg",
-                "SpiderCave egg","Beetle egg","HelWorm egg","HelSpider egg","Hel Bee egg",
-                "HelHornet egg","HelBeetle egg","Dragon egg","DragonNest egg","HelHive egg",
-                "HelJellyfish egg","Hel Queen Bee egg","ToxicDragon egg","Hel Digger egg",
-                "Hel Beekeeper egg","FireStick","Photon egg","Electron egg","ElectronCloud egg",
-                "Proton egg","Atom egg","BlackHole egg","WhiteHole egg","NeutronStar egg",
-                "Star egg","Asteroid egg","Alien egg","UFO egg","Ghost egg","GraveStone egg","AlienDigger egg","GraveDigger egg"
+                "Egg","Ant Egg","Moon Egg","Squid Egg","White Blood Cell Egg","Stem Cell Egg","Spider Egg",
+                "Red Blood Cell Egg","Bacteria Egg","Stick","Poo Stick","Queen Ant Egg","Hive Egg",
+                "Worker Fire Ant Egg","Soldier Fire Ant Egg","Baby Fire Ant Egg","Fire Ant Overmind Egg",
+                "Fire Ant Hole Egg","Shell Egg","Starfish Egg","Bubble Egg","Crab Egg","Jellyfish Egg",
+                "Crab Hole Egg","Cancer Egg","Manhole Egg","Fly Egg","Rat Egg","Roach Egg",
+                "Trash Digger Egg","Mud Digger Egg","Digger Egg","Biologist Egg","Square Egg",
+                "Leech Egg","Parasite Egg","Bacteriophage Egg","Virus Egg","Bee Egg","Ladybug Egg",
+                "Hive Egg","Beekeeper Egg","Barnacle Egg","Centipede egg","Soldier Ant Egg",
+                "Worker Ant Egg","Stalagmite Egg","Frost Digger Egg","Tick Egg","Ice Cube Egg",
+                "Igloo Egg","Ice Dragon Egg","Arctic Spider Egg","Arctic Spider Cave Egg","Snow Stick",
+                "Queen Bee Egg","Snowman Egg","Wasp Egg","Worker Termite Egg","Soldier Termite Egg",
+                "Stickbug Egg","Mantis Egg","Firefly Egg","Termite Hole Egg","Termite Overmind Egg",
+                "Spider Cave Egg","Beetle Egg","HelWorm egg","Hel Spider Egg","Hel Bee Egg",
+                "Hel Hornet Egg","Hel Beetle Egg","Dragon Egg","Dragon Nest Egg","Hel Hive Egg",
+                "Hel Jellyfish Egg","Hel Queen Bee Egg","Toxic Dragon Egg","Hel Digger Egg",
+                "Hel Beekeeper Egg","Fire Stick","Photon Egg","Electron Egg","Electron Cloud Egg",
+                "Proton Egg","Atom Egg","Black Hole Egg","White Hole Egg","Neutron Star Egg",
+                "Star Egg","Asteroid Egg","Alien Egg","UFO Egg","Ghost Egg","Grave Stone Egg","Alien Digger Egg","Grave Digger Egg"
             ]);
 
             if (this.hasAntennae) {
@@ -33506,7 +34474,7 @@ tryBreakBubble(dt) {
                 this.targetRadius = 0;
             } else {
                 const isEggItem = currentItem && EGG_ITEMS.has(currentItem.type);
-                const fixedItems = new Set(["Magnet","Stick","PooStick","Plank"]);
+                const fixedItems = new Set(["Magnet","Stick","Poo Stick","Plank"]);
                 const isFixed = currentItem && fixedItems.has(currentItem.type);
 
                 if (isEggItem) {
@@ -33522,7 +34490,7 @@ tryBreakBubble(dt) {
                 }else if (this.itemType === "Sponge") {
                     this.targetRadius = 35;
                 } else if (spreadMode) {
-                    this.targetRadius = 100 + thirdEyeBonus;
+                    this.targetRadius = 100 + ThirdEyeBonus;
                 } else {
                     this.targetRadius = 35;
                 }
@@ -33611,92 +34579,92 @@ tryBreakBubble(dt) {
 
             // 自动生成映射表（精简版，保持原有逻辑）
             const autoEggMap = {
-                "WhiteBloodCell egg": ["WhiteBloodCellsWithDna", 5000, "updateWhiteBloodCells"],
-                "Spider egg": ["SpidersWithDna", 6000, "updateSpiders"],
-                "RedBloodCell egg": ["RedBloodCellsWithDna", 8000, "updateRedBloodCells"],
-                "StemCell egg": ["StemCellsWithDna", 15000, "updateStemCells"],
+                "White Blood Cell Egg": ["WhiteBloodCellsWithDna", 5000, "updateWhiteBloodCells"],
+                "Spider Egg": ["SpidersWithDna", 6000, "updateSpiders"],
+                "Red Blood Cell Egg": ["RedBloodCellsWithDna", 8000, "updateRedBloodCells"],
+                "Stem Cell Egg": ["StemCellsWithDna", 15000, "updateStemCells"],
                 "Stick": ["SandstormsWithDna", 8000, "updateSandstorms"],
                 "HelWorm egg": ["HelWorm", 10000, "updateHelWorm"],
-                "HelSpider egg": ["HelSpider", 12000, "updateHelSpider"],
-                "Hel Bee egg": ["HelBee", 10000, "updateHelBee"],
-                "HelHornet egg": ["HelHornet", 12000, "updateHelHornet"],
-                "HelBeetle egg": ["HelBeetle", 15000, "updateHelBeetle"],
-                "Dragon egg": ["Dragon", 20000, "updateDragon"],
-                "DragonNest egg": ["NestDragon", 28000, "updateNestDragon"],
-                "HelHive egg": ["HiveHelBee", 25000, "updateHiveHelBee"],
-                "HelJellyfish egg": ["HelJellyfish", 15000, "updateHelJellyfish"],
-                "Hel Queen Bee egg": ["HelQueenBee", 25000, "updateHelQueenBee"],
-                "ToxicDragon egg": ["ToxicDragon", 22000, "updateToxicDragon"],
-                "Hel Digger egg": ["HelDigger", 6000, "updateHelDigger"],
-                "Hel Beekeeper egg": ["HelBeekeeper", 20000, "updateHelBeekeeper"],
-                "FireStick": ["Firestorm", 8000, "updateFirestorm"],
-                "Shell egg": ["ScallopsWithDna", 7000, "updateScallops"],
-                "Starfish egg": ["StarfishWithDna", 8000, "updateStarfish"],
-                "Bubble egg": ["BubblesWithDna", 5000, "updateBubbles"],
-                "Crab egg": ["CrabsWithDna", 6000, "updateCrabs"],
-                "Jellyfish egg": ["JellyfishWithDna", 10000, "updateJellyfish"],
-                "CrabHole egg": ["CrabHoleWithDna", 15000, "updateCrabHoles"],
-                "Cancer egg": ["CancerWithDNA", 12000, "updateCancer"],
-                "ManHole egg": ["ManHoleWithDna", 20000, "updateManHoles"],
-                "Fly_egg": ["FlyWithDna", 10000, "updateFlies"],
-                "Rat_egg": ["RatWithDna", 20000, "updateRats"],
-                "Roach_egg": ["RoachWithDna", 6000, "updateRoaches"],
-                "PooStick": ["PooStormWithDna", 8000, "updatePooStorms"],
-                "Wasp egg": ["Wasp", 10000, "updateWasps"],
-                "Worker Termite egg": ["WorkerTermite", 12000, "updateWorkerTermites"],
-                "Soldier Termite egg": ["SoldierTermite", 12000, "updateSoldierTermites"],
-                "StickBug egg": ["StickBug", 6000, "updateStickBugs"],
-                "Mantis egg": ["Mantis", 10000, "updateMantises"],
-                "Firefly egg": ["Firefly", 14000, "updateFireflies"],
-                "TermiteHole egg": ["TermiteHoleSoldiers", 18000, "updateTermiteSoldiers"],
-                "TermiteOvermind egg": ["TermiteOvermind", 20000, "updateTermiteOverminds"],
-                "SpiderCave egg": ["SpiderCave", 19000, "updateSpiderCaveSpiders"],
+                "Hel Spider Egg": ["HelSpider", 12000, "updateHelSpider"],
+                "Hel Bee Egg": ["HelBee", 10000, "updateHelBee"],
+                "Hel Hornet Egg": ["HelHornet", 12000, "updateHelHornet"],
+                "Hel Beetle Egg": ["HelBeetle", 15000, "updateHelBeetle"],
+                "Dragon Egg": ["Dragon", 20000, "updateDragon"],
+                "Dragon Nest Egg": ["NestDragon", 28000, "updateNestDragon"],
+                "Hel Hive Egg": ["HiveHelBee", 25000, "updateHiveHelBee"],
+                "Hel Jellyfish Egg": ["HelJellyfish", 15000, "updateHelJellyfish"],
+                "Hel Queen Bee Egg": ["HelQueenBee", 25000, "updateHelQueenBee"],
+                "Toxic Dragon Egg": ["ToxicDragon", 22000, "updateToxicDragon"],
+                "Hel Digger Egg": ["HelDigger", 6000, "updateHelDigger"],
+                "Hel Beekeeper Egg": ["HelBeekeeper", 20000, "updateHelBeekeeper"],
+                "Fire Stick": ["Firestorm", 8000, "updateFirestorm"],
+                "Shell Egg": ["ScallopsWithDna", 7000, "updateScallops"],
+                "Starfish Egg": ["StarfishWithDna", 8000, "updateStarfish"],
+                "Bubble Egg": ["BubblesWithDna", 5000, "updateBubbles"],
+                "Crab Egg": ["CrabsWithDna", 6000, "updateCrabs"],
+                "Jellyfish Egg": ["JellyfishWithDna", 10000, "updateJellyfish"],
+                "Crab Hole Egg": ["CrabHoleWithDna", 15000, "updateCrabHoles"],
+                "Cancer Egg": ["CancerWithDNA", 12000, "updateCancer"],
+                "Manhole Egg": ["ManHoleWithDna", 20000, "updateManHoles"],
+                "Fly Egg": ["FlyWithDna", 10000, "updateFlies"],
+                "Rat Egg": ["RatWithDna", 20000, "updateRats"],
+                "Roach Egg": ["RoachWithDna", 6000, "updateRoaches"],
+                "Poo Stick": ["PooStormWithDna", 8000, "updatePooStorms"],
+                "Wasp Egg": ["Wasp", 10000, "updateWasps"],
+                "Worker Termite Egg": ["WorkerTermite", 12000, "updateWorkerTermites"],
+                "Soldier Termite Egg": ["SoldierTermite", 12000, "updateSoldierTermites"],
+                "Stickbug Egg": ["StickBug", 6000, "updateStickBugs"],
+                "Mantis Egg": ["Mantis", 10000, "updateMantises"],
+                "Firefly Egg": ["Firefly", 14000, "updateFireflies"],
+                "Termite Hole Egg": ["TermiteHoleSoldiers", 18000, "updateTermiteSoldiers"],
+                "Termite Overmind Egg": ["TermiteOvermind", 20000, "updateTermiteOverminds"],
+                "Spider Cave Egg": ["SpiderCave", 19000, "updateSpiderCaveSpiders"],
                 "Square Egg": ["SquareWithDNA", 15000, "updateSquare"],
                 "Leech Egg": ["LeechWithDNA", 10000, "updateLeeches"],
                 "Parasite Egg": ["ParasiteWithDNA", 9000, "updateParasites"],
-                "Bacteriophage egg": ["BacteriophageWithDNA", 15000, "updateBacteriophages"],
-                "Virus egg": ["VirusWithDNA", 5000, "updateVirus"],
-                "SlagMight egg": ["SlagMight", 8000, "updateSlagMight"],
-                "Ice Cube egg": ["IceCube", 6000, "updateIceCube"],
-                "Ice Dragon egg": ["IceDragon", 10000, "updateIceDragon"],
-                "Igloo egg": ["IglooSnowmen", 20000, "updateIglooSnowmen"],
-                "Beetle egg": ["BeetleWithDna", 8000, "updateBeetles"],
-                "Tick egg": ["Tick", 6000, "updateTick"],
-                "Shipwreck egg": ["ShipwreckJellyfish", 19000, "updateShipwreckJellyfish"],
-                "ArcticSpider egg": ["ArcticSpiders", 12000, "updateArcticSpiders"],
-                "Scorpion egg": ["ScorpionsWithDNA", 20000, "updateScorpions"],
-                "ArcticSpiderCave egg": ["ArcticCaveSpiders", 18000, "updateArcticCaveSpiders"],
-                "Snowman egg": ["Snowman", 6000, "updateSnowman"],
-                "SnowStick": ["Snowstorm", 8000, "updateSnowstorm"],
-                "Soldier Ant egg": ["SoldierAntsWithDNA", 10000, "updateSoldierAnts"],
-                "Worker Ant egg": ["WorkerAntsWithDNA", 8000, "updateWorkerAnts"],
-                "Barnacle egg": ["BarnaclesWithDNA", 12000, "updateBarnacles"],
+                "Bacteriophage Egg": ["BacteriophageWithDNA", 15000, "updateBacteriophages"],
+                "Virus Egg": ["VirusWithDNA", 5000, "updateVirus"],
+                "Stalagmite Egg": ["SlagMight", 8000, "updateSlagMight"],
+                "Ice Cube Egg": ["IceCube", 6000, "updateIceCube"],
+                "Ice Dragon Egg": ["IceDragon", 10000, "updateIceDragon"],
+                "Igloo Egg": ["IglooSnowmen", 20000, "updateIglooSnowmen"],
+                "Beetle Egg": ["BeetleWithDna", 8000, "updateBeetles"],
+                "Tick Egg": ["Tick", 6000, "updateTick"],
+                "Shipwreck Egg": ["ShipwreckJellyfish", 19000, "updateShipwreckJellyfish"],
+                "Arctic Spider Egg": ["ArcticSpiders", 12000, "updateArcticSpiders"],
+                "Scorpion Egg": ["ScorpionsWithDNA", 20000, "updateScorpions"],
+                "Arctic Spider Cave Egg": ["ArcticCaveSpiders", 18000, "updateArcticCaveSpiders"],
+                "Snowman Egg": ["Snowman", 6000, "updateSnowman"],
+                "Snow Stick": ["Snowstorm", 8000, "updateSnowstorm"],
+                "Soldier Ant Egg": ["SoldierAntsWithDNA", 10000, "updateSoldierAnts"],
+                "Worker Ant Egg": ["WorkerAntsWithDNA", 8000, "updateWorkerAnts"],
+                "Barnacle Egg": ["BarnaclesWithDNA", 12000, "updateBarnacles"],
                 "Centipede egg": ["CentipedeWithDNA", 15000, "updateCentipedes"],
-                "Frost Digger egg": ["FrostDiggerWithDNA", 15000, "updateFrostDiggers"],
-                "PirateDigger egg": ["PirateDiggerWithDNA", 18000, "updatePirateDiggers"],
-                "Queen Bee egg": ["QueenBeeWithDNA", 15000, "updateQueenBees"],
-                "Bee egg": ["BeesWithDNA", 10000, "updateBees"],
-                "Ladybug egg": ["LadybugsWithDNA", 12000, "updateLadybugs"],
-                "Squid egg": ["SquidWithDNA", 10000, "updateSquid"],
-                "Bacteria_egg": ["BacteriaWithDna", 10000, "updateBacteria"],
-                "Hive egg": ["HiveBeesWithDNA", 20000, "updateHiveBees"],
-                "Beekeeper egg": ["BeekeeperWithDNA", 20000, "updateBeekeepers"],
-                "Photon egg": ["Photon", 10000, "updatePhoton"],
-                "Electron egg": ["Electron", 6000, "updateElectron"],
-                "ElectronCloud egg": ["ElectronCloud", 20000, "updateElectronCloud"],
-                "Proton egg": ["Proton", 8000, "updateProton"],
-                "Atom egg": ["Atom", 18000, "updateAtom"],
-                "BlackHole egg": ["BlackHole", 25000, "updateBlackHole"],
-                "WhiteHole egg": ["WhiteHole", 22000, "updateWhiteHole"],
-                "NeutronStar egg": ["NeutronStar", 28000, "updateNeutronStar"],
-                "Star egg": ["Star", 15000, "updateStar"],
-                "Asteroid egg": ["Asteroid", 10000, "updateAsteroid"],
-                "Alien egg": ["Alien", 12000, "updateAlien"],
-                "Ghost egg": ["Ghost", 15000, "updateGhost"],
-                "UFO egg": ["UFOAlien", 28000, "updateUFOAlien"],
-                "GraveStone egg": ["GraveGhost", 24000, "updateGraveGhost"],
-                "GraveDigger egg": ["GraveDigger", 20000, "updateGraveDiggers"],
-                "AlienDigger egg": ["AlienDigger", 22000, "updateAlienDiggers"],
+                "Frost Digger Egg": ["FrostDiggerWithDNA", 15000, "updateFrostDiggers"],
+                "Pirate Digger Egg": ["PirateDiggerWithDNA", 18000, "updatePirateDiggers"],
+                "Queen Bee Egg": ["QueenBeeWithDNA", 15000, "updateQueenBees"],
+                "Bee Egg": ["BeesWithDNA", 10000, "updateBees"],
+                "Ladybug Egg": ["LadybugsWithDNA", 12000, "updateLadybugs"],
+                "Squid Egg": ["SquidWithDNA", 10000, "updateSquid"],
+                "Bacteria Egg": ["BacteriaWithDna", 10000, "updateBacteria"],
+                "Hive Egg": ["HiveBeesWithDNA", 20000, "updateHiveBees"],
+                "Beekeeper Egg": ["BeekeeperWithDNA", 20000, "updateBeekeepers"],
+                "Photon Egg": ["Photon", 10000, "updatePhoton"],
+                "Electron Egg": ["Electron", 6000, "updateElectron"],
+                "Electron Cloud Egg": ["ElectronCloud", 20000, "updateElectronCloud"],
+                "Proton Egg": ["Proton", 8000, "updateProton"],
+                "Atom Egg": ["Atom", 18000, "updateAtom"],
+                "Black Hole Egg": ["BlackHole", 25000, "updateBlackHole"],
+                "White Hole Egg": ["WhiteHole", 22000, "updateWhiteHole"],
+                "Neutron Star Egg": ["NeutronStar", 28000, "updateNeutronStar"],
+                "Star Egg": ["Star", 15000, "updateStar"],
+                "Asteroid Egg": ["Asteroid", 10000, "updateAsteroid"],
+                "Alien Egg": ["Alien", 12000, "updateAlien"],
+                "Ghost Egg": ["Ghost", 15000, "updateGhost"],
+                "UFO Egg": ["UFOAlien", 28000, "updateUFOAlien"],
+                "Grave Stone Egg": ["GraveGhost", 24000, "updateGraveGhost"],
+                "Grave Digger Egg": ["GraveDigger", 20000, "updateGraveDiggers"],
+                "Alien Digger Egg": ["AlienDigger", 22000, "updateAlienDiggers"],
             };
 
             if (autoEggMap[currentItem.type]) {
@@ -33712,24 +34680,24 @@ tryBreakBubble(dt) {
             } else if (currentItem.type === "Moon Egg") {
                 handleEggSpawn(this.trySpawnRockWithDna, 15000);
                 this.updateRocks?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            } else if (["WorkerFireAnt egg","SoldierFireAnt egg","BabyFireAnt egg","FireAntOvermind egg","FireAntHole egg"].includes(currentItem.type)) {
+            } else if (["Worker Fire Ant Egg","Soldier Fire Ant Egg","Baby Fire Ant Egg","Fire Ant Overmind Egg","Fire Ant Hole Egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         let spawned = false;
                         let defaultCooldown = 8000;
-                        if (currentItem.type === "WorkerFireAnt egg") {
+                        if (currentItem.type === "Worker Fire Ant Egg") {
                             spawned = this.trySpawnWorkerFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 12000;
-                        } else if (currentItem.type === "SoldierFireAnt egg") {
+                        } else if (currentItem.type === "Soldier Fire Ant Egg") {
                             spawned = this.trySpawnSoldierFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 15000;
-                        } else if (currentItem.type === "BabyFireAnt egg") {
+                        } else if (currentItem.type === "Baby Fire Ant Egg") {
                             spawned = this.trySpawnBabyFireAnts?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 6000;
-                        } else if (currentItem.type === "FireAntOvermind egg") {
+                        } else if (currentItem.type === "Fire Ant Overmind Egg") {
                             spawned = this.trySpawnFireAntOverminds?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 12000;
-                        } else if (currentItem.type === "FireAntHole egg") {
+                        } else if (currentItem.type === "Fire Ant Hole Egg") {
                             spawned = this.trySpawnFireAntHole?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
                             defaultCooldown = 18000;
                         }
@@ -33741,15 +34709,15 @@ tryBreakBubble(dt) {
                     }
                 }
                 this.updateFireAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            } else if (currentItem.type === "queen ant egg") {
+            } else if (currentItem.type === "Queen Ant Egg") {
                 handleEggSpawn(this.trySpawnQueenAntsWithDna, 20000);
                 this.updateQueenAnts?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            } else if (["TrashDigger egg","MudDigger_egg","Digger egg","Biologist egg"].includes(currentItem.type)) {
+            } else if (["Trash Digger Egg","Mud Digger Egg","Digger Egg","Biologist Egg"].includes(currentItem.type)) {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         const eggToDigger = {
-                            "TrashDigger egg":"TrashDigger","MudDigger_egg":"MudDigger",
-                            "Digger egg":"Digger","Biologist egg":"Biologist"
+                            "Trash Digger Egg":"TrashDigger","Mud Digger Egg":"MudDigger",
+                            "Digger Egg":"Digger","Biologist Egg":"Biologist"
                         };
                         const spawned = this.trySpawnDiggers?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA, eggToDigger[currentItem.type]);
                         if (spawned) {
@@ -33760,7 +34728,7 @@ tryBreakBubble(dt) {
                     }
                 }
                 this.updateDiggers?.(dt, this.player?.gameInstance?.enemies, this.player?.getWorldPosition());
-            } else if (currentItem.type === "Trashcan egg") {
+            } else if (currentItem.type === "Trashcan Egg") {
                 if (this.spawnCooldown <= 0 && !this.eggSpawned) {
                     if (this.player && this.player.gameInstance) {
                         const spawned = this.trySpawnFliesFromEgg?.(this.player.gameInstance.enemies, this.player.getWorldPosition(), hasDNA);
@@ -33898,31 +34866,27 @@ tryBreakBubble(dt) {
         if (!this.canTakeDamage()) return false;
         const currentItem = this.getCurrentItem();
 
-        // 1. 炸弹逻辑 (保持原样)
-        if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb"|| currentItem.type === "FireBomb")) {
+        // 1. 炸弹逻辑
+        if (currentItem && (currentItem.type === "Bomb" || currentItem.type === "Bubble Bomb"|| currentItem.type === "Fire Bomb")) {
             this._triggerBombExplosion(currentItem);
             return true;
         }
 
-        // 2. 棉花特有逻辑：将伤害转化为对耐久的 1:1 扣除，并处理溢出
+        // 2. 棉花特有逻辑
         if (currentItem && currentItem.type === "Cotton") {
-            // 如果已经碎了，伤害直接穿透给玩家
             if (this.isBroken) return false;
 
             const absorbedDamage = Math.min(damage, this.durability);
             const remainingDamage = damage - absorbedDamage;
 
-            // 扣除棉花自身的数值
             this.durability -= absorbedDamage;
             this.health = this.durability;
             if (currentItem) currentItem.durability = this.durability;
 
-            // 如果有溢出伤害，直接给玩家
             if (remainingDamage > 0 && this.player) {
                 this.player.takeDamage(remainingDamage, "Cotton overflow");
             }
 
-            // 检查是否破碎：如果耐久没了，直接走通用破碎流程
             if (this.durability <= 0) {
                 this.health = 0;
                 this.durability = 0;
@@ -33932,18 +34896,16 @@ tryBreakBubble(dt) {
             return true;
         }
 
-        // 3. 贝壳护盾逻辑 (保持原样)
+        // 4. 贝壳护盾逻辑
         if (currentItem && currentItem.type === "Shell" && this.player && !this.player.isDead) {
             const shieldValue = ITEM_STATS.Shell.shield_value || 2;
             this.player.addShield(damage / shieldValue);
             return false;
         }
 
-        // ✅ 4. 海绵吸收毒伤和火伤
+        // 5. 海绵吸收毒伤和火伤
         if (currentItem && currentItem.type === "Sponge" && (source === "poison" || source === "fire")) {
-            // 海绵吸收毒/火伤害，不传递给花瓣
             if (this.player && this.player.gameInstance) {
-                // 记录到海绵伤害队列
                 const game = this.player.gameInstance;
                 const existingIndex = game.player.spongeDamageQueue.findIndex(
                     item => item.petalIndex === this._petalIndex
@@ -33965,21 +34927,81 @@ tryBreakBubble(dt) {
             }
             return false;
         }
+        // 在 Petal.takeDamage 中
+        if (currentItem && currentItem.type === "Ice Cube" && source === "fire") {
+            if (this.isBroken) return false;
+
+            const currentDurability = this.durability || 0;
+            if (currentDurability <= 0) {
+                this.breakPetal();
+                return true;
+            }
+
+            // 2:1 比例吸收
+            const durabilityNeeded = Math.ceil(damage / 5);
+            const absorbed = Math.min(durabilityNeeded, currentDurability);
+            const actualDamageAbsorbed = absorbed * 5;
+
+            this.durability -= absorbed;
+            this.health = this.durability;
+            if (currentItem) currentItem.durability = this.durability;
+
+            console.log(`🧊 Ice Cube Petal: 吸收 ${actualDamageAbsorbed} 伤害，消耗 ${absorbed} 耐久，剩余 ${this.durability}`);
+
+            if (this.durability <= 0) {
+                this.breakPetal();
+            }
+
+            // 注意：这里返回 true 表示伤害已被吸收，不需要再扣血
+            // 但实际扣血已经在 Player.takeDamage 中处理了
+            return true;
+        }
+        // 在 Petal.takeDamage 中添加
+        if (currentItem && currentItem.type === "Lotus" && source === "poison") {
+            if (this.isBroken) return false;
+
+            const currentDurability = this.durability || 0;
+            if (currentDurability <= 0) {
+                this.breakPetal();
+                return true;
+            }
+
+            // 5:1 比例：5点毒伤消耗1点耐久
+            const durabilityNeeded = Math.ceil(damage / 5);
+            const absorbed = Math.min(durabilityNeeded, currentDurability);
+            const actualDamageAbsorbed = absorbed * 5;
+
+            this.durability -= absorbed;
+            this.health = this.durability;
+            if (currentItem) currentItem.durability = this.durability;
+
+            // 溢出伤害传给玩家
+            const remainingDamage = damage - actualDamageAbsorbed;
+            if (remainingDamage > 0 && this.player) {
+                this.player.takeDamage(remainingDamage, "Lotus overflow");
+            }
+
+            if (this.durability <= 0) {
+                this.health = 0;
+                this.durability = 0;
+                this.breakPetal();
+                return true;
+            }
+            return true;
+        }
 
         let actualDamage = damage;
-
-        // 5. 普通减伤逻辑 (护甲/抵抗)
         if (this.armor && this.armor > 0) {
             actualDamage = applyPetalArmorReduction(damage, this.armor);
         }
         actualDamage = actualDamage * (1 - this.damageResistance);
 
-        // 6. 通用扣除逻辑
+        // 7. 通用扣除逻辑
         this.health -= actualDamage;
         this.durability -= actualDamage;
         this.collisionCooldown = 200;
 
-        // 7. 通用破碎触发
+        // 8. 通用破碎触发
         if (this.health <= 0 || this.durability <= 0) {
             this.health = 0;
             this.durability = 0;
@@ -34190,9 +35212,9 @@ tryBreakBubble(dt) {
         const currentItem = this.getCurrentItem();
         if (!currentItem) return false;
         const eggToDigger = {
-            "TrashDigger egg":"TrashDigger","MudDigger_egg":"MudDigger",
-            "Digger egg":"Digger","Biologist egg":"Biologist","GraveDigger egg": "GraveDigger",   // ✅ 添加
-        "AlienDigger egg": "AlienDigger"    // ✅ 添加
+            "Trash Digger Egg":"TrashDigger","Mud Digger Egg":"MudDigger",
+            "Digger Egg":"Digger","Biologist Egg":"Biologist","Grave Digger Egg": "GraveDigger",   // ✅ 添加
+        "Alien Digger Egg": "AlienDigger"    // ✅ 添加
         };
         if (eggToDigger[currentItem.type] !== diggerType) return false;
         if (this.spawnCooldown > 0) return false;
@@ -34234,8 +35256,8 @@ tryBreakBubble(dt) {
         const currentItem = this.getCurrentItem();
         if (!currentItem) return;
         const eggToDigger = {
-            "TrashDigger egg":"TrashDigger","Digger egg":"Digger",
-            "MudDigger_egg":"MudDigger","Biologist egg":"Biologist"
+            "Trash Digger Egg":"TrashDigger","Digger Egg":"Digger",
+            "Mud Digger Egg":"MudDigger","Biologist Egg":"Biologist"
         };
         const diggerType = eggToDigger[currentItem.type];
         if (!diggerType) return;
@@ -34254,7 +35276,7 @@ tryBreakBubble(dt) {
     trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "WorkerFireAnt egg") return false;
+        if (!currentItem || currentItem.type !== "Worker Fire Ant Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         this._cleanDeadWorkerFireAnts(gameEnemies);
@@ -34278,7 +35300,7 @@ tryBreakBubble(dt) {
     trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "SoldierFireAnt egg") return false;
+        if (!currentItem || currentItem.type !== "Soldier Fire Ant Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         this._cleanDeadSoldierFireAnts(gameEnemies);
@@ -34302,7 +35324,7 @@ tryBreakBubble(dt) {
     trySpawnBabyFireAnts(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "BabyFireAnt egg") return false;
+        if (!currentItem || currentItem.type !== "Baby Fire Ant Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         this._cleanDeadBabyFireAnts(gameEnemies);
@@ -34326,7 +35348,7 @@ tryBreakBubble(dt) {
     trySpawnFireAntOverminds(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "FireAntOvermind egg") return false;
+        if (!currentItem || currentItem.type !== "Fire Ant Overmind Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         this._cleanDeadFireAntOverminds(gameEnemies);
@@ -34350,7 +35372,7 @@ tryBreakBubble(dt) {
     trySpawnFireAntHole(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "FireAntHole egg") return false;
+        if (!currentItem || currentItem.type !== "Fire Ant Hole Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         this._cleanDeadFireAntHoles(gameEnemies);
@@ -34405,18 +35427,18 @@ tryBreakBubble(dt) {
         this._cleanDeadFireAntHoles(gameEnemies);
         const currentItem = this.getCurrentItem();
         if (!currentItem || this.isBroken || this.isReloading) return;
-        if (currentItem.type === "WorkerFireAnt egg"    && this.workerFireAntList.length   < 4  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, false);
-        if (currentItem.type === "SoldierFireAnt egg"   && this.soldierFireAntList.length  < 5  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, false);
-        if (currentItem.type === "BabyFireAnt egg"      && this.babyFireAntList.length     < 3  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnBabyFireAnts(gameEnemies, playerWorldPos, false);
-        if (currentItem.type === "FireAntOvermind egg"  && this.fireAntOvermindList.length < 2  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntOverminds(gameEnemies, playerWorldPos, false);
-        if (currentItem.type === "FireAntHole egg"      && this.fireAntHoleList.length     < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntHole(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "Worker Fire Ant Egg"    && this.workerFireAntList.length   < 4  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnWorkerFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "Soldier Fire Ant Egg"   && this.soldierFireAntList.length  < 5  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnSoldierFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "Baby Fire Ant Egg"      && this.babyFireAntList.length     < 3  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnBabyFireAnts(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "Fire Ant Overmind Egg"  && this.fireAntOvermindList.length < 2  && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntOverminds(gameEnemies, playerWorldPos, false);
+        if (currentItem.type === "Fire Ant Hole Egg"      && this.fireAntHoleList.length     < 10 && this.spawnCooldown <= 0 && !this.eggSpawned) this.trySpawnFireAntHole(gameEnemies, playerWorldPos, false);
     }
 
     // ── Queen Ant (lowercase type comparison quirk) ───────────────────────────
     trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "queen ant egg") return false;
+        if (!currentItem || !currentItem.type || currentItem.type.toLowerCase() !== "Queen Ant Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         if (!this.queenAntList) this.queenAntList = [];
@@ -34448,7 +35470,7 @@ tryBreakBubble(dt) {
         if (!this.queenAntList) this.queenAntList = [];
         this._cleanDeadQueenAnts(gameEnemies);
         const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "queen ant egg") {
+        if (currentItem && currentItem.type && currentItem.type.toLowerCase() === "Queen Ant Egg") {
             if (!this.isBroken && !this.isReloading) {
                 if (this.queenAntList.length < this.maxQueenAnts && this.spawnCooldown <= 0 && !this.eggSpawned) {
                     this.trySpawnQueenAntsWithDna(gameEnemies, playerWorldPos, false);
@@ -34457,11 +35479,11 @@ tryBreakBubble(dt) {
         }
     }
 
-    // ── Trashcan egg (anonymous fly spawn, no list tracking) ─────────────────
+    // ── Trashcan Egg (anonymous fly spawn, no list tracking) ─────────────────
     trySpawnFliesFromEgg(gameEnemies, playerWorldPos, hasDNA) {
         if (this.isBroken || this.isReloading) return false;
         const currentItem = this.getCurrentItem();
-        if (!currentItem || currentItem.type !== "Trashcan egg") return false;
+        if (!currentItem || currentItem.type !== "Trashcan Egg") return false;
         if (this.spawnCooldown > 0) return false;
         if (!this.player || this.player.isDead) return false;
         const finalRarity = this.player.getSummonRarityWithDna(this);
@@ -34476,7 +35498,7 @@ tryBreakBubble(dt) {
             this._applyTalentToPet(fly);
             gameEnemies.push(fly);
         }
-        this.spawnCooldown = ITEM_STATS["Trashcan egg"]?.base_cooldown || 22000;
+        this.spawnCooldown = ITEM_STATS["Trashcan Egg"]?.base_cooldown || 22000;
         return true;
     }
 
@@ -34532,7 +35554,13 @@ tryBreakBubble(dt) {
             armor: mimicItem.armor,
             isBroken: mimicItem.isBroken || false
         };
-
+        // ✅ 确保变形槽位有一个物品
+        if (!this.player.quickSlot.slots[targetSlotIndex]) {
+            // 如果变形槽位是空的，创建一个 Mimic 放进去
+            const newMimic = new Item("Mimic", 1, mimicItem.rarity);
+            newMimic.count = 1;
+            this.player.quickSlot.slots[targetSlotIndex] = newMimic;
+        }
         // ✅ 只使用追踪器，不设置物品上的标记
         this.player.quickSlot.registerMimic(mimicSlotIndex, true, originalData, targetItem.type);
 
@@ -34647,7 +35675,7 @@ tryBreakBubble(dt) {
         }
         if (this.isBroken || this.isReloading) return;
         const currentItem = this.getCurrentItem();
-        if (currentItem && currentItem.type === "ThirdEye") return;
+        if (currentItem && currentItem.type === "Third Eye") return;
         if (this.hasAntennae) { this.drawAntennaeSimple(ctx); return; }
         const sizeMultiplier = 2.5;
         const scaledSize = this.size * viewScale * sizeMultiplier;
@@ -35657,8 +36685,8 @@ class Player {
             this.gameInstance = null;
             this.currentViewScale = 1.0;
             this._lastWorldPos = new Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
-            this.thirdEyeItem = null;
-            this.thirdEyeRangeBonus = 0;
+            this.ThirdEyeItem = null;
+            this.ThirdEyeRangeBonus = 0;
             this.impulseVelocity = new Vector2(0, 0);
             this.petals = [];
             for (let i = 0; i < this.petalCount; i++) {
@@ -35888,14 +36916,14 @@ class Player {
         return totalArmor;
     }
     updateThirdEye() {
-        /** 从快捷栏中查找 ThirdEye 或 Quantum 并更新范围加成 */
-        this.thirdEyeItem = null;
-        this.thirdEyeRangeBonus = 0;
+        /** 从快捷栏中查找 Third Eye 或 Quantum 并更新范围加成 */
+        this.ThirdEyeItem = null;
+        this.ThirdEyeRangeBonus = 0;
 
         for (let i = 0; i < this.quickSlot.slots.length; i++) {
             const slotItem = this.quickSlot.slots[i];
-            if (slotItem && (slotItem.type === "ThirdEye" || slotItem.type === "Quantum")) {
-                this.thirdEyeItem = slotItem;
+            if (slotItem && (slotItem.type === "Third Eye" || slotItem.type === "Quantum")) {
+                this.ThirdEyeItem = slotItem;
 
                 // 获取范围加成
                 let bonus = THIRD_EYE_RANGE_BONUS[slotItem.rarity];
@@ -35906,10 +36934,10 @@ class Player {
 
                 // Quantum 可以有额外加成
                 if (slotItem.type === "Quantum") {
-                    bonus = Math.floor(bonus * 1.2);  // Quantum 比 ThirdEye 强20%
+                    bonus = Math.floor(bonus * 1.2);  // Quantum 比 Third Eye 强20%
                 }
 
-                this.thirdEyeRangeBonus = bonus;
+                this.ThirdEyeRangeBonus = bonus;
                 break;
             }
         }
@@ -35926,7 +36954,7 @@ class Player {
             if (!petal) continue;
             const item = petal.getCurrentItem();
 
-            if (item && (item.type === "ThirdEye" || item.type === "Antennae")) {
+            if (item && (item.type === "Third Eye" || item.type === "Antennae")) {
                 petal.angle = 0;
                 petal.radius = 0;
                 petal.screenX = WIDTH / 2;
@@ -36193,7 +37221,7 @@ class Player {
                 totalDamageReduction += 0.15 + Math.log(rarityBonus) * 0.05;
             }
 
-            // Quantum: 增加视野（类似ThirdEye）
+            // Quantum: 增加视野（类似Third Eye）
             if (item.type === "Quantum") {
                 const rarityBonus = RARITY_MULTIPLIERS[item.rarity] || 1;
                 totalVisionBonus += 0.2 + Math.log(rarityBonus) * 0.05;
@@ -36511,37 +37539,37 @@ class Player {
                 if (this.gameInstance) petal.trySpawnRockWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
             // 其他召唤物...
-            else if (petal.itemType === "WhiteBloodCell Egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "White Blood Cell Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnWhiteBloodCellsWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
             else if (petal.itemType === "Spider Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnSpidersWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "RedBloodCell Egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Red Blood Cell Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnRedBloodCellsWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "StemCell Egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Stem Cell Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnStemCellsWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
             else if (petal.itemType === "Hive Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnHiveBeesWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "queen ant egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Queen Ant Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnQueenAntsWithDna(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "WorkerFireAnt egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Worker Fire Ant Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnWorkerFireAnts(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "SoldierFireAnt egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Soldier Fire Ant Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnSoldierFireAnts(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "BabyFireAnt egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Baby Fire Ant Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnBabyFireAnts(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "FireAntOvermind egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Fire Ant Overmind Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnFireAntOverminds(this.gameInstance.enemies, worldPos, hasDna);
             }
-            else if (petal.itemType === "FireAntHole egg" && petal.spawnCooldown <= 0) {
+            else if (petal.itemType === "Fire Ant Hole Egg" && petal.spawnCooldown <= 0) {
                 if (this.gameInstance) petal.trySpawnFireAntHole(this.gameInstance.enemies, worldPos, hasDna);
             }
 
@@ -36549,22 +37577,22 @@ class Player {
             if (petal.itemType === "Egg" || petal.itemType === "Ant Egg") {
                 if (this.gameInstance) petal.updateGoldenAnts(dt, this.gameInstance.enemies, worldPos);
             }
-            if (petal.itemType === "WhiteBloodCell Egg") {
+            if (petal.itemType === "White Blood Cell Egg") {
                 if (this.gameInstance) petal.updateWhiteBloodCells(dt, this.gameInstance.enemies, worldPos);
             }
             if (petal.itemType === "Spider Egg") {
                 if (this.gameInstance) petal.updateSpiders(dt, this.gameInstance.enemies, worldPos);
             }
-            if (petal.itemType === "RedBloodCell Egg") {
+            if (petal.itemType === "Red Blood Cell Egg") {
                 if (this.gameInstance) petal.updateRedBloodCells(dt, this.gameInstance.enemies, worldPos);
             }
-            if (petal.itemType === "StemCell Egg") {
+            if (petal.itemType === "Stem Cell Egg") {
                 if (this.gameInstance) petal.updateStemCells(dt, this.gameInstance.enemies, worldPos);
             }
             if (petal.itemType === "Hive Egg") {
                 if (this.gameInstance) petal.updateHiveBees(dt, this.gameInstance.enemies, worldPos);
             }
-            if (petal.itemType === "queen ant egg") {
+            if (petal.itemType === "Queen Ant Egg") {
                 if (this.gameInstance) petal.updateQueenAnts(dt, this.gameInstance.enemies, worldPos);
             }
             if (petal.itemType && petal.itemType.includes("FireAnt")) {
@@ -36723,126 +37751,163 @@ class Player {
         this.shield += shieldAmount;
         return shieldAmount;
     }
-
     takeDamage(damage, source = "unknown") {
-    // 1. 基础检查
-    if (this.isDead) return false;
+        // 1. 基础检查
+        if (this.isDead) return false;
 
-    // 2. 识别持续伤害 (DoT)
-    const isDotDamage = (source === "poison" || source === "fire");
+        // 2. 识别持续伤害 (DoT)
+        const isDotDamage = (source === "poison" || source === "fire");
 
-    // 3. 无敌帧拦截：只有非毒伤才受无敌帧限制
-    if (!isDotDamage && this.collisionCooldown > 0) {
-        return false;
-    }
+        // 3. 无敌帧拦截：只有非毒伤才受无敌帧限制
+        if (!isDotDamage && this.collisionCooldown > 0) {
+            return false;
+        }
 
-    // 电击生物逻辑
-    if (source && source.isLightningEnemy) {
-        const lightningDamage = source.attackDamage * 0.4;
-        for (const petal of this.petals) {
-            if (!petal.isBroken && !petal.isReloading && Math.random() < 0.6) {
-                petal.takeDamage(lightningDamage, true);
+        // 电击生物逻辑
+        if (source && source.isLightningEnemy) {
+            const lightningDamage = source.attackDamage * 0.4;
+            for (const petal of this.petals) {
+                if (!petal.isBroken && !petal.isReloading && Math.random() < 0.6) {
+                    petal.takeDamage(lightningDamage, true);
+                }
             }
         }
-    }
 
-    let remainingDamage = damage;
+        let remainingDamage = damage;
 
-    // ===== 🧽 海绵处理逻辑 =====
-    let hasActiveSponge = false;
-    let spongePetalIndex = -1;
-    let spongeRarity = "Common";
+        // ===== 🧊 Ice Cube 优先吸收火焰伤害（2:1 比例）=====
+        if (source === "fire" && remainingDamage > 0) {
+            for (const petal of this.petals) {
+                if (petal.isBroken || petal.isReloading) continue;
+                const item = petal.getCurrentItem();
+                if (item && item.type === "Ice Cube" && petal.durability > 0) {
+                    const beforeDurability = petal.durability;
+                    petal.takeDamage(remainingDamage, "fire");
+                    const afterDurability = petal.durability;
+                    const durabilityLoss = beforeDurability - afterDurability;
+                    const absorbed = durabilityLoss * 5;
+                    remainingDamage -= absorbed;
 
-    for (let i = 0; i < this.petals.length; i++) {
-        const petal = this.petals[i];
-        const item = petal.getCurrentItem();
-        if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
-            hasActiveSponge = true;
-            spongePetalIndex = petal._petalIndex;
-            spongeRarity = item.rarity;
-            break;
+                    if (remainingDamage <= 0) {
+                        if (!isDotDamage) this.collisionCooldown = 500;
+                        return false;
+                    }
+                }
+            }
         }
-    }
 
-    if (hasActiveSponge) {
-        // ✅ 修复点：如果当前是毒伤/火伤，海绵采取“减免”模式而非“吸收”模式
-        // 这样毒伤就不会触发 500ms 无敌，也不会存入无限增长的队列
-        if (isDotDamage) {
-            remainingDamage *= 0.5; // 海绵稀释毒素，伤害减半，继续向下走扣血流程
-        } else {
-            // 正常物理伤害：进入海绵队列
-            const existingIndex = this.spongeDamageQueue.findIndex(
-                item => item.petalIndex === spongePetalIndex
-            );
-            const rarityIndex = RARITY_LIST.indexOf(spongeRarity);
-            const duration = 3 + (rarityIndex * 3);
+        // ===== 🌸 Lotus 吸收毒伤（5:1 比例）=====
+        if (source === "poison" && remainingDamage > 0) {
+            for (const petal of this.petals) {
+                if (petal.isBroken || petal.isReloading) continue;
+                const item = petal.getCurrentItem();
+                if (item && item.type === "Lotus" && petal.durability > 0) {
+                    const beforeDurability = petal.durability;
+                    petal.takeDamage(remainingDamage, "poison");
+                    const afterDurability = petal.durability;
+                    const durabilityLoss = beforeDurability - afterDurability;
+                    const absorbed = durabilityLoss * 5;  // 5:1 比例
+                    remainingDamage -= absorbed;
 
-            if (existingIndex !== -1) {
-                this.spongeDamageQueue[existingIndex].totalDamage += remainingDamage;
-                this.spongeDamageQueue[existingIndex].remainingDamage += remainingDamage;
+                    if (remainingDamage <= 0) {
+                        if (!isDotDamage) this.collisionCooldown = 500;
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // ===== 🧽 海绵处理逻辑 =====
+        let hasActiveSponge = false;
+        let spongePetalIndex = -1;
+        let spongeRarity = "Common";
+
+        for (let i = 0; i < this.petals.length; i++) {
+            const petal = this.petals[i];
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Sponge" && !petal.isBroken && !petal.isReloading) {
+                hasActiveSponge = true;
+                spongePetalIndex = petal._petalIndex;
+                spongeRarity = item.rarity;
+                break;
+            }
+        }
+
+        if (hasActiveSponge) {
+            if (isDotDamage) {
+                remainingDamage *= 0.5;
             } else {
-                this.spongeDamageQueue.push({
-                    totalDamage: remainingDamage,
-                    remainingDamage: remainingDamage,
-                    duration: duration,
-                    startTime: Date.now() / 1000,
-                    rarity: spongeRarity,
-                    petalIndex: spongePetalIndex
-                });
-            }
-            this.collisionCooldown = 500; // 物理撞击触发无敌
-            return false; // 物理伤害被吸收，直接结束
-        }
-    }
+                const existingIndex = this.spongeDamageQueue.findIndex(
+                    item => item.petalIndex === spongePetalIndex
+                );
+                const rarityIndex = RARITY_LIST.indexOf(spongeRarity);
+                const duration = 3 + (rarityIndex * 3);
 
-    // ===== 🛡️ Cotton 吸收逻辑 =====
-    for (const petal of this.petals) {
-        if (petal.isBroken || petal.isReloading) continue;
-        const item = petal.getCurrentItem();
-        if (item && item.type === "Cotton" && petal.durability > 0) {
-            const absorbed = Math.min(remainingDamage, petal.durability);
-            petal.durability -= absorbed;
-            petal.health = petal.durability;
-            remainingDamage -= absorbed;
-            if (item) item.durability = petal.durability;
-            if (petal.durability <= 0) petal.breakPetal();
-            if (remainingDamage <= 0) {
-                if (!isDotDamage) this.collisionCooldown = 500;
+                if (existingIndex !== -1) {
+                    this.spongeDamageQueue[existingIndex].totalDamage += remainingDamage;
+                    this.spongeDamageQueue[existingIndex].remainingDamage += remainingDamage;
+                } else {
+                    this.spongeDamageQueue.push({
+                        totalDamage: remainingDamage,
+                        remainingDamage: remainingDamage,
+                        duration: duration,
+                        startTime: Date.now() / 1000,
+                        rarity: spongeRarity,
+                        petalIndex: spongePetalIndex
+                    });
+                }
+                this.collisionCooldown = 500;
                 return false;
             }
         }
-    }
 
-    // ===== 🛡️ 护盾扣除 =====
-    if (this.shield > 0 && remainingDamage > 0) {
-        const shieldAbsorb = Math.min(this.shield * 2, remainingDamage);
-        remainingDamage -= shieldAbsorb;
-        this.shield -= Math.ceil(shieldAbsorb / 2);
-        if (this.shield < 0) this.shield = 0;
-    }
-
-    // ===== ❤️ 最终扣除生命 =====
-    if (remainingDamage > 0) {
-        const resistance = isDotDamage ? 0 : this.frameDamageResistance;
-        const actualDamage = remainingDamage * (1 - resistance);
-        const newHealth = this._health - actualDamage;
-
-        if (newHealth <= 0) {
-            this._health = 0;
-            this.isDead = true;
-            this.spongeDamageQueue = []; // 死亡清除海绵队列
-            if (this.handleDeath) this.handleDeath(); // 触发死亡 UI 清理
-            return true;
+        // ===== 🛡️ Cotton 吸收逻辑 =====
+        for (const petal of this.petals) {
+            if (petal.isBroken || petal.isReloading) continue;
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Cotton" && petal.durability > 0) {
+                const absorbed = Math.min(remainingDamage, petal.durability);
+                petal.durability -= absorbed;
+                petal.health = petal.durability;
+                remainingDamage -= absorbed;
+                if (item) item.durability = petal.durability;
+                if (petal.durability <= 0) petal.breakPetal();
+                if (remainingDamage <= 0) {
+                    if (!isDotDamage) this.collisionCooldown = 500;
+                    return false;
+                }
+            }
         }
-        this._health = newHealth;
-    }
 
-    // 只有非毒伤才会在结束时设置无敌帧
-    if (!isDotDamage) {
-        this.collisionCooldown = 500;
+        // ===== 🛡️ 护盾扣除 =====
+        if (this.shield > 0 && remainingDamage > 0) {
+            const shieldAbsorb = Math.min(this.shield * 2, remainingDamage);
+            remainingDamage -= shieldAbsorb;
+            this.shield -= Math.ceil(shieldAbsorb / 2);
+            if (this.shield < 0) this.shield = 0;
+        }
+
+        // ===== ❤️ 最终扣除生命 =====
+        if (remainingDamage > 0) {
+            const resistance = isDotDamage ? 0 : this.frameDamageResistance;
+            const actualDamage = remainingDamage * (1 - resistance);
+            const newHealth = this._health - actualDamage;
+
+            if (newHealth <= 0) {
+                this._health = 0;
+                this.isDead = true;
+                this.spongeDamageQueue = [];
+                if (this.handleDeath) this.handleDeath();
+                return true;
+            }
+            this._health = newHealth;
+        }
+
+        if (!isDotDamage) {
+            this.collisionCooldown = 500;
+        }
+        return false;
     }
-    return false;
-}
     updateSpongeDamage(dt) {
         if (this.isDead) {
             this.spongeDamageQueue = [];
@@ -37413,29 +38478,29 @@ class Player {
         // 绘制生命值条和护盾条
         this.drawHealthAndShieldBars(ctx, x, y, viewScale);
 
-        // 绘制 ThirdEye 图标（如果存在）
-        if (this.thirdEyeItem) {
+        // 绘制 Third Eye 图标（如果存在）
+        if (this.ThirdEyeItem) {
             const iconSize = Math.floor(35 * viewScale);
             const centerX = WIDTH / 2;
             const centerY = HEIGHT / 2;
-            const thirdEyeImg = imageLoader.getImage(
-                "ThirdEye",
-                this.thirdEyeItem.rarity,
+            const ThirdEyeImg = imageLoader.getImage(
+                "Third Eye",
+                this.ThirdEyeItem.rarity,
                 [iconSize, iconSize]
             );
-            if (thirdEyeImg) {
+            if (ThirdEyeImg) {
                 ctx.save();
                 ctx.drawImage(
-                    thirdEyeImg,
+                    ThirdEyeImg,
                     centerX - iconSize/2,
                     centerY - iconSize - 10 * viewScale,
                     iconSize,
                     iconSize
                 );
-                ctx.shadowColor = `rgb(${RARITY_COLORS[this.thirdEyeItem.rarity]?.join(',') || '255,255,255'})`;
+                ctx.shadowColor = `rgb(${RARITY_COLORS[this.ThirdEyeItem.rarity]?.join(',') || '255,255,255'})`;
                 ctx.shadowBlur = 15 * viewScale;
                 ctx.drawImage(
-                    thirdEyeImg,
+                    ThirdEyeImg,
                     centerX - iconSize/2,
                     centerY - iconSize - 10 * viewScale,
                     iconSize,
@@ -40441,7 +41506,7 @@ class WorldMapGame {
         this.effectiveViewWidth = WIDTH;
         this.effectiveViewHeight = HEIGHT;
         this.SAFE_BORDER = 100;
-
+        this.fluidManager = new FluidManager(this);
         // Canvas设置
         this.screen = document.getElementById('gameCanvas');
         if (!this.screen) throw new Error("Canvas #gameCanvas not found!");
@@ -42559,6 +43624,7 @@ class WorldMapGame {
         this.updateEnemyLoading();
         this.poisonManager.updateAll();
         this.flameManager.updateAll();
+        this.fluidManager.update(deltaTime);
         // 更新掉落卡片（总是更新，开销小）
         for (let i = 0; i < this.droppedCards.length; i++) {
             if (i % 2 === this.frameCount % 2) {
@@ -45401,7 +46467,7 @@ class WorldMapGame {
 
             // 绘制背景
             this.drawWorldBackground(context, cameraOffset, drawW, drawH, drawX, drawY);
-
+            this.fluidManager.draw(context, cameraOffset);
             // 绘制敌人（传 viewScale=1.0，不再自己缩放）
             for (const enemy of this.enemies) {
                 if (enemy.isDead) continue;
@@ -47700,35 +48766,35 @@ class GameRoom {
 
     getEnemyDrops(enemy) {
         const dropTables = {
-            "Spider": ["Web", "Fang", "ThirdEye", "Spider egg"],
-            "Bee": ["Stinger", "Pollen", "Honey", "Bee egg"],
-            "Ladybug": ["Rose", "Honey", "Ladybug egg"],
-            "Soldier Ant": ["Wing", "Clover", "Soldier Ant egg"],
-            "Worker Ant": ["Leaf", "Corn", "Worker Ant egg"],
-            "Crab": ["Claw", "Powder", "Crab egg"],
+            "Spider": ["Web", "Fang", "Third Eye", "Spider Egg"],
+            "Bee": ["Stinger", "Pollen", "Honey", "Bee Egg"],
+            "Ladybug": ["Rose", "Honey", "Ladybug Egg"],
+            "Soldier Ant": ["Wing", "Clover", "Soldier Ant Egg"],
+            "Worker Ant": ["Leaf", "Corn", "Worker Ant Egg"],
+            "Crab": ["Claw", "Powder", "Crab Egg"],
             "Bush": ["Leaf", "Root", "Golden Leaf"],
             "Centipede": ["Leaf", "Antennae", "Centipede egg"],
-            "QueenAnt": ["queen ant egg", "Leaf", "Corn"],
-            "FireAntOvermind": ["FireAntOvermind egg", "Leaf", "Heavy"],
-            "FireAntHole": ["FireAntHole egg", "Magnet", "Corn"],
-            "Cancer": ["Cancer", "Cancer egg", "DNA", "Iris", "Chromosome"],
-            "Bacteria": ["Iris", "Bacteria_egg", "Chromosome"],
+            "QueenAnt": ["Queen Ant Egg", "Leaf", "Corn"],
+            "FireAntOvermind": ["Fire Ant Overmind Egg", "Leaf", "Heavy"],
+            "FireAntHole": ["Fire Ant Hole Egg", "Magnet", "Corn"],
+            "Cancer": ["Cancer", "Cancer Egg", "DNA", "Iris", "Chromosome"],
+            "Bacteria": ["Iris", "Bacteria Egg", "Chromosome"],
             "Sponge": ["Sponge", "Coral"],
-            "Scallop": ["Shell", "Magnet", "Pearl", "Shell egg"],
-            "Starfish": ["Starfish", "Salt", "Sand", "Starfish egg"],
-            "Jellyfish": ["Jelly", "Lightning", "Jellyfish egg"],
-            "CrabHole": ["Magnet", "CrabHole egg", "Cotton", "Sand"],
+            "Scallop": ["Shell", "Magnet", "Pearl", "Shell Egg"],
+            "Starfish": ["Starfish", "Salt", "Sand", "Starfish Egg"],
+            "Jellyfish": ["Jelly", "Lightning", "Jellyfish Egg"],
+            "CrabHole": ["Magnet", "Crab Hole Egg", "Cotton", "Sand"],
             "Leech": ["Fang", "Leech Egg", "Salt"],
             "Parasite": ["Suger", "Parasite Egg", "Chromosome", "Iris"],
-            "Rat": ["Rat_egg", "Poo", "Iris"],
-            "Roach": ["Lotus", "Roach_egg", "Antennae", "Powder"],
-            "Fly": ["Wing", "Fly_egg", "Poo"],
-            "PooStorm": ["PooStick", "Poo", "Iris"],
-            "ManHole": ["ManHole egg", "Poo", "Cotton", "Basil"],
-            "TrashDigger": ["TrashDigger egg", "Poo", "Iris", "Cutter"],
-            "Digger": ["Digger egg", "Cutter", "Heavy", "Bur"],
-            "MudDigger": ["MudDigger_egg", "Claw", "Root", "Heavy", "Cutter"],
-            "Biologist": ["Biologist egg", "DNA", "Iris", "Cancer"],
+            "Rat": ["Rat Egg", "Poo", "Iris"],
+            "Roach": ["Lotus", "Roach Egg", "Antennae", "Powder"],
+            "Fly": ["Wing", "Fly Egg", "Poo"],
+            "PooStorm": ["Poo Stick", "Poo", "Iris"],
+            "ManHole": ["Manhole Egg", "Poo", "Cotton", "Basil"],
+            "TrashDigger": ["Trash Digger Egg", "Poo", "Iris", "Cutter"],
+            "Digger": ["Digger Egg", "Cutter", "Heavy", "Bur"],
+            "MudDigger": ["Mud Digger Egg", "Claw", "Root", "Heavy", "Cutter"],
+            "Biologist": ["Biologist Egg", "DNA", "Iris", "Cancer"],
             "Square": ["Square Egg", "Square Egg"],
             "GoldenAnt": ["Golden Leaf", "Ant Egg"]
         };
