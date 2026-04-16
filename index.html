@@ -476,67 +476,228 @@ canvas {
     // ========== 物品管理函数 ==========
 
     window.handleExportItems = () => {
-        const game = window.gameInstance;
-        if (!game || !game.player) {
-            alert("请先进入游戏！");
-            return;
-        }
+    const game = window.gameInstance;
+    if (!game || !game.player) {
+        alert("请先进入游戏！");
+        return;
+    }
 
-        const player = game.player;
+    const player = game.player;
 
-        const allItems = {
-            inventory: player.inventory.items.map(item => ({
-                type: item.type,
-                rarity: item.rarity,
-                level: item.level,
-                count: item.count,
-                durability: item.durability,
-                maxDurability: item.maxDurability,
-                isBroken: item.isBroken,
-                reloadTime: item.reloadTime,
-                baseReloadTime: item.baseReloadTime,
-                armor: item.armor
-            })),
-            quickSlot: player.quickSlot.slots.map(slot => slot ? {
-                type: slot.type,
-                rarity: slot.rarity,
-                level: slot.level,
-                count: slot.count,
-                durability: slot.durability,
-                maxDurability: slot.maxDurability,
-                isBroken: slot.isBroken,
-                reloadTime: slot.reloadTime,
-                baseReloadTime: slot.baseReloadTime,
-                armor: slot.armor
-            } : null),
-            secondarySlot: player.quickSlot.secondarySlots.map(slot => slot ? {
-                type: slot.type,
-                rarity: slot.rarity,
-                level: slot.level,
-                count: slot.count,
-                durability: slot.durability,
-                maxDurability: slot.maxDurability,
-                isBroken: slot.isBroken,
-                reloadTime: slot.reloadTime,
-                baseReloadTime: slot.baseReloadTime,
-                armor: slot.armor
-            } : null),
-            timestamp: Date.now(),
-            version: "3.0"
-        };
+    // ========== 添加名称映射表 ==========
+    const nameMapping = {
+    // ========== Stick 系列 ==========
+    "FireStick": "Fire Stick",
+    "PooStick": "Poo Stick",
+    "SnowStick": "Snow Stick",
 
-        const json = JSON.stringify(allItems, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `flwrr_items_${Date.now()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+    // ========== Hel 地狱系列 ==========
+    "HelWorm egg": "Hel Worm Egg",
+    "HelSpider egg": "Hel Spider Egg",
+    "HelBee egg": "Hel Bee Egg",
+    "HelHornet egg": "Hel Hornet Egg",
+    "HelBeetle egg": "Hel Beetle Egg",
+    "HelHive egg": "Hel Hive Egg",
+    "HelJellyfish egg": "Hel Jellyfish Egg",
+    "HelQueenBee egg": "Hel Queen Bee Egg",
+    "HelDigger egg": "Hel Digger Egg",
+    "HelBeekeeper egg": "Hel Beekeeper Egg",
+    "Hel Lighting": "Hel Lightning",
+    "Hel Honey": "Hel Honey",
 
-        alert(`✅ 已导出 ${player.inventory.items.length} 个物品`);
+    // ========== 龙系列 ==========
+    "Dragon egg": "Dragon Egg",
+    "DragonNest egg": "Dragon Nest Egg",
+    "ToxicDragon egg": "Toxic Dragon Egg",
+    "IceDragon egg": "Ice Dragon Egg",
+
+    // ========== 蚂蚁系列 ==========
+    "QueenAnt egg": "Queen Ant Egg",
+    "SoldierAnt egg": "Soldier Ant Egg",
+    "WorkerAnt egg": "Worker Ant Egg",
+    "QueenBee egg": "Queen Bee Egg",
+    "FireAntOvermind egg": "Fire Ant Overmind Egg",
+    "FireAntHole egg": "Fire Ant Hole Egg",
+    "WorkerFireAnt egg": "Worker Fire Ant Egg",
+    "SoldierFireAnt egg": "Soldier Fire Ant Egg",
+    "BabyFireAnt egg": "Baby Fire Ant Egg",
+
+    // ========== 海洋系列 ==========
+    "Crab egg": "Crab Egg",
+    "CrabHole egg": "Crab Hole Egg",
+    "Jellyfish egg": "Jellyfish Egg",
+    "Starfish egg": "Starfish Egg",
+    "Bubble egg": "Bubble Egg",
+    "Shell egg": "Shell Egg",
+    "Squid egg": "Squid Egg",
+    "Shipwreck egg": "Shipwreck Egg",
+    "Barnacle egg": "Barnacle Egg",
+    "Leech Egg": "Leech Egg",
+
+    // ========== 蜘蛛系列 ==========
+    "Spider egg": "Spider Egg",
+    "SpiderCave egg": "Spider Cave Egg",
+    "ArcticSpider egg": "Arctic Spider Egg",
+    "ArcticSpiderCave egg": "Arctic Spider Cave Egg",
+
+    // ========== 蜜蜂系列 ==========
+    "Bee egg": "Bee Egg",
+    "Hive egg": "Hive Egg",
+    "Beekeeper egg": "Beekeeper Egg",
+    "Wasp egg": "Wasp Egg",
+
+    // ========== 白蚁系列 ==========
+    "WorkerTermite egg": "Worker Termite Egg",
+    "SoldierTermite egg": "Soldier Termite Egg",
+    "TermiteHole egg": "Termite Hole Egg",
+    "TermiteOvermind egg": "Termite Overmind Egg",
+
+    // ========== 甲虫系列 ==========
+    "Beetle egg": "Beetle Egg",
+    "Scorpion egg": "Scorpion Egg",
+    "Ladybug egg": "Ladybug Egg",
+    "Centipede egg": "Centipede Egg",
+    "Firefly egg": "Firefly Egg",
+    "Mantis egg": "Mantis Egg",
+    "StickBug egg": "Stick Bug Egg",
+
+    // ========== 北极系列 ==========
+    "SlagMight egg": "Stalagmite Egg",
+    "IceCube egg": "Ice Cube Egg",
+    "Igloo egg": "Igloo Egg",
+    "Tick egg": "Tick Egg",
+    "Snowman egg": "Snowman Egg",
+    "FrostDigger egg": "Frost Digger Egg",
+
+    // ========== 细胞/病毒系列 ==========
+    "StemCell egg": "Stem Cell Egg",
+    "RedBloodCell egg": "Red Blood Cell Egg",
+    "WhiteBloodCell egg": "White Blood Cell Egg",
+    "Bacteria_egg": "Bacteria Egg",
+    "Cancer egg": "Cancer Egg",
+    "Virus egg": "Virus Egg",
+    "Bacteriophage egg": "Bacteriophage Egg",
+    "Parasite Egg": "Parasite Egg",
+
+    // ========== 下水道系列 ==========
+    "ManHole egg": "Manhole Egg",
+    "Fly_egg": "Fly Egg",
+    "Rat_egg": "Rat Egg",
+    "Roach_egg": "Roach Egg",
+    "Trashcan egg": "Trashcan Egg",
+
+    // ========== Digger 系列 ==========
+    "Digger egg": "Digger Egg",
+    "MudDigger_egg": "Mud Digger Egg",
+    "TrashDigger egg": "Trash Digger Egg",
+    "Biologist egg": "Biologist Egg",
+    "PirateDigger egg": "Pirate Digger Egg",
+    "GraveDigger egg": "Grave Digger Egg",
+    "AlienDigger egg": "Alien Digger Egg",
+
+    // ========== 微观/宇宙系列 ==========
+    "Atom egg": "Atom Egg",
+    "Electron egg": "Electron Egg",
+    "Proton egg": "Proton Egg",
+    "ElectronCloud egg": "Electron Cloud Egg",
+    "Photon egg": "Photon Egg",
+    "BlackHole egg": "Black Hole Egg",
+    "WhiteHole egg": "White Hole Egg",
+    "NeutronStar egg": "Neutron Star Egg",
+    "Star egg": "Star Egg",
+    "Asteroid egg": "Asteroid Egg",
+    "Alien egg": "Alien Egg",
+    "UFO egg": "UFO Egg",
+    "Ghost egg": "Ghost Egg",
+    "GraveStone egg": "Grave Stone Egg",
+
+    // ========== 基础蛋 ==========
+    "Egg": "Egg",
+    "Ant Egg": "Ant Egg",
+    "Moon Egg": "Moon Egg",
+    "Square Egg": "Square Egg",
+
+    // ========== 其他物品 ==========
+    "Bubonic Plague": "Bubonic Plague",
+    "Bubble Bomb": "Bubble Bomb",
+    "FireBomb": "Fire Bomb",
+    "Golden Leaf": "Golden Leaf",
+    "Blood Stinger": "Blood Stinger",
+    "Gamma Ray": "Gamma Ray",
+    "Ice Rose": "Ice Rose",
+    "Ice Cube": "Ice Cube",
+    "Trident": "Trident",
+    "Controller": "Controller",
+    "Chromosome": "Chromosome",
+    "Singularity": "Singularity",
+    "DarkMatter": "Dark Matter",
+    "ElectronCloud": "Electron Cloud",
+    "Stardust": "Stardust"
+};
+
+    // 转换名称函数
+    function convertName(oldName) {
+        if (nameMapping[oldName]) return nameMapping[oldName];
+
+        // 自动转换驼峰命名（可选）
+        let converted = oldName.replace(/([A-Z])/g, ' $1').trim();
+        converted = converted.charAt(0).toUpperCase() + converted.slice(1);
+        return converted;
+    }
+
+    // ========== 导出时转换名称 ==========
+    const allItems = {
+        inventory: player.inventory.items.map(item => ({
+            type: convertName(item.type),  // ✅ 转换
+            rarity: item.rarity,
+            level: item.level,
+            count: item.count,
+            durability: item.durability,
+            maxDurability: item.maxDurability,
+            isBroken: item.isBroken,
+            reloadTime: item.reloadTime,
+            baseReloadTime: item.baseReloadTime,
+            armor: item.armor
+        })),
+        quickSlot: player.quickSlot.slots.map(slot => slot ? {
+            type: convertName(slot.type),  // ✅ 转换
+            rarity: slot.rarity,
+            level: slot.level,
+            count: slot.count,
+            durability: slot.durability,
+            maxDurability: slot.maxDurability,
+            isBroken: slot.isBroken,
+            reloadTime: slot.reloadTime,
+            baseReloadTime: slot.baseReloadTime,
+            armor: slot.armor
+        } : null),
+        secondarySlot: player.quickSlot.secondarySlots.map(slot => slot ? {
+            type: convertName(slot.type),  // ✅ 转换
+            rarity: slot.rarity,
+            level: slot.level,
+            count: slot.count,
+            durability: slot.durability,
+            maxDurability: slot.maxDurability,
+            isBroken: slot.isBroken,
+            reloadTime: slot.reloadTime,
+            baseReloadTime: slot.baseReloadTime,
+            armor: slot.armor
+        } : null),
+        timestamp: Date.now(),
+        version: "3.0"
     };
 
+    const json = JSON.stringify(allItems, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flwrr_items_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert(`✅ 已导出 ${player.inventory.items.length} 个物品（名称已规范化）`);
+};
     window.handleImportItems = () => {
         const game = window.gameInstance;
         if (!game || !game.player) {
