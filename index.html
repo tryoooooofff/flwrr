@@ -698,126 +698,151 @@ canvas {
 
     alert(`✅ 已导出 ${player.inventory.items.length} 个物品（名称已规范化）`);
 };
-    window.handleImportItems = () => {
-        const game = window.gameInstance;
-        if (!game || !game.player) {
-            alert("请先进入游戏！");
+  window.handleImportItems = () => {
+    const game = window.gameInstance;
+    if (!game || !game.player) {
+        alert("请先进入游戏！");
+        return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        const player = game.player;
+
+        // ========== 修复：正确获取 Item 类 ==========
+        let ItemClass = null;
+
+        // 方法1：从 window 获取（如果已经挂载）
+        if (window.Item) {
+            ItemClass = window.Item;
+        }
+        // 方法2：从导入的模块获取
+        else if (typeof Item !== 'undefined') {
+            ItemClass = Item;
+        }
+        // 方法3：从现有物品获取
+        else if (player.inventory.items.length > 0) {
+            ItemClass = player.inventory.items[0].constructor;
+        }
+        // 方法4：从快捷栏获取
+        else if (player.quickSlot.slots.length > 0 && player.quickSlot.slots[0]) {
+            ItemClass = player.quickSlot.slots[0].constructor;
+        }
+        // 方法5：创建一个临时物品来获取类
+        else {
+            // 尝试从 game.js 导入（需要在模块作用域内）
+            try {
+                const module = await import('./game.js');
+                if (module.Item) ItemClass = module.Item;
+            } catch(err) {
+                console.warn("无法从模块导入:", err);
+            }
+        }
+
+        if (!ItemClass) {
+            alert("无法找到 Item 类，请确保游戏完全加载后再试");
+            console.error("ItemClass 获取失败，所有方法都尝试过了");
             return;
         }
 
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
+        console.log("✅ 成功获取 Item 类:", ItemClass.name);
 
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            const text = await file.text();
-            const data = JSON.parse(text);
+        // 清空
+        player.inventory.items = [];
+        for (let i = 0; i < player.quickSlot.slots.length; i++) {
+            player.quickSlot.slots[i] = null;
+            if (player.petals[i]) player.petals[i].resetToDefault();
+        }
+        for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
+            player.quickSlot.secondarySlots[i] = null;
+        }
 
-            const player = game.player;
-
-            let ItemClass = null;
-            if (player.inventory.items.length > 0) {
-                ItemClass = player.inventory.items[0].constructor;
-            } else if (player.quickSlot.slots[0]) {
-                ItemClass = player.quickSlot.slots[0].constructor;
+        // 导入背包
+        for (const itemData of data.inventory) {
+            try {
+                const item = new ItemClass(itemData.type, itemData.level || 1, itemData.rarity);
+                item.count = itemData.count || 1;
+                if (itemData.durability) item.durability = itemData.durability;
+                if (itemData.maxDurability) item.maxDurability = itemData.maxDurability;
+                if (itemData.isBroken) item.isBroken = itemData.isBroken;
+                if (itemData.reloadTime) item.reloadTime = itemData.reloadTime;
+                if (itemData.baseReloadTime) item.baseReloadTime = itemData.baseReloadTime;
+                if (itemData.armor) item.armor = itemData.armor;
+                player.inventory.items.push(item);
+            } catch(err) {
+                console.warn("跳过背包物品:", itemData.type, err);
             }
-            if (!ItemClass && window.Item) ItemClass = window.Item;
+        }
 
-            if (!ItemClass) {
-                alert("无法找到 Item 类");
-                return;
-            }
-
-            // 清空
-            player.inventory.items = [];
-            for (let i = 0; i < player.quickSlot.slots.length; i++) {
-                player.quickSlot.slots[i] = null;
-                if (player.petals[i]) player.petals[i].resetToDefault();
-            }
-            for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
-                player.quickSlot.secondarySlots[i] = null;
-            }
-
-            // 导入背包
-            for (const itemData of data.inventory) {
-                try {
-                    const item = new ItemClass(itemData.type, itemData.level || 1, itemData.rarity);
-                    item.count = itemData.count || 1;
-                    if (itemData.durability) item.durability = itemData.durability;
-                    if (itemData.maxDurability) item.maxDurability = itemData.maxDurability;
-                    if (itemData.isBroken) item.isBroken = itemData.isBroken;
-                    if (itemData.reloadTime) item.reloadTime = itemData.reloadTime;
-                    if (itemData.baseReloadTime) item.baseReloadTime = itemData.baseReloadTime;
-                    if (itemData.armor) item.armor = itemData.armor;
-                    player.inventory.items.push(item);
-                } catch(err) {
-                    console.warn("跳过:", itemData.type, err);
-                }
-            }
-
-            // 导入快捷栏
-            if (data.quickSlot) {
-                for (let i = 0; i < data.quickSlot.length && i < player.quickSlot.slots.length; i++) {
-                    const slotData = data.quickSlot[i];
-                    if (slotData) {
-                        try {
-                            const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
-                            item.count = slotData.count || 1;
-                            if (slotData.durability) item.durability = slotData.durability;
-                            if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
-                            if (slotData.isBroken) item.isBroken = slotData.isBroken;
-                            if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
-                            if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
-                            if (slotData.armor) item.armor = slotData.armor;
-                            player.quickSlot.slots[i] = item;
-                            if (player.petals[i]) player.petals[i].updateFromQuickSlot(i);
-                        } catch(err) {
-                            console.warn("跳过快捷栏:", slotData.type, err);
-                        }
+        // 导入快捷栏
+        if (data.quickSlot) {
+            for (let i = 0; i < data.quickSlot.length && i < player.quickSlot.slots.length; i++) {
+                const slotData = data.quickSlot[i];
+                if (slotData) {
+                    try {
+                        const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
+                        item.count = slotData.count || 1;
+                        if (slotData.durability) item.durability = slotData.durability;
+                        if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
+                        if (slotData.isBroken) item.isBroken = slotData.isBroken;
+                        if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
+                        if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
+                        if (slotData.armor) item.armor = slotData.armor;
+                        player.quickSlot.slots[i] = item;
+                        if (player.petals[i]) player.petals[i].updateFromQuickSlot(i);
+                    } catch(err) {
+                        console.warn("跳过快捷栏:", slotData.type, err);
                     }
                 }
             }
+        }
 
-            // 导入副栏
-            if (data.secondarySlot) {
-                for (let i = 0; i < data.secondarySlot.length && i < player.quickSlot.secondarySlots.length; i++) {
-                    const slotData = data.secondarySlot[i];
-                    if (slotData) {
-                        try {
-                            const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
-                            item.count = slotData.count || 1;
-                            if (slotData.durability) item.durability = slotData.durability;
-                            if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
-                            if (slotData.isBroken) item.isBroken = slotData.isBroken;
-                            if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
-                            if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
-                            if (slotData.armor) item.armor = slotData.armor;
-                            player.quickSlot.secondarySlots[i] = item;
-                        } catch(err) {
-                            console.warn("跳过副栏:", slotData.type, err);
-                        }
+        // 导入副栏
+        if (data.secondarySlot) {
+            for (let i = 0; i < data.secondarySlot.length && i < player.quickSlot.secondarySlots.length; i++) {
+                const slotData = data.secondarySlot[i];
+                if (slotData) {
+                    try {
+                        const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
+                        item.count = slotData.count || 1;
+                        if (slotData.durability) item.durability = slotData.durability;
+                        if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
+                        if (slotData.isBroken) item.isBroken = slotData.isBroken;
+                        if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
+                        if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
+                        if (slotData.armor) item.armor = slotData.armor;
+                        player.quickSlot.secondarySlots[i] = item;
+                    } catch(err) {
+                        console.warn("跳过副栏:", slotData.type, err);
                     }
                 }
             }
+        }
 
-            player.inventory.cacheDirty = true;
-            game.requestRedraw();
+        player.inventory.cacheDirty = true;
+        game.requestRedraw();
 
-            if (game.autoSaveSystem && typeof game.autoSaveSystem.saveGame === 'function') {
-                game.autoSaveSystem.saveGame(player, {
-                    score: game.score || 0,
-                    enemiesKilled: game.enemiesKilled || 0,
-                    currentWave: 1
-                });
-            }
+        // 自动保存
+        if (game.autoSaveSystem && typeof game.autoSaveSystem.saveGame === 'function') {
+            game.autoSaveSystem.saveGame(player, {
+                score: game.score || 0,
+                enemiesKilled: game.enemiesKilled || 0,
+                currentWave: 1
+            });
+        }
 
-            alert(`✅ 导入完成！共 ${player.inventory.items.length} 个物品`);
-        };
-
-        input.click();
+        alert(`✅ 导入完成！共 ${player.inventory.items.length} 个物品`);
     };
 
+    input.click();
+};
     window.handleClearAllItems = () => {
         const game = window.gameInstance;
         if (!game || !game.player) {
