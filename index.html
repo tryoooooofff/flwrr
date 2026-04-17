@@ -635,15 +635,31 @@ canvas {
     "Stardust": "Stardust"
 };
 
-    // 转换名称函数
-    function convertName(oldName) {
-        if (nameMapping[oldName]) return nameMapping[oldName];
+function convertName(oldName) {
+    // 先查映射表
+    if (nameMapping[oldName]) return nameMapping[oldName];
 
-        // 自动转换驼峰命名（可选）
-        let converted = oldName.replace(/([A-Z])/g, ' $1').trim();
-        converted = converted.charAt(0).toUpperCase() + converted.slice(1);
-        return converted;
+    // 清理多余空格
+    let cleaned = oldName.replace(/\s+/g, ' ').trim();
+
+    // 如果是驼峰命名（没有空格），尝试转换
+    if (!cleaned.includes(' ')) {
+        cleaned = cleaned.replace(/([a-z])([A-Z])/g, '$1 $2');
+        cleaned = cleaned.replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+        cleaned = cleaned.replace(/\s+/g, ' ');
     }
+
+    // 分割单词，每个单词首字母大写
+    let words = cleaned.split(' ');
+    words = words.map(word => {
+        // 特殊处理：egg → Egg
+        if (word.toLowerCase() === 'egg') return 'Egg';
+        // 其他单词首字母大写
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+
+    return words.join(' ');
+}
 
     // ========== 导出时转换名称 ==========
     const allItems = {
