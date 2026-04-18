@@ -2,7 +2,7 @@
 // 墙壁颜色
 export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
-//后期会增加wave room ---无尽波次，每波敌人增强，每10波生成一次特殊波次（单一生物）。wave room只有常规地图，但是更快刷新速度而且敌方生物血量减少10%，但是玩家在一个2000*2000的空间里面
+//增加生物进化功能---rna，有概率增加生物level和随机一个指标（速度，血量和攻击力）
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
 //后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton Egg+ 1 charge组成1 Electron Cloud Egg...
 //可能增加新地图error：所有生物使用黑白紫色
@@ -957,7 +957,7 @@ export const SPECIAL_ZONES = {
                 ["Cancer", 0.08, 2, 5, ["Super"]]
             ],
             spawnRate: 1.0,
-            maxEnemies: 10
+            maxEnemies: 20
         },
         {
             name: "CellZone",
@@ -1243,7 +1243,22 @@ function drawText(text, x, y, font, color, align = "left") {
 function getMousePosition() {
     return [mouseState.x, mouseState.y];
 }
+// 计算毒伤/火伤的稀有度减免系数
+function getDamageReductionByRarity(sourceRarity, targetRarity) {
+    const RARITY_ORDER = ["Common", "Unusual", "Rare", "Epic", "Legendary", "Mythic", "Ultra", "Super", "Omega", "Eternal"];
 
+    const sourceIndex = RARITY_ORDER.indexOf(sourceRarity);
+    const targetIndex = RARITY_ORDER.indexOf(targetRarity);
+
+    const diff = targetIndex - sourceIndex;  // 目标稀有度 - 来源稀有度
+
+    if (diff <= 0) return 1.0;           // 目标不高于来源，无减免
+    if (diff === 1) return 0.9;           // 高1级：-10%
+    if (diff === 2) return 0.6;           // 高2级：-40%
+    if (diff >= 3) return 0.3;            // 高3级以上：-70%
+
+    return 1.0;
+}
 // 简单的Font类
 class Font {
     constructor(name, size) {
@@ -1573,7 +1588,9 @@ const ITEM_IMAGE_URLS = {
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
-    "Mud": {base_cooldown: 200,is_mud: true,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 5,base_fixed_damage: 10,fluid_speed: 10,fluid_duration: 3,fluid_color: "#946C10",use_rarity_multiplier: true,},
+// 在 ITEM_STATS 中添加
+"Bur": {base_attack: 5,base_cooldown: 200,armor_reduction: 3,armor_reduction_duration: 3,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.75},
+    "Mud": {base_attack:10,base_cooldown: 100,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 12,base_fixed_damage: 10,fluid_speed: 8,fluid_duration: 5,fluid_color: "#946C10",use_rarity_multiplier: true,},
     "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000,    attack_range_reduction: {"Common": 0.90, "Unusual": 0.80,   "Rare": 0.70,  "Epic": 0.60,   "Legendary": 0.50, "Mythic": 0.40,   "Ultra": 0.30, "Super": 0.20, "Omega": 0.10,"Eternal": 0.00 }, dropFactor: 0.9},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.95},
@@ -1594,7 +1611,7 @@ export const ITEM_STATS = {
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.05},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.5},
-    "Trident": {base_attack:1000, base_cooldown:90, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.06},
+    "Trident": {base_attack:1000, base_cooldown:90, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.05},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.8},
     "Third Eye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
@@ -6713,20 +6730,19 @@ class PhysicsBody {
         this.position.y += this.velocity.y * dt;
     }
 }
-// ── 花瓣-敌人位置分离（最小开销版）──
 function resolvePetalEnemyCollisions(petals, enemies, viewScale) {
     if (!petals || !enemies) return;
 
+    const MAX_PUSH = 25;  // 最大推开12像素
+
     for (const petal of petals) {
-        // 跳过：重载中、破碎、无物品
         if (petal.isReloading || petal.isBroken || !petal.itemType) continue;
 
         const px = petal.worldX;
         const py = petal.worldY;
-        const pr = petal.size * 1.0; // 花瓣碰撞半径（略大于显示尺寸）
+        const pr = petal.size * 1.0;
 
         for (const enemy of enemies) {
-            // 跳过：死亡、友方、生成保护中
             if (enemy.isDead || enemy.isFriendly || enemy.isSpawning) continue;
             if (!enemy.physicsBody) continue;
 
@@ -6746,22 +6762,24 @@ function resolvePetalEnemyCollisions(petals, enemies, viewScale) {
             const nx = dx / dist;
             const ny = dy / dist;
 
-            // 质量比：花瓣质量视为1，敌人质量用 physicsBody.mass
             const em = enemy.physicsBody.mass || 1;
             const totalMass = 10 + em;
-            const petalRatio  = em / totalMass;   // 敌人越重，花瓣被推越多
-            const enemyRatio  = 1  / totalMass;
+            const petalRatio = em / totalMass;
 
-            // 推开花瓣（修改世界坐标，让轨道平滑跟上）
-            petal.worldX += nx * overlap * petalRatio;
-            petal.worldY += ny * overlap * petalRatio;
-            // 同步屏幕坐标
+            // 计算推开距离，但不超过 MAX_PUSH
+            let pushAmount = overlap * petalRatio;
+            if (pushAmount > MAX_PUSH) pushAmount = MAX_PUSH;
+
+            petal.worldX += nx * pushAmount;
+            petal.worldY += ny * pushAmount;
+
             if (petal.player?.physicsBody) {
                 petal.screenX = WIDTH / 2 + (petal.worldX - petal.player.physicsBody.position.x);
                 petal.screenY = HEIGHT / 2 + (petal.worldY - petal.player.physicsBody.position.y);
             }
 
-            // 推开敌人
+            // 敌人正常推开（不限距离，或者也限制）
+            const enemyRatio = 1 / totalMass;
             enemy.physicsBody.position.x -= nx * overlap * enemyRatio;
             enemy.physicsBody.position.y -= ny * overlap * enemyRatio;
         }
@@ -23622,7 +23640,7 @@ class ShopSystem {
             "Biologist Egg":102,"Beekeeper Egg":100,"Pirate Digger Egg":103,
             "Frost Digger Egg":105,"Hel Digger Egg":108,"Hel Beekeeper Egg":104,
             "Bubonic Plague":120,
-            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,"Mud":15
+            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,"Mud":15,"Bur":12
         };
 
         this.shopItems = [];
@@ -27576,160 +27594,108 @@ function isPointInRect(point, rect) {
 }
 class Projectile {
     constructor(x, y, angle, type, source) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-        this.type = type;
-        this.source = source;
+            // 基础属性初始化
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.type = type;
+            this.source = source;
+            this.isPhysical = true;
 
-        // --- 物理属性 ---
-        this.mass = 5.0;
-        this.health = 100;
-        this.maxHealth = 100;
-        this.isPhysical = true;   // ✅ 墨汁必须是实体
-        this.velocity = new Vector2(0, 0);
-        this.lastCollisionTime = 0;
+            // 获取来源稀有度倍率
+            const sourceRarity = source?.rarity || "Common";
 
-        const sourceRarity = source?.rarity || "Common";
+            // ✅ 统一使用累进稀有度倍率
+            const PROGRESSIVE_RARITY_MULTIPLIERS = {
+                "Common": 1.0, "Unusual": 3.0, "Rare": 9.0, "Epic": 27.0,
+                "Legendary": 81.0, "Mythic": 243.0, "Ultra": 729.0,
+                "Super": 2187.0, "Omega": 6561.0, "Eternal": 19683.0
+            };
+            const rarityMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[sourceRarity] || 1;
 
-        // 稀有度攻击倍率
-        const rarityMultiplier = {
-            "Common": 1, "Unusual": 1.2, "Rare": 1.4, "Epic": 1.6,
-            "Legendary": 1.8, "Mythic": 2.0, "Ultra": 2.2,
-            "Super": 2.5, "Omega": 3.0, "Eternal": 4.0
-        };
+            // 统一稀有度尺寸因子
+            const raritySizeFactors = {
+                "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+                "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
+                "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
+            };
+            const sizeMult = raritySizeFactors[sourceRarity] || 1;
 
-        // ✅ 稀有度尺寸因子
-        const raritySizeFactors = {
-            "Common": 1.0,
-            "Unusual": 1.1,
-            "Rare": 1.2,
-            "Epic": 1.6,
-            "Legendary": 1.8,
-            "Mythic": 2.8,
-            "Ultra": 4.0,
-            "Super": 8.4,
-            "Omega": 12.0,
-            "Eternal": 15.0
-        };
+            // --- 根据类型设置基础数值 (再乘以倍率) ---
+            let baseSpeed = 400;
+            let baseDamage = 30;
+            let baseHealth = 200;
+            let basePush = 80;
+            let baseLife = 4.0;
+            let baseSize = 18;
 
-        const mult = rarityMultiplier[sourceRarity] || 1;
-        const sizeMult = raritySizeFactors[sourceRarity] || 1;
-
-        switch(type) {
-            case "ink":
-                const baseSpeed = 250 + Math.random() * 50;
-                this.velocity = new Vector2(
-                    Math.cos(angle) * baseSpeed,
-                    Math.sin(angle) * baseSpeed
-                );
-                this.vx = this.velocity.x;
-                this.vy = this.velocity.y;
-
-                this.life = 6.0;
-                this.maxLife = 6.0;
-                this.size = 30 * sizeMult;
-                this.damage = Math.max(5, Math.floor(15 * mult));
-                this.slowAmount = 0.6 + (mult * 0.05);
+            if (this.type === "ink") {
+                baseSpeed = 250;
+                baseDamage = 15;
+                baseHealth = 50;
+                basePush = 40;
+                baseLife = 6.0;
+                baseSize = 30;
+                this.slowAmount = 0.6 + (Math.log10(rarityMultiplier) * 0.05);
                 this.slowDuration = 4000;
+            } else if (this.type === "stinger") {
+                baseSpeed = 400;
+                baseDamage = 60; // 刺的伤害通常更高
+                baseHealth = 200;
+                basePush = 0;
+                baseLife = 5.0;
+                baseSize = 25;
+                this.color = [100, 80, 40];
+                this.outlineColor = [60, 45, 25];
+            }
 
-                this.health = 50 * mult;
-                this.maxHealth = this.health;
-                this.mass = 100.0 * mult;
-                break;
-
-             case "stinger":
-                    const stingerSpeed = 350 + Math.random() * 50;
-                    this.velocity = new Vector2(
-                        Math.cos(angle) * stingerSpeed,
-                        Math.sin(angle) * stingerSpeed
-                    );
-                    this.vx = this.velocity.x;
-                    this.vy = this.velocity.y;
-
-                    this.life = 5.0;
-                    this.maxLife = 5.0;
-
-                    // ✅ 三角形刺的大小
-                    this.size = 25 * sizeMult;
-
-                    // 灰黑色
-                    this.color = [80, 80, 80];
-                    this.outlineColor = [40, 40, 40];
-
-                    this.damage = Math.max(20, Math.floor(60 * mult));
-                    this.health = 200 * mult;
-                    this.maxHealth = this.health;
-                    this.mass = 100.0 * mult;
-                    this.isPhysical = true;
-                    this.piercing = true;
-                    this.pierceCount = 2;
-                    this.knockback = 300 * mult;
-                    break;
-
-            default:
-                this.damage = 10 * mult;
-                this.velocity = new Vector2(
-                    Math.cos(angle) * 200,
-                    Math.sin(angle) * 200
-                );
-                this.vx = this.velocity.x;
-                this.vy = this.velocity.y;
-                this.life = 2.0;
-                this.size = 12 * sizeMult;
-                this.mass = 1.0;
-                this.health = 10;
-                this.isPhysical = false;
-        }
-
-        this.rotation = Math.random() * Math.PI * 2;
-        this.rotationSpeed = (Math.random() - 0.5) * 2;
-
-        this.offsetPoints = [];
-        for (let i = 0; i < 12; i++) {
-            this.offsetPoints.push({
-                angle: (i / 12) * Math.PI * 2,
-                radius: 0.6 + Math.random() * 0.8
-            });
-        }
-    }
-
-    // ✅ 核心修复：update 方法内部直接处理所有移动逻辑
-    update(dt) {
-        // 1. 移动逻辑 (所有投射物都执行)
-        if (this.isPhysical) {
-            // 实体：使用 velocity 并应用阻力
-            this.x += this.velocity.x * dt;
-            this.y += this.velocity.y * dt;
-
-            // 空气阻力 (让墨汁慢慢停下)
-            const drag = 1.0;
-            this.velocity.x *= drag;
-            this.velocity.y *= drag;
-
-            // 同步回 vx, vy 以防万一
+            // ✅ 应用统一倍率公式
+            this.speed = (baseSpeed + Math.random() * 50);
+            this.velocity = new Vector2(
+                Math.cos(angle) * this.speed,
+                Math.sin(angle) * this.speed
+            );
             this.vx = this.velocity.x;
             this.vy = this.velocity.y;
 
-            // 简单的墙壁反弹 (可选)
-            if (window.gameInstance && window.gameInstance.isInMazeWall) {
-                if (window.gameInstance.isInMazeWall(this.x, this.y)) {
-                    this.health -= 50000 * dt; // 撞墙扣血
-                    this.velocity.x *= -0.5;
-                    this.velocity.y *= -0.5;
-                }
-            }
-        } else {
-            // 非实体：旧逻辑
-            this.x += this.vx * dt;
-            this.y += this.vy * dt;
+            this.size = baseSize * sizeMult;
+            this.damage = Math.floor(baseDamage * rarityMultiplier);
+            this.health = baseHealth * rarityMultiplier;
+            this.maxHealth = this.health;
+            this.pushForce = basePush * rarityMultiplier;
+            this.life = baseLife;
+            this.maxLife = baseLife;
+            this.mass = 3.0 * rarityMultiplier; // 质量也随稀有度增加，防止被轻易弹开
+
+
         }
 
-        // 2. 寿命和旋转
+    update(dt) {
+        if (this.isPhysical) {
+            this.x += this.velocity.x * dt;
+            this.y += this.velocity.y * dt;
+
+            // 空气阻力（让刺慢慢减速）
+            const drag = 1.0;
+            this.velocity.x *= drag;
+            this.velocity.y *= drag;
+            this.vx = this.velocity.x;
+            this.vy = this.velocity.y;
+
+            // 环境碰撞处理（撞墙扣血但不反弹）
+            if (window.gameInstance?.isInMazeWall?.(this.x, this.y)) {
+                this.health -= 50000 * dt;
+                this.velocity.x *= 0.5;  // 减速但不反弹
+                this.velocity.y *= 0.5;
+            }
+        } else {
+            this.x -= this.vx * dt;
+            this.y -= this.vy * dt;
+        }
+
         this.life -= dt;
         this.rotation += this.rotationSpeed * dt;
 
-        // 3. 返回存活状态 (寿命>0 且 血量>0)
         return this.life > 0 && this.health > 0;
     }
     draw(ctx, cameraOffset) {
@@ -27759,76 +27725,46 @@ class Projectile {
         }
 
         if (this.type === "stinger") {
-            // ========== 三角形刺绘制（尖端向前）==========
-            const halfSize = drawSize / 2;
+    // ✅ 让刺的大小基于黄蜂本身的大小
+    let baseSize = this.size;
+    if (this.source && this.source.radius) {
+        // 刺的大小 = 黄蜂半径的 80%
+        baseSize = this.source.radius * 1.6;
+    }
 
-            // ✅ 三角形顶点：尖端在正X方向（前方）
-            const tipX = halfSize;           // 尖端在右侧（运动方向）
-            const tipY = 0;
-            const baseLeftX = -halfSize * 0.6;
-            const baseLeftY = -halfSize * 0.5;
-            const baseRightX = -halfSize * 0.6;
-            const baseRightY = halfSize * 0.5;
+    const drawSize = baseSize * viewScale;
+    const halfSize = drawSize / 2;
 
-            // 绘制三角形主体
-            ctx.beginPath();
-            ctx.moveTo(tipX, tipY);
-            ctx.lineTo(baseLeftX, baseLeftY);
-            ctx.lineTo(baseRightX, baseRightY);
-            ctx.closePath();
+    // 三角形尖端向前
+    ctx.beginPath();
+    ctx.moveTo(halfSize, 0);
+    ctx.lineTo(-halfSize * 0.6, -halfSize * 0.5);
+    ctx.lineTo(-halfSize * 0.6, halfSize * 0.5);
+    ctx.closePath();
 
-            // 填充颜色
-            if (this.color) {
-                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
-            } else {
-                ctx.fillStyle = `rgb(80, 80, 80)`;
-            }
-            ctx.fill();
+    if (this.color) {
+        ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+    } else {
+        ctx.fillStyle = `rgb(80, 80, 80)`;
+    }
+    ctx.fill();
 
-            // 描边
-            if (this.outlineColor) {
-                ctx.strokeStyle = `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`;
-            } else {
-                ctx.strokeStyle = `rgb(40, 40, 40)`;
-            }
-            ctx.lineWidth = 2 * viewScale;
-            ctx.stroke();
+    if (this.outlineColor) {
+        ctx.strokeStyle = `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`;
+    } else {
+        ctx.strokeStyle = `rgb(40, 40, 40)`;
+    }
+    ctx.lineWidth = 2 * viewScale;
+    ctx.stroke();
 
-            // 添加尖端高光
-            ctx.beginPath();
-            ctx.moveTo(tipX - 3 * viewScale, 0);
-            ctx.lineTo(tipX, 0);
-            ctx.strokeStyle = `rgba(150, 150, 150, 0.8)`;
-            ctx.lineWidth = 1.5 * viewScale;
-            ctx.stroke();
-
-            // 添加中间的脊线
-            ctx.beginPath();
-            ctx.moveTo(tipX - 2 * viewScale, 0);
-            ctx.lineTo(baseLeftX + 3 * viewScale, baseLeftY + 3 * viewScale);
-            ctx.moveTo(tipX - 2 * viewScale, 0);
-            ctx.lineTo(baseRightX + 3 * viewScale, baseRightY - 3 * viewScale);
-            ctx.strokeStyle = `rgba(60, 60, 60, 0.6)`;
-            ctx.lineWidth = 1 * viewScale;
-            ctx.stroke();
-
-            // 生命值过低时的碎裂效果
-            if (this.health < this.maxHealth * 0.3) {
-                ctx.beginPath();
-                for (let i = 0; i < 3; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = drawSize * 0.4;
-                    const cx = Math.cos(angle) * dist;
-                    const cy = Math.sin(angle) * dist;
-                    ctx.moveTo(tipX, tipY);
-                    ctx.lineTo(cx, cy);
-                }
-                ctx.strokeStyle = `rgba(200, 100, 100, 0.8)`;
-                ctx.lineWidth = 1 * viewScale;
-                ctx.stroke();
-            }
-
-        } else if (this.type === "ink") {
+    // 添加尖端高光
+    ctx.beginPath();
+    ctx.moveTo(halfSize - 3 * viewScale, 0);
+    ctx.lineTo(halfSize, 0);
+    ctx.strokeStyle = `rgba(150, 150, 150, 0.8)`;
+    ctx.lineWidth = 1.5 * viewScale;
+    ctx.stroke();
+}else if (this.type === "ink") {
             // ========== 墨汁绘制 ==========
             const lifeRatio = Math.max(0, Math.min(1, this.life / this.maxLife));
             const alpha = Math.min(0.8, lifeRatio * 0.6 + 0.2);
@@ -27891,37 +27827,42 @@ class Projectile {
         ctx.restore();
     }
 
-    takeDamage(amount) {
-        this.health -= amount;
-        return this.health <= 0;
-    }
-
     hitTarget(target) {
         if (!target) return false;
-        if (this.type === "ink") {
-            if (target.slowMultiplier !== undefined) {
-                target.slowMultiplier = 1 - Math.min(0.8, this.slowAmount);
-                target.slowDuration = this.slowDuration;
-                target.isInked = true;
-                setTimeout(() => { if (target) target.isInked = false; }, this.slowDuration);
-            }
-            if (target.takeDamage) {
-                target.takeDamage(this.damage, this.source);
-            }
-            // ✅ 命中后立即自毁
-            this.health = -10;
+
+        // ✅ 造成伤害
+        if (target.takeDamage) {
+            target.takeDamage(this.damage, this.source);
+        } else {
+            target.health -= this.damage;
         }
+
+        // 显示伤害数字
+        if (this.source?.gameInstance?.addDamageNumber) {
+            this.source.gameInstance.addDamageNumber(
+                target.physicsBody.position.x,
+                target.physicsBody.position.y,
+                Math.floor(this.damage),
+                "stinger"
+            );
+        }
+
+
         return true;
     }
 
     get physicsBody() {
-        return {
-            position: { x: this.x, y: this.y },
-            radius: this.size,
-            velocity: this.velocity,
-            mass: this.mass,
-            lastCollisionTime: this.lastCollisionTime || 0
-        };
+            return {
+                position: { x: this.x, y: this.y },
+                radius: this.size * 0.5,
+                velocity: this.velocity,
+                mass: this.mass,
+                isProjectile: true
+            };
+        }
+        takeDamage(damage, source = null) {
+        this.health -= damage;
+        return this.health <= 0;
     }
 }
 // ==================== 蝎子毒刺投射物 ====================
@@ -27935,12 +27876,9 @@ class ScorpionStinger extends Projectile {
 
         // 获取来源稀有度倍率
         const sourceRarity = source?.rarity || "Common";
-        const rarityMultiplier = {
-            "Common": 1, "Unusual": 1.2, "Rare": 1.8, "Epic": 2.1,
-            "Legendary": 2.4, "Mythic": 2.8, "Ultra": 3.5,
-            "Super": 4.5, "Omega": 7.0, "Eternal": 9.0
-        };
-        const mult = rarityMultiplier[sourceRarity] || 1;
+
+        // ✅ 使用 PROGRESSIVE_RARITY_MULTIPLIERS（和攻击力一样）
+        const rarityMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[sourceRarity] || 1;
 
         // 稀有度尺寸因子
         const raritySizeFactors = {
@@ -27950,7 +27888,7 @@ class ScorpionStinger extends Projectile {
         };
         const sizeMult = raritySizeFactors[sourceRarity] || 1;
 
-        // 毒刺属性
+        // 速度
         this.speed = 400 + Math.random() * 50;
         this.velocity = new Vector2(
             Math.cos(angle) * this.speed,
@@ -27958,62 +27896,47 @@ class ScorpionStinger extends Projectile {
         );
         this.vx = this.velocity.x;
         this.vy = this.velocity.y;
-        this.pushForce = 80 * mult;
+
+        // ✅ 推动力也使用稀有度倍数
+        this.pushForce = 80 * rarityMultiplier;
         this.life = 4.0;
         this.maxLife = 4.0;
         this.size = 18 * sizeMult;
-        this.damage = Math.floor(30 * mult);
-        this.poisonDamage = Math.floor(20 * mult);
-        this.poisonDuration = 3000; // 3秒中毒
 
-        this.health = 200 * mult;
+        // ✅ 伤害使用 PROGRESSIVE_RARITY_MULTIPLIERS
+        this.damage = Math.floor(30 * rarityMultiplier);
+        this.poisonDamage = Math.floor(20 * rarityMultiplier);
+        this.poisonDuration = 3000;
+
+        // ✅ 血量也使用稀有度倍数（让刺更耐打）
+        this.health = 200 * rarityMultiplier;
         this.maxHealth = this.health;
 
         // 颜色
-        this.color = [100, 80, 40];      // 深棕色
-        this.outlineColor = [60, 45, 25]; // 深褐色
+        this.color = [100, 80, 40];
+        this.outlineColor = [60, 45, 25];
     }
 
     hitTarget(target) {
         if (!target) return false;
 
-        // 造成伤害
+        // ✅ 造成伤害
         if (target.takeDamage) {
             target.takeDamage(this.damage, this.source);
+        } else {
+            target.health -= this.damage;
         }
 
-        // 中毒效果
-        if (target.poisonTimer === undefined) {
-            target.poisonTimer = 0;
-            target.poisonDamagePerSec = 0;
-        }
-        target.poisonTimer = this.poisonDuration;
-        target.poisonDamagePerSec = (target.poisonDamagePerSec || 0) + this.poisonDamage;
-
-        // ===== 推动效果 =====
-        // 计算推动方向（从毒刺指向目标）
-        const dx = target.physicsBody.position.x - this.x;
-        const dy = target.physicsBody.position.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist > 0.01) {
-            const pushX = (dx / dist) * this.pushForce;
-            const pushY = (dy / dist) * this.pushForce;
-
-            // 给目标施加推力
-            target.physicsBody.velocity.x += pushX;
-            target.physicsBody.velocity.y += pushY;
-            target.knockbackTimer = 0.3;
+        // 显示伤害数字
+        if (this.source?.gameInstance?.addDamageNumber) {
+            this.source.gameInstance.addDamageNumber(
+                target.physicsBody.position.x,
+                target.physicsBody.position.y,
+                Math.floor(this.damage),
+                "stinger"
+            );
         }
 
-        // 毒刺自己反弹（轻微减速，继续飞行）
-        this.velocity.x *= -0.3;
-        this.velocity.y *= -0.3;
-        this.vx = this.velocity.x;
-        this.vy = this.velocity.y;
-
-        // 减少伤害（可选，多次命中伤害递减）
-        this.damage = Math.floor(this.damage * 0.7);
 
         return true;
     }
@@ -28024,7 +27947,15 @@ class ScorpionStinger extends Projectile {
         const viewScale = window.gameInstance?.viewScale || 1.0;
         const screenX = this.x - cameraOffset.x;
         const screenY = this.y - cameraOffset.y;
-        const drawSize = this.size * viewScale;
+
+        // ✅ 让刺的大小基于蝎子本身的大小（通过 source 的半径）
+        let baseSize = this.size;
+        if (this.source && this.source.radius) {
+            // 刺的大小 = 蝎子半径的 60%
+            baseSize = this.source.radius * 1.2;
+        }
+
+        const drawSize = baseSize * viewScale;
 
         if (screenX < -drawSize || screenX > ctx.canvas.width + drawSize ||
             screenY < -drawSize || screenY > ctx.canvas.height + drawSize) {
@@ -28034,25 +27965,21 @@ class ScorpionStinger extends Projectile {
         ctx.save();
         ctx.translate(screenX, screenY);
 
-        // 计算运动方向
         const directionAngle = Math.atan2(this.vy, this.vx);
         ctx.rotate(directionAngle);
 
-        // 绘制毒刺形状
         const halfSize = drawSize / 2;
 
-        // 三角形尖端
+        // 绘制三角形刺
         ctx.beginPath();
         ctx.moveTo(halfSize, 0);
         ctx.lineTo(-halfSize * 0.6, -halfSize * 0.5);
         ctx.lineTo(-halfSize * 0.6, halfSize * 0.5);
         ctx.closePath();
 
-        // 填充
         ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
         ctx.fill();
 
-        // 描边
         ctx.strokeStyle = `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`;
         ctx.lineWidth = 2 * viewScale;
         ctx.stroke();
@@ -28134,6 +28061,10 @@ class Enemy {
         this.targetLockTimer = 0;
         this.targetLockDuration = 8000;
         this.lockedTargetPos = null;
+        this.armorReduction = 0;           // 当前护甲削减值
+        this.armorReductionTimer = 0;      // 护甲削减剩余时间（毫秒）
+        this.originalArmor = this.armor;   // 保存原始护甲值
+
 // 在 Enemy 构造函数中，找到其他触发器变量初始化部分
         if (enemyType === "DragonNest") {
             this.triggered80 = false;
@@ -28504,7 +28435,7 @@ class Enemy {
         const FLAME_STATS = {
             "Dragon":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
             "HelBee":   { damage: 2, duration: 3500, init: 0.5, ramp: 1.5 },
-            "FireStorm":     { damage: 10, duration: 5000, init: 0.4, ramp: 1.7 },
+            "FireStorm":     { damage: 25, duration: 5000, init: 0.5, ramp: 1.7 },
             "HelBeetle":     { damage: 5, duration: 3000, init: 0.5, ramp: 1.3 },
             "HelHornet":     { damage: 3, duration: 2500, init: 0.5, ramp: 1.8 },
             "HelBeekeeper":        { damage: 5, duration: 4000, init: 0.6, ramp: 1.8 },
@@ -28666,7 +28597,7 @@ class Enemy {
 
         // 查找周围 500 像素内的白蚁（不包括自己）
         const nearbyTermites = [];
-        const radius = 600;
+        const radius = 700;
         const myPos = this.physicsBody.position;
 
         for (const enemy of this.gameInstance.enemies) {
@@ -28704,6 +28635,28 @@ class Enemy {
 
         // 返回自己需要承受的伤害
         return selfDamage;
+    }
+    applyArmorReduction(reductionAmount, durationSeconds = 3) {
+        this.armorReduction = reductionAmount;
+        this.armorReductionTimer = durationSeconds * 1000;
+        this.armorReductionStartTime = Date.now();
+        this.armorReductionDuration = durationSeconds * 1000;
+        // 立即应用护甲削减
+        this.updateArmorWithReduction();
+    }
+    // 更新护甲值（考虑削减）
+    updateArmorWithReduction() {
+        if (this.armorReductionTimer <= 0) {
+            this.armor = this.originalArmor;
+            return;
+        }
+
+        const elapsed = Date.now() - this.armorReductionStartTime;
+        const progress = Math.min(1, elapsed / this.armorReductionDuration);
+        const decayFactor = 1 - Math.exp(-5 * progress);
+
+        const currentReduction = this.armorReduction * decayFactor;
+        this.armor = Math.max(0, this.originalArmor - currentReduction);
     }
     initMultiSegmentCollision() {
         this.hasMultiSegmentCollision = (this.type === "Leech" || this.type === "Parasite" || this.type === "Centipede"|| this.type === "HelWorm");
@@ -29770,7 +29723,7 @@ class Enemy {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance <= this.attackRange) {
                     this.shootCooldown = this.shootCooldownMax || 2000;
-                    const angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx) + Math.PI;
                     if (this.gameInstance && this.gameInstance.projectiles) {
                         const stinger = new ScorpionStinger(
                             this.physicsBody.position.x,
@@ -29785,6 +29738,7 @@ class Enemy {
             }
         }
 
+
         // ===== 🐝 黄蜂远程攻击 =====
         if (!isSegment && this.type === "Wasp") {
             if (this.attackCooldown <= 0) {
@@ -29796,7 +29750,8 @@ class Enemy {
                     this.isAttacking = true;
                     this.attackStartTime = Date.now();
                     this.attackDuration = 400;
-                    const angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx) + Math.PI;
+
                     if (this.gameInstance && this.gameInstance.projectiles) {
                         const stinger = new Projectile(
                             this.physicsBody.position.x,
@@ -29805,19 +29760,12 @@ class Enemy {
                             "stinger",
                             this
                         );
-                        stinger.size = 12;
-                        stinger.speed = 400;
-                        stinger.damage = this.attackDamage;
-                        stinger.life = 5.0;
-                        stinger.maxLife = 5.0;
-                        stinger.isPhysical = true;
                         this.gameInstance.projectiles.push(stinger);
                     }
                     return 0;
                 }
             }
         }
-
         // ===== 🦑 鱿鱼远程攻击 =====
         if (!isSegment && this.type === "Squid") {
             if (this.inkCooldown <= 0) {
@@ -29826,7 +29774,7 @@ class Enemy {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance <= this.attackRange) {
                     this.inkCooldown = 4000;
-                    const angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx) + Math.PI;
                     if (this.gameInstance && this.gameInstance.projectiles) {
                         const ink = new Projectile(
                             this.physicsBody.position.x,
@@ -29957,6 +29905,7 @@ class Enemy {
 
             // 毒伤触发（只有头部）
             if (!isSegment && this.isPoisonous && this.gameInstance?.poisonManager) {
+
                 this.gameInstance.poisonManager.applyPoison(
                     target,
                     this,
@@ -30624,7 +30573,10 @@ class Enemy {
         }
         this.animationTimer += dt;
         const currentTime = Date.now();
-
+        if (this.armorReductionTimer > 0) {
+                this.armorReductionTimer -= dt * 1000;
+                this.updateArmorWithReduction();
+            }
         // 保存 gameInstance 引用
         if (gameInstance) {
             this.gameInstance = gameInstance;
@@ -31889,8 +31841,11 @@ class PoisonSystem {
         this.lastTickTime = Date.now();
         this.tickInterval = 100;
         this.stackCount = 1;
-        this.maxStack = 256;  // 默认最大 256 层
-
+        if (source && source.isFriendly === true) {
+            this.maxStack = 4;
+        } else {
+            this.maxStack = 32;
+        }
         // 计算各阶段参数
         this.decayDuration = duration * 0.3;      // 衰减阶段占30%时间
         this.stableDuration = duration * 0.7;     // 稳定阶段占70%时间
@@ -32045,21 +32000,29 @@ class PoisonSystem {
 // ==================== 火焰伤害系统类 ====================
 class FlameSystem {
     constructor(source, baseDamage, duration = 3000, initialMultiplier = 0.5, rampUpMultiplier = 2.0) {
-        this.source = source;                    // 伤害来源
-        this.baseDamage = baseDamage;            // 基础伤害
-        this.duration = duration;                // 总持续时间（毫秒）
-        this.initialMultiplier = initialMultiplier;  // 初始倍率（默认0.5倍，较低）
-        this.rampUpMultiplier = rampUpMultiplier;    // 最终倍率（默认2倍，较高）
+        this.source = source;
+        this.baseDamage = baseDamage;
+        this.duration = duration;
+        this.initialMultiplier = initialMultiplier;
+        this.rampUpMultiplier = rampUpMultiplier;
         this.gameInstance = null;
+
         // 火焰状态
         this.active = true;
         this.startTime = Date.now();
         this.lastTickTime = Date.now();
-        this.tickInterval = 100;  // 0.1秒一跳
+        this.tickInterval = 100;
 
+        // ✅ 添加叠加层数
+        this.stackCount = 1;  // 当前叠加层数
+    if (source && source.isFriendly === true) {
+        this.maxStack = 4;   // 友方最多32层
+    } else {
+        this.maxStack = 32;  // 敌方最多128层
+    }
         // 计算各阶段参数
-        this.rampUpDuration = duration * 0.7;     // 升温阶段占70%时间
-        this.sustainDuration = duration * 0.3;    // 维持阶段占30%时间
+        this.rampUpDuration = duration * 0.7;
+        this.sustainDuration = duration * 0.3;
 
         // 当前伤害值
         this.currentDamage = baseDamage * initialMultiplier;
@@ -32080,30 +32043,33 @@ class FlameSystem {
         return (endDamage - startDamage) / totalTicks;
     }
 
-    // 获取当前应该造成的伤害
+    // 获取当前应该造成的伤害（✅ 加入层数加成）
     getCurrentDamage() {
         const now = Date.now();
         const elapsed = now - this.startTime;
 
-        // 火焰结束
         if (elapsed >= this.duration) {
             this.active = false;
             return 0;
         }
 
-        // 升温阶段（伤害逐渐增加）
+        let damage;
         if (elapsed < this.rampUpDuration) {
             const progress = elapsed / this.rampUpDuration;
-            const damage = this.baseDamage * this.initialMultiplier * (1 - progress) +
-                          this.baseDamage * this.rampUpMultiplier * progress;
+            damage = this.baseDamage * this.initialMultiplier * (1 - progress) +
+                     this.baseDamage * this.rampUpMultiplier * progress;
+            this.currentDamage = damage;
+        } else {
+            damage = this.baseDamage * this.rampUpMultiplier;
             this.currentDamage = damage;
         }
-        // 维持阶段（保持最高伤害）
-        else {
-            this.currentDamage = this.baseDamage * this.rampUpMultiplier;
+
+        // ✅ 叠加层数加成：每层 +5% 伤害
+        if (this.stackCount > 1) {
+            damage = damage * (1 + (this.stackCount - 1) * 0.5);
         }
 
-        return this.currentDamage;
+        return damage;
     }
 
     // 更新并返回是否应该造成伤害
@@ -32112,7 +32078,6 @@ class FlameSystem {
 
         const now = Date.now();
 
-        // 检查是否到达 tick 时间
         if (now - this.lastTickTime >= this.tickInterval) {
             const damage = this.getCurrentDamage();
 
@@ -32173,19 +32138,37 @@ class FlameSystem {
         this.damageIncreasePerTick = this._calculateDamageIncreasePerTick();
     }
 
-    // 叠加火焰（新火焰与旧火焰合并）
     stack(newFlame) {
-        // 取更长的持续时间
-        this.duration = Math.max(this.duration, newFlame.duration);
-        // 取更高的基础伤害
-        this.baseDamage = Math.max(this.baseDamage, newFlame.baseDamage);
-        // 取更高的最终倍率
+        // ✅ 检查是否已达到最大层数（可选）
+        const maxStack = this.maxStack || 128;
+        if (this.stackCount >= maxStack) {
+            this.reset();  // 已达最大层数，只刷新时间
+            return;
+        }
+
+        // ✅ 叠加层数
+        this.stackCount = (this.stackCount || 0) + 1;
+
+        // ✅ 叠加伤害（相加，不是取最大值）
+        this.baseDamage += newFlame.baseDamage;
+
+        // ✅ 取更高的最终倍率（或者也相加？）
         this.rampUpMultiplier = Math.max(this.rampUpMultiplier, newFlame.rampUpMultiplier);
-        // 重置计时器
+
+        // ✅ 取更长的持续时间
+        this.duration = Math.max(this.duration, newFlame.duration);
+
+        // ✅ 重新计算参数
+        this.rampUpDuration = this.duration * 0.7;
+        this.sustainDuration = this.duration * 0.3;
+        this.currentDamage = this.baseDamage * this.initialMultiplier;
+        this.damageIncreasePerTick = this._calculateDamageIncreasePerTick();
+
+        // ✅ 刷新时间
         this.reset();
     }
 
-    // 获取火焰统计
+    // 获取火焰统计（✅ 添加层数）
     getStats() {
         return {
             active: this.active,
@@ -32193,6 +32176,7 @@ class FlameSystem {
             currentDamage: this.currentDamage,
             totalDamage: this.totalDamageDealt,
             tickCount: this.tickCount,
+            stackCount: this.stackCount,  // ✅ 新增
             remainingTime: Math.max(0, this.duration - (Date.now() - this.startTime)),
             stage: this.getStageInfo().stage
         };
@@ -32205,36 +32189,49 @@ class FlameManager {
     }
 
     applyFlame(target, source, baseDamage, duration = 3000, initialMultiplier = 0.5, rampUpMultiplier = 2.0) {
-    if (!target || target.isDead) return false;
+        if (!target || target.isDead) return false;
 
-    // 获取 gameInstance（关键修复）
-    let gameInstance = null;
-    if (source && source.gameInstance) {
-        gameInstance = source.gameInstance;
-    } else if (source && source.player && source.player.gameInstance) {
-        gameInstance = source.player.gameInstance;
-    } else if (window.gameInstance) {
-        gameInstance = window.gameInstance;
+        let finalDuration = duration;
+        if (source && source.isFriendly === true) {
+            finalDuration = 1000;
+        }
+
+        // ✅ 计算稀有度减免
+        const sourceRarity = source.rarity || source.sourceRarity || "Common";
+        const targetRarity = target.rarity || "Common";
+        const reduction = getDamageReductionByRarity(sourceRarity, targetRarity);
+        const finalDamage = baseDamage * reduction;
+
+        if (finalDamage <= 0) return false;
+
+        let gameInstance = null;
+        if (source && source.gameInstance) {
+            gameInstance = source.gameInstance;
+        } else if (source && source.player && source.player.gameInstance) {
+            gameInstance = source.player.gameInstance;
+        } else if (window.gameInstance) {
+            gameInstance = window.gameInstance;
+        }
+
+        const newFlame = new FlameSystem(source, finalDamage, finalDuration, initialMultiplier, rampUpMultiplier);
+        // 构造函数已经根据 source.isFriendly 设置了 maxStack，不需要再设置
+
+        newFlame.gameInstance = gameInstance;
+
+        if (this.activeFlames.has(target)) {
+            // ✅ 友方也可以叠加（构造函数已限制最大32层）
+            this.activeFlames.get(target).stack(newFlame);
+        } else {
+            this.activeFlames.set(target, newFlame);
+        }
+
+        if (target.isPlayer === true && target.statusBar) {
+            const durationSec = finalDuration / 1000;
+            target.statusBar.addEffect("burn", durationSec);
+        }
+
+        return true;
     }
-
-    const newFlame = new FlameSystem(source, baseDamage, duration, initialMultiplier, rampUpMultiplier);
-
-    // 存储 gameInstance 到火焰系统中
-    newFlame.gameInstance = gameInstance;
-
-    if (this.activeFlames.has(target)) {
-        this.activeFlames.get(target).stack(newFlame);
-    } else {
-        this.activeFlames.set(target, newFlame);
-    }
-
-    if (target.isPlayer === true && target.statusBar) {
-        const durationSec = duration / 1000;
-        target.statusBar.addEffect("burn", durationSec);
-    }
-
-    return true;
-}
     updateAll(gameInstance) {
         const gi = gameInstance || window.gameInstance;
         const toRemove = [];
@@ -32311,38 +32308,28 @@ class PoisonManager {
         // 存储每个目标的毒伤效果（单个 PoisonSystem）
         this.activePoisons = new Map();
     }
-
-    /**
-     * 应用毒伤
-     * @param {Object} target - 目标对象
-     * @param {Object} source - 伤害来源
-     * @param {number} baseDamage - 基础伤害
-     * @param {number} duration - 持续时间（毫秒）
-     * @param {number} initialMultiplier - 初始倍率
-     * @param {number} stableMultiplier - 稳定倍率
-     * @param {boolean} canStack - true=合并模式（伤害叠加），false=原版排队模式
-     */
     applyPoison(target, source, baseDamage, duration = 3000, initialMultiplier = 1.5, stableMultiplier = 0.5, canStack = true) {
         if (!target || target.isDead) return false;
 
+        // ✅ 友方生物也可以叠加（构造函数会自动设置 maxStack = 32）
+        let finalCanStack = canStack;
+        if (source && source.isFriendly === true) {
+            finalCanStack = true;  // 友方也可以叠加
+        }
+
         const newPoison = new PoisonSystem(source, baseDamage, duration, initialMultiplier, stableMultiplier);
+        // 构造函数已经根据 source.isFriendly 设置了 maxStack，不需要再设置
 
         if (this.activePoisons.has(target)) {
             const existingPoison = this.activePoisons.get(target);
 
-            if (canStack) {
-                // ===== 模式1：合并模式（stack）=====
-                // 新毒伤直接合并到旧毒伤，伤害叠加，时间重置
+            if (finalCanStack) {
                 existingPoison.stack(newPoison);
             } else {
-                // ===== 模式2：原版排队模式（不 stack）=====
-                // 新毒伤要等旧毒伤结束后才开始
-                // 什么都不做，保持原毒伤不变
-                // 新毒伤会被丢弃，等旧毒伤结束后才能施加新毒伤
-                return false;
+                // 不叠加：直接替换
+                this.activePoisons.set(target, newPoison);
             }
         } else {
-            // 首次毒伤
             this.activePoisons.set(target, newPoison);
         }
 
@@ -32354,7 +32341,6 @@ class PoisonManager {
 
         return true;
     }
-
     updateAll(gameInstance) {
         const gi = gameInstance || window.gameInstance;
         const targetsToRemove = [];
@@ -32475,7 +32461,9 @@ class FluidBlob {
         color = '#FF6F00',
         damage = 1,
         rarity = "Common",
-        baseSpeed = 10
+        baseSpeed = 10,
+        duration = 5,
+        itemStat = {}
     ) {
         this.x = x;
         this.y = y;
@@ -32491,27 +32479,43 @@ class FluidBlob {
 
         const rarityIndex = RARITY_LIST.indexOf(rarity);
 
+        // 稀有度等级映射
+        const RARITY_BONUS = {
+            Common: 0, Unusual: 1, Rare: 2, Epic: 3,
+            Legendary: 4, Mythic: 5, Ultra: 6,
+            Super: 7, Omega: 8, Eternal: 9
+        };
+        const level = RARITY_BONUS[rarity] || 0;
+
         // =========================
-        // 生命周期（固定 5 秒）
+        // 生命周期
         // =========================
-        this.duration = 5;
+        this.duration = duration;
         this.startTime = Date.now() / 1000;
 
         // =========================
-        // 扩散速度（核心）
-        // base + 每级 +5 px/s
+        // 扩散速度 = baseSpeed + 等级×5
         // =========================
-        this.expandSpeed = baseSpeed + (rarityIndex * 5);
-
-        this.currentRadius = 5;
+        this.baseSpeed = baseSpeed;
+        this.expandSpeed = baseSpeed + (level * 5);
+        this.currentRadius = 0;
 
         // =========================
         // 基础属性
         // =========================
         this.color = color;
         this.damage = damage;
-
         this.lastDamageTime = 0;
+
+        // =========================
+        // 从 itemStat 读取叠加配置
+        // =========================
+        this.canStack = itemStat.can_stack || false;
+        this.stackCap = itemStat.stack_cap || 256;
+        this.stackDamageBonus = itemStat.stack_damage_bonus || 0.05;
+        this.attackCooldown = itemStat.attack_cooldown || 100;
+        this.effectType = itemStat.effect_type || 'damage';
+        this.poisonDamage = itemStat.base_poison_damage || 0;
 
         this.state = 'GROWING';
         this.opacity = 1;
@@ -32556,7 +32560,7 @@ class FluidBlob {
     }
 
     // =========================
-    // 更新（核心改造）
+    // 更新
     // =========================
     update(dt) {
         if (this.state === 'DEAD') return;
@@ -32564,9 +32568,6 @@ class FluidBlob {
         const now = Date.now() / 1000;
         const elapsed = now - this.startTime;
 
-        // =========================
-        // 1. 无限制扩散
-        // =========================
         if (this.state === 'GROWING') {
             this.currentRadius = elapsed * this.expandSpeed;
 
@@ -32574,32 +32575,21 @@ class FluidBlob {
                 this.state = 'FADING';
             }
         }
-
-        // =========================
-        // 2. 消失
-        // =========================
         else if (this.state === 'FADING') {
             this.opacity -= dt * 0.8;
-            this.currentRadius *= 0.8;
+            this.currentRadius *= 0.3;
 
             if (this.opacity <= 0 || this.currentRadius < 2) {
                 this.state = 'DEAD';
             }
         }
 
-        // =========================
-        // 3. noise 粒子边缘
-        // =========================
         const time = now * this.waveSpeed;
 
         for (let p of this.particles) {
             const t = time + p.noiseOffset;
-
-            const wave =
-                this.noise(t) * (this.currentRadius * 0.15);
-
+            const wave = this.noise(t) * (this.currentRadius * 0.15);
             const finalDist = this.currentRadius + wave;
-
             p.x = Math.cos(p.angle) * finalDist;
             p.y = Math.sin(p.angle) * finalDist;
         }
@@ -32613,8 +32603,6 @@ class FluidBlob {
 
         ctx.save();
         ctx.translate(screenX, screenY);
-
-        ctx.globalAlpha = 1;
 
         ctx.beginPath();
 
@@ -32636,54 +32624,15 @@ class FluidBlob {
 
         ctx.closePath();
 
-        // =========================
-        // 填充（无透明）
-        // =========================
         ctx.fillStyle = this.color;
         ctx.fill();
 
-        // =========================
-        // 深色描边
-        // =========================
         ctx.strokeStyle = this.darkenColor(this.color, 0.45);
         ctx.lineWidth = 6;
         ctx.lineJoin = 'round';
         ctx.stroke();
 
         ctx.restore();
-    }
-
-    // =========================
-    // 伤害逻辑（保留原结构）
-    // =========================
-    applyEffect(target, dt) {
-        const now = Date.now() / 1000;
-
-        if (now - this.lastDamageTime < 0.3) return false;
-
-        this.lastDamageTime = now;
-
-        if (this.effectType === 'poison') {
-            if (target.takeDamage) {
-                target.takeDamage(this.damage, "fluid");
-            } else {
-                target.health -= this.damage;
-            }
-
-            if (target.poisonTimer !== undefined) {
-                target.poisonTimer = 3000;
-                target.poisonDamagePerSec =
-                    (target.poisonDamagePerSec || 0) + this.poisonDamage;
-            }
-        } else {
-            if (target.takeDamage) {
-                target.takeDamage(this.damage, "fluid");
-            } else {
-                target.health -= this.damage;
-            }
-        }
-
-        return true;
     }
 
     // =========================
@@ -32706,30 +32655,24 @@ class FluidManager {
         this.maxFluids = 50;
     }
 
-    addFluid(x, y, color, damage, duration = 5, rarity = "Common", effectType = 'damage') {
+    addFluid(x, y, color, damage, duration = 5, rarity = "Common", effectType = 'damage', baseSpeed = 20, itemStat = {}) {
         if (this.fluids.length >= this.maxFluids) {
             this.fluids.shift();
         }
 
-        const fluid = new FluidBlob(x, y, color, damage, rarity);
-
+        const fluid = new FluidBlob(x, y, color, damage, rarity, baseSpeed, duration, itemStat);
         fluid.effectType = effectType;
 
-        // =========================
-        // 只设置 item_stat baseSpeed
-        // =========================
+        // 速度稀有度加成已在 FluidBlob 构造函数中计算
+        // 如果 game.itemStats.fluidBaseSpeed 存在，会覆盖 baseSpeed
         if (this.game?.itemStats?.fluidBaseSpeed !== undefined) {
-            fluid.baseSpeed = this.game.itemStats.fluidBaseSpeed;
-
             const RARITY_BONUS = {
                 Common: 0, Unusual: 1, Rare: 2, Epic: 3,
                 Legendary: 4, Mythic: 5, Ultra: 6,
                 Super: 7, Omega: 8, Eternal: 9
             };
-
             const level = RARITY_BONUS[rarity] || 0;
-
-            // ✅ 关键：直接影响 expandSpeed（不是 fluid.speed）
+            fluid.baseSpeed = this.game.itemStats.fluidBaseSpeed;
             fluid.expandSpeed = fluid.baseSpeed + level * 5;
         }
 
@@ -32737,67 +32680,89 @@ class FluidManager {
         return fluid;
     }
     update(dt) {
-        for (let i = 0; i < this.fluids.length; i++) {
+        const now = Date.now();
+
+        for (let i = this.fluids.length - 1; i >= 0; i--) {
             const fluid = this.fluids[i];
             fluid.update(dt);
 
-            const attackRadius = fluid.currentRadius;
+            if (!fluid._damageTracker) fluid._damageTracker = new Map();
+            const fluidRadius = fluid.currentRadius;
 
             for (const enemy of this.game.enemies) {
-                if (enemy.isDead) continue;
-                if (enemy.isFriendly) continue;
+                if (enemy.isDead || enemy.isFriendly || enemy.isTunnel) continue;
 
                 const dx = enemy.physicsBody.position.x - fluid.x;
                 const dy = enemy.physicsBody.position.y - fluid.y;
-                if (dx * dx + dy * dy < attackRadius * attackRadius) {
-                    // ✅ 修改前：伤害 × dt（每秒伤害）
-                    // const damageThisFrame = fluid.damage * dt;
+                const combinedRadius = fluidRadius + (enemy.radius || 20);
 
-                    // ✅ 修改后：每帧直接造成完整伤害
-                    const damageThisFrame = fluid.damage;
+                // 1. 碰撞检测
+    // --- 修正后的逻辑：直接用 enemy 对象本身作为 Key ---
 
-                    enemy.health -= damageThisFrame;
+            // 1. 碰撞检测成功后
+            if (dx * dx + dy * dy < combinedRadius * combinedRadius) {
 
-                    // 显示伤害数字
-                    if (!fluid._damageAccumulator) fluid._damageAccumulator = {};
-                    fluid._damageAccumulator[enemy.id] = (fluid._damageAccumulator[enemy.id] || 0) + damageThisFrame;
-                    if (fluid._damageAccumulator[enemy.id] >= 1) {
-                        if (this.game.addDamageNumber) {
-                            this.game.addDamageNumber(
-                                enemy.physicsBody.position.x,
-                                enemy.physicsBody.position.y,
-                                Math.floor(fluid._damageAccumulator[enemy.id]),
-                                "mud"
+                // ✅ 直接用 enemy 对象，不再依赖 enemy.id
+                if (!fluid._damageTracker.has(enemy)) {
+                    fluid._damageTracker.set(enemy, {
+                        lastDamageTime: 0,
+                        lastPoisonTime: 0
+                    });
+                }
+
+                const tracker = fluid._damageTracker.get(enemy);
+                const now = Date.now();
+
+                // 2. 物理伤害尝试 (每 100ms)
+                if (now - tracker.lastDamageTime >= 100) {
+                    tracker.lastDamageTime = now;
+
+                    const damageSource = {
+                        type: "poison",
+                        rarity: fluid.rarity || "Common",
+                        player: this.game.player
+                    };
+
+                    // 执行伤害
+                    enemy.takeDamage(fluid.damage, damageSource);
+
+                    // 3. 毒伤注入逻辑 (每 200ms)
+                    if (fluid.effectType === 'poison' && this.game.poisonManager) {
+                        if (now - tracker.lastPoisonTime >= 200) {
+                            tracker.lastPoisonTime = now;
+
+                            this.game.poisonManager.applyPoison(
+                                enemy,
+                                damageSource,
+                                fluid.poisonDamage || 0,
+                                3000,
+                                1.5,
+                                0.5,
+                                true
                             );
-                        }
-                        fluid._damageAccumulator[enemy.id] = 0;
-                    }
-
-                    // 检查死亡
-                    if (enemy.health <= 0 && !enemy.isDead) {
-                        enemy.health = 0;
-                        enemy.isDead = true;
-                        if (this.game.dropCard) {
-                            this.game.dropCard(enemy);
                         }
                     }
                 }
             }
+            }
 
             if (fluid.state === 'DEAD') {
+                fluid._damageTracker.clear();
                 this.fluids.splice(i, 1);
-                i--;
             }
         }
     }
-
-
+        // 绘制所有流体
     // 绘制所有流体
     draw(ctx, cameraOffset) {
         for (const fluid of this.fluids) {
             const screenX = fluid.x - cameraOffset.x;
             const screenY = fluid.y - cameraOffset.y;
+
+
+            // 3. 绘制流体本体
             fluid.draw(ctx, screenX, screenY);
+
         }
     }
 
@@ -33213,6 +33178,45 @@ class Petal {
         this.spiderCaveSpiders = [];
         this.maxSpiderCaveSpiders = 10;
     }
+    // 在 Petal 类的碰撞/攻击处理方法中添加
+// 例如在 `attack` 相关的代码中，或者创建一个专门的方法
+
+    applyBurArmorReduction(enemy) {
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Bur") return false;
+
+        // 检查冷却
+        if (this.attackCooldown > 0) return false;
+        if (this.isReloading || this.isBroken) return false;
+
+        const rarity = currentItem.rarity;
+        const multiplier = RARITY_MULTIPLIERS[rarity] || 1;
+        const config = ITEM_STATS["Bur"] || {};
+
+        const baseReduction = config.armor_reduction || 3;
+        const totalReduction = baseReduction * multiplier;
+        const duration = config.armor_reduction_duration || 3;
+
+        // 应用护甲削减
+        if (typeof enemy.applyArmorReduction === 'function') {
+            enemy.applyArmorReduction(totalReduction, duration);
+        }
+
+        // 显示效果
+        if (this.player?.gameInstance?.addDamageNumber) {
+            this.player.gameInstance.addDamageNumber(
+                enemy.physicsBody.position.x,
+                enemy.physicsBody.position.y,
+                `-${Math.floor(totalReduction)} ARMOR`,
+                "armor_break"
+            );
+        }
+
+        // 设置冷却
+        this.attackCooldown = this.attackCooldownMax;
+
+        return true;
+    }
     // 在 Petal 类中修改 _applyTalentToPet 方法
     _applyTalentToPet(pet) {
         if (!pet || !this.player) return;
@@ -33240,26 +33244,26 @@ class Petal {
             console.log(`[天赋] ${pet.type} 加成: HP ${pet._originalMaxHealth} → ${pet.maxHealth} (${hpMult}x), ATK ${pet._originalAttackDamage} → ${pet.attackDamage} (${dmgMult}x)`);
         }
     }
-// 在 Petal 类中修改 tryBreakBubble 方法
-tryBreakBubble(dt) {
-    const currentItem = this.getCurrentItem();
-    if (!currentItem || currentItem.type !== "Bubble" || this.isBroken || this.isReloading) return;
+    // 在 Petal 类中修改 tryBreakBubble 方法
+    tryBreakBubble(dt) {
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Bubble" || this.isBroken || this.isReloading) return;
 
-    if (this.player && this.player.contractMode) {
-        if (this._breakingThisFrame) return;
-        this._breakingThisFrame = true;
-        setTimeout(() => { this._breakingThisFrame = false; }, 100);
+        if (this.player && this.player.contractMode) {
+            if (this._breakingThisFrame) return;
+            this._breakingThisFrame = true;
+            setTimeout(() => { this._breakingThisFrame = false; }, 100);
 
-        // ✅ 调用触发方法
-        this._triggerBubbleBreak(currentItem);
+            // ✅ 调用触发方法
+            this._triggerBubbleBreak(currentItem);
 
-        // 破碎并重载
-        this.health = 0;
-        this.durability = 0;
-        this.isBroken = true;
-        this.startReload();
+            // 破碎并重载
+            this.health = 0;
+            this.durability = 0;
+            this.isBroken = true;
+            this.startReload();
+        }
     }
-}
 
     // 提取公共的破碎状态变更
     executeBreakEffect() {
@@ -33315,12 +33319,14 @@ tryBreakBubble(dt) {
         const finalInitial = initialMultiplier !== null ? initialMultiplier : (stats.fire_init_mult || 0.5);
         const finalRamp = rampUpMultiplier !== null ? rampUpMultiplier : (stats.fire_ramp_mult || 2.0);
 
+        // ✅ 修复：删除重复的 rarity，添加 isFriendly
         const source = {
             type: currentItem.type,
             rarity: currentItem.rarity,
             level: currentItem.level,
             petal: this,
-            player: this.player
+            player: this.player,
+            isFriendly: true  // ✅ 花瓣是友方的
         };
 
         return game.flameManager.applyFlame(
@@ -33445,22 +33451,32 @@ tryBreakBubble(dt) {
         const game = this.player.gameInstance;
         if (!game.poisonManager) return false;
 
-        // 获取当前物品作为伤害来源
+        // ✅ 先获取当前物品
         const currentItem = this.getCurrentItem();
+
+        // ✅ 再定义 source
         const source = {
             type: currentItem ? currentItem.type : this.itemType,
-            rarity: this.rarity,
+            rarity: currentItem ? currentItem.rarity : this.rarity,
             level: this.level,
             petal: this,
-            player: this.player
+            player: this.player,
+            isFriendly: true
         };
+
+        // ✅ 友方毒伤持续时间可以在这里设置（如果需要）
+        let finalDuration = duration;
+        if (source.isFriendly === true) {
+            // 友方毒伤可以设置更短，但毒伤持续时间已经在 PoisonManager 中处理了
+            // finalDuration = 2000;  // 可选
+        }
 
         // 应用毒伤
         const applied = game.poisonManager.applyPoison(
             enemy,
             source,
             baseDamage,
-            duration,
+            finalDuration,  // ✅ 使用 finalDuration
             initialMultiplier,
             stableMultiplier
         );
@@ -33487,34 +33503,34 @@ tryBreakBubble(dt) {
         }
         return null;
     }
- static SUMMON_LISTS = [
-        'goldenAntList', 'rockList', 'sandstormList', 'whiteBloodCellList',
-        'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
-        'beeList', 'ladybugList', 'beetleList', 'scorpionList',
-        'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
-        'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
-        'scallopList', 'starfishList', 'bubbleList', 'crabList',
-        'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
-        'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
-        'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
-        'virusList', 'squareList', 'helWormList', 'helSpiderList',
-        'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
-        'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
-        'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
-        'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
-        'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
-        'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
-        'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
-        'workerAntList', 'centipedeList', 'termiteSoldierList',
-        'waspList', 'stickBugList', 'mantisList', 'fireflyList',
-        'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
-        'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList',
-        'photonList', 'electronList', 'electronCloudList', 'protonList',
-        'atomList', 'blackHoleList', 'whiteHoleList', 'neutronStarList',
-        'starList', 'asteroidList', 'alienList', 'ufoAlienList',
-        'graveGhostList', 'ghostList', 'graveDiggerList', 'alienDiggerList',
-        'mudDiggerList'  // 添加泥浆挖掘者
-    ];
+     static SUMMON_LISTS = [
+            'goldenAntList', 'rockList', 'sandstormList', 'whiteBloodCellList',
+            'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
+            'beeList', 'ladybugList', 'beetleList', 'scorpionList',
+            'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
+            'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
+            'scallopList', 'starfishList', 'bubbleList', 'crabList',
+            'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
+            'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
+            'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
+            'virusList', 'squareList', 'helWormList', 'helSpiderList',
+            'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
+            'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
+            'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
+            'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
+            'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
+            'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
+            'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
+            'workerAntList', 'centipedeList', 'termiteSoldierList',
+            'waspList', 'stickBugList', 'mantisList', 'fireflyList',
+            'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
+            'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList',
+            'photonList', 'electronList', 'electronCloudList', 'protonList',
+            'atomList', 'blackHoleList', 'whiteHoleList', 'neutronStarList',
+            'starList', 'asteroidList', 'alienList', 'ufoAlienList',
+            'graveGhostList', 'ghostList', 'graveDiggerList', 'alienDiggerList',
+            'mudDiggerList'  // 添加泥浆挖掘者
+        ];
     _clearAllSummons() {
         const gameEnemies = this.player?.gameInstance?.enemies;
         if (!gameEnemies) return;
@@ -34291,53 +34307,48 @@ tryBreakBubble(dt) {
         this.updateReloadTimeWithGoldenLeaf();
         this.updateSpawnCooldownWithGoldenLeaf();
 
+        // --- 修改后的武器发射逻辑 ---
+        // --- 修正后的武器发射逻辑 ---
         if (currentItem && currentItem.type === "Mud" && !this.isReloading && !this.isBroken) {
             if (this.attackCooldown <= 0 && this.player && this.player.gameInstance) {
 
                 this.attackCooldown = this.attackCooldownMax;
 
                 const rarity = currentItem.rarity;
-
-                // 使用你原有的稀有度倍数系统
                 const multiplier = RARITY_MULTIPLIERS[rarity] || 1;
 
-                // =========================
-                // 从 item_stat 获取配置
-                // =========================
-                const itemStat = currentItem.item_stat || {};
+                // ✅ 关键修复：从全局配置表中获取 Mud 的数值
+                const config = ITEM_STATS["Mud"] || {};
 
-                const basePoisonDamage = itemStat.base_poison_damage || 5;
-                const baseFixedDamage = itemStat.base_fixed_damage || 10;
-                const fluidDuration = itemStat.fluid_duration || 3;
-                const fluidSpeed = itemStat.fluid_speed || 20;
-                const fluidColor = itemStat.fluid_color || "#8B5A2B";
+                const fluidSpeed = config.fluid_speed || 10;
+                const finalSpeed = fluidSpeed * multiplier / 1000;
 
-                // 应用稀有度倍数
-                const poisonDamage = basePoisonDamage * multiplier;
-                const fixedDamage = baseFixedDamage * multiplier;
-                const finalSpeed = fluidSpeed * multiplier;
+                const spawnX = this.player.physicsBody.position.x;
+                const spawnY = this.player.physicsBody.position.y;
 
-                // =========================
-                // 创建流体
-                // =========================
+                // 3. 创建流体
                 const fluid = this.player.gameInstance.fluidManager.addFluid(
-                    this.worldX,
-                    this.worldY,
-                    fluidColor,
-                    fixedDamage,      // 直接伤害
-                    fluidDuration,    // 持续时间（秒）
+                    spawnX, spawnY,
+                    config.fluid_color || "#8B5A2B",
+                    (config.base_fixed_damage || 10) * multiplier,
+                    config.fluid_duration || 3,
                     rarity,
-                    "poison",         // 效果类型
-                    finalSpeed        // 扩散速度
+                    "poison",
+                    finalSpeed,
+                    config // 传入配置对象
                 );
 
-                // 设置毒伤
-                fluid.poisonDamage = poisonDamage;
+                // 4. ✅ 确保这些关键属性被挂载到了流体实例上
+                // 这里的 config.base_poison_damage 必须对应 ITEM_STATS 里的属性名
+                fluid.poisonDamage = (config.base_poison_damage || config.poison_damage || 109350) * multiplier;
                 fluid.effectType = "poison";
+                fluid.rarity = rarity;
+                fluid.sourcePetal = this;
 
                 this.startReload();
             }
         }
+
         // 所有花瓣都持续旋转，不受任何条件限制
             const ANGLE_INCREMENT = 0.08; // 固定增量，确保旋转可见
         this.angle += ANGLE_INCREMENT;
@@ -38217,7 +38228,10 @@ class Player {
                             baseDamage = baseDamage * opalBonus.critMultiplier;
                             isCrit = true;
                         }
-
+                        // 在 Player.attack 方法中，造成伤害后添加
+                        if (petal.itemType === "Bur" && !enemy.isDead) {
+                            petal.applyBurArmorReduction(enemy);
+                        }
                         // Claw：满血暴击（与 Opal 暴击叠加）
                         if (petal.itemType === "Claw") {
                             const threshold = Math.min(0.85, 0.7 + 0.05 * (petal.level - 1));
@@ -41880,8 +41894,6 @@ class WorldMapGame {
             this.lastDamageEmitTime = 0;
         }
 
-        // 1. 频率锁：如果距离上一次弹出不足 250ms，直接拦截
-        // 这能保证数字绝对不会在同一瞬间叠在一起
         if (now - this.lastDamageEmitTime < minInterval) {
             return;
         }
@@ -43163,6 +43175,9 @@ class WorldMapGame {
 
                     if (justDied) {
                         this.dropCard(enemy);
+                        if (enemy.spawnZone && this.zoneEnemyCounts) {
+                                this.zoneEnemyCounts[enemy.spawnZone.name] = Math.max(0, (this.zoneEnemyCounts[enemy.spawnZone.name] || 0) - 1);
+                        }
                         this.player.gainXpFromKill(enemy.rarity || 'Common', enemy.type);
                         this.score += 20;
                         this.enemiesKilled++;
@@ -43448,8 +43463,8 @@ class WorldMapGame {
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 const playerRadius = this.player.getScaledRadius();
                 if (dist < playerRadius + p.size) {
-                    p.hitTarget(this.player); // 这会设置 p.health = -9999
-                    hit = true;
+                    p.hitTarget(this.player);
+
                 }
             }
 
@@ -43468,8 +43483,8 @@ class WorldMapGame {
                     const enemyRadius = enemy.getScaledRadius ? enemy.getScaledRadius() : enemy.physicsBody.radius * this.viewScale;
 
                     if (dist < enemyRadius + p.size) {
-                        p.hitTarget(enemy); // 这会设置 p.health = -9999
-                        hit = true;
+                        p.hitTarget(enemy);
+
                         break;
                     }
                 }
@@ -45474,35 +45489,40 @@ class WorldMapGame {
 
         const playerPos = this.player.physicsBody.position;
 
-        // ===== 🟦 超稀有：1/100000000 概率生成 Square =====
-        if (Math.random() < 0.00000001) { // 1/100000000
-            this.spawnSquare();
-            return;
-        }
-
-        // ===== 检查特殊区域（优先）=====
+        // ✅ 检查特殊区域（优先）
         const specialZone = this.getSpecialZoneAt(playerPos.x, playerPos.y);
         if (specialZone) {
             if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
-            const zoneName = specialZone.name;
+            const currentCount = this.zoneEnemyCounts[specialZone.name] || 0;
+
+            // 性能模式调整
             let zoneMaxEnemies = specialZone.maxEnemies;
             if (this.performanceMode === 'low') {
                 zoneMaxEnemies = Math.floor(zoneMaxEnemies / 2);
             } else if (this.performanceMode === 'medium') {
                 zoneMaxEnemies = Math.floor(zoneMaxEnemies * 0.75);
             }
-            if ((this.zoneEnemyCounts[zoneName] || 0) < zoneMaxEnemies) {
-                this.spawnEnemyInSpecialZone(specialZone);
-                return;
+
+            // ✅ 检查是否已满
+            if (currentCount >= zoneMaxEnemies) {
+                return; // 区域已满，不生成
             }
+
+            this.spawnEnemyInSpecialZone(specialZone);
+            return;
+        }
+
+        // ===== 🟦 超稀有：1/100000000 概率生成 Square =====
+        if (Math.random() < 0.00000001) {
+            this.spawnSquare();
+            return;
         }
 
         // ===== 获取玩家所在区块 =====
         const playerBlock = this.blockManager.getBlockAt(playerPos.x, playerPos.y);
         if (!playerBlock) return;
 
-        // ===== 新增：检查周围敌人数量（只改了这一行）=====
-        // 计算玩家周围500像素内的敌人数量
+        // 检查周围敌人数量
         const nearbyEnemies = this.enemies.filter(enemy => {
             if (enemy.isDead) return false;
             const dist = Math.hypot(
@@ -45512,13 +45532,27 @@ class WorldMapGame {
             return dist < 500;
         }).length;
 
-        // 如果周围敌人太多（超过20个），暂时不生成新敌人
-        if (nearbyEnemies >= 20) {
+        if (nearbyEnemies >= 10) {
             return;
         }
 
-        // 根据玩家区块生成敌人
         this.spawnEnemyInBlock(playerBlock);
+    }
+
+    spawnEnemyInSpecialZone(zone) {
+        const playerPos = this.player.physicsBody.position;
+
+        const selected = this.selectEnemyFromRules(zone.spawnRules);
+        const level = Math.floor(Math.random() * (selected.maxLevel - selected.minLevel + 1)) + selected.minLevel;
+        const rarity = selected.rarities[Math.floor(Math.random() * selected.rarities.length)];
+
+        const spawned = this.trySpawnEnemyInZoneWithWallCheck(selected.type, level, rarity, zone);
+
+        // ✅ 只有成功生成才增加计数
+        if (spawned) {
+            if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
+            this.zoneEnemyCounts[zone.name] = (this.zoneEnemyCounts[zone.name] || 0) + 1;
+        }
     }
 
     // 🟦 新增：生成 Square 的方法
@@ -45572,18 +45606,7 @@ class WorldMapGame {
         this.markers.set(marker.id, marker);
     }
 
-    // 在 WorldMapGame 类中修改 spawnEnemyInSpecialZone 方法
-    spawnEnemyInSpecialZone(zone) {
-        const playerPos = this.player.physicsBody.position;
-        const WALL_MARGIN = 20;
 
-        // 从特殊区域的规则中选择敌人
-        const selected = this.selectEnemyFromRules(zone.spawnRules);
-        const level = Math.floor(Math.random() * (selected.maxLevel - selected.minLevel + 1)) + selected.minLevel;
-        const rarity = selected.rarities[Math.floor(Math.random() * selected.rarities.length)];
-
-        this.trySpawnEnemyInZoneWithWallCheck(selected.type, level, rarity, zone);
-    }
 
     // 新增：带墙边检查的区域生成方法
     trySpawnEnemyInZoneWithWallCheck(enemyType, level, rarity, zone) {
@@ -45605,22 +45628,22 @@ class WorldMapGame {
             if (distanceToPlayer < this.MIN_SPAWN_DISTANCE) continue;
 
             if (this.isInMazeWall && this.isInMazeWall(x, y)) continue;
-
-            // 检查是否离墙太近
             if (this.isTooCloseToWall(x, y, WALL_MARGIN)) continue;
 
             const enemy = new Enemy(enemyType, x, y, level, rarity);
             enemy.spawnTime = Date.now();
             enemy.spawnProtection = 1500;
             enemy.isSpawning = true;
-
+            enemy.spawnZone = zone;
             this.enemies.push(enemy);
 
-            if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
-            this.zoneEnemyCounts[zone.name] = (this.zoneEnemyCounts[zone.name] || 0) + 1;
+            // ❌ 删除这里的计数（避免重复）
+            // if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
+            // this.zoneEnemyCounts[zone.name] = (this.zoneEnemyCounts[zone.name] || 0) + 1;
 
-            return;
+            return true;  // ✅ 返回成功
         }
+        return false;  // ✅ 返回失败
     }
 
     // 在区块内生成敌人
