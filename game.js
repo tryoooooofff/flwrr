@@ -45492,22 +45492,7 @@ class WorldMapGame {
         // ✅ 检查特殊区域（优先）
         const specialZone = this.getSpecialZoneAt(playerPos.x, playerPos.y);
         if (specialZone) {
-            if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
-            const currentCount = this.zoneEnemyCounts[specialZone.name] || 0;
-
-            // 性能模式调整
-            let zoneMaxEnemies = specialZone.maxEnemies;
-            if (this.performanceMode === 'low') {
-                zoneMaxEnemies = Math.floor(zoneMaxEnemies / 2);
-            } else if (this.performanceMode === 'medium') {
-                zoneMaxEnemies = Math.floor(zoneMaxEnemies * 0.75);
-            }
-
-            // ✅ 检查是否已满
-            if (currentCount >= zoneMaxEnemies) {
-                return; // 区域已满，不生成
-            }
-
+            // ❌ 删除区域数量检查，直接生成
             this.spawnEnemyInSpecialZone(specialZone);
             return;
         }
@@ -45546,15 +45531,9 @@ class WorldMapGame {
         const level = Math.floor(Math.random() * (selected.maxLevel - selected.minLevel + 1)) + selected.minLevel;
         const rarity = selected.rarities[Math.floor(Math.random() * selected.rarities.length)];
 
-        const spawned = this.trySpawnEnemyInZoneWithWallCheck(selected.type, level, rarity, zone);
-
-        // ✅ 只有成功生成才增加计数
-        if (spawned) {
-            if (!this.zoneEnemyCounts) this.zoneEnemyCounts = {};
-            this.zoneEnemyCounts[zone.name] = (this.zoneEnemyCounts[zone.name] || 0) + 1;
-        }
+        // ✅ 直接生成，不检查数量，不增加计数
+        this.trySpawnEnemyInZoneWithWallCheck(selected.type, level, rarity, zone);
     }
-
     // 🟦 新增：生成 Square 的方法
     spawnSquare() {
         const playerPos = this.player.physicsBody.position;
