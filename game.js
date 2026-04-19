@@ -6,6 +6,8 @@ export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
 //后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton Egg+ 1 charge组成1 Electron Cloud Egg...
 //可能增加新地图error：所有生物使用黑白紫色
+//后期重构账号面板（不使用html，包含time join, time played,start time,xp,petal crafted,还有退出和其他html里面有的功能）
+//后期增加魔法系统（magic leaf, magic starfish, magic fang, magic fire bomb, magic bubble bomb, magic golden leaf,magic soldier ant egg...)
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -1178,6 +1180,7 @@ export const SPECIAL_ZONES = {
             spawnRules: [
                 ["Worker Termite", 90, 1, 5, ["Super"]],
                 ["Soldier Termite", 100, 5, 5, ["Super"]],
+                ["Soldier Termite", 1, 5, 5, ["Super","Omega"]],
                 ["TermiteHole", 0.1, 1, 5, ["Ultra","Super","Omega"]],
                 ["TermiteOvermind", 1.0, 1, 5, ["Ultra","Super","Omega"]],
             ],
@@ -1583,13 +1586,14 @@ const ITEM_IMAGE_URLS = {
     "Grave Digger Egg": "images/GraveDigger_egg.png",
     "Alien Digger Egg": "images/AlienDigger_egg.png",
     "Trident": "images/trident.png",
+    "Sawdust": "images/Sawdust.png",
 
 };
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
+
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
-// 在 ITEM_STATS 中添加
-"Bur": {base_attack: 5,base_cooldown: 200,armor_reduction: 3,armor_reduction_duration: 3,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.75},
+    "Bur": {base_attack: 5,base_cooldown: 200,armor_reduction: 3,armor_reduction_duration: 3,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.75},
     "Mud": {base_attack:10,base_cooldown: 100,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 12,base_fixed_damage: 10,fluid_speed: 8,fluid_duration: 5,fluid_color: "#946C10",use_rarity_multiplier: true,},
     "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000,    attack_range_reduction: {"Common": 0.90, "Unusual": 0.80,   "Rare": 0.70,  "Epic": 0.60,   "Legendary": 0.50, "Mythic": 0.40,   "Ultra": 0.30, "Super": 0.20, "Omega": 0.10,"Eternal": 0.00 }, dropFactor: 0.9},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
@@ -1651,7 +1655,7 @@ export const ITEM_STATS = {
     "Baby Fire Ant Egg": {base_attack:1, base_cooldown:6000, spawn_babyfireant:true, spawn_count:3, durability_bonus:20, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.85},
     "Fire Ant Overmind Egg": {base_attack:1, base_cooldown:9000, spawn_fireantovermind:true, spawn_count:2, durability_bonus:60, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
     "Fire Ant Hole Egg": {base_attack:1, base_cooldown:18000, spawn_fireanthole:true, spawn_count:10, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:20000, dropFactor: 0.7},
-    "Cancer": {base_attack:25, base_cooldown:300, is_cancer:true, cancer_clone_chance:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.5},
+    "Cancer": {base_attack:15, base_cooldown:300, is_cancer:true, cancer_clone_chance:1.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
     "Cancer Egg": {base_attack:1, base_cooldown:8000, spawn_cancer:true, spawn_count:2, durability_bonus:80, use_rarity_multiplier: true, base_reload_time:15000, dropFactor: 0.7},
     "Bacteria Egg": {base_attack:1, base_cooldown:8000, spawn_bacteria:true, spawn_count:2, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.85},
     "Square Egg": {base_attack:50, base_cooldown:2000, base_reload_time:20000, spawn_square:true, spawn_count:1, health_bonus:5000, durability_bonus:5000, use_rarity_multiplier: true, dropFactor: 0.3},
@@ -1803,21 +1807,11 @@ export const ITEM_STATS = {
     "Grave Stone Egg": { base_attack: 1, base_cooldown: 12000, spawn_grave_ghost: true, spawn_count: 15, use_rarity_multiplier: true, base_reload_time: 24000, dropFactor: 0.6 },
 
     // ========== Opal ==========
-    "Opal": {
-        base_attack: 15,
-        base_cooldown: 150,
-        crit_multiplier: 1.1,
-        crit_chance: 0.3,
-        broken_crit_multiplier: 2.7,
-        use_rarity_multiplier: true,
-        base_reload_time: 1800,
-        dropFactor: 0.1
-    },
-
+    "Opal": {base_attack: 15,base_cooldown: 150,crit_multiplier: 1.1,crit_chance: 0.3,broken_crit_multiplier: 2.7,use_rarity_multiplier: true,base_reload_time: 1800,dropFactor: 0.1},
+    "Sawdust": {base_attack: 1,base_cooldown: 100,is_sawdust: true,explosion_radius_bonus: {"Common": 0.05,"Unusual": 0.10,"Rare": 0.15,"Epic": 0.20,"Legendary": 0.25,"Mythic": 0.30,"Ultra": 0.35,"Super": 0.40,"Omega": 0.50,"Eternal": 0.60},use_rarity_multiplier: true,base_reload_time: 5000,dropFactor: 0.2},
     // ========== Leech & Parasite 蛋 ==========
     "Leech Egg": {base_attack:1, base_cooldown:8000, spawn_leech:true, spawn_count:2, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
     "Parasite Egg": {base_attack:1, base_cooldown:7000, spawn_parasite:true, spawn_count:2, durability_bonus:25, use_rarity_multiplier: true, base_reload_time:7000, dropFactor: 0.8},
-
     // ========== Chromosome ==========
     "Chromosome": {base_attack:0, base_cooldown:100, is_chromosome:true, repair_rate:20, repair_rate_multiplier: {"Common": 1, "Unusual": 3, "Rare": 9, "Epic": 27, "Legendary": 81, "Mythic": 243, "Ultra": 729, "Super": 1524, "Omega": 16683, "Eternal": 31415}, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.85}
 };
@@ -1857,7 +1851,7 @@ export const ENEMY_DROP_TABLE = {
     "Crab": ["Claw", "Powder"],
     "Soldier Ant": ["Wing", "Clover","Soldier Ant Egg"],
     "Worker Ant": ["Leaf", "Corn","Worker Ant Egg"],
-    "Bush": ["Leaf", "Root","Cotton"],
+    "Bush": ["Leaf", "Root","Cotton","Sawdust"],
     "Centipede": ["Leaf", "Antennae","Centipede egg"],
     "Cactus": ["Cactus", "Lotus"],
     "Anthill": ["Magnet", "Egg"],
@@ -1961,38 +1955,11 @@ export const ENEMY_DROP_TABLE = {
         "Sand"
     ],
         // ========== 🆕 下水道生物掉落 ==========
-    "ManHole": [
-        "Manhole Egg",  // 下水道井盖蛋
-        "Poo",          // 粪便
-        "Cotton",       // 棉花
-        "Basil"         // 罗勒
-    ],
-
-    "Fly": [
-        "Wing",         // 翅膀
-        "Fly Egg",      // 苍蝇蛋
-        "Poo"           // 粪便
-    ],
-
-    "Rat": [
-        "Rat Egg",      // 老鼠蛋
-        "Poo",          // 粪便
-        "Iris",
-        "Bubonic Plague"
-    ],
-
-    "Roach": [
-        "Lotus",        // 莲花
-        "Roach Egg",    // 蟑螂蛋
-        "Antennae",     // 触角
-        "Powder"        // 粉末
-    ],
-
-    "PooStorm": [
-        "Poo Stick",     // 粪棒
-        "Poo",          // 粪便
-        "Iris"          // 虹膜
-    ],
+    "ManHole": ["Manhole Egg","Poo","Cotton","Basil" ],
+    "Fly": ["Wing", "Fly Egg",  "Poo"],
+    "Rat": ["Rat Egg","Poo","Iris","Bubonic Plague"],
+    "Roach": ["Lotus","Roach Egg", "Antennae","Powder"],
+    "PooStorm": ["Poo Stick","Poo","Iris"],
     "SlagMight": ["Icicle", "Stalagmite Egg"],
     "Ice Cube": ["Ice Cube","Icicle", "Ice Cube Egg","Rock"],
     "Ice Dragon": ["Mimic", "Icicle", "Ice Dragon Egg","Bone"],
@@ -4638,24 +4605,21 @@ class AccountSystem {
         this.users = new Map();
         this.autoSaveEnabled = true;
         this.STORAGE_KEY = 'flwrr_accounts_data';
-        this.LAST_USER_KEY = 'flwrr_last_user';      // 最后登录用户
-        this.LOGIN_COUNT_KEY = 'flwrr_login_counts';  // 登录次数统计
+        this.LAST_USER_KEY = 'flwrr_last_user';
+        this.LOGIN_COUNT_KEY = 'flwrr_login_counts';
 
         this.loadAllUsers();
         this.loadLoginCounts();
 
-        // 每30秒自动保存一次
         setInterval(() => {
             if (this.currentUser) {
                 this.saveAllUsers();
             }
         }, 30000);
 
-        // 延迟自动登录（等待游戏初始化完成）
         setTimeout(() => this.autoLogin(), 500);
     }
 
-    // 从 localStorage 加载所有用户
     loadAllUsers() {
         try {
             const usersData = localStorage.getItem(this.STORAGE_KEY);
@@ -4672,7 +4636,6 @@ class AccountSystem {
         }
     }
 
-    // 加载登录次数统计
     loadLoginCounts() {
         try {
             const saved = localStorage.getItem(this.LOGIN_COUNT_KEY);
@@ -4686,41 +4649,34 @@ class AccountSystem {
         }
     }
 
-    // 保存登录次数统计
     saveLoginCounts() {
         try {
             localStorage.setItem(this.LOGIN_COUNT_KEY, JSON.stringify(this.loginCounts));
         } catch (e) {}
     }
 
-    // 记录登录
     recordLogin(username) {
         this.loginCounts[username] = (this.loginCounts[username] || 0) + 1;
         this.saveLoginCounts();
         localStorage.setItem(this.LAST_USER_KEY, username);
     }
 
-    // 获取最常使用的账号
     getMostUsedAccount() {
         let mostUsed = null;
         let maxCount = 0;
-
         for (const [username, count] of Object.entries(this.loginCounts)) {
             if (this.users.has(username) && count > maxCount) {
                 maxCount = count;
                 mostUsed = username;
             }
         }
-
         return mostUsed;
     }
 
-    // 获取最后登录的账号
     getLastLoginAccount() {
         return localStorage.getItem(this.LAST_USER_KEY);
     }
 
-    // 自动登录
     async autoLogin() {
         if (this.currentUser) return;
 
@@ -4728,7 +4684,6 @@ class AccountSystem {
         if (!username) {
             username = this.getMostUsedAccount();
         }
-
         if (!username) {
             console.log("没有可自动登录的账号");
             return;
@@ -4748,29 +4703,24 @@ class AccountSystem {
         }
 
         this.updateUIAfterLogin();
-
         return { success: true, message: '自动登录成功', gameData: userData.gameData };
     }
 
-    // 登录后更新UI
     updateUIAfterLogin() {
         const ud = document.getElementById('current-user');
         if (ud) {
             ud.style.display = 'block';
             ud.innerHTML = `👤 ${this.currentUser}`;
         }
-
         if (window.gameInstance?.mainMenu) {
             window.gameInstance.mainMenu.recalculatePositions();
         }
     }
 
-    // 清除自动登录记录
     clearAutoLogin() {
         localStorage.removeItem(this.LAST_USER_KEY);
     }
 
-    // 保存所有用户到 localStorage
     saveAllUsers() {
         try {
             const users = Object.fromEntries(this.users);
@@ -4782,12 +4732,10 @@ class AccountSystem {
         }
     }
 
-    // 创建新账号
     createAccount(username, password) {
         if (this.users.has(username)) {
             return { success: false, message: '用户名已存在' };
         }
-
         if (username.length < 3 || username.length > 20) {
             return { success: false, message: '用户名长度必须在3-20个字符之间' };
         }
@@ -4802,18 +4750,19 @@ class AccountSystem {
             lastLogin: null,
             gameData: null,
             stats: {
-                totalPlayTime: 0,
+                totalPlayTime: 0,      // 毫秒，累计游玩时间
                 totalKills: 0,
                 highestScore: 0,
                 gamesPlayed: 0,
                 multiplayerGames: 0,
-                singleGames: 0
+                singleGames: 0,
+                petalsBurned: 0,       // 累计消耗花瓣数
+                petalsCrafted: 0       // 累计合成成功花瓣数
             }
         };
 
         this.users.set(username, userData);
         const saved = this.saveAllUsers();
-
         if (saved) {
             return { success: true, message: '账号创建成功' };
         } else {
@@ -4821,14 +4770,11 @@ class AccountSystem {
         }
     }
 
-    // 登录
     login(username, password) {
         const userData = this.users.get(username);
-
         if (!userData) {
             return { success: false, message: '用户名不存在' };
         }
-
         if (userData.password !== this.hashPassword(password)) {
             return { success: false, message: '密码错误' };
         }
@@ -4836,8 +4782,6 @@ class AccountSystem {
         userData.lastLogin = Date.now();
         this.currentUser = username;
         this.saveAllUsers();
-
-        // 记录登录次数和最后登录
         this.recordLogin(username);
 
         return {
@@ -4848,27 +4792,40 @@ class AccountSystem {
         };
     }
 
-    // 登出
     logout() {
         this.currentUser = null;
     }
 
-    // 保存游戏数据到当前账号
-    saveGameData(player, gameData) {
-        if (!this.currentUser) {
-            return false;
-        }
+    addPlayTime(ms) {
+        if (!this.currentUser) return;
+        const userData = this.users.get(this.currentUser);
+        if (!userData) return;
+        if (!userData.stats) userData.stats = {};
+        userData.stats.totalPlayTime = (userData.stats.totalPlayTime || 0) + ms;
+    }
 
+    saveGameData(player, gameData, craftData = {}) {
+        if (!this.currentUser) return false;
         const userData = this.users.get(this.currentUser);
         if (!userData) return false;
 
+        if (!userData.stats) userData.stats = {};
+
         if (gameData) {
-            if (gameData.score > (userData.stats?.highestScore || 0)) {
+            if (gameData.score > (userData.stats.highestScore || 0)) {
                 userData.stats.highestScore = gameData.score;
             }
             if (gameData.enemiesKilled) {
                 userData.stats.totalKills = (userData.stats.totalKills || 0) + gameData.enemiesKilled;
             }
+        }
+
+        // 累加花瓣统计（只加增量，不覆盖）
+        if (craftData.petalsBurned) {
+            userData.stats.petalsBurned = (userData.stats.petalsBurned || 0) + craftData.petalsBurned;
+        }
+        if (craftData.petalsCrafted) {
+            userData.stats.petalsCrafted = (userData.stats.petalsCrafted || 0) + craftData.petalsCrafted;
         }
 
         const saveData = this.prepareGameData(player, gameData);
@@ -4877,27 +4834,17 @@ class AccountSystem {
         return this.saveAllUsers();
     }
 
-    // 从当前账号加载游戏数据
     loadGameData() {
-        if (!this.currentUser) {
-            return null;
-        }
-
+        if (!this.currentUser) return null;
         const userData = this.users.get(this.currentUser);
-        if (!userData || !userData.gameData) {
-            return null;
-        }
-
+        if (!userData || !userData.gameData) return null;
         return userData.gameData;
     }
 
     prepareGameData(player, gameData) {
         const autoSave = window.gameInstance?.autoSaveSystem;
-
-        // 获取当前槽位数量
         const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
 
-        // ========== 1. 压缩背包物品 ==========
         let inventoryItems = [];
         if (player.inventory && player.inventory.items) {
             if (autoSave && typeof autoSave.compressItemsForCloud === 'function') {
@@ -4912,7 +4859,6 @@ class AccountSystem {
             }
         }
 
-        // ========== 2. 压缩快捷栏（主栏）==========
         let quickSlotItems = [];
         if (player.quickSlot && player.quickSlot.slots) {
             if (autoSave && typeof autoSave.compressSlotsForCloud === 'function') {
@@ -4922,16 +4868,12 @@ class AccountSystem {
                 for (let i = 0; i < player.quickSlot.slots.length; i++) {
                     const item = player.quickSlot.slots[i];
                     if (item && typeof item.toDict === 'function') {
-                        quickSlotItems.push({
-                            slot_index: i,
-                            ...item.toDict()
-                        });
+                        quickSlotItems.push({ slot_index: i, ...item.toDict() });
                     }
                 }
             }
         }
 
-        // ========== 3. 压缩快捷栏（副栏）==========
         let secondarySlotItems = [];
         if (player.quickSlot && player.quickSlot.secondarySlots) {
             if (autoSave && typeof autoSave.compressSlotsForCloud === 'function') {
@@ -4941,22 +4883,17 @@ class AccountSystem {
                 for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
                     const item = player.quickSlot.secondarySlots[i];
                     if (item && typeof item.toDict === 'function') {
-                        secondarySlotItems.push({
-                            slot_index: i,
-                            ...item.toDict()
-                        });
+                        secondarySlotItems.push({ slot_index: i, ...item.toDict() });
                     }
                 }
             }
         }
 
-        // ========== 4. 星星数量 ==========
         let starCount = 0;
         if (window.gameInstance && window.gameInstance.shopSystem) {
             starCount = window.gameInstance.shopSystem.getStarCount();
         }
 
-        // ========== 5. 构建保存数据 ==========
         return {
             timestamp: Date.now(),
             slot_count: currentSlotCount,
@@ -4994,9 +4931,7 @@ class AccountSystem {
     }
 
     applyGameData(player, saveData) {
-        if (!saveData) {
-            return null;
-        }
+        if (!saveData) return null;
 
         const autoSave = window.gameInstance?.autoSaveSystem;
         const isCompressed = saveData.compressed === true;
@@ -5005,26 +4940,18 @@ class AccountSystem {
         const currentSlotCount = player.getTotalSlotCount ? player.getTotalSlotCount() : 5;
         const targetSlotCount = Math.max(savedSlotCount, currentSlotCount);
 
-        // ========== 1. 恢复玩家基础数据 ==========
         if (saveData.player_data) {
             const pd = saveData.player_data;
-
             if (player.levelSystem) {
                 player.levelSystem.level = pd.level || 1;
                 player.levelSystem.currentXp = pd.current_xp || 0;
                 player.xp = pd.total_xp || 0;
-
                 player.baseMaxHealth = player.levelSystem.getHpForLevel(player.levelSystem.level);
                 player.maxHealth = pd.max_health || player.baseMaxHealth;
                 player.health = Math.min(pd.health || player.maxHealth, player.maxHealth);
             }
-
             player.petalCount = Math.max(5, pd.petal_count || 5, targetSlotCount);
-
-            if (pd.player_rarity) {
-                player.playerRarity = pd.player_rarity;
-            }
-
+            if (pd.player_rarity) player.playerRarity = pd.player_rarity;
             if (pd.stars !== undefined && window.gameInstance && window.gameInstance.shopSystem) {
                 const targetStars = pd.stars;
                 const currentStars = window.gameInstance.shopSystem.getStarCount();
@@ -5032,24 +4959,18 @@ class AccountSystem {
                     window.gameInstance.shopSystem.addStars(targetStars - currentStars);
                 }
             }
-
             if (pd.player_position && player.physicsBody) {
                 player.physicsBody.position.x = pd.player_position.x || WORLD_WIDTH / 2;
                 player.physicsBody.position.y = pd.player_position.y || WORLD_HEIGHT / 2;
             }
         }
 
-        // ========== 2. 清空现有数据 ==========
-        if (player.inventory) {
-            player.inventory.items = [];
-        }
-
+        if (player.inventory) player.inventory.items = [];
         if (player.quickSlot) {
             player.quickSlot.slots = new Array(targetSlotCount).fill(null);
             player.quickSlot.secondarySlots = new Array(targetSlotCount).fill(null);
         }
 
-        // ========== 3. 恢复背包物品 ==========
         if (saveData.inventory && player.inventory) {
             if (isCompressed && autoSave && typeof autoSave.decompressItemsForCloud === 'function') {
                 const items = autoSave.decompressItemsForCloud(saveData.inventory);
@@ -5082,14 +5003,11 @@ class AccountSystem {
             }
         }
 
-        // ========== 4. 恢复主栏快捷栏 ==========
         if (saveData.quick_slot && player.quickSlot) {
             if (isCompressed && autoSave && typeof autoSave.decompressSlotsForCloud === 'function') {
                 const slots = autoSave.decompressSlotsForCloud(saveData.quick_slot, targetSlotCount);
                 for (let i = 0; i < slots.length && i < player.quickSlot.slots.length; i++) {
-                    if (slots[i]) {
-                        player.quickSlot.slots[i] = slots[i];
-                    }
+                    if (slots[i]) player.quickSlot.slots[i] = slots[i];
                 }
                 console.log(`📦 从压缩格式恢复主栏: ${slots.filter(s => s).length} 个物品, 目标槽位数: ${targetSlotCount}`);
             } else {
@@ -5119,14 +5037,11 @@ class AccountSystem {
             }
         }
 
-        // ========== 5. 恢复副栏 ==========
         if (saveData.secondary_slot && player.quickSlot) {
             if (isCompressed && autoSave && typeof autoSave.decompressSlotsForCloud === 'function') {
                 const slots = autoSave.decompressSlotsForCloud(saveData.secondary_slot, targetSlotCount);
                 for (let i = 0; i < slots.length && i < player.quickSlot.secondarySlots.length; i++) {
-                    if (slots[i]) {
-                        player.quickSlot.secondarySlots[i] = slots[i];
-                    }
+                    if (slots[i]) player.quickSlot.secondarySlots[i] = slots[i];
                 }
                 console.log(`📦 从压缩格式恢复副栏: ${slots.filter(s => s).length} 个物品`);
             } else {
@@ -5156,7 +5071,6 @@ class AccountSystem {
             }
         }
 
-        // ========== 6. 重建花瓣并同步 ==========
         this.recreatePetals(player);
         player.updateStatsFromPetals();
 
@@ -5167,11 +5081,9 @@ class AccountSystem {
         }
 
         console.log(`✅ 加载完成: 槽位数=${targetSlotCount}, 主栏物品=${player.quickSlot.slots.filter(s => s).length}, 背包种类=${player.inventory.items.length}`);
-
         return saveData.game_data || {};
     }
 
-    // 重新创建花瓣
     recreatePetals(player) {
         const quickSlots = player.quickSlot.slots;
         const oldPetals = player.petals;
@@ -5179,14 +5091,11 @@ class AccountSystem {
 
         for (let i = 0; i < player.petalCount; i++) {
             const newPetal = new Petal(player, i, player.petalCount);
-
             if (i < oldPetals.length) {
                 newPetal.stillMode = oldPetals[i].stillMode;
                 newPetal.stillPosition = oldPetals[i].stillPosition;
             }
-
             player.petals.push(newPetal);
-
             if (i < quickSlots.length && quickSlots[i]) {
                 newPetal.updateFromQuickSlot(i);
             }
@@ -5196,7 +5105,6 @@ class AccountSystem {
         player.updateStatsFromPetals();
     }
 
-    // 简单的哈希函数
     hashPassword(password) {
         let hash = 0;
         for (let i = 0; i < password.length; i++) {
@@ -5207,48 +5115,37 @@ class AccountSystem {
         return hash.toString(36);
     }
 
-    // 检查是否已登录
     isLoggedIn() {
         return this.currentUser !== null;
     }
 
-    // 获取当前用户名
     getCurrentUser() {
         return this.currentUser;
     }
 
-    // 获取所有账号列表
     getAllUsers() {
         return Array.from(this.users.keys());
     }
 
-    // 获取用户统计数据
     getUserStats(username) {
         const userData = this.users.get(username);
         return userData ? userData.stats : null;
     }
-
-    // 删除账号
+    getCurrentStats() {
+        if (!this.currentUser) return null;
+        return this.getUserStats(this.currentUser);
+    }
     deleteAccount(username, password) {
         const userData = this.users.get(username);
-        if (!userData) {
-            return { success: false, message: '用户名不存在' };
-        }
-
-        if (userData.password !== this.hashPassword(password)) {
-            return { success: false, message: '密码错误' };
-        }
+        if (!userData) return { success: false, message: '用户名不存在' };
+        if (userData.password !== this.hashPassword(password)) return { success: false, message: '密码错误' };
 
         this.users.delete(username);
-        if (this.currentUser === username) {
-            this.currentUser = null;
-        }
+        if (this.currentUser === username) this.currentUser = null;
         this.saveAllUsers();
-
         return { success: true, message: '账号已删除' };
     }
 
-    // 导出所有账号数据
     exportAccounts() {
         const data = {
             exportTime: Date.now(),
@@ -5265,7 +5162,6 @@ class AccountSystem {
         return { success: true, message: '账号已导出' };
     }
 
-    // 导入账号数据
     importAccounts(jsonStr) {
         try {
             const data = JSON.parse(jsonStr);
@@ -5284,7 +5180,6 @@ class AccountSystem {
         }
     }
 
-    // 清除所有账号数据
     clearAllAccounts() {
         if (confirm('确定要删除所有账号吗？此操作不可恢复！')) {
             this.users.clear();
@@ -23640,7 +23535,7 @@ class ShopSystem {
             "Biologist Egg":102,"Beekeeper Egg":100,"Pirate Digger Egg":103,
             "Frost Digger Egg":105,"Hel Digger Egg":108,"Hel Beekeeper Egg":104,
             "Bubonic Plague":120,
-            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,"Mud":15,"Bur":12
+            "Egg":30,"Ant Egg":12,"Moon Egg":10,"Stick":18,"Coin":2,"Mud":15,"Bur":12,"Sawdust":15
         };
 
         this.shopItems = [];
@@ -33594,6 +33489,10 @@ class Petal {
             knockback = 400 + mult * 0.3;
         }
 
+        // ✅ 应用 Sawdust 爆炸范围加成
+        const explosionBonus = this.player.getTotalExplosionRadiusBonus();
+        radius = radius * (1 + explosionBonus);
+
         const cx = this.worldX, cy = this.worldY;
 
         for (const enemy of game.enemies) {
@@ -36750,8 +36649,24 @@ class Player {
     get health() {
         return this._health;
     }
-    // 在 Player 类中
-// 在 Player 类中
+    getTotalExplosionRadiusBonus() {
+        let totalBonus = 0;
+        for (const petal of this.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Sawdust" && !petal.isBroken && !petal.isReloading) {
+                const bonus = ITEM_STATS["Sawdust"]?.explosion_radius_bonus?.[item.rarity] || 0;
+                totalBonus += bonus;
+            }
+        }
+        // 也检查快捷栏
+        for (const slotItem of this.quickSlot.slots) {
+            if (slotItem && slotItem.type === "Sawdust") {
+                const bonus = ITEM_STATS["Sawdust"]?.explosion_radius_bonus?.[slotItem.rarity] || 0;
+                totalBonus += bonus;
+            }
+        }
+        return Math.min(totalBonus, 2.0); // 最大200%加成
+    }
     getOpalBonus() {
         let totalCritChance = 0;
         let bestCritMultiplier = 1.1;  // 默认最低 1.1
@@ -43425,9 +43340,7 @@ class WorldMapGame {
         if (!this.projectiles || this.projectiles.length === 0) return;
 
         // 1. 先更新所有投射物的位置和寿命
-        // 注意：Projectile.update(dt) 内部已经处理了移动和阻力
         for (const p of this.projectiles) {
-            // 确保 velocity 同步给 vx, vy (双重保险)
             if (p.isPhysical) {
                 p.vx = p.velocity.x;
                 p.vy = p.velocity.y;
@@ -43435,20 +43348,17 @@ class WorldMapGame {
             p.update(deltaTime);
         }
 
-        // 2. 将存活的实体投射物加入碰撞系统 (用于推人)
-        // 必须在 checkAllCollisions 之前做
+        // 2. 将存活的实体投射物加入碰撞系统
         for (const p of this.projectiles) {
             if (p.isPhysical && p.health > 0 && p.life > 0) {
                 this.collisionSystem.addObject(p, `proj_${p}`);
             }
         }
 
-        // 3. 手动检测碰撞 (作为 CollisionSystem 的补充，确保立即消失)
-        // 遍历数组 (倒序以便安全删除)
+        // 3. 手动检测碰撞
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             const p = this.projectiles[i];
 
-            // 如果已经死了 (寿命尽或血量尽)，直接移除
             if (p.life <= 0 || p.health <= 0) {
                 this.projectiles.splice(i, 1);
                 continue;
@@ -43456,26 +43366,35 @@ class WorldMapGame {
 
             let hit = false;
 
-            // 检测玩家
+            // ========== 检测玩家 ==========
             if (!this.player.isDead && p.source !== this.player) {
-                const dx = p.x - this.player.physicsBody.position.x;
-                const dy = p.y - this.player.physicsBody.position.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const playerRadius = this.player.getScaledRadius();
-                if (dist < playerRadius + p.size) {
-                    p.hitTarget(this.player);
-
+                // ✅ 友方投射物不打玩家
+                const pIsFriendly = p.isFriendly !== undefined ? p.isFriendly : (p.source?.isFriendly === true);
+                if (!pIsFriendly) {
+                    const dx = p.x - this.player.physicsBody.position.x;
+                    const dy = p.y - this.player.physicsBody.position.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const playerRadius = this.player.getScaledRadius();
+                    if (dist < playerRadius + p.size) {
+                        p.hitTarget(this.player);
+                        hit = true;
+                    }
                 }
             }
 
-            // 检测敌人
+            // ========== 检测敌人 ==========
             if (!hit) {
                 for (const enemy of this.enemies) {
                     if (enemy.isDead || p.source === enemy) continue;
 
-                    // ✅ 阵营检测：不让墨汁打自己人
-                    const pIsFriendly = p.source ? p.source.isFriendly : false;
-                    if (pIsFriendly === enemy.isFriendly) continue; // 同阵营跳过
+                    // ✅ 阵营检测
+                    const pIsFriendly = p.isFriendly !== undefined ? p.isFriendly : (p.source?.isFriendly === true);
+                    const enemyIsFriendly = enemy.isFriendly === true;
+
+                    // 同阵营跳过（友方不打友方，敌方不打敌方）
+                    if (pIsFriendly === enemyIsFriendly) {
+                        continue;
+                    }
 
                     const dx = p.x - enemy.physicsBody.position.x;
                     const dy = p.y - enemy.physicsBody.position.y;
@@ -43484,13 +43403,13 @@ class WorldMapGame {
 
                     if (dist < enemyRadius + p.size) {
                         p.hitTarget(enemy);
-
+                        hit = true;
                         break;
                     }
                 }
             }
 
-            // 如果命中了，或者寿命/血量耗尽，移除
+            // 移除命中的投射物
             if (hit || p.life <= 0 || p.health <= 0) {
                 this.projectiles.splice(i, 1);
                 continue;
@@ -45517,7 +45436,7 @@ class WorldMapGame {
             return dist < 500;
         }).length;
 
-        if (nearbyEnemies >= 10) {
+        if (nearbyEnemies >= 20) {
             return;
         }
 
@@ -46130,17 +46049,26 @@ class WorldMapGame {
 
         const playerPos = this.player.physicsBody.position;
 
-        // ===== 卸载：超出范围 → 存入休眠池 =====
+        // ===== 卸载：超出范围的处理 =====
         const toRemove = [];
         for (const enemy of this.enemies) {
             if (enemy.isDead || enemy.neverUnload || enemy.isDummy) continue;
+
             const dist = Math.hypot(
                 enemy.physicsBody.position.x - playerPos.x,
                 enemy.physicsBody.position.y - playerPos.y
             );
+
+            // ✅ 友方生物：直接移除，不缓存
+            if (enemy.isFriendly) {
+                if (dist > WEAK_LOAD_DISTANCE) {
+                    toRemove.push(enemy);
+                }
+                continue;
+            }
+
+            // 敌方生物：超出范围 → 存入休眠池
             if (dist > WEAK_LOAD_DISTANCE) {
-                // ✅ 只存必要字段，不保留整个对象
-                // updateEnemyLoading 卸载时，保存触发器状态
                 this.dormantEnemies.push({
                     type: enemy.type,
                     rarity: enemy.rarity,
@@ -46150,7 +46078,6 @@ class WorldMapGame {
                     health: enemy.health,
                     maxHealth: enemy.maxHealth,
                     isFriendly: enemy.isFriendly,
-                    // ✅ 保存所有触发器状态
                     triggers: {
                         triggered80: enemy.triggered80,
                         triggered70: enemy.triggered70,
@@ -46167,11 +46094,14 @@ class WorldMapGame {
                 toRemove.push(enemy);
             }
         }
+
+        // 移除标记的敌人
         for (const e of toRemove) {
-            this.enemies.splice(this.enemies.indexOf(e), 1);
+            const index = this.enemies.indexOf(e);
+            if (index !== -1) this.enemies.splice(index, 1);
         }
 
-        // ===== 唤醒：休眠敌人重新进入视野 =====
+        // ===== 唤醒：休眠敌人重新进入视野（只唤醒敌方）=====
         const wakeUp = [];
         const stillDormant = [];
         for (const d of this.dormantEnemies) {
@@ -46190,7 +46120,6 @@ class WorldMapGame {
             enemy.maxHealth = d.maxHealth;
             enemy.isFriendly = d.isFriendly;
             enemy.isSpawning = false;
-            // ✅ 恢复触发器状态（只恢复有值的字段，undefined不覆盖）
             if (d.triggers) {
                 for (const [key, val] of Object.entries(d.triggers)) {
                     if (val !== undefined) enemy[key] = val;
@@ -46199,7 +46128,7 @@ class WorldMapGame {
             this.enemies.push(enemy);
         }
 
-        // ===== 休眠池上限（防内存无限增长）=====
+        // ===== 休眠池上限 =====
         if (this.dormantEnemies.length > 300) {
             this.dormantEnemies.splice(0, this.dormantEnemies.length - 300);
         }
@@ -46316,7 +46245,19 @@ class WorldMapGame {
         if (this.player) {
             this.player.spongeDamageQueue = [];
         }
-
+        if (this.accountSystem?.isLoggedIn()) {
+                this.accountSystem.saveGameData(
+                    this.player,
+                    {
+                        score: this.score,
+                        enemiesKilled: this.enemiesKilled
+                    },
+                    {
+                        petalsBurned: this.player?.inventory?.craftingSystem?.totalBurned || 0,
+                        petalsCrafted: this.player?.inventory?.craftingSystem?.totalCrafted || 0
+                    }
+                );
+        }
         // 清除所有友方生物
         this.clearAllFriendlyUnits();
 
