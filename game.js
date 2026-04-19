@@ -153,101 +153,103 @@ export const BIOME_ENEMY_POOLS = {
 // ========== 经验值配置表 ==========
 const ENEMY_XP_TABLE = {
     // 基础生物
-    "Worker Ant": { baseXp: 10, typeBonus: 1.0 },
-    "Soldier Ant": { baseXp: 15, typeBonus: 1.2 },
-    "Spider": { baseXp: 12, typeBonus: 1.1 },
-    "Crab": { baseXp: 12, typeBonus: 1.3 },
-    "Bush": { baseXp: 8, typeBonus: 1.0 },
-    "Centipede": { baseXp: 8, typeBonus: 1.4 },
-    "Cactus": { baseXp: 15, typeBonus: 1.5 },
-    "QueenBee": { baseXp: 30, typeBonus: 1.5 },
-    "Bee": { baseXp: 13, typeBonus: 1.2 },
-    "QueenAnt": { baseXp: 20, typeBonus: 2.0 },
-    "Ladybug":{ baseXp: 11, typeBonus: 1.3 },
-    "Hive":{ baseXp: 30, typeBonus: 1.9 },
+    "Worker Ant": { baseXp: 2, typeBonus: 1.0 },
+    "Soldier Ant": { baseXp: 3, typeBonus: 1.0 },
+    "Spider": { baseXp: 3, typeBonus: 1.0 },
+    "Crab": { baseXp: 7, typeBonus: 1.0 },
+    "Bush": { baseXp: 3, typeBonus: 1.0 },
+    "Centipede": { baseXp: 2, typeBonus: 1.0 },
+    "Cactus": { baseXp: 12, typeBonus: 1.0 },
+    "QueenBee": { baseXp: 30, typeBonus: 1.0 },
+    "Bee": { baseXp: 5, typeBonus: 1.0 },
+    "QueenAnt": { baseXp: 10, typeBonus: 1.0 },
+    "Ladybug":{ baseXp: 3, typeBonus: 1.0 },
+    "Hive":{ baseXp: 230, typeBonus: 1.0 },
     // 细胞类生物
     // ========== 微观世界 ==========
-    "Atom": { baseXp: 50, typeBonus: 1.5 },
-    "Electron": { baseXp: 30, typeBonus: 1.2 },
-    "Proton": { baseXp: 45, typeBonus: 1.4 },
-    "ElectronCloud": { baseXp: 80, typeBonus: 1.8 },
-    "Photon": { baseXp: 25, typeBonus: 1.1 },
+    "Atom": { baseXp: 10, typeBonus: 1.0 },
+    "Electron": { baseXp: 4, typeBonus: 1.0 },
+    "Proton": { baseXp: 4, typeBonus: 1.0 },
+    "ElectronCloud": { baseXp: 300, typeBonus: 1.0 },
+    "Photon": { baseXp: 5, typeBonus: 1.0 },
     // ========== 宇宙世界 ==========
-    "BlackHole": { baseXp: 500, typeBonus: 3.0 },
-    "WhiteHole": { baseXp: 450, typeBonus: 2.8 },
-    "NeutronStar": { baseXp: 400, typeBonus: 2.5 },
-    "Star": { baseXp: 200, typeBonus: 2.0 },
-    "Asteroid": { baseXp: 80, typeBonus: 1.5 },
-    "Alien": { baseXp: 120, typeBonus: 1.8 },
-    "UFO": { baseXp: 150, typeBonus: 1.9 },
-    "StemCell": { baseXp: 40, typeBonus: 1.8 },
-    "RedBloodCell": { baseXp: 15, typeBonus: 1.1 },
-    "WhiteBloodCell": { baseXp: 12, typeBonus: 1.3 },
-    "Bacteria": { baseXp: 8, typeBonus: 1.0 },
-    "Cancer": { baseXp: 30, typeBonus: 2.1 },
+    "BlackHole": { baseXp: 204, typeBonus: 1.0 },
+    "WhiteHole": { baseXp: 260, typeBonus: 1.0 },
+    "NeutronStar": { baseXp: 800, typeBonus: 1.0 },
+    "Star": { baseXp: 1000, typeBonus: 1.0 },
+    "Asteroid": { baseXp: 10, typeBonus: 1.0 },
+    "Alien": { baseXp: 60, typeBonus: 1.0 },
+    "UFO": { baseXp: 500, typeBonus: 1.0 },
+    "Ghost": { baseXp: 1, typeBonus: 1.0 },
+    "GraveStone": { baseXp: 100, typeBonus: 1.0 },
+    "StemCell": { baseXp: 150, typeBonus: 1.0 },
+    "RedBloodCell": { baseXp: 8, typeBonus: 1.0 },
+    "WhiteBloodCell": { baseXp: 7, typeBonus: 1.0 },
+    "Bacteria": { baseXp: 3, typeBonus: 1.0 },
+    "Cancer": { baseXp: 40, typeBonus: 1.1 },
     "Parasite":{ baseXp: 10, typeBonus: 1.1 },
-    "Bacteriophage":{ baseXp: 13, typeBonus: 1.1 },
-    "Virus":{baseXp: 5, typeBonus: 1.0},
-    "HelWorm": { baseXp: 12, typeBonus: 1.8 },
-    "HelSpider": { baseXp: 12, typeBonus: 2.0 },
-    "HelBee": { baseXp: 14, typeBonus: 1.9 },
-    "HelHornet": { baseXp: 15, typeBonus: 2.2 },
-    "HelBeetle": { baseXp: 18, typeBonus: 2.5 },
-    "Dragon": { baseXp: 15, typeBonus: 2.8 },
-    "DragonNest": { baseXp: 60, typeBonus: 3.0 },
-    "HelHive": { baseXp: 40, typeBonus: 2.6 },
-    "HelJellyfish": { baseXp: 18, typeBonus: 2.1 },
-    "ToxicDragon": { baseXp: 20, typeBonus: 3.2 },
-    "FireStorm": { baseXp: 20, typeBonus: 2.3 },
-    "HelQueenBee": { baseXp: 55, typeBonus: 2.7 },
-    "SlagMight": { baseXp: 50, typeBonus: 2.0 },
-    "Ice Cube": { baseXp: 25, typeBonus: 1.3 },
-    "Ice Dragon": { baseXp: 200, typeBonus: 3.0 },
-    "Igloo": { baseXp: 80, typeBonus: 1.8 },
-    "Tick": { baseXp: 35, typeBonus: 1.5 },
-    "ArcticSpider": { baseXp: 30, typeBonus: 1.4 },
-    "ArcticSpiderCave": { baseXp: 60, typeBonus: 1.7 },
-    "Snowman": { baseXp: 40, typeBonus: 1.5 },
-    "Snowstorm": { baseXp: 55, typeBonus: 1.6 },
+    "Bacteriophage":{ baseXp: 4, typeBonus: 1.1 },
+    "Virus":{baseXp: 2, typeBonus: 1.0},
+    "HelWorm": { baseXp: 8, typeBonus: 1.0 },
+    "HelSpider": { baseXp: 4, typeBonus: 1.0 },
+    "HelBee": { baseXp: 10, typeBonus: 1.0 },
+    "HelHornet": { baseXp: 15, typeBonus: 1.0 },
+    "HelBeetle": { baseXp: 18, typeBonus: 1.0 },
+    "Dragon": { baseXp: 10, typeBonus: 1.0 },
+    "DragonNest": { baseXp: 280, typeBonus: 1.0 },
+    "HelHive": { baseXp: 370, typeBonus: 1.0 },
+    "HelJellyfish": { baseXp: 13, typeBonus: 1.1 },
+    "ToxicDragon": { baseXp: 56, typeBonus: 1.0 },
+    "FireStorm": { baseXp: 50, typeBonus: 1.0 },
+    "HelQueenBee": { baseXp: 85, typeBonus: 1.0 },
+    "SlagMight": { baseXp: 10, typeBonus: 1.0 },
+    "Ice Cube": { baseXp: 25, typeBonus: 1.0 },
+    "Ice Dragon": { baseXp: 30, typeBonus: 1.0 },
+    "Igloo": { baseXp: 100, typeBonus: 1.0 },
+    "Tick": { baseXp: 5, typeBonus: 1.0 },
+    "ArcticSpider": { baseXp: 3, typeBonus: 1.0 },
+    "ArcticSpiderCave": { baseXp: 160, typeBonus: 1.0 },
+    "Snowman": { baseXp: 4, typeBonus: 1.0 },
+    "Snowstorm": { baseXp: 9, typeBonus: 1.0 },
 
     // 沙漠火蚁系列
-    "WorkerFireAnt": { baseXp: 10, typeBonus: 1.1 },
-    "SoldierFireAnt": { baseXp: 12, typeBonus: 1.3 },
-    "BabyFireAnt": { baseXp: 5, typeBonus: 0.8 },
-    "FireAntOvermind": { baseXp: 20, typeBonus: 2.1 },
-    "FireAntHole": { baseXp: 35, typeBonus: 1.8 },
-    "Scorpion": { baseXp: 13, typeBonus: 1.4},
+    "WorkerFireAnt": { baseXp: 3, typeBonus: 1.1 },
+    "SoldierFireAnt": { baseXp: 5, typeBonus: 1.0 },
+    "BabyFireAnt": { baseXp: 2, typeBonus: 0.9 },
+    "FireAntOvermind": { baseXp: 20, typeBonus: 1.1 },
+    "FireAntHole": { baseXp: 80, typeBonus: 1.0 },
+    "Scorpion": { baseXp: 5, typeBonus: 1.0},
     // 海洋生物
-    "Sponge": { baseXp: 5, typeBonus: 0.8 },
-    "Scallop": { baseXp: 8, typeBonus: 1.0 },
-    "Bubble": { baseXp: 2, typeBonus: 0.5 },
-    "Starfish": { baseXp: 12, typeBonus: 1.2 },
-    "Jellyfish": { baseXp: 15, typeBonus: 1.3 },
-    "CrabHole": { baseXp: 30, typeBonus: 1.6 },
-    "Leech": { baseXp: 13, typeBonus: 1.2 },
-    "Barnacle": { baseXp: 15, typeBonus: 1.3 },
-    "Shipwreck": { baseXp: 50, typeBonus: 1.9 },
-
+    "Sponge": { baseXp: 4, typeBonus: 0.8 },
+    "Scallop": { baseXp: 5, typeBonus: 1.0 },
+    "Bubble": { baseXp: 2, typeBonus: 1.0 },
+    "Starfish": { baseXp: 4, typeBonus: 1.0 },
+    "Jellyfish": { baseXp: 5, typeBonus: 1.0 },
+    "CrabHole": { baseXp: 130, typeBonus: 1.0 },
+    "Leech": { baseXp: 13, typeBonus: 1.0 },
+    "Barnacle": { baseXp: 15, typeBonus: 1.0 },
+    "Shipwreck": { baseXp: 120, typeBonus: 1.0 },
+    "Squid": { baseXp: 13, typeBonus: 1.0 },
     // 下水道生物
-    "Rat": { baseXp: 28, typeBonus: 1.8 },
-    "Roach": { baseXp: 25, typeBonus: 1.5 },
-    "Fly": { baseXp: 5, typeBonus: 0.7 },
-    "ManHole": { baseXp: 40, typeBonus: 1.8 },
-    "PooStorm": { baseXp: 30, typeBonus: 1.4 },
-    "Squid":{ baseXp: 20, typeBonus: 1.2 },
+    "Rat": { baseXp: 40, typeBonus: 1.0 },
+    "Roach": { baseXp: 22, typeBonus: 1.0 },
+    "Fly": { baseXp: 1, typeBonus: 1.0 },
+    "ManHole": { baseXp: 40, typeBonus: 1.0 },
+    "PooStorm": { baseXp: 50, typeBonus: 1.0 },
 
     // Digger 系列
-    "TrashDigger": { baseXp: 30, typeBonus: 1.8 },
-    "Digger": { baseXp: 30, typeBonus: 1.5 },
-    "MudDigger": { baseXp: 28, typeBonus: 1.5 },
-    "Biologist": { baseXp: 35, typeBonus: 1.3 },
-    "PirateDigger": { baseXp: 40, typeBonus: 2.0 },
-    "Trashcan": { baseXp: 42, typeBonus: 1.4 },
+    "TrashDigger": { baseXp: 200, typeBonus: 1.1 },
+    "Digger": { baseXp: 300, typeBonus: 1.0 },
+    "MudDigger": { baseXp: 213, typeBonus: 1.0 },
+    "Biologist": { baseXp: 35, typeBonus: 1.0 },
+    "PirateDigger": { baseXp: 500, typeBonus: 1.0 },
+    "Trashcan": { baseXp: 190, typeBonus: 1.1 },
     // 特殊生物
-    "Anthill": { baseXp: 35, typeBonus: 1.7 },
-    "Sandstorm": { baseXp: 20, typeBonus: 1.3 },
-    "Rock": { baseXp: 15, typeBonus: 1.2 },
-    "FrostDigger":{ baseXp: 30, typeBonus: 1.8 },
+    "Anthill": { baseXp: 60, typeBonus: 1.1 },
+    "Sandstorm": { baseXp: 8, typeBonus: 1.0 },
+    "Rock": { baseXp: 15, typeBonus: 1.0 },
+    "FrostDigger":{ baseXp: 350, typeBonus: 1.1 },
+    "GraveDigger":{ baseXp: 300, typeBonus: 1.0 },
 
     // 默认
     "default": { baseXp: 10, typeBonus: 1.0 }
@@ -5212,47 +5214,74 @@ class LevelSystemExact {
     constructor() {
         this.level = 1;
         this.currentXp = 0;
-        this.xpBase = 131.3;
-        this.xpGrowth = 1.131;
-        this.hpBase = 396.7;
+        this.xpBase = 20;      // 1级升2级所需经验
+        this.xpGrowth = 1.074; // 每级增长7.4%
+        this.hpBase = 400.0;
         this.hpGrowth = 1.028;
     }
 
+    // 获取升级所需经验
     getXpNeededForLevel(level) {
-        if (level <= 0) {
-            return 0;
-        }
-        const xp = this.xpBase * Math.pow(this.xpGrowth, level - 1);
-        return Math.floor(xp);
+        if (level <= 0) return 0;
+
+        // 低级（1-20级）：分段线性
+        if (level <= 4) return level * 20;
+        if (level <= 8) return 120 + (level - 5) * 40;
+        if (level <= 12) return 240 + (level - 9) * 60;
+        if (level <= 16) return 500 + (level - 13) * 80;
+        if (level <= 20) return 760 + (level - 17) * 120;
+
+        // 高级（20+级）：指数增长
+        const baseXpAt20 = 1320;  // 20级升21级所需经验
+        return Math.floor(baseXpAt20 * Math.pow(this.xpGrowth, level - 20));
     }
 
+    // 获取当前等级升级所需经验
+    getCurrentLevelXpNeeded() {
+        return this.getXpNeededForLevel(this.level);
+    }
+
+    // 获取等级对应的最大生命值
     getHpForLevel(level) {
-        if (level <= 0) {
-            return 100;
-        }
+        if (level <= 0) return 100;
         const hp = this.hpBase * Math.pow(this.hpGrowth, level - 1);
-        return hp;
+        return Math.floor(hp);
     }
 
+    // 添加经验值
     addXp(xpAmount) {
         this.currentXp += xpAmount;
-        let xpNeeded = this.getXpNeededForLevel(this.level);
-
         let leveledUp = false;
-        while (this.currentXp >= xpNeeded && xpNeeded > 0) {
+        let levelsGained = 0;
+
+        // 循环升级（可能一次升多级）
+        while (true) {
+            const xpNeeded = this.getCurrentLevelXpNeeded();
+            if (this.currentXp < xpNeeded) break;
+
             this.currentXp -= xpNeeded;
             this.level++;
+            levelsGained++;
             leveledUp = true;
-            xpNeeded = this.getXpNeededForLevel(this.level);
         }
 
         return leveledUp;
     }
 
+    // 获取经验进度 [当前经验, 所需经验, 百分比]
     getXpProgress() {
-        const xpNeeded = this.getXpNeededForLevel(this.level);
+        const xpNeeded = this.getCurrentLevelXpNeeded();
         const progress = xpNeeded > 0 ? (this.currentXp / xpNeeded * 100) : 0;
         return [this.currentXp, xpNeeded, progress];
+    }
+
+    // 格式化经验显示（支持 K/M/B/T）
+    formatXp(xp) {
+        if (xp >= 1e12) return (xp / 1e12).toFixed(2) + 'T';
+        if (xp >= 1e9) return (xp / 1e9).toFixed(2) + 'B';
+        if (xp >= 1e6) return (xp / 1e6).toFixed(2) + 'M';
+        if (xp >= 1e3) return (xp / 1e3).toFixed(2) + 'K';
+        return xp.toString();
     }
 }
 // ==================== 区块管理器类 ====================
@@ -37934,16 +37963,16 @@ class Player {
 
         // 稀有度倍率（包含所有稀有度）
         const rarityMultiplier = {
-            "Common": 1.0,
-            "Unusual": 3,
-            "Rare": 9,
-            "Epic": 27,
-            "Legendary": 81,
-            "Mythic": 243,
-            "Ultra": 729,
-            "Super": 2187,
-            "Omega": 6561,
-            "Eternal": 19683
+        "Common": 1,
+        "Unusual": 5.43,
+        "Rare": 28.64,
+        "Epic": 163.27,
+        "Legendary": 1443.13,
+        "Mythic": 10884.35,
+        "Ultra": 156666.67,
+        "Super": 1925438.78,
+        "Omega": 27619047.62,
+        "Eternal": 1226258503.40
         }[enemyRarity] || 1.0;
 
         // 计算最终经验值（保留2位小数）
