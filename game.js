@@ -165,6 +165,19 @@ const ENEMY_XP_TABLE = {
     "QueenAnt": { baseXp: 10, typeBonus: 1.0 },
     "Ladybug":{ baseXp: 3, typeBonus: 1.0 },
     "Hive":{ baseXp: 230, typeBonus: 1.0 },
+
+    // ========== 🌿 丛林生物 ==========
+    "Wasp": { baseXp: 8, typeBonus: 1.2 },
+    "Worker Termite": { baseXp: 4, typeBonus: 1.0 },
+    "Soldier Termite": { baseXp: 6, typeBonus: 1.1 },
+    "StickBug": { baseXp: 5, typeBonus: 1.0 },
+    "Mantis": { baseXp: 12, typeBonus: 1.3 },
+    "Firefly": { baseXp: 3, typeBonus: 1.0 },
+    "TermiteHole": { baseXp: 100, typeBonus: 1.2 },
+    "TermiteOvermind": { baseXp: 80, typeBonus: 1.5 },
+    "SpiderCave": { baseXp: 150, typeBonus: 1.2 },
+    "Beetle": { baseXp: 7, typeBonus: 1.1 },
+
     // 细胞类生物
     // ========== 微观世界 ==========
     "Atom": { baseXp: 10, typeBonus: 1.0 },
@@ -172,6 +185,7 @@ const ENEMY_XP_TABLE = {
     "Proton": { baseXp: 4, typeBonus: 1.0 },
     "ElectronCloud": { baseXp: 300, typeBonus: 1.0 },
     "Photon": { baseXp: 5, typeBonus: 1.0 },
+
     // ========== 宇宙世界 ==========
     "BlackHole": { baseXp: 204, typeBonus: 1.0 },
     "WhiteHole": { baseXp: 260, typeBonus: 1.0 },
@@ -182,6 +196,7 @@ const ENEMY_XP_TABLE = {
     "UFO": { baseXp: 500, typeBonus: 1.0 },
     "Ghost": { baseXp: 1, typeBonus: 1.0 },
     "GraveStone": { baseXp: 100, typeBonus: 1.0 },
+
     "StemCell": { baseXp: 150, typeBonus: 1.0 },
     "RedBloodCell": { baseXp: 8, typeBonus: 1.0 },
     "WhiteBloodCell": { baseXp: 7, typeBonus: 1.0 },
@@ -190,6 +205,7 @@ const ENEMY_XP_TABLE = {
     "Parasite":{ baseXp: 10, typeBonus: 1.1 },
     "Bacteriophage":{ baseXp: 4, typeBonus: 1.1 },
     "Virus":{baseXp: 2, typeBonus: 1.0},
+
     "HelWorm": { baseXp: 8, typeBonus: 1.0 },
     "HelSpider": { baseXp: 4, typeBonus: 1.0 },
     "HelBee": { baseXp: 10, typeBonus: 1.0 },
@@ -202,6 +218,7 @@ const ENEMY_XP_TABLE = {
     "ToxicDragon": { baseXp: 56, typeBonus: 1.0 },
     "FireStorm": { baseXp: 50, typeBonus: 1.0 },
     "HelQueenBee": { baseXp: 85, typeBonus: 1.0 },
+
     "SlagMight": { baseXp: 10, typeBonus: 1.0 },
     "Ice Cube": { baseXp: 25, typeBonus: 1.0 },
     "Ice Dragon": { baseXp: 30, typeBonus: 1.0 },
@@ -218,7 +235,8 @@ const ENEMY_XP_TABLE = {
     "BabyFireAnt": { baseXp: 2, typeBonus: 0.9 },
     "FireAntOvermind": { baseXp: 20, typeBonus: 1.1 },
     "FireAntHole": { baseXp: 80, typeBonus: 1.0 },
-    "Scorpion": { baseXp: 5, typeBonus: 1.0},
+    "Scorpion": { baseXp: 5, typeBonus: 1.0 },
+
     // 海洋生物
     "Sponge": { baseXp: 4, typeBonus: 0.8 },
     "Scallop": { baseXp: 5, typeBonus: 1.0 },
@@ -230,6 +248,7 @@ const ENEMY_XP_TABLE = {
     "Barnacle": { baseXp: 15, typeBonus: 1.0 },
     "Shipwreck": { baseXp: 120, typeBonus: 1.0 },
     "Squid": { baseXp: 13, typeBonus: 1.0 },
+
     // 下水道生物
     "Rat": { baseXp: 40, typeBonus: 1.0 },
     "Roach": { baseXp: 22, typeBonus: 1.0 },
@@ -244,6 +263,7 @@ const ENEMY_XP_TABLE = {
     "Biologist": { baseXp: 35, typeBonus: 1.0 },
     "PirateDigger": { baseXp: 500, typeBonus: 1.0 },
     "Trashcan": { baseXp: 190, typeBonus: 1.1 },
+
     // 特殊生物
     "Anthill": { baseXp: 60, typeBonus: 1.1 },
     "Sandstorm": { baseXp: 8, typeBonus: 1.0 },
@@ -36742,32 +36762,29 @@ class Player {
             this.isDead = true;
         }
     }
-    // 在 Player 类中添加方法
-    // 在 Player 类中修改
     getExtraSlotCount() {
         const level = this.levelSystem.level;
 
         // 基础槽位 5 个
-        // 每 20 级增加 1 个槽位
-        // 20级: +1 (共6), 40级: +2 (共7), 60级: +3 (共8), 80级: +4 (共9), 100级: +5 (共10)
-        // 120级: +6 (共11), 140级: +7 (共12), 160级: +8 (共13), 180级: +9 (共14), 200级: +10 (共15)
-        if (level < 20) return 0;
-        if (level < 40) return 1;
-        if (level < 60) return 2;
-        if (level < 80) return 3;
-        if (level < 100) return 4;
-        if (level < 120) return 5;
-        if (level < 140) return 6;
-        if (level < 160) return 7;
-        if (level < 180) return 8;
-        if (level < 200) return 9;
-        return 10; // 200级以上最多 +10 槽位
+        // 60级前：无额外槽位
+        // 60级后：每30级 +1 槽位，最多22个（即额外 +17）
+
+        if (level < 80) return 0;
+
+        let extra = Math.floor((level - 80) / 25) + 1;
+
+        // 限制最大额外槽位（最多22个总槽位，即额外+17）
+        const maxExtra = 17;
+        extra = Math.min(extra, maxExtra);
+
+        return extra;
     }
 
     // 获取当前总槽位数（基础5 + 额外）
     getTotalSlotCount() {
         return 5 + this.getExtraSlotCount();
     }
+
 
     applyBounce(bounceDirection, bounceSpeed = 400) {
         if (this.isDead) return;
