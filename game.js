@@ -737,7 +737,8 @@ export const BIOME_SPAWN_RATES = {
         "Leech": { weight: 50, minLevel: 1, maxLevel: 5 },
         "Barnacle": { weight: 10, minLevel: 1, maxLevel: 5 },
         "Shipwreck": { weight: 0.06, minLevel: 1, maxLevel: 5 },
-        "Squid": { weight: 18, minLevel: 1, maxLevel: 5 }
+        "Squid": { weight: 18, minLevel: 1, maxLevel: 5 },
+        "Urchin": { weight: 0.2, minLevel: 1, maxLevel: 5 },
     },
      "Hel": {
         "HelWorm": { weight: 60, minLevel: 1, maxLevel: 5 },
@@ -1609,11 +1610,16 @@ const ITEM_IMAGE_URLS = {
     "Alien Digger Egg": "images/AlienDigger_egg.png",
     "Trident": "images/trident.png",
     "Sawdust": "images/Sawdust.png",
-
+    "Spikeball": "images/Spikeball.png",
+    "Urchin Egg": "images/Urchin_egg.png",
+    "Nail": "images/Nail.png",
+    "Quartz": "images/Quartz.png",
 };
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
-
+    "Quartz": {base_attack: 5,base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.15,instant_reload_chance: 0.1},
+    "Spikeball": {base_attack:40, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:4000, dropFactor: 0.75},
+    "Nail": {base_attack: 20,base_cooldown: 200,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.95},
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Bur": {base_attack: 5,base_cooldown: 200,armor_reduction: 3,armor_reduction_duration: 3,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.75},
     "Mud": {base_attack:10,base_cooldown: 100,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 12,base_fixed_damage: 10,fluid_speed: 8,fluid_duration: 5,fluid_color: "#946C10",use_rarity_multiplier: true,},
@@ -1637,7 +1643,7 @@ export const ITEM_STATS = {
     "Mimic": {base_attack:0, base_cooldown:0, is_mimic:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.05},
     "Rose": {base_attack:1, base_cooldown:1000,healing:3.0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Bubble Bomb": {base_attack:1, base_cooldown:200, is_bomb:true, use_rarity_multiplier: true, base_reload_time:500, dropFactor: 0.5},
-    "Trident": {base_attack:1000, base_cooldown:90, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.05},
+    "Trident": {base_attack:1000, base_cooldown:90, use_rarity_multiplier: true, base_reload_time:3000, dropFactor: 0.02},
     // ========== 特殊功能类 ==========
     "Antennae": {base_attack:8, base_cooldown:190, vision_bonus:0.2, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.8},
     "Third Eye": {base_attack:0, base_cooldown:1000, vision_bonus:0, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.2},
@@ -1685,6 +1691,7 @@ export const ITEM_STATS = {
     "Bee Egg": {base_attack:1, base_cooldown:10000, spawn_fly:true, spawn_count:1, durability_bonus:10, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.85},
     "Ladybug Egg": {base_attack:1, base_cooldown:20000, spawn_rat:true, spawn_count:2, durability_bonus:50, use_rarity_multiplier: true, base_reload_time:12000, dropFactor: 0.8},
     "Squid Egg": {base_attack:1, base_cooldown:250, spawn_squid: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:10000, dropFactor: 0.8},
+    "Urchin Egg": {base_attack:1, base_cooldown:250, spawn_squid: true,spawn_count: 1, use_rarity_multiplier: true, base_reload_time:8000, dropFactor: 0.8},
 
     // ========== Digger 系列蛋 ==========
     "Trash Digger Egg": {base_attack:1, base_cooldown:6000, spawn_trashdigger:true, spawn_count:1, durability_bonus:30, use_rarity_multiplier: true, base_reload_time:6000, dropFactor: 0.7},
@@ -1895,7 +1902,7 @@ export const ENEMY_DROP_TABLE = {
     "QueenBee": ["Queen Bee Egg", "Bee Egg", "Honey","Pollen"],
     "Cancer": ["Cancer","Cancer Egg","DNA","Iris","Chromosome"],
     "Shipwreck": ["Pearl", "Bubble Bomb", "Shipwreck Egg", "Cotton", "Coin"],
-    // 在 ENEMY_DROP_TABLE 中，在下水道生物后面添加
+    "Urchin": ["Trident","Quartz","Spikeball","Nail","Urchin Egg"],
     // ========== 🐛 Hel 系列生物掉落 ==========
     "HelWorm": ["Fang", "Bur", "Hel Worm Egg"],
     "HelSpider": ["Web", "Faster", "Third Eye", "Hel Spider Egg"],
@@ -1938,44 +1945,12 @@ export const ENEMY_DROP_TABLE = {
     "HelDigger": ["Heavy", "Cutter","Hel Digger Egg","Bomb"],
     "HelBeekeeper": ["Hel Honey", "Hel Beekeeper Egg", "Cutter","Honey"],
     // ========== 🌊 新增海洋生物掉落 ==========
-    "Starfish": [
-        "Starfish",      // 海星
-        "Salt",          // 盐
-        "Sand",          // 沙子
-        "Starfish Egg"   // 海星蛋
-    ],
-
-    "Jellyfish": [
-        "Jelly",         // 果冻/胶质
-        "Lightning",     // 闪电（水母放电）
-        "Jellyfish Egg"  // 水母蛋
-    ],
-
-    "Scallop": [
-        "Shell",         // 贝壳
-        "Magnet",        // 磁铁（50%概率，因为是洞类掉落）
-        "Pearl",         // 珍珠
-        "Shell Egg"      // 扇贝壳蛋
-    ],
-
-    "Sponge": [
-        "Sponge",        // 海绵
-        "Coral"          // 珊瑚
-    ],
-
-    "Crab": [
-        "Claw",          // 原有的
-        "Powder",        // 原有的
-        "Crab Egg",
-        "Sand"
-    ],
-
-    "CrabHole": [
-        "Magnet",        // 磁铁（洞类）
-        "Crab Hole Egg",  // 蟹洞蛋
-        "Cotton",
-        "Sand"
-    ],
+    "Starfish": ["Starfish","Salt","Sand","Starfish Egg"],
+    "Jellyfish": ["Jelly","Lightning","Jellyfish Egg"],
+    "Scallop": ["Shell","Magnet","Pearl","Shell Egg"  ],
+    "Sponge": ["Sponge","Coral"],
+    "Crab": ["Claw","Powder","Crab Egg","Sand"],
+    "CrabHole": ["Magnet","Crab Hole Egg","Cotton","Sand"],
         // ========== 🆕 下水道生物掉落 ==========
     "ManHole": ["Manhole Egg","Poo","Cotton","Basil" ],
     "Fly": ["Wing", "Fly Egg",  "Poo"],
@@ -2057,7 +2032,7 @@ export function getItemArmorValue(itemType, rarity) {
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy","Ghost","ElectronCloud"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom","Urchin"],
     "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton","UFO"],
     "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest","NeutronStar"] // E级 - 最难打的Boss级生物
@@ -2229,60 +2204,57 @@ for (const [itemType, stats] of Object.entries(ITEM_STATS)) {
 // 设置默认值
 ITEM_BASE_FACTOR["default"] = 0.8;
 
-// 确保所有有 dropFactor 的物品都被正确设置
-// 如果没有 dropFactor 的物品，会在 getDropRarityByItem 中使用默认值
 export function getDropRarityByItem(itemType, mobRarity) {
     const factor = ITEM_BASE_FACTOR[itemType] || ITEM_BASE_FACTOR["default"];
     const base = RARITY_DROP_RATES[mobRarity];
+
     if (!base) return "Common";
 
-    // 复制一份，避免修改原对象
     const modifiedBase = { ...base };
 
     let weights = {};
     let totalWeight = 0;
 
-    // 1. 获取所有可用稀有度
     let availableRarities = Object.keys(modifiedBase).filter(r => modifiedBase[r] > 0);
 
-    // ========== 修改后的逻辑：排除 Omega 和 Eternal 生物 ==========
     const isSuperDisabled = factor < 0.9;
     const isSpecialMob = mobRarity === "Omega" || mobRarity === "Eternal";
 
-    // 只有当 factor < 0.9 且 生物不是 Omega 或 Eternal 时，才执行屏蔽
     if (isSuperDisabled && !isSpecialMob && modifiedBase["Super"] !== undefined && modifiedBase["Super"] > 0) {
         const superProb = modifiedBase["Super"];
-
-        // 从可用稀有度中移除 Super
         availableRarities = availableRarities.filter(r => r !== "Super");
-
-        // 将 Super 的概率加到 Ultra 上
         if (modifiedBase["Ultra"] !== undefined) {
             modifiedBase["Ultra"] = (modifiedBase["Ultra"] || 0) + superProb;
         } else {
             modifiedBase["Ultra"] = superProb;
         }
-
-        // 将 Super 概率设为 0
         modifiedBase["Super"] = 0;
     }
-    // =========================================================
 
-    // 2. 核心逻辑：因子越小，越向该生物掉落表的“右侧（高级）”挤压
+    // ── 找到掉落表中最低的可用稀有度，以及它下面一级作为保底 ──
+    // availableRarities 里已经是掉落表有概率的稀有度
+    // 按 RARITY_ORDER 排序后，第一个就是最低可用稀有度
+    const sortedAvailable = availableRarities.slice().sort(
+        (a, b) => RARITY_ORDER.indexOf(a) - RARITY_ORDER.indexOf(b)
+    );
+    const lowestAvailable = sortedAvailable[0]; // 掉落表最低稀有度，e.g. "Mythic"
+    const lowestIndex = RARITY_ORDER.indexOf(lowestAvailable);
+
+    // 保底稀有度 = 掉落表最低稀有度的下面一级（如果存在），否则就用最低本身
+    const fallbackRarity = lowestIndex > 0
+        ? RARITY_ORDER[lowestIndex - 1]  // e.g. "Legendary"
+        : lowestAvailable;
+
+    // ── 计算权重 ──
     availableRarities.forEach((rarity) => {
         const baseProb = modifiedBase[rarity];
         const rarityIndex = RARITY_ORDER.indexOf(rarity);
-
-        // 关键：这里使用 (1 / factor)。
-        // 如果 factor = 0.1, 则底数是 10。
-        // 稀有度等级越高，权重被放大的倍数就越恐怖。
         let weight = baseProb * Math.pow(1 / factor, rarityIndex);
-
         weights[rarity] = weight;
         totalWeight += weight;
     });
 
-    // 3. 归一化随机抽奖
+    // ── 归一化抽奖 ──
     let rand = Math.random() * totalWeight;
     let cumulative = 0;
 
@@ -2295,7 +2267,8 @@ export function getDropRarityByItem(itemType, mobRarity) {
         }
     }
 
-    return availableRarities[0]; // 保底返回
+    // ── 保底：返回比掉落表最低稀有度再低一级的稀有度 ──
+    return fallbackRarity;
 }
 // Rarity drop rates
 // ===== 🆕 Eternal 掉落特殊处理 =====
@@ -2903,7 +2876,7 @@ class ChangelogPanel {
     constructor() {
         this.visible = false;
         this.scrollY = 0;
-        this.logs = [{ date: "15th April 2026", entries: ["- Updated physic system","- Rewrote bubble logic", "- Update slot system", "- Add new petal - Trident"] },{ date: "14th April 2026", entries: ["- Added memberships","- Rewrote bonus system and fixed position", "- Redraw shop system", "- Reorder talent system", "- Fixed a bug in craft system"] }, { date: "12th April 2026", entries: ["- Completed buttons UI design", "- Finish mob gallery UI drawing", "- Added flowing petals in main menu"] }, { date: "11th April 2026", entries: ["- Battery body lightning: 69.", "- Fixed Warp not teleporting.", "- New map UI and better setting"] }, { date: "9th April 2026", entries: ["- Battery flower body lightning: 120 -> 100.", "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.", "- Amulet now allows all eggs to spawn."] }, { date: "7th April 2026", entries: ["- Added new Hel biome with 15+ new enemies.", "- Added spacetime tunnel system.", "- Improved performance with chunk-based loading.", "- Fixed petal rotation issues."] }, { date: "5th April 2026", entries: ["- New item: Opal (crit chance & damage).", "- Added hunting quest system.", "- Added mob gallery.", "- Balance changes: reduced boss spawn rates."] }, { date: "3rd April 2026", entries: ["- Add Void and micro world", "- Add SpacetimeTunnel"] }, { date: "1st April 2026", entries: ["- changelog are not available before"] }];
+        this.logs = [{ date: "22th April 2026", entries: ["- Add Urchin","- Add Urchin Egg, Quartz, Nail, Spikeball", "- Balanced bubble", "- fixed some bugs"] },{ date: "15th April 2026", entries: ["- Updated physic system","- Rewrote bubble logic", "- Update slot system", "- Add new petal - Trident"] },{ date: "14th April 2026", entries: ["- Added memberships","- Rewrote bonus system and fixed position", "- Redraw shop system", "- Reorder talent system", "- Fixed a bug in craft system"] }, { date: "12th April 2026", entries: ["- Completed buttons UI design", "- Finish mob gallery UI drawing", "- Added flowing petals in main menu"] }, { date: "11th April 2026", entries: ["- Battery body lightning: 69.", "- Fixed Warp not teleporting.", "- New map UI and better setting"] }, { date: "9th April 2026", entries: ["- Battery flower body lightning: 120 -> 100.", "- Dizzy, Wound, Puppeteer, Elemental now increase fire & poison damage.", "- Amulet now allows all eggs to spawn."] }, { date: "7th April 2026", entries: ["- Added new Hel biome with 15+ new enemies.", "- Added spacetime tunnel system.", "- Improved performance with chunk-based loading.", "- Fixed petal rotation issues."] }, { date: "5th April 2026", entries: ["- New item: Opal (crit chance & damage).", "- Added hunting quest system.", "- Added mob gallery.", "- Balance changes: reduced boss spawn rates."] }, { date: "3rd April 2026", entries: ["- Add Void and micro world", "- Add SpacetimeTunnel"] }, { date: "1st April 2026", entries: ["- changelog are not available before"] }];
         this.panelW = 420;
         this.panelH = 460;
         this.closeRect = null;
@@ -3950,17 +3923,15 @@ class MobGallery {
 
         return { health, damage, armor };
     }
+// 在 MobGallery 类中替换 getDropItems 方法
     getDropItems(mobType, mobRarity) {
-        // 获取该生物的所有掉落物品
         const dropItems = ENEMY_DROP_TABLE[mobType] || ["Leaf"];
         const result = [];
 
-        // 遍历所有掉落物品
         for (const itemType of dropItems) {
-            // 计算所有稀有度的理论概率
+            // 使用 getDropRarityByItem 计算理论概率
             const chances = this.calculateDropChances(itemType, mobRarity);
 
-            // 收集所有概率大于0的稀有度
             const entries = [];
             for (const [rarity, chance] of Object.entries(chances)) {
                 if (chance > 0) {
@@ -3968,19 +3939,16 @@ class MobGallery {
                 }
             }
 
-            // 按稀有度从高到低排序
             entries.sort((a, b) => {
                 return RARITY_ORDER.indexOf(a[0]) - RARITY_ORDER.indexOf(b[0]);
             });
 
-            // 只取前3种稀有度
             const topEntries = entries.slice(0, 3);
 
             if (topEntries.length === 0) continue;
 
             const dropChances = {};
             for (const [rarity, chance] of topEntries) {
-                // 转换为百分比，保留2位小数
                 const percent = (chance * 100).toFixed(2);
                 dropChances[rarity] = percent + '%';
             }
@@ -3993,20 +3961,33 @@ class MobGallery {
 
         return result;
     }
-
-    // 新增方法：计算理论掉落概率（不依赖随机）
     calculateDropChances(itemType, mobRarity) {
         const factor = ITEM_BASE_FACTOR[itemType] || ITEM_BASE_FACTOR["default"];
         const base = RARITY_DROP_RATES[mobRarity];
         if (!base) return {};
 
+        const modifiedBase = { ...base };
+        let availableRarities = Object.keys(modifiedBase).filter(r => modifiedBase[r] > 0);
+
+        const isSuperDisabled = factor < 0.9;
+        const isSpecialMob = mobRarity === "Omega" || mobRarity === "Eternal";
+
+        if (isSuperDisabled && !isSpecialMob && modifiedBase["Super"] !== undefined && modifiedBase["Super"] > 0) {
+            const superProb = modifiedBase["Super"];
+            availableRarities = availableRarities.filter(r => r !== "Super");
+            if (modifiedBase["Ultra"] !== undefined) {
+                modifiedBase["Ultra"] = (modifiedBase["Ultra"] || 0) + superProb;
+            } else {
+                modifiedBase["Ultra"] = superProb;
+            }
+            modifiedBase["Super"] = 0;
+        }
+
         const weights = {};
         let totalWeight = 0;
 
-        const availableRarities = Object.keys(base).filter(r => base[r] > 0);
-
         availableRarities.forEach((rarity) => {
-            const baseProb = base[rarity];
+            const baseProb = modifiedBase[rarity];
             const rarityIndex = RARITY_ORDER.indexOf(rarity);
             let weight = baseProb * Math.pow(1 / factor, rarityIndex);
             weights[rarity] = weight;
@@ -4016,13 +3997,17 @@ class MobGallery {
         const chances = {};
         for (const rarity of RARITY_ORDER) {
             if (weights[rarity]) {
-                chances[rarity] = weights[rarity] / totalWeight;
+                let chance = weights[rarity] / totalWeight;
+                // ✅ 所有小于 0.01% 的概率显示为 0.01%
+                if (chance > 0 && chance < 0.0001) {
+                    chance = 0.0001;
+                }
+                chances[rarity] = chance;
             }
         }
 
         return chances;
     }
-
     // 新增方法：获取最可能的掉落稀有度
     getMostLikelyDropRarity(itemType, mobRarity) {
         const chances = this.calculateDropChances(itemType, mobRarity);
@@ -5237,7 +5222,7 @@ class LevelSystemExact {
         this.xpBase = 20;      // 1级升2级所需经验
         this.xpGrowth = 1.074; // 每级增长7.4%
         this.hpBase = 400.0;
-        this.hpGrowth = 1.028;
+        this.hpGrowth = 1.015;
     }
 
     // 获取升级所需经验
@@ -5252,7 +5237,7 @@ class LevelSystemExact {
         if (level <= 20) return 760 + (level - 17) * 120;
 
         // 高级（20+级）：指数增长
-        const baseXpAt20 = 1320;  // 20级升21级所需经验
+        const baseXpAt20 = 1600;  // 20级升21级所需经验
         return Math.floor(baseXpAt20 * Math.pow(this.xpGrowth, level - 20));
     }
 
@@ -7272,17 +7257,7 @@ class CollisionSystem {
                 push2X = -dirX * pushStrength * 0.3;
                 push2Y = -dirY * pushStrength * 0.3;
             }
-            // ===== 处理投射物与玩家/敌人的碰撞 =====
-            else if (isProjectile1 && (isPlayer2 || isEnemy2)) {
-                this._handleProjectileHit(obj1, obj2, dirX, dirY);
-                obj1.health -= 1;
-                if (obj1.health <= 0) shouldRemoveProjectile1 = true;
-            }
-            else if (isProjectile2 && (isPlayer1 || isEnemy1)) {
-                this._handleProjectileHit(obj2, obj1, -dirX, -dirY);
-                obj2.health -= 20;
-                if (obj2.health <= 0) shouldRemoveProjectile2 = true;
-            }
+
             // ===== 玩家与敌人的碰撞 =====
             else if (isPlayer1 && isEnemy2) {
                 if (!obj1.isBouncing) {
@@ -13675,6 +13650,102 @@ class EnemyDrawer {
 
         this.drawLightning(context, x, y, enemyObj.lightningTargets, color);
     }
+
+    drawUrchin(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        // 稀有度缩放因子
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0, "Super": 8.4,
+            "Omega": 12.0, "Eternal": 15.0
+        };
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor = raritySizeFactors[rarity] || 1.0;
+        const scale = (rarityFactor / legendaryFactor) * (scaledSize / size);
+
+        // 颜色定义
+        let bodyColor, outerColor, spineColor, glowColor;
+        if (isFriendly) {
+            bodyColor = '#FFD700';      // 金色
+            outerColor = '#B8860B';      // 深金色
+            spineColor = '#DAA520';      // 金杖色
+            glowColor = 'rgba(255, 215, 0, 0.3)';
+        } else {
+            bodyColor = '#7B2FBE';       // 紫色
+            outerColor = '#3D006E';      // 深紫色
+            spineColor = '#52007A';      // 中紫色
+            glowColor = 'rgba(123, 47, 190, 0.3)';
+        }
+
+        // 根据稀有度决定刺的数量（Common 20根，每级+1根）
+        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                             "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        const rarityIndex = rarityOrder.indexOf(rarity);
+        const baseSpines = 20;
+        const spineCount = baseSpines + (rarityIndex >= 0 ? rarityIndex : 0);
+
+        const bodyRadius = 20 * scale;
+        const outerRadius = bodyRadius * 1.15;
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer);
+
+        const time = animationTimer;
+        const cx = 0;
+        const cy = 0;
+
+        // 辅助随机函数
+        function seededRand(seed) {
+            let x = Math.sin(seed + 1) * 43758.5453123;
+            return x - Math.floor(x);
+        }
+
+        // 绘制刺
+        context.beginPath();
+        context.strokeStyle = spineColor;
+        context.lineWidth = Math.max(2, bodyRadius * 0.15);
+        context.lineCap = 'round';
+
+        for (let i = 0; i < spineCount; i++) {
+            const angle = (i / spineCount) * Math.PI * 2;
+            const phase = seededRand(i * 3.7) * Math.PI * 2;
+            const speed = 1.5 + seededRand(i * 5.1) * 2;
+
+            const wave = Math.sin(time * speed + phase);
+            const len = (bodyRadius * 0.3) + (wave * 0.5 + 0.5) * (bodyRadius * 0.5);
+
+            const offset = bodyRadius * 0.1;
+            const x1 = cx + Math.cos(angle) * (bodyRadius + offset);
+            const y1 = cy + Math.sin(angle) * (bodyRadius + offset);
+            const x2 = cx + Math.cos(angle) * (bodyRadius + offset + len);
+            const y2 = cy + Math.sin(angle) * (bodyRadius + offset + len);
+
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+        context.stroke();
+
+        // 绘制外圈
+        context.beginPath();
+        context.arc(cx, cy, outerRadius, 0, Math.PI * 2);
+        context.fillStyle = outerColor;
+        context.fill();
+
+        // 绘制主体
+        context.beginPath();
+        context.arc(cx, cy, bodyRadius, 0, Math.PI * 2);
+        context.fillStyle = bodyColor;
+        context.fill();
+
+
+        context.restore();
+    }
     drawSpider(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         // 应用视野缩放
         const scaledSize = size * viewScale;
@@ -17509,26 +17580,28 @@ class EnemyDrawer {
             segments = enemyObj?.segments || [];
         }
 
-        // 2. 预处理坐标点 (修复位移偏移的关键)
-        const screenPoints = [];
-        if (segments.length > 0) {
-            // 计算头部相对于物理位置的偏移量，用于校准所有节
-            const headPhysX = segments[0].physicsBody?.position?.x ?? segments[0].x;
-            const headPhysY = segments[0].physicsBody?.position?.y ?? segments[0].y;
+const screenPoints = [];
+if (segments.length > 0) {
+    // Fallback to 0 to avoid NaN multiplication
+    const headPhysX = segments[0].physicsBody?.position?.x || segments[0].x || 0;
+    const headPhysY = segments[0].physicsBody?.position?.y || segments[0].y || 0;
 
-            for (let i = 0; i < segments.length; i++) {
-                const seg = segments[i];
-                const px = seg.physicsBody?.position?.x ?? seg.x;
-                const py = seg.physicsBody?.position?.y ?? seg.y;
+    for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        const px = seg.physicsBody?.position?.x || seg.x || 0;
+        const py = seg.physicsBody?.position?.y || seg.y || 0;
 
-                // 算法：以传入的 x, y (头部屏幕位置) 为基准，累加物理位移差
-                screenPoints.push({
-                    x: x + (px - headPhysX) * viewScale,
-                    y: y + (py - headPhysY) * viewScale,
-                    radius: (seg.physicsBody?.radius ?? seg.radius ?? (size / 4)) * viewScale
-                });
-            }
-        }
+        // Calculate relative distance from head in world units, then scale to screen
+        const relX = (px - headPhysX) * viewScale;
+        const relY = (py - headPhysY) * viewScale;
+
+        screenPoints.push({
+            x: x + relX,
+            y: y + relY,
+            radius: (seg.physicsBody?.radius || seg.radius || (size / 4)) * viewScale
+        });
+    }
+}
 
         // 3. 兜底：如果数据异常，只画一个头
         if (screenPoints.length === 0) {
@@ -22718,6 +22791,8 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
             this.drawSpiderCave(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Crab") {
             this.drawCrab(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        } else if (enemyType === "Urchin") {
+            this.drawUrchin(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Soldier Ant") {
             this.drawSoldierAnt(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Worker Ant") {
@@ -22965,8 +23040,52 @@ class RedeemSystem {
             { type: "Leaf", rarity: "Super", count: 1 }
         ], 30);
 
-        this.addCode("fffkkk", [
+        this.addCode("7891220", [
+            { type: "Alien Egg", rarity: "Super", count: 1 },
+            { type: "Golden Leaf", rarity: "Super", count: 1 },
+            { type: "Corn", rarity: "Super", count: 3 },
+            { type: "Bomb", rarity: "Super", count: 1 },
+            { type: "Quantum", rarity: "Super", count: 1 },
+            { type: "Iris", rarity: "Super", count: 1 },
+            { type: "Cotton", rarity: "Super", count: 1 },
+            { type: "Clover", rarity: "Super", count: 4 },
+            { type: "Chromosome", rarity: "Super", count: 4 },
+            { type: "Stem Cell Egg", rarity: "Super", count: 1 },
+            { type: "Pearl", rarity: "Super", count: 3 },
+            { type: "Third Eye", rarity: "Super", count: 4 },
+            { type: "Magnet", rarity: "Super", count: 3 },
+            { type: "Crab Egg", rarity: "Super", count: 2 },
+            { type: "Cancer Egg", rarity: "Super", count: 2 },
+            { type: "Photon Egg", rarity: "Super", count: 1 },
+            { type: "Jelly", rarity: "Super", count: 4 },
+            { type: "Beetle Egg", rarity: "Super", count: 1 },
+            { type: "Queen Ant Egg", rarity: "Super", count: 4 },
+            { type: "Coral", rarity: "Super", count: 2 },
+            { type: "Sponge", rarity: "Super", count: 2 },
+            { type: "Cancer", rarity: "Super", count: 1 },
+            { type: "Moon Egg", rarity: "Super", count: 2 },
+            { type: "DNA", rarity: "Super", count: 4 },
+            { type: "Clover", rarity: "Omega", count: 1 },
+            { type: "Leaf", rarity: "Omega", count: 1 },
+            { type: "Spider Egg", rarity: "Omega", count: 1 },
+            { type: "Antennae", rarity: "Super", count: 4 },
+            { type: "Squid Egg", rarity: "Super", count: 1 },
+            { type: "Barnacle Egg", rarity: "Super", count: 1 },
+            { type: "Fang", rarity: "Super", count: 4 },
+            { type: "Bubble Bomb", rarity: "Ultra", count: 4 },
+            { type: "Fire Bomb", rarity: "Ultra", count: 1 },
+            { type: "Atom Egg", rarity: "Super", count: 1 },
+            { type: "Electron", rarity: "Super", count: 1 },
+            { type: "Electron Egg", rarity: "Super", count: 1 },
             { type: "Mud Digger Egg", rarity: "Super", count: 1 },
+            { type: "Trash Digger Egg", rarity: "Super", count: 1 },
+            { type: "Biologist Egg", rarity: "Super", count: 1 },
+            { type: "Black Hole", rarity: "Super", count: 1 },
+            { type: "Stinger", rarity: "Super", count: 4 },
+            { type: "Powder", rarity: "Super", count: 2 },
+            { type: "White Blood Cell Egg", rarity: "Super", count: 3 },
+            { type: "Red Blood Cell Egg", rarity: "Super", count: 2 },
+            { type: "Bubble", rarity: "Super", count: 2 },
         ], 10);
 
         this.addCode("WAGE2", [
@@ -23556,7 +23675,7 @@ class ShopSystem {
             "White Hole Egg":99,"Neutron Star Egg":100,"Star Egg":60,"Asteroid Egg":30,
             "Alien Egg":30,"UFO Egg":80,"Ghost Egg":15,"Grave Stone Egg":45,
             "Plasma":30,"Orb":30,"Slime":12,"Dvd":20,"Fire Bomb":100,"Stardust":18,
-            "Opal":50,"Gamma Ray":40,"Dust":10,"Singularity":90,
+            "Opal":92,"Gamma Ray":40,"Dust":10,"Singularity":90,
             "Antennae":12,"Third Eye":15,"Cactus":4,"Magnet":10,"Heavy":5,"Rock":5,
             "Sponge":7,"Cotton":4,"Starfish":5,
             "Hel Worm Egg":15,"Hel Spider Egg":15,"Hel Bee Egg":15,"Hel Hornet Egg":14,
@@ -23576,7 +23695,7 @@ class ShopSystem {
             "Worker Fire Ant Egg":12,"Soldier Fire Ant Egg":15,"Baby Fire Ant Egg":10,
             "Fire Ant Overmind Egg":16,"Fire Ant Hole Egg":42,
             "White Blood Cell Egg":12,"Spider Egg":12,"Red Blood Cell Egg":18,
-            "Stem Cell Egg":45,"Bacteria Egg":10,"Cancer Egg":20,"Virus Egg":10,
+            "Stem Cell Egg":45,"Bacteria Egg":10,"Cancer Egg":20,"Virus Egg":10,"Quartz":91,
             "Bacteriophage Egg":12,
             "Manhole Egg":55,"Fly Egg":12,"Rat Egg":35,"Roach Egg":25,
             "Poo Stick":35,"Trashcan Egg":40,
@@ -27536,112 +27655,119 @@ function isPointInRect(point, rect) {
     return point[0] >= rect[0] && point[0] <= rect[0] + rect[2] &&
            point[1] >= rect[1] && point[1] <= rect[1] + rect[3];
 }
+// ==================== Projectile ====================
 class Projectile {
     constructor(x, y, angle, type, source) {
-            // 基础属性初始化
-            this.x = x;
-            this.y = y;
-            this.angle = angle;
-            this.type = type;
-            this.source = source;
-            this.isPhysical = true;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.type = type;
+        this.source = source;
+        this.isPhysical = true;
 
-            // 获取来源稀有度倍率
-            const sourceRarity = source?.rarity || "Common";
+        const sourceRarity = source?.rarity || "Common";
 
-            // ✅ 统一使用累进稀有度倍率
-            const PROGRESSIVE_RARITY_MULTIPLIERS = {
-                "Common": 1.0, "Unusual": 3.0, "Rare": 9.0, "Epic": 27.0,
-                "Legendary": 81.0, "Mythic": 243.0, "Ultra": 729.0,
-                "Super": 2187.0, "Omega": 6561.0, "Eternal": 19683.0
-            };
-            const rarityMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[sourceRarity] || 1;
+        const PROGRESSIVE_RARITY_MULTIPLIERS = {
+            "Common": 1.0, "Unusual": 3.0, "Rare": 9.0, "Epic": 27.0,
+            "Legendary": 81.0, "Mythic": 243.0, "Ultra": 729.0,
+            "Super": 2187.0, "Omega": 6561.0, "Eternal": 19683.0
+        };
+        const rarityMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[sourceRarity] || 1;
 
-            // 统一稀有度尺寸因子
-            const raritySizeFactors = {
-                "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
-                "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
-                "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
-            };
-            const sizeMult = raritySizeFactors[sourceRarity] || 1;
+        const raritySizeFactors = {
+            "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
+            "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
+            "Super": 8.4, "Omega": 12.0, "Eternal": 15.0
+        };
+        const sizeMult = raritySizeFactors[sourceRarity] || 1;
 
-            // --- 根据类型设置基础数值 (再乘以倍率) ---
-            let baseSpeed = 400;
-            let baseDamage = 30;
-            let baseHealth = 200;
-            let basePush = 80;
-            let baseLife = 4.0;
-            let baseSize = 18;
+        let baseSpeed = 400;
+        let baseDamage = 30;
+        let baseHealth = 200;
+        let basePush = 80;
+        let baseLife = 4.0;
+        let baseSize = 18;
 
-            if (this.type === "ink") {
-                baseSpeed = 250;
-                baseDamage = 15;
-                baseHealth = 50;
-                basePush = 40;
-                baseLife = 6.0;
-                baseSize = 30;
-                this.slowAmount = 0.6 + (Math.log10(rarityMultiplier) * 0.05);
-                this.slowDuration = 4000;
-            } else if (this.type === "stinger") {
-                baseSpeed = 400;
-                baseDamage = 60; // 刺的伤害通常更高
-                baseHealth = 200;
-                basePush = 0;
-                baseLife = 5.0;
-                baseSize = 25;
-                this.color = [100, 80, 40];
-                this.outlineColor = [60, 45, 25];
-            }
-
-            // ✅ 应用统一倍率公式
-            this.speed = (baseSpeed + Math.random() * 50);
-            this.velocity = new Vector2(
-                Math.cos(angle) * this.speed,
-                Math.sin(angle) * this.speed
-            );
-            this.vx = this.velocity.x;
-            this.vy = this.velocity.y;
-
-            this.size = baseSize * sizeMult;
-            this.damage = Math.floor(baseDamage * rarityMultiplier);
-            this.health = baseHealth * rarityMultiplier;
-            this.maxHealth = this.health;
-            this.pushForce = basePush * rarityMultiplier;
-            this.life = baseLife;
-            this.maxLife = baseLife;
-            this.mass = 3.0 * rarityMultiplier; // 质量也随稀有度增加，防止被轻易弹开
-
-
+        if (this.type === "ink") {
+            baseSpeed = 250;
+            baseDamage = 15;
+            baseHealth = 50;
+            basePush = 40;
+            baseLife = 6.0;
+            baseSize = 30;
+            this.slowAmount = 0.6 + (Math.log10(rarityMultiplier) * 0.05);
+            this.slowDuration = 4000;
+        } else if (this.type === "stinger") {
+            baseSpeed = 400;
+            baseDamage = 60;
+            baseHealth = 200;
+            basePush = 0;       // 刺不推人
+            baseLife = 5.0;
+            baseSize = 25;
+            this.color = [100, 80, 40];
+            this.outlineColor = [60, 45, 25];
         }
 
+        this.speed = baseSpeed + Math.random() * 50;
+        this.velocity = new Vector2(
+            Math.cos(angle) * this.speed,
+            Math.sin(angle) * this.speed
+        );
+        this.vx = this.velocity.x;
+        this.vy = this.velocity.y;
+
+        this.size = baseSize * sizeMult;
+        this.damage = Math.floor(baseDamage * rarityMultiplier);
+        this.health = baseHealth * rarityMultiplier;
+        this.maxHealth = this.health;
+        this.pushForce = basePush * rarityMultiplier;
+        this.life = baseLife;
+        this.maxLife = baseLife;
+        this.mass = 3.0 * rarityMultiplier;
+
+        // 每个目标的命中冷却，防止同一帧对同一目标多次触发
+        this.hitCooldowns = new Map();
+        this.hitCooldownMs = 100; // 同一目标 500ms 内只伤害一次
+        // 在构造函数末尾加上
+
+    }
+
     update(dt) {
+        // ✅ 物理位置更新交给外部 collisionSystem，
+        //    这里只做：寿命递减 + 墙体检测
+        // 如果外部没有调用 updatePhysics，才在这里自己更新位置
         if (this.isPhysical) {
             this.x += this.velocity.x * dt;
             this.y += this.velocity.y * dt;
 
-            // 空气阻力（让刺慢慢减速）
-            const drag = 1.0;
-            this.velocity.x *= drag;
-            this.velocity.y *= drag;
+            // 空气阻力
+            this.velocity.x *= 0.995;
+            this.velocity.y *= 0.995;
             this.vx = this.velocity.x;
             this.vy = this.velocity.y;
 
-            // 环境碰撞处理（撞墙扣血但不反弹）
             if (window.gameInstance?.isInMazeWall?.(this.x, this.y)) {
                 this.health -= 50000 * dt;
-                this.velocity.x *= 0.5;  // 减速但不反弹
+                this.velocity.x *= 0.5;
                 this.velocity.y *= 0.5;
             }
         } else {
-            this.x -= this.vx * dt;
-            this.y -= this.vy * dt;
+            // 非物理模式（旧逻辑，保留兼容）
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
         }
 
         this.life -= dt;
-        this.rotation += this.rotationSpeed * dt;
+
+        // 清理过期的命中冷却记录
+        const now = Date.now();
+        for (const [id, t] of this.hitCooldowns) {
+            if (now - t > this.hitCooldownMs) this.hitCooldowns.delete(id);
+        }
 
         return this.life > 0 && this.health > 0;
     }
+
     draw(ctx, cameraOffset) {
         if (!ctx || !cameraOffset) return;
 
@@ -27650,7 +27776,6 @@ class Projectile {
         const screenY = this.y - cameraOffset.y;
         const drawSize = this.size * viewScale;
 
-        // 屏幕裁剪
         if (screenX < -drawSize * 2 || screenX > ctx.canvas.width + drawSize * 2 ||
             screenY < -drawSize * 2 || screenY > ctx.canvas.height + drawSize * 2) {
             return;
@@ -27659,9 +27784,7 @@ class Projectile {
         ctx.save();
         ctx.translate(screenX, screenY);
 
-            // ✅ 刺的方向：指向运动方向
         if (this.type === "stinger") {
-            // 计算运动方向角度
             const directionAngle = Math.atan2(this.vy, this.vx);
             ctx.rotate(directionAngle);
         } else if (this.rotation !== undefined) {
@@ -27669,47 +27792,38 @@ class Projectile {
         }
 
         if (this.type === "stinger") {
-    // ✅ 让刺的大小基于黄蜂本身的大小
-    let baseSize = this.size;
-    if (this.source && this.source.radius) {
-        // 刺的大小 = 黄蜂半径的 80%
-        baseSize = this.source.radius * 1.6;
-    }
+            let baseSize = this.size;
+            if (this.source && this.source.radius) {
+                baseSize = this.source.radius * 1.6;
+            }
+            const ds = baseSize * viewScale;
+            const half = ds / 2;
 
-    const drawSize = baseSize * viewScale;
-    const halfSize = drawSize / 2;
+            ctx.beginPath();
+            ctx.moveTo(half, 0);
+            ctx.lineTo(-half * 0.6, -half * 0.5);
+            ctx.lineTo(-half * 0.6, half * 0.5);
+            ctx.closePath();
 
-    // 三角形尖端向前
-    ctx.beginPath();
-    ctx.moveTo(halfSize, 0);
-    ctx.lineTo(-halfSize * 0.6, -halfSize * 0.5);
-    ctx.lineTo(-halfSize * 0.6, halfSize * 0.5);
-    ctx.closePath();
+            ctx.fillStyle = this.color
+                ? `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`
+                : `rgb(80, 80, 80)`;
+            ctx.fill();
 
-    if (this.color) {
-        ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
-    } else {
-        ctx.fillStyle = `rgb(80, 80, 80)`;
-    }
-    ctx.fill();
+            ctx.strokeStyle = this.outlineColor
+                ? `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`
+                : `rgb(40, 40, 40)`;
+            ctx.lineWidth = 2 * viewScale;
+            ctx.stroke();
 
-    if (this.outlineColor) {
-        ctx.strokeStyle = `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`;
-    } else {
-        ctx.strokeStyle = `rgb(40, 40, 40)`;
-    }
-    ctx.lineWidth = 2 * viewScale;
-    ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(half - 3 * viewScale, 0);
+            ctx.lineTo(half, 0);
+            ctx.strokeStyle = `rgba(150, 150, 150, 0.8)`;
+            ctx.lineWidth = 1.5 * viewScale;
+            ctx.stroke();
 
-    // 添加尖端高光
-    ctx.beginPath();
-    ctx.moveTo(halfSize - 3 * viewScale, 0);
-    ctx.lineTo(halfSize, 0);
-    ctx.strokeStyle = `rgba(150, 150, 150, 0.8)`;
-    ctx.lineWidth = 1.5 * viewScale;
-    ctx.stroke();
-}else if (this.type === "ink") {
-            // ========== 墨汁绘制 ==========
+        } else if (this.type === "ink") {
             const lifeRatio = Math.max(0, Math.min(1, this.life / this.maxLife));
             const alpha = Math.min(0.8, lifeRatio * 0.6 + 0.2);
 
@@ -27752,17 +27866,12 @@ class Projectile {
             }
 
         } else {
-            // ========== 默认圆形投射物 ==========
             ctx.beginPath();
             ctx.arc(0, 0, drawSize / 2, 0, Math.PI * 2);
-
-            if (this.color) {
-                ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
-            } else {
-                ctx.fillStyle = `rgba(255, 100, 50, 0.8)`;
-            }
+            ctx.fillStyle = this.color
+                ? `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`
+                : `rgba(255, 100, 50, 0.8)`;
             ctx.fill();
-
             ctx.strokeStyle = `rgba(0, 0, 0, 0.5)`;
             ctx.lineWidth = 1 * viewScale;
             ctx.stroke();
@@ -27771,10 +27880,22 @@ class Projectile {
         ctx.restore();
     }
 
+    // ✅ 命中目标：只扣伤害，投射物不消失，有冷却防止重复伤害
     hitTarget(target) {
         if (!target) return false;
 
-        // ✅ 造成伤害
+        // 冷却检测：同一目标短时间内不重复伤害
+        const targetId = target.id ?? target;
+        const now = Date.now();
+        if (this.hitCooldowns.has(targetId)) {
+            const lastHit = this.hitCooldowns.get(targetId);
+            if (now - lastHit < this.hitCooldownMs) {
+                return false; // 还在冷却，不伤害，但也不消失
+            }
+        }
+        this.hitCooldowns.set(targetId, now);
+
+        // 造成伤害
         if (target.takeDamage) {
             target.takeDamage(this.damage, this.source);
         } else {
@@ -27787,44 +27908,56 @@ class Projectile {
                 target.physicsBody.position.x,
                 target.physicsBody.position.y,
                 Math.floor(this.damage),
-                "stinger"
+                this.type === "stinger" ? "stinger" : "projectile"
             );
         }
 
+        // 墨汁减速
+        if (this.type === "ink" && target.slowMultiplier !== undefined) {
+            target.slowMultiplier = 1 - Math.min(0.8, this.slowAmount);
+            target.slowDuration = this.slowDuration;
+            target.isInked = true;
+            setTimeout(() => { if (target) target.isInked = false; }, this.slowDuration);
+        }
 
+        // ✅ 不修改 this.health 和 this.life，投射物继续飞行
         return true;
     }
 
     get physicsBody() {
-            return {
-                position: { x: this.x, y: this.y },
-                radius: this.size * 0.5,
-                velocity: this.velocity,
-                mass: this.mass,
-                isProjectile: true
-            };
-        }
-        takeDamage(damage, source = null) {
+        return {
+            position: { x: this.x, y: this.y },
+            radius: this.size * 0.5,
+            velocity: this.velocity,
+            mass: this.mass,
+            isProjectile: true
+        };
+    }
+
+    takeDamage(damage, source = null) {
         this.health -= damage;
         return this.health <= 0;
     }
-}
-// ==================== 蝎子毒刺投射物 ====================
-class ScorpionStinger extends Projectile {
-    constructor(x, y, angle, source) {
-        super(x, y, angle, "scorpion_stinger", source);
 
-        this.type = "scorpion_stinger";
+}
+
+
+// ==================== ScorpionStinger ====================
+class ScorpionStinger extends Projectile {
+    constructor(x, y, angle, source, stingerType = "scorpion") {
+        super(x, y, angle,
+            stingerType === "scorpion" ? "scorpion_stinger" : "urchin_spine",
+            source
+        );
+
+        this.stingerType = stingerType;
         this.isPhysical = true;
         this.mass = 3.0;
+        this.hitCooldownMs = 600; // 稍长一点的冷却
 
-        // 获取来源稀有度倍率
         const sourceRarity = source?.rarity || "Common";
-
-        // ✅ 使用 PROGRESSIVE_RARITY_MULTIPLIERS（和攻击力一样）
         const rarityMultiplier = PROGRESSIVE_RARITY_MULTIPLIERS[sourceRarity] || 1;
 
-        // 稀有度尺寸因子
         const raritySizeFactors = {
             "Common": 1.0, "Unusual": 1.1, "Rare": 1.2, "Epic": 1.6,
             "Legendary": 1.8, "Mythic": 2.8, "Ultra": 4.0,
@@ -27832,8 +27965,7 @@ class ScorpionStinger extends Projectile {
         };
         const sizeMult = raritySizeFactors[sourceRarity] || 1;
 
-        // 速度
-        this.speed = 400 + Math.random() * 50;
+        this.speed = 350 + Math.random() * 80;
         this.velocity = new Vector2(
             Math.cos(angle) * this.speed,
             Math.sin(angle) * this.speed
@@ -27841,49 +27973,29 @@ class ScorpionStinger extends Projectile {
         this.vx = this.velocity.x;
         this.vy = this.velocity.y;
 
-        // ✅ 推动力也使用稀有度倍数
-        this.pushForce = 80 * rarityMultiplier;
-        this.life = 4.0;
-        this.maxLife = 4.0;
-        this.size = 18 * sizeMult;
+        this.pushForce = 0; // 刺不推人
+        this.life = 3.0;
+        this.maxLife = 3.0;
+        this.size = 12 * sizeMult;
 
-        // ✅ 伤害使用 PROGRESSIVE_RARITY_MULTIPLIERS
-        this.damage = Math.floor(30 * rarityMultiplier);
-        this.poisonDamage = Math.floor(20 * rarityMultiplier);
-        this.poisonDuration = 3000;
+        this.damage = stingerType === "urchin"
+            ? Math.floor(20 * rarityMultiplier)
+            : Math.floor(30 * rarityMultiplier);
 
-        // ✅ 血量也使用稀有度倍数（让刺更耐打）
-        this.health = 200 * rarityMultiplier;
+        this.health = 100 * rarityMultiplier;
         this.maxHealth = this.health;
 
-        // 颜色
-        this.color = [100, 80, 40];
-        this.outlineColor = [60, 45, 25];
-    }
-
-    hitTarget(target) {
-        if (!target) return false;
-
-        // ✅ 造成伤害
-        if (target.takeDamage) {
-            target.takeDamage(this.damage, this.source);
+        if (stingerType === "urchin") {
+            this.color = [123, 47, 190];
+            this.outlineColor = [61, 0, 110];
         } else {
-            target.health -= this.damage;
+            this.color = [100, 80, 40];
+            this.outlineColor = [60, 45, 25];
         }
-
-        // 显示伤害数字
-        if (this.source?.gameInstance?.addDamageNumber) {
-            this.source.gameInstance.addDamageNumber(
-                target.physicsBody.position.x,
-                target.physicsBody.position.y,
-                Math.floor(this.damage),
-                "stinger"
-            );
-        }
-
-
-        return true;
     }
+
+    // hitTarget 继承自 Projectile（只扣伤害，不消失，有冷却）
+    // 无需重写
 
     draw(ctx, cameraOffset) {
         if (!ctx || !cameraOffset) return;
@@ -27892,13 +28004,10 @@ class ScorpionStinger extends Projectile {
         const screenX = this.x - cameraOffset.x;
         const screenY = this.y - cameraOffset.y;
 
-        // ✅ 让刺的大小基于蝎子本身的大小（通过 source 的半径）
         let baseSize = this.size;
         if (this.source && this.source.radius) {
-            // 刺的大小 = 蝎子半径的 60%
             baseSize = this.source.radius * 1.2;
         }
-
         const drawSize = baseSize * viewScale;
 
         if (screenX < -drawSize || screenX > ctx.canvas.width + drawSize ||
@@ -27908,34 +28017,32 @@ class ScorpionStinger extends Projectile {
 
         ctx.save();
         ctx.translate(screenX, screenY);
+        ctx.rotate(Math.atan2(this.vy, this.vx));
 
-        const directionAngle = Math.atan2(this.vy, this.vx);
-        ctx.rotate(directionAngle);
+        const half = drawSize / 2;
 
-        const halfSize = drawSize / 2;
-
-        // 绘制三角形刺
         ctx.beginPath();
-        ctx.moveTo(halfSize, 0);
-        ctx.lineTo(-halfSize * 0.6, -halfSize * 0.5);
-        ctx.lineTo(-halfSize * 0.6, halfSize * 0.5);
+        ctx.moveTo(half, 0);
+        ctx.lineTo(-half * 0.6, -half * 0.5);
+        ctx.lineTo(-half * 0.6, half * 0.5);
         ctx.closePath();
 
         ctx.fillStyle = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
         ctx.fill();
-
         ctx.strokeStyle = `rgb(${this.outlineColor[0]}, ${this.outlineColor[1]}, ${this.outlineColor[2]})`;
         ctx.lineWidth = 2 * viewScale;
         ctx.stroke();
 
-        // 毒液特效
-        ctx.beginPath();
-        ctx.moveTo(halfSize - 3 * viewScale, 0);
-        ctx.lineTo(halfSize + 5 * viewScale, -3 * viewScale);
-        ctx.lineTo(halfSize + 5 * viewScale, 3 * viewScale);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(150, 200, 50, 0.7)`;
-        ctx.fill();
+        // 海胆刺毒液特效
+        if (this.stingerType === "urchin") {
+            ctx.beginPath();
+            ctx.moveTo(half - 3 * viewScale, 0);
+            ctx.lineTo(half + 5 * viewScale, -3 * viewScale);
+            ctx.lineTo(half + 5 * viewScale, 3 * viewScale);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(180, 100, 255, 0.7)`;
+            ctx.fill();
+        }
 
         ctx.restore();
     }
@@ -28159,7 +28266,14 @@ class Enemy {
             this.meleeCooldown = 0;        // ✅ 添加近战冷却
             this.meleeCooldownMax = 500;    // 近战冷却 0.5 秒
         }
-
+        // 在 Enemy 构造函数中，设置 type 后添加
+        if (enemyType === "Urchin") {
+            this.spineCooldown = 0;
+            this.spineCooldownMax = 800;  // 初始冷却
+            this.spineCount = 20;
+            this.lastHealthPercent = 1.0;
+            this.hasShotSpines = false;  // 是否已经发射过刺
+        }
         // 设置稀有度
         if (rarity !== null && rarity !== undefined && RARITY_LIST.includes(rarity)) {
             this.rarity = rarity;
@@ -28429,7 +28543,47 @@ class Enemy {
 
         enemies.push(dragon);
     }
-// 在 Enemy 类中添加
+    // 在 Enemy 类的 shootSpines 方法中
+    shootSpines() {
+        if (!this.gameInstance) return;
+        if (this.spineCooldown > 0) return;
+
+        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                             "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        const rarityIndex = rarityOrder.indexOf(this.rarity);
+        const baseSpines = 20;
+        const spinesPerRarity = 1;
+        const totalSpines = baseSpines + (rarityIndex * spinesPerRarity);
+
+        const angleStep = (Math.PI * 2) / totalSpines;
+
+        for (let i = 0; i < totalSpines; i++) {
+            const randomOffset = (Math.random() - 0.5) * 0.15;
+            const angle = i * angleStep + randomOffset;
+
+            // 使用 ScorpionStinger，传入 "urchin" 类型
+            const spine = new ScorpionStinger(
+                this.physicsBody.position.x,
+                this.physicsBody.position.y,
+                angle,
+                this,
+                "urchin"  // 指定为海胆刺
+            );
+            this.gameInstance.projectiles.push(spine);
+        }
+
+        const cooldownReduction = 1 - (rarityIndex * 0.04);
+        this.spineCooldown = Math.max(400, this.spineCooldownMax * cooldownReduction);
+
+        if (this.gameInstance.addDamageNumber && Math.random() < 0.3) {
+            this.gameInstance.addDamageNumber(
+                this.physicsBody.position.x,
+                this.physicsBody.position.y,
+                `💢 ${totalSpines} SPINES!`,
+                "heal"
+            );
+        }
+    }
     spawnHelBeeAndHelHornet(enemies) {
         if (this.isDead || !enemies) return;
 
@@ -30866,6 +31020,24 @@ class Enemy {
                 this.shootCooldown -= dt * 1000;
             }
         }
+        // 在 Enemy 类的 update 方法中，找到 SeaUrchin 的处理部分
+        if (this.type === "Urchin" && !this.isDead && !this.isSpawning) {
+            const currentHealthPercent = this.health / this.maxHealth;
+
+            // 血量低于90%时持续发射刺
+            if (currentHealthPercent < 0.95) {
+                // 冷却检查
+                if (this.spineCooldown <= 0) {
+                    this.shootSpines();
+                    this.spineCooldown = this.spineCooldownMax;
+                }
+            }
+
+            // 更新冷却
+            if (this.spineCooldown > 0) {
+                this.spineCooldown -= dt * 1000;
+            }
+        }
         // 沉船逻辑
         if (this.type === "Shipwreck" && !this.isSpawning && !this.isDead) {
             const healthPercent = this.health / this.maxHealth;
@@ -33161,6 +33333,29 @@ class Petal {
 
         return true;
     }
+    // 在 Petal 类中添加这个方法
+    shouldInstantReload(item) {
+        if (!item || item.type !== "Quartz") return false;
+
+        const currentItem = this.getCurrentItem();
+        if (!currentItem) return false;
+
+        // 获取 Quartz 的稀有度索引
+        const rarityOrder = ["Common", "Unusual", "Rare", "Epic", "Legendary",
+                             "Mythic", "Ultra", "Super", "Omega", "Eternal"];
+        const quartzRarityIndex = rarityOrder.indexOf(item.rarity);
+        const targetRarityIndex = rarityOrder.indexOf(currentItem.rarity);
+
+        // 只有稀有度相同或更低的目标才能触发
+        if (targetRarityIndex > quartzRarityIndex) return false;
+
+        // 获取触发概率（基础15%，每级稀有度+5%）
+        const baseChance = 0.15;
+        const rarityBonus = quartzRarityIndex * 0.01;
+        const totalChance = Math.min(0.3, baseChance + rarityBonus);
+
+        return Math.random() < totalChance;
+    }
     // 在 Petal 类中修改 _applyTalentToPet 方法
     _applyTalentToPet(pet) {
         if (!pet || !this.player) return;
@@ -33448,7 +33643,7 @@ class Petal {
         return null;
     }
      static SUMMON_LISTS = [
-            'goldenAntList', 'rockList', 'sandstormList', 'whiteBloodCellList',
+            'goldenAntList','urchinList', 'rockList', 'sandstormList', 'whiteBloodCellList',
             'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
             'beeList', 'ladybugList', 'beetleList', 'scorpionList',
             'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
@@ -33856,9 +34051,10 @@ class Petal {
                 if (item.type === "Bubble") {
                     const rarityReloadMap = {
                         "Common": 1800, "Unusual": 1700, "Rare": 1600, "Epic": 1500,
-                        "Legendary": 1400, "Mythic": 1300, "Ultra": 1200,
-                        "Super": 1000, "Omega": 800, "Eternal": 200
+                        "Legendary": 1400, "Mythic": 1200, "Ultra": 1000,
+                        "Super": 400, "Omega": 150, "Eternal": 200
                     };
+                    console.log("bbb");
                     this.baseReloadTime = rarityReloadMap[this.rarity] || 5000;
                     this.reloadTime = this.baseReloadTime;
                 }
@@ -33934,6 +34130,10 @@ class Petal {
     // =========================================================================
     _registerSpawnMethods() {
         const SPAWN_CONFIGS = [
+        // 在 Petal 类的 _registerSpawnMethods 中添加海胆配置
+            { listName: "urchinList", maxName: "maxUrchins", maxDefault: 1, spawnCount: 1,
+              enemyType: "Urchin", eggType: "Urchin Egg", cooldown: 15000,
+              spawnMethod: "Urchin", cleanMethod: "Urchin", updateMethod: "Urchin" },
             // ── Hel / Dragon ─────────────────────────────────────────────────
             { listName:"helWormList",       maxName:"maxHelWorms",          maxDefault:2,  spawnCount:2,  enemyType:"HelWorm",        eggType:"Hel Worm Egg",          cooldown:10000, spawnMethod:"HelWorm",             cleanMethod:"HelWorm",             updateMethod:"HelWorm" },
             { listName:"helSpiderList",     maxName:"maxHelSpiders",        maxDefault:3,  spawnCount:3,  enemyType:"HelSpider",      eggType:"Hel Spider Egg",        cooldown:12000, spawnMethod:"HelSpider",           cleanMethod:"HelSpider",           updateMethod:"HelSpider" },
@@ -34539,6 +34739,7 @@ class Petal {
             // 自动生成映射表（精简版，保持原有逻辑）
             const autoEggMap = {
                 "White Blood Cell Egg": ["WhiteBloodCellsWithDna", 5000, "updateWhiteBloodCells"],
+                "Urchin Egg": ["Urchin", 8000, "updateUrchin"],
                 "Spider Egg": ["SpidersWithDna", 6000, "updateSpiders"],
                 "Red Blood Cell Egg": ["RedBloodCellsWithDna", 8000, "updateRedBloodCells"],
                 "Stem Cell Egg": ["StemCellsWithDna", 15000, "updateStemCells"],
@@ -34794,11 +34995,42 @@ class Petal {
         this.startReload();
     }
 
+    // 在 Petal 类中修改 startReload 方法
     startReload() {
         if (this.isReloading) return;
+
+        // 检查是否有 Quartz 可以触发瞬间重载
+        let quartzItem = null;
+        for (const petal of this.player?.petals || []) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Quartz") {
+                quartzItem = item;
+                break;
+            }
+        }
+
+        // 检查是否触发瞬间重载
+        if (quartzItem && this.shouldInstantReload(quartzItem)) {
+            // 瞬间重载：不进入重载状态，直接恢复
+            this.isReloading = false;
+            this.reloadCooldown = 0;
+            this.isBroken = false;
+            this.health = this.maxHealth;
+            this.durability = this.maxDurability;
+
+            // 同步到快捷栏物品
+            const currentItem = this.getCurrentItem();
+            if (currentItem) {
+                currentItem.isBroken = false;
+                currentItem.durability = this.maxDurability;
+            }
+
+            return;
+        }
+
+        // 正常重载
         this.isReloading = true;
         this.reloadCooldown = this.reloadTime;
-        // 重载时也不保存位置
         this.stillMode = false;
     }
 
@@ -43455,11 +43687,6 @@ class WorldMapGame {
                 }
             }
 
-            // 移除命中的投射物
-            if (hit || p.life <= 0 || p.health <= 0) {
-                this.projectiles.splice(i, 1);
-                continue;
-            }
 
             // 边界移除
             if (p.x < -500 || p.x > WORLD_WIDTH + 500 || p.y < -500 || p.y > WORLD_HEIGHT + 500) {
@@ -47051,22 +47278,19 @@ class WorldMapGame {
         context.restore();
     }
 
-    getOrCreatePattern(groundColor, scale) {
-        const currentScale = scale || this.viewScale || 1;
-        // ✅ 量化到小数点后1位
-        const quantizedScale = Math.round(currentScale * 10) / 10;
-        const key = `${this.currentBiome}_${quantizedScale}`;
+getOrCreatePattern(groundColor, scale) {
+    // ✅ 关键修改：忽略 scale，始终使用固定 key
+    const key = `${this.currentBiome}_fixed`;
 
-        if (!this._patternCache) this._patternCache = {};
-        if (this._patternCache[key]) return this._patternCache[key];
+    if (!this._patternCache) this._patternCache = {};
+    if (this._patternCache[key]) return this._patternCache[key];
 
-        console.log(`🔄 生成新图案: ${key}, 缩放: ${quantizedScale}`);
-        const pattern = this.createTilePattern(groundColor, quantizedScale);
-        this._patternCache[key] = pattern;
+    console.log(`🔄 生成固定图案: ${key}`);
+    const pattern = this.createTilePattern(groundColor, 1.0);  // 始终用 1.0 创建
+    this._patternCache[key] = pattern;
 
-        return pattern;
-    }
-
+    return pattern;
+}
     createTilePattern(groundColor, scale) {
         const currentScale = scale || this.viewScale || 1;
         const TILE_SIZE = 300 * Math.max(0.5, currentScale);
