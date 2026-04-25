@@ -34945,18 +34945,27 @@ class Petal {
             this.nextSpawnCooldown = this.baseSpawnCooldown;
         }
     }
-
+    
     updateReloadTimeWithGoldenLeaf() {
         if (!this.player) return;
         let totalReduction = 0;
+
         for (const petal of this.player.petals) {
             const item = petal.getCurrentItem();
-            if (item && item.type === "Golden Leaf"|| item.type === "Magic Golden Leaf") {
+            if (!item) continue;
+
+            // ✅ 区分普通和魔法 Golden Leaf
+            if (item.type === "Golden Leaf") {
                 const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
+                totalReduction += reduction;
+            } else if (item.type === "Magic Golden Leaf") {
+                const reduction = ITEM_STATS["Magic Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
                 totalReduction += reduction;
             }
         }
+
         totalReduction = Math.min(totalReduction, 0.99);
+
         if (this.baseReloadTime === undefined) {
             const currentItem = this.getCurrentItem();
             if (currentItem && currentItem.baseReloadTime) {
@@ -34965,6 +34974,7 @@ class Petal {
                 this.baseReloadTime = this.reloadTime;
             }
         }
+
         if (totalReduction > 0) {
             const newReloadTime = Math.max(10, this.baseReloadTime * (1 - totalReduction));
             if (this.reloadTime !== newReloadTime) this.reloadTime = newReloadTime;
@@ -34974,7 +34984,6 @@ class Petal {
             }
         }
     }
-
     updateFromQuickSlot(petalIndex) {
         this._petalIndex = petalIndex;
         this.petalIndex = petalIndex;
@@ -47602,7 +47611,6 @@ class WorldMapGame {
         let magicCoreIndex = -1;
         let magicCoreRarity = null;
 
-        // ✅ 只有快捷栏有 Magic Core 时才记录
         for (const slotItem of this.player.quickSlot.slots) {
             if (slotItem?.type === "Magic Core") {
                 const idx = rarityOrder.indexOf(slotItem.rarity);
@@ -47624,6 +47632,7 @@ class WorldMapGame {
 
         for (const itemType of dropItems) {
             for (let i = 0; i < dropCount; i++) {
+                // ✅ 普通物品：正常计算，不受 Magic Core 影响
                 let dropRarity = getDropRarityByItem(itemType, enemyRarity);
                 let finalItemType = itemType;
 
@@ -47631,22 +47640,17 @@ class WorldMapGame {
 
                 // ✅ 魔法物品：只有快捷栏有 Magic Core 时才可能掉落
                 if (magicVersion && magicCoreRarity) {
-                    // 使用魔法物品自己的 dropFactor 计算稀有度
                     const magicDropRarity = getDropRarityByItem(magicVersion, enemyRarity);
                     if (magicDropRarity && magicDropRarity !== "Common") {
                         finalItemType = magicVersion;
                         dropRarity = magicDropRarity;
-                    }
-                }
 
-                // 如果没有 Magic Core，魔法物品不会掉落（finalItemType 保持普通物品）
-
-                // ✅ Magic Core：限制最高稀有度（不提升，只降低）
-                if (magicCoreRarity && dropRarity && dropRarity !== "Common") {
-                    const currentIdx = rarityOrder.indexOf(dropRarity);
-                    const coreIdx = rarityOrder.indexOf(magicCoreRarity);
-                    if (currentIdx > coreIdx) {
-                        dropRarity = magicCoreRarity;  // 限制最高稀有度，不提升
+                        // ✅ Magic Core：只对魔法物品限制最高稀有度（不提升）
+                        const currentIdx = rarityOrder.indexOf(dropRarity);
+                        const coreIdx = rarityOrder.indexOf(magicCoreRarity);
+                        if (currentIdx > coreIdx) {
+                            dropRarity = magicCoreRarity;
+                        }
                     }
                 }
 
