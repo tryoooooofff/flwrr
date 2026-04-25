@@ -6,7 +6,7 @@ export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
 //后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton Egg+ 1 charge组成1 Electron Cloud Egg...
 //可能增加新地图error：所有生物使用黑白紫色
-//后期重构账号面板（不使用html，包含time join, time played,start time,xp,petal crafted,还有退出和其他html里面有的功能）
+//增加新地图沼泽--shark,vampire digger, bat(没有写掉落物表）
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -711,10 +711,11 @@ export const BIOME_SPAWN_RATES = {
             "Firefly": { weight: 70, minLevel: 1, maxLevel: 5 },
             "TermiteHole": { weight: 0.1, minLevel: 1, maxLevel: 5 },
             "TermiteOvermind": { weight: 0.1, minLevel: 1, maxLevel: 5, condition: "boss" },
-            "Magic Stickbug":{ weight: 0.01, minLevel: 1, maxLevel: 5 },
+            "Magic Stickbug":{ weight: 0.008, minLevel: 1, maxLevel: 4 },
     },
     "Random": {
         "Worker Ant": { weight: 100, minLevel: 1, maxLevel: 5 },
+        "Shark": { weight: 100, minLevel: 1, maxLevel: 5 },
         "Soldier Ant": { weight: 80, minLevel: 1, maxLevel: 5 },
         "SoldierFireAnt": { weight: 70, minLevel: 1, maxLevel: 5 },
         "BabyFireAnt": { weight: 60, minLevel: 1, maxLevel: 5 },
@@ -1640,7 +1641,7 @@ export const ITEM_STATS = {
     "Magic Fang": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 500, dropFactor: 0.1, is_magic: true, mana_cost: -6, mana_restore: 1.2, effect_type: "mana_restore" },
     "Magic Fire Bomb": { base_attack: 50, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.05, is_magic: true, is_bomb: true, mana_cost: 8, fire_damage: 30, fire_duration: 4, explosion_radius: 120 },
     "Magic Bubble Bomb": { base_attack: 30, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.09, is_magic: true, is_bomb: true, mana_cost: 4, knockback_power: 800, explosion_radius: 150 },
-    "Magic Golden Leaf": { base_attack: 2, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.04, is_magic: true, mana_cost_reduction: 0.04, effect_type: "mana_reduction" },
+    "Magic Golden Leaf": { base_attack: 5, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.04,    is_golden_leaf: true,reload_reduction: {"Mythic": 0.08, "Ultra": 0.12,"Super": 0.16,"Omega": 0.2, "Eternal": 0.25},is_magic: true, mana_cost_reduction: 0.05, effect_type: "mana_reduction" },
     "Magic Soldier Ant Egg": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.06, is_magic: true, mana_cost: 2, spawn_magic_ant: true, spawn_count: 1,effect_type: "mana_reduction" },
     "Magic Blood Stinger": {base_attack: 380,base_cooldown: 10,use_rarity_multiplier: true,base_reload_time: 150,dropFactor: 0.03,is_magic: true,mana_cost: 20,lifesteal: 0.1},
     "Magic Core": {base_attack: 10,base_cooldown: 100,use_rarity_multiplier: false,base_reload_time: 1000,dropFactor: 0.05,is_magic_core: true},
@@ -2062,7 +2063,7 @@ export function getItemArmorValue(itemType, rarity) {
 // 在 ENEMY_ARMOR_CLASSES 中添加 E 级
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy","Ghost","ElectronCloud"],
-    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom","Urchin"],
+    "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom","Urchin","Shark"],
     "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton","UFO","VampireDigger","Bat"],
     "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole","Magic Stickbug"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest","NeutronStar"] // E级 - 最难打的Boss级生物
@@ -22713,6 +22714,102 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
 
         context.restore();
     }
+    // ==================== 🦈 鲨鱼 (Shark) ====================
+    drawShark(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+        const raritySizeFactors = {"Common":1.0,"Unusual":1.1,"Rare":1.2,"Epic":1.6,"Legendary":1.8,"Mythic":2.8,"Ultra":4.0,"Super":8.4,"Omega":12.0};
+        const legendaryFactor = raritySizeFactors["Legendary"];
+        const rarityFactor    = raritySizeFactors[rarity] || 1.0;
+        const S = (rarityFactor / legendaryFactor) * (scaledSize / size);
+
+        let BODY_COLOR, FIN_COLOR, OUTLINE, EYE_COLOR, PUPIL_COLOR;
+
+        if (isFriendly) {
+            BODY_COLOR = '#FFD700';      // 金色身体
+            FIN_COLOR  = '#DAA520';      // 深金色鱼鳍
+            OUTLINE    = '#B8860B';      // 暗金色描边
+        } else {
+            BODY_COLOR = '#2e4e6e';      // 蓝色身体
+            FIN_COLOR  = '#1e3a52';      // 深蓝色鱼鳍
+            OUTLINE    = '#162c3e';      // 深蓝色描边
+        }
+        const W = 75;
+        const H = 175;
+
+        context.save();
+        context.translate(x, y);
+        context.rotate(angleToPlayer + Math.PI / 2);
+        context.lineCap  = 'round';
+        context.lineJoin = 'round';
+
+        // ===== 1. 左鱼鳍 =====
+        context.beginPath();
+        context.moveTo(-62 * S, -80 * S);
+        context.quadraticCurveTo(-145 * S, -38 * S, -128 * S, 8 * S);
+        context.lineTo(-60 * S, -18 * S);
+        context.closePath();
+        context.fillStyle = FIN_COLOR;
+        context.fill();
+        context.strokeStyle = OUTLINE;
+        context.lineWidth = 12 * S;
+        context.stroke();
+
+        // ===== 2. 右鱼鳍（严格镜像）=====
+        context.beginPath();
+        context.moveTo( 62 * S, -80 * S);
+        context.quadraticCurveTo( 145 * S, -38 * S,  128 * S, 8 * S);
+        context.lineTo( 60 * S, -18 * S);
+        context.closePath();
+        context.fillStyle = FIN_COLOR;
+        context.fill();
+        context.strokeStyle = OUTLINE;
+        context.lineWidth = 12 * S;
+        context.stroke();
+
+        // ===== 3. 身体（头部最宽W=75，中段收至60，下部收尖）=====
+        context.beginPath();
+        context.moveTo(0, -H * S);
+        context.bezierCurveTo(
+             W * S,    -H * S,
+             W * S,    -H * 0.4 * S,
+            60 * S,     H * 0.1 * S
+        );
+        context.bezierCurveTo(
+            50 * S,     H * 0.45 * S,
+            28 * S,     H * 0.82 * S,
+             0,         H * S
+        );
+        context.bezierCurveTo(
+           -28 * S,     H * 0.82 * S,
+           -50 * S,     H * 0.45 * S,
+           -60 * S,     H * 0.1 * S
+        );
+        context.bezierCurveTo(
+            -W * S,    -H * 0.4 * S,
+            -W * S,    -H * S,
+             0,        -H * S
+        );
+        context.closePath();
+        context.fillStyle = BODY_COLOR;
+        context.fill();
+        context.strokeStyle = OUTLINE;
+        context.lineWidth = 16 * S;
+        context.stroke();
+
+        // ===== 4. 背部中线 =====
+        context.beginPath();
+        context.moveTo(0, -95 * S);
+        context.lineTo(0,  15 * S);
+        context.strokeStyle = OUTLINE;
+        context.lineWidth = 15 * S;
+        context.lineCap = 'round';
+        context.stroke();
+
+        context.restore();
+    }
     // 在 EnemyDrawer 类中添加 drawMagicStickbug 方法
     drawMagicStickbug(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
         const scaledSize = size * viewScale;
@@ -23695,6 +23792,8 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
             this.drawShipwreck(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Magic Stickbug") {
             this.drawMagicStickbug(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Shark") {
+            this.drawShark(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         }
         // ========== 🆕 下水道生物 ==========
         else if (enemyType === "ManHole") {
@@ -29902,6 +30001,7 @@ class Enemy {
             case "HelQueenBee": return [180, 20, 120, 400, 100];
             case "GraveDigger": return [260, 30, 90, 300, 90];
             case "AlienDigger": return [500, 28, 90, 300, 200];
+            case "Shark": return [250, 35, 90, 300, 75];
             default: return [100, 20, 60, 10, 40];
         }
     }
@@ -34851,7 +34951,7 @@ class Petal {
         let totalReduction = 0;
         for (const petal of this.player.petals) {
             const item = petal.getCurrentItem();
-            if (item && item.type === "Golden Leaf") {
+            if (item && item.type === "Golden Leaf"|| item.type === "Magic Golden Leaf") {
                 const reduction = ITEM_STATS["Golden Leaf"]?.reload_reduction?.[item.rarity] || 0;
                 totalReduction += reduction;
             }
@@ -45210,17 +45310,17 @@ class WorldMapGame {
             this.player.physicsBody.position.y
         );
 
-        let spawnInterval = 0.8;
+        let spawnInterval = 1.6;  // 原来是 0.8
         if (playerBlock) {
             const blockType = playerBlock.type;
             switch(blockType) {
-                case 'A': spawnInterval = 1.0; break;
-                case 'B': spawnInterval = 0.8; break;
-                case 'C': spawnInterval = 0.9; break;
-                case 'D': spawnInterval = 0.8; break;
-                case 'E': spawnInterval = 0.8; break;
-                case 'F': spawnInterval = 0.8; break;
-                default: spawnInterval = 1.0;
+                case 'A': spawnInterval = 2.0; break;  // 原来是 1.0
+                case 'B': spawnInterval = 1.6; break;  // 原来是 0.8
+                case 'C': spawnInterval = 1.8; break;  // 原来是 0.9
+                case 'D': spawnInterval = 1.6; break;  // 原来是 0.8
+                case 'E': spawnInterval = 1.6; break;  // 原来是 0.8
+                case 'F': spawnInterval = 1.6; break;  // 原来是 0.8
+                default: spawnInterval = 2.0; break;   // 原来是 1.0
             }
         }
 
@@ -47473,7 +47573,6 @@ class WorldMapGame {
             this.resolveMazeCollision(card.physicsBody);
         }
     }
-
     dropCard(enemy) {
         if (this.droppedCards.length >= this.maxDroppedCards) {
             this.droppedCards = this.droppedCards.slice(5);
@@ -47503,6 +47602,7 @@ class WorldMapGame {
         let magicCoreIndex = -1;
         let magicCoreRarity = null;
 
+        // ✅ 只有快捷栏有 Magic Core 时才记录
         for (const slotItem of this.player.quickSlot.slots) {
             if (slotItem?.type === "Magic Core") {
                 const idx = rarityOrder.indexOf(slotItem.rarity);
@@ -47517,40 +47617,45 @@ class WorldMapGame {
             "Leaf": "Magic Leaf", "Starfish": "Magic Starfish", "Fang": "Magic Fang",
             "Fire Bomb": "Magic Fire Bomb", "Bubble Bomb": "Magic Bubble Bomb",
             "Golden Leaf": "Magic Golden Leaf", "Soldier Ant Egg": "Magic Soldier Ant Egg",
-            "Blood Stinger": "Magic Blood Stinger","Cactus": "Magic Cactus","Claw": "Magic Claw","Stinger":"Magic Stinger", "Hemoglobin": "Magic Hemoglobin","Ruby":"Magic Ruby"
+            "Blood Stinger": "Magic Blood Stinger", "Cactus": "Magic Cactus",
+            "Claw": "Magic Claw", "Stinger": "Magic Stinger", "Hemoglobin": "Magic Hemoglobin",
+            "Ruby": "Magic Ruby"
         };
 
-    for (const itemType of dropItems) {
-        for (let i = 0; i < dropCount; i++) {
-            let dropRarity = getDropRarityByItem(itemType, enemyRarity);
-            let finalItemType = itemType;
+        for (const itemType of dropItems) {
+            for (let i = 0; i < dropCount; i++) {
+                let dropRarity = getDropRarityByItem(itemType, enemyRarity);
+                let finalItemType = itemType;
 
-            const magicVersion = magicItemMap[itemType];
-            if (magicVersion) {
-                // ✅ 使用魔法物品自己的 dropFactor 计算稀有度
-                const magicDropRarity = getDropRarityByItem(magicVersion, enemyRarity);
-                if (magicDropRarity && magicDropRarity !== "Common") {
-                    finalItemType = magicVersion;
-                    dropRarity = magicDropRarity;
+                const magicVersion = magicItemMap[itemType];
+
+                // ✅ 魔法物品：只有快捷栏有 Magic Core 时才可能掉落
+                if (magicVersion && magicCoreRarity) {
+                    // 使用魔法物品自己的 dropFactor 计算稀有度
+                    const magicDropRarity = getDropRarityByItem(magicVersion, enemyRarity);
+                    if (magicDropRarity && magicDropRarity !== "Common") {
+                        finalItemType = magicVersion;
+                        dropRarity = magicDropRarity;
+                    }
                 }
-            }
 
-            // ✅ Magic Core：降低稀有度（不提升）
-            if (magicCoreRarity && dropRarity) {
-                const currentIdx = rarityOrder.indexOf(dropRarity);
-                const coreIdx = rarityOrder.indexOf(magicCoreRarity);
-                if (currentIdx > coreIdx) {
-                    dropRarity = magicCoreRarity;  // 限制最高稀有度，不提升
+                // 如果没有 Magic Core，魔法物品不会掉落（finalItemType 保持普通物品）
+
+                // ✅ Magic Core：限制最高稀有度（不提升，只降低）
+                if (magicCoreRarity && dropRarity && dropRarity !== "Common") {
+                    const currentIdx = rarityOrder.indexOf(dropRarity);
+                    const coreIdx = rarityOrder.indexOf(magicCoreRarity);
+                    if (currentIdx > coreIdx) {
+                        dropRarity = magicCoreRarity;  // 限制最高稀有度，不提升
+                    }
                 }
-            }
 
-            if (dropRarity && dropRarity !== "Common") {
-                this._spawnItemDrop(enemy, finalItemType, dropRarity, i);
+                if (dropRarity && dropRarity !== "Common") {
+                    this._spawnItemDrop(enemy, finalItemType, dropRarity, i);
+                }
             }
         }
     }
-    }
-
     _spawnItemDrop(enemy, itemType, rarity, dropNum = 0) {
         const angle = Math.random() * Math.PI * 2;
         const distance = (Math.random() * 20 + 10) * (1 + dropNum * 0.5);
