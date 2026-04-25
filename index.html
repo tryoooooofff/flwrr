@@ -194,61 +194,8 @@ html, body {
   white-space: nowrap;
 }
 
-/* 原有面板样式 - 提升z-index并添加触摸拦截 */
-/* 所有模态面板统一使用全屏覆盖背景 */
-.modal-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(3px);
-  z-index: 5000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-}
-.modal-panel > .panel-content {
-  background: rgba(20, 30, 40, 0.95);
-  border-radius: 20px;
-  padding: 30px;
-  color: white;
-  min-width: 280px;
-  max-width: 90%;
-  text-align: center;
-  border: 1px solid rgba(255,215,0,0.5);
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
-  pointer-events: auto;
-}
-.modal-panel h2 { margin-bottom: 15px; color: #ffd700; }
-.modal-panel input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  background: #1e2a3a;
-  border: 1px solid #ffd700;
-  color: white;
-  border-radius: 10px;
-  font-size: 16px;
-}
-.modal-panel button {
-  background: #2c3e50;
-  border: none;
-  padding: 10px 20px;
-  margin: 8px;
-  border-radius: 30px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.modal-panel button.cancel { background: #c0392b; }
-.modal-panel button:hover { opacity: 0.8; }
-
-/* 兼容旧面板ID，应用新样式 */
-#multiplayer-panel, #account-panel {
+/* 多人游戏面板 */
+#multiplayer-panel {
   position: fixed;
   top: 0;
   left: 0;
@@ -261,7 +208,7 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-#multiplayer-panel > div, #account-panel > div {
+#multiplayer-panel > div {
   background: rgba(20, 30, 40, 0.95);
   border-radius: 20px;
   padding: 30px;
@@ -270,8 +217,8 @@ html, body {
   text-align: center;
   border: 1px solid rgba(255,215,0,0.5);
 }
-#multiplayer-panel h2, #account-panel h2 { color: #ffd700; margin-bottom: 15px; }
-#multiplayer-panel input, #account-panel input {
+#multiplayer-panel h2 { color: #ffd700; margin-bottom: 15px; }
+#multiplayer-panel input {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
@@ -281,7 +228,7 @@ html, body {
   border-radius: 10px;
   font-size: 16px;
 }
-#multiplayer-panel button, #account-panel button {
+#multiplayer-panel button {
   background: #2c3e50;
   border: none;
   padding: 10px 20px;
@@ -292,7 +239,7 @@ html, body {
   font-weight: bold;
   cursor: pointer;
 }
-#multiplayer-panel button.cancel, #account-panel button.cancel { background: #c0392b; }
+#multiplayer-panel button.cancel { background: #c0392b; }
 
 #room-info {
   position: fixed;
@@ -307,6 +254,7 @@ html, body {
   border: 1px solid #00ff00;
   pointer-events: none;
 }
+
 #current-user {
   position: fixed;
   top: 10px;
@@ -348,14 +296,6 @@ canvas {
   max-width: 100%;
   display: block;
 }
-
-/* 按钮特殊样式 */
-#btn-export-items, #btn-import-items, #btn-clear-items {
-  margin-top: 10px;
-}
-#btn-export-items { background: #3498db; }
-#btn-import-items { background: #2ecc71; }
-#btn-clear-items { background: #e74c3c; }
 </style>
 </head>
 <body>
@@ -413,59 +353,6 @@ canvas {
         </div>
     </div>
 
-    <!-- 账号面板 -->
-    <div id="account-panel">
-        <div>
-            <h2>👤 账号系统</h2>
-            <div id="account-menu">
-                <button onclick="showAccountLogin()">🔑 登录</button>
-                <button onclick="showAccountRegister()">📝 注册</button>
-                <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
-            </div>
-            <div id="account-login" style="display: none;">
-                <h3>登录</h3>
-                <div class="input-label">用户名</div>
-                <input type="text" id="login-username" placeholder="输入用户名" maxlength="20">
-                <div class="input-label">密码</div>
-                <div style="position: relative;">
-                    <input type="password" id="login-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                    <span onclick="togglePasswordVisibility('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
-                </div>
-                <button onclick="handleLogin()">✅ 登录</button>
-                <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
-                <div id="login-message" class="message" style="display: none;"></div>
-            </div>
-            <div id="account-register" style="display: none;">
-                <h3>注册新账号</h3>
-                <div class="input-label">用户名 (3-20字符)</div>
-                <input type="text" id="register-username" placeholder="输入用户名" maxlength="20">
-                <div class="input-label">密码 (3-20字符)</div>
-                <div style="position: relative;">
-                    <input type="password" id="register-password" placeholder="输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                    <span onclick="togglePasswordVisibility('register-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
-                </div>
-                <div class="input-label">确认密码</div>
-                <div style="position: relative;">
-                    <input type="password" id="register-confirm" placeholder="再次输入密码" maxlength="20" style="width: 100%; padding-right: 40px;">
-                    <span onclick="togglePasswordVisibility('register-confirm')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #f1c40f; font-size: 20px;">👁️</span>
-                </div>
-                <button onclick="handleRegister()">📝 注册</button>
-                <button class="cancel" onclick="backToAccountMenu()">↩️ 返回</button>
-                <div id="register-message" class="message" style="display: none;"></div>
-            </div>
-            <div id="account-loggedin" style="display: none;">
-                <h3>已登录</h3>
-                <div id="loggedin-username" style="font-size: 24px; margin: 20px; color: #f1c40f;"></div>
-                <button onclick="handleLogout()">🚪 登出</button>
-                <button id="btn-export-items" onclick="handleExportItems()">📤 导出物品</button>
-                <button id="btn-import-items" onclick="handleImportItems()">📥 导入物品</button>
-                <button id="btn-clear-items" onclick="handleClearAllItems()">🗑️ 清除所有物品</button>
-                <button class="cancel" onclick="hideAccountPanel()">❌ 关闭</button>
-                <div id="clear-message" class="message" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
     import {
       QuickSlot, Item, Inventory, StarCraftUI, RARITY_LIST, RARITY_COLORS,
@@ -473,408 +360,172 @@ canvas {
       ProbabilityCalculator, CraftAnimation
     } from './game.js';
 
-    // ========== 物品管理函数 ==========
+    // ========== 物品导入导出 ==========
 
     window.handleExportItems = () => {
-    const game = window.gameInstance;
-    if (!game || !game.player) {
-        alert("请先进入游戏！");
-        return;
-    }
-
-    const player = game.player;
-
-    // ========== 添加名称映射表 ==========
-    const nameMapping = {
-    // ========== Stick 系列 ==========
-    "FireStick": "Fire Stick",
-    "PooStick": "Poo Stick",
-    "SnowStick": "Snow Stick",
-
-    // ========== Hel 地狱系列 ==========
-    "HelWorm egg": "Hel Worm Egg",
-    "HelSpider egg": "Hel Spider Egg",
-    "HelBee egg": "Hel Bee Egg",
-    "HelHornet egg": "Hel Hornet Egg",
-    "HelBeetle egg": "Hel Beetle Egg",
-    "HelHive egg": "Hel Hive Egg",
-    "HelJellyfish egg": "Hel Jellyfish Egg",
-    "HelQueenBee egg": "Hel Queen Bee Egg",
-    "HelDigger egg": "Hel Digger Egg",
-    "HelBeekeeper egg": "Hel Beekeeper Egg",
-    "Hel Lighting": "Hel Lightning",
-    "Hel Honey": "Hel Honey",
-
-    // ========== 龙系列 ==========
-    "Dragon egg": "Dragon Egg",
-    "DragonNest egg": "Dragon Nest Egg",
-    "ToxicDragon egg": "Toxic Dragon Egg",
-    "IceDragon egg": "Ice Dragon Egg",
-
-    // ========== 蚂蚁系列 ==========
-    "QueenAnt egg": "Queen Ant Egg",
-    "SoldierAnt egg": "Soldier Ant Egg",
-    "WorkerAnt egg": "Worker Ant Egg",
-    "QueenBee egg": "Queen Bee Egg",
-    "FireAntOvermind egg": "Fire Ant Overmind Egg",
-    "FireAntHole egg": "Fire Ant Hole Egg",
-    "WorkerFireAnt egg": "Worker Fire Ant Egg",
-    "SoldierFireAnt egg": "Soldier Fire Ant Egg",
-    "BabyFireAnt egg": "Baby Fire Ant Egg",
-
-    // ========== 海洋系列 ==========
-    "Crab egg": "Crab Egg",
-    "CrabHole egg": "Crab Hole Egg",
-    "Jellyfish egg": "Jellyfish Egg",
-    "Starfish egg": "Starfish Egg",
-    "Bubble egg": "Bubble Egg",
-    "Shell egg": "Shell Egg",
-    "Squid egg": "Squid Egg",
-    "Shipwreck egg": "Shipwreck Egg",
-    "Barnacle egg": "Barnacle Egg",
-    "Leech Egg": "Leech Egg",
-
-    // ========== 蜘蛛系列 ==========
-    "Spider egg": "Spider Egg",
-    "SpiderCave egg": "Spider Cave Egg",
-    "ArcticSpider egg": "Arctic Spider Egg",
-    "ArcticSpiderCave egg": "Arctic Spider Cave Egg",
-
-    // ========== 蜜蜂系列 ==========
-    "Bee egg": "Bee Egg",
-    "Hive egg": "Hive Egg",
-    "Beekeeper egg": "Beekeeper Egg",
-    "Wasp egg": "Wasp Egg",
-
-    // ========== 白蚁系列 ==========
-    "WorkerTermite egg": "Worker Termite Egg",
-    "SoldierTermite egg": "Soldier Termite Egg",
-    "TermiteHole egg": "Termite Hole Egg",
-    "TermiteOvermind egg": "Termite Overmind Egg",
-
-    // ========== 甲虫系列 ==========
-    "Beetle egg": "Beetle Egg",
-    "Scorpion egg": "Scorpion Egg",
-    "Ladybug egg": "Ladybug Egg",
-    "Centipede egg": "Centipede Egg",
-    "Firefly egg": "Firefly Egg",
-    "Mantis egg": "Mantis Egg",
-    "StickBug egg": "Stick Bug Egg",
-
-    // ========== 北极系列 ==========
-    "SlagMight egg": "Stalagmite Egg",
-    "IceCube egg": "Ice Cube Egg",
-    "Igloo egg": "Igloo Egg",
-    "Tick egg": "Tick Egg",
-    "Snowman egg": "Snowman Egg",
-    "FrostDigger egg": "Frost Digger Egg",
-
-    // ========== 细胞/病毒系列 ==========
-    "StemCell egg": "Stem Cell Egg",
-    "RedBloodCell egg": "Red Blood Cell Egg",
-    "WhiteBloodCell egg": "White Blood Cell Egg",
-    "Bacteria_egg": "Bacteria Egg",
-    "Cancer egg": "Cancer Egg",
-    "Virus egg": "Virus Egg",
-    "Bacteriophage egg": "Bacteriophage Egg",
-    "Parasite Egg": "Parasite Egg",
-
-    // ========== 下水道系列 ==========
-    "ManHole egg": "Manhole Egg",
-    "Fly_egg": "Fly Egg",
-    "Rat_egg": "Rat Egg",
-    "Roach_egg": "Roach Egg",
-    "Trashcan egg": "Trashcan Egg",
-
-    // ========== Digger 系列 ==========
-    "Digger egg": "Digger Egg",
-    "MudDigger_egg": "Mud Digger Egg",
-    "TrashDigger egg": "Trash Digger Egg",
-    "Biologist egg": "Biologist Egg",
-    "PirateDigger egg": "Pirate Digger Egg",
-    "GraveDigger egg": "Grave Digger Egg",
-    "AlienDigger egg": "Alien Digger Egg",
-
-    // ========== 微观/宇宙系列 ==========
-    "Atom egg": "Atom Egg",
-    "Electron egg": "Electron Egg",
-    "Proton egg": "Proton Egg",
-    "ElectronCloud egg": "Electron Cloud Egg",
-    "Photon egg": "Photon Egg",
-    "BlackHole egg": "Black Hole Egg",
-    "WhiteHole egg": "White Hole Egg",
-    "NeutronStar egg": "Neutron Star Egg",
-    "Star egg": "Star Egg",
-    "Asteroid egg": "Asteroid Egg",
-    "Alien egg": "Alien Egg",
-    "UFO egg": "UFO Egg",
-    "Ghost egg": "Ghost Egg",
-    "GraveStone egg": "Grave Stone Egg",
-
-    // ========== 基础蛋 ==========
-    "Egg": "Egg",
-    "Ant Egg": "Ant Egg",
-    "Moon Egg": "Moon Egg",
-    "Square Egg": "Square Egg",
-
-    // ========== 其他物品 ==========
-    "Bubonic Plague": "Bubonic Plague",
-    "Bubble Bomb": "Bubble Bomb",
-    "FireBomb": "Fire Bomb",
-    "Golden Leaf": "Golden Leaf",
-    "Blood Stinger": "Blood Stinger",
-    "Gamma Ray": "Gamma Ray",
-    "Ice Rose": "Ice Rose",
-    "Ice Cube": "Ice Cube",
-    "Trident": "Trident",
-    "Controller": "Controller",
-    "Chromosome": "Chromosome",
-    "Singularity": "Singularity",
-    "DarkMatter": "Dark Matter",
-    "ElectronCloud": "Electron Cloud",
-    "Stardust": "Stardust"
-};
-
-function convertName(oldName) {
-    // 先查映射表
-    if (nameMapping[oldName]) return nameMapping[oldName];
-
-    // 清理多余空格
-    let cleaned = oldName.replace(/\s+/g, ' ').trim();
-
-    // 如果是驼峰命名（没有空格），尝试转换
-    if (!cleaned.includes(' ')) {
-        cleaned = cleaned.replace(/([a-z])([A-Z])/g, '$1 $2');
-        cleaned = cleaned.replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
-        cleaned = cleaned.replace(/\s+/g, ' ');
-    }
-
-    // 分割单词，每个单词首字母大写
-    let words = cleaned.split(' ');
-    words = words.map(word => {
-        // 特殊处理：egg → Egg
-        if (word.toLowerCase() === 'egg') return 'Egg';
-        // 其他单词首字母大写
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    });
-
-    return words.join(' ');
-}
-
-    // ========== 导出时转换名称 ==========
-    const allItems = {
-        inventory: player.inventory.items.map(item => ({
-            type: convertName(item.type),  // ✅ 转换
-            rarity: item.rarity,
-            level: item.level,
-            count: item.count,
-            durability: item.durability,
-            maxDurability: item.maxDurability,
-            isBroken: item.isBroken,
-            reloadTime: item.reloadTime,
-            baseReloadTime: item.baseReloadTime,
-            armor: item.armor
-        })),
-        quickSlot: player.quickSlot.slots.map(slot => slot ? {
-            type: convertName(slot.type),  // ✅ 转换
-            rarity: slot.rarity,
-            level: slot.level,
-            count: slot.count,
-            durability: slot.durability,
-            maxDurability: slot.maxDurability,
-            isBroken: slot.isBroken,
-            reloadTime: slot.reloadTime,
-            baseReloadTime: slot.baseReloadTime,
-            armor: slot.armor
-        } : null),
-        secondarySlot: player.quickSlot.secondarySlots.map(slot => slot ? {
-            type: convertName(slot.type),  // ✅ 转换
-            rarity: slot.rarity,
-            level: slot.level,
-            count: slot.count,
-            durability: slot.durability,
-            maxDurability: slot.maxDurability,
-            isBroken: slot.isBroken,
-            reloadTime: slot.reloadTime,
-            baseReloadTime: slot.baseReloadTime,
-            armor: slot.armor
-        } : null),
-        timestamp: Date.now(),
-        version: "3.0"
-    };
-
-    const json = JSON.stringify(allItems, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `flwrr_items_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    alert(`✅ 已导出 ${player.inventory.items.length} 个物品（名称已规范化）`);
-};
-  window.handleImportItems = () => {
-    const game = window.gameInstance;
-    if (!game || !game.player) {
-        alert("请先进入游戏！");
-        return;
-    }
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        const text = await file.text();
-        const data = JSON.parse(text);
-
+        const game = window.gameInstance;
+        if (!game || !game.player) { alert("请先进入游戏！"); return; }
         const player = game.player;
 
-        // ========== 修复：正确获取 Item 类 ==========
-        let ItemClass = null;
+        const nameMapping = {
+            "FireStick":"Fire Stick","PooStick":"Poo Stick","SnowStick":"Snow Stick",
+            "HelWorm egg":"Hel Worm Egg","HelSpider egg":"Hel Spider Egg","HelBee egg":"Hel Bee Egg",
+            "HelHornet egg":"Hel Hornet Egg","HelBeetle egg":"Hel Beetle Egg","HelHive egg":"Hel Hive Egg",
+            "HelJellyfish egg":"Hel Jellyfish Egg","HelQueenBee egg":"Hel Queen Bee Egg",
+            "HelDigger egg":"Hel Digger Egg","HelBeekeeper egg":"Hel Beekeeper Egg",
+            "Hel Lighting":"Hel Lightning","Hel Honey":"Hel Honey",
+            "Dragon egg":"Dragon Egg","DragonNest egg":"Dragon Nest Egg",
+            "ToxicDragon egg":"Toxic Dragon Egg","IceDragon egg":"Ice Dragon Egg",
+            "QueenAnt egg":"Queen Ant Egg","SoldierAnt egg":"Soldier Ant Egg",
+            "WorkerAnt egg":"Worker Ant Egg","QueenBee egg":"Queen Bee Egg",
+            "FireAntOvermind egg":"Fire Ant Overmind Egg","FireAntHole egg":"Fire Ant Hole Egg",
+            "WorkerFireAnt egg":"Worker Fire Ant Egg","SoldierFireAnt egg":"Soldier Fire Ant Egg",
+            "BabyFireAnt egg":"Baby Fire Ant Egg","Crab egg":"Crab Egg","CrabHole egg":"Crab Hole Egg",
+            "Jellyfish egg":"Jellyfish Egg","Starfish egg":"Starfish Egg","Bubble egg":"Bubble Egg",
+            "Shell egg":"Shell Egg","Squid egg":"Squid Egg","Shipwreck egg":"Shipwreck Egg",
+            "Barnacle egg":"Barnacle Egg","Leech Egg":"Leech Egg","Spider egg":"Spider Egg",
+            "SpiderCave egg":"Spider Cave Egg","ArcticSpider egg":"Arctic Spider Egg",
+            "ArcticSpiderCave egg":"Arctic Spider Cave Egg","Bee egg":"Bee Egg","Hive egg":"Hive Egg",
+            "Beekeeper egg":"Beekeeper Egg","Wasp egg":"Wasp Egg",
+            "WorkerTermite egg":"Worker Termite Egg","SoldierTermite egg":"Soldier Termite Egg",
+            "TermiteHole egg":"Termite Hole Egg","TermiteOvermind egg":"Termite Overmind Egg",
+            "Beetle egg":"Beetle Egg","Scorpion egg":"Scorpion Egg","Ladybug egg":"Ladybug Egg",
+            "Centipede egg":"Centipede Egg","Firefly egg":"Firefly Egg","Mantis egg":"Mantis Egg",
+            "StickBug egg":"Stickbug Egg","SlagMight egg":"Stalagmite Egg","IceCube egg":"Ice Cube Egg",
+            "Igloo egg":"Igloo Egg","Tick egg":"Tick Egg","Snowman egg":"Snowman Egg",
+            "FrostDigger egg":"Frost Digger Egg","StemCell egg":"Stem Cell Egg",
+            "RedBloodCell egg":"Red Blood Cell Egg","WhiteBloodCell egg":"White Blood Cell Egg",
+            "Bacteria_egg":"Bacteria Egg","Cancer egg":"Cancer Egg","Virus egg":"Virus Egg",
+            "Bacteriophage egg":"Bacteriophage Egg","Parasite Egg":"Parasite Egg",
+            "ManHole egg":"Manhole Egg","Fly_egg":"Fly Egg","Rat_egg":"Rat Egg",
+            "Roach_egg":"Roach Egg","Trashcan egg":"Trashcan Egg","Digger egg":"Digger Egg",
+            "MudDigger_egg":"Mud Digger Egg","TrashDigger egg":"Trash Digger Egg",
+            "Biologist egg":"Biologist Egg","PirateDigger egg":"Pirate Digger Egg",
+            "GraveDigger egg":"Grave Digger Egg","AlienDigger egg":"Alien Digger Egg",
+            "Atom egg":"Atom Egg","Electron egg":"Electron Egg","Proton egg":"Proton Egg",
+            "ElectronCloud egg":"Electron Cloud Egg","Photon egg":"Photon Egg",
+            "BlackHole egg":"Black Hole Egg","WhiteHole egg":"White Hole Egg",
+            "NeutronStar egg":"Neutron Star Egg","Star egg":"Star Egg","Asteroid egg":"Asteroid Egg",
+            "Alien egg":"Alien Egg","UFO egg":"UFO Egg","Ghost egg":"Ghost Egg",
+            "GraveStone egg":"Grave Stone Egg","Egg":"Egg","Ant Egg":"Ant Egg",
+            "Moon Egg":"Moon Egg","Square Egg":"Square Egg","DNA":"DNA",
+            "Bubonic Plague":"Bubonic Plague","Bubble Bomb":"Bubble Bomb","FireBomb":"Fire Bomb",
+            "Golden Leaf":"Golden Leaf","Blood Stinger":"Blood Stinger","Gamma Ray":"Gamma Ray",
+            "Ice Rose":"Ice Rose","Ice Cube":"Ice Cube","Trident":"Trident",
+            "Controller":"Controller","Chromosome":"Chromosome","Singularity":"Singularity",
+            "DarkMatter":"Dark Matter","ElectronCloud":"Electron Cloud","Stardust":"Stardust"
+        };
 
-        // 方法1：从 window 获取（如果已经挂载）
-        if (window.Item) {
-            ItemClass = window.Item;
-        }
-        // 方法2：从导入的模块获取
-        else if (typeof Item !== 'undefined') {
-            ItemClass = Item;
-        }
-        // 方法3：从现有物品获取
-        else if (player.inventory.items.length > 0) {
-            ItemClass = player.inventory.items[0].constructor;
-        }
-        // 方法4：从快捷栏获取
-        else if (player.quickSlot.slots.length > 0 && player.quickSlot.slots[0]) {
-            ItemClass = player.quickSlot.slots[0].constructor;
-        }
-        // 方法5：创建一个临时物品来获取类
-        else {
-            // 尝试从 game.js 导入（需要在模块作用域内）
-            try {
-                const module = await import('./game.js');
-                if (module.Item) ItemClass = module.Item;
-            } catch(err) {
-                console.warn("无法从模块导入:", err);
+        function convertName(oldName) {
+            if (nameMapping[oldName]) return nameMapping[oldName];
+            let cleaned = oldName.replace(/\s+/g, ' ').trim();
+            if (!cleaned.includes(' ')) {
+                cleaned = cleaned.replace(/([a-z])([A-Z])/g, '$1 $2');
+                cleaned = cleaned.replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+                cleaned = cleaned.replace(/\s+/g, ' ');
             }
+            return cleaned.split(' ').map(w =>
+                w.toLowerCase() === 'egg' ? 'Egg' : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+            ).join(' ');
         }
 
-        if (!ItemClass) {
-            alert("无法找到 Item 类，请确保游戏完全加载后再试");
-            console.error("ItemClass 获取失败，所有方法都尝试过了");
-            return;
-        }
+        const serializeItem = item => item ? {
+            type: convertName(item.type), rarity: item.rarity, level: item.level,
+            count: item.count, durability: item.durability, maxDurability: item.maxDurability,
+            isBroken: item.isBroken, reloadTime: item.reloadTime,
+            baseReloadTime: item.baseReloadTime, armor: item.armor
+        } : null;
 
-        console.log("✅ 成功获取 Item 类:", ItemClass.name);
+        const allItems = {
+            inventory: player.inventory.items.map(serializeItem),
+            quickSlot: player.quickSlot.slots.map(serializeItem),
+            secondarySlot: player.quickSlot.secondarySlots.map(serializeItem),
+            timestamp: Date.now(), version: "3.0"
+        };
 
-        // 清空
-        player.inventory.items = [];
-        for (let i = 0; i < player.quickSlot.slots.length; i++) {
-            player.quickSlot.slots[i] = null;
-            if (player.petals[i]) player.petals[i].resetToDefault();
-        }
-        for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
-            player.quickSlot.secondarySlots[i] = null;
-        }
-
-        // 导入背包
-        for (const itemData of data.inventory) {
-            try {
-                const item = new ItemClass(itemData.type, itemData.level || 1, itemData.rarity);
-                item.count = itemData.count || 1;
-                if (itemData.durability) item.durability = itemData.durability;
-                if (itemData.maxDurability) item.maxDurability = itemData.maxDurability;
-                if (itemData.isBroken) item.isBroken = itemData.isBroken;
-                if (itemData.reloadTime) item.reloadTime = itemData.reloadTime;
-                if (itemData.baseReloadTime) item.baseReloadTime = itemData.baseReloadTime;
-                if (itemData.armor) item.armor = itemData.armor;
-                player.inventory.items.push(item);
-            } catch(err) {
-                console.warn("跳过背包物品:", itemData.type, err);
-            }
-        }
-
-        // 导入快捷栏
-        if (data.quickSlot) {
-            for (let i = 0; i < data.quickSlot.length && i < player.quickSlot.slots.length; i++) {
-                const slotData = data.quickSlot[i];
-                if (slotData) {
-                    try {
-                        const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
-                        item.count = slotData.count || 1;
-                        if (slotData.durability) item.durability = slotData.durability;
-                        if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
-                        if (slotData.isBroken) item.isBroken = slotData.isBroken;
-                        if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
-                        if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
-                        if (slotData.armor) item.armor = slotData.armor;
-                        player.quickSlot.slots[i] = item;
-                        if (player.petals[i]) player.petals[i].updateFromQuickSlot(i);
-                    } catch(err) {
-                        console.warn("跳过快捷栏:", slotData.type, err);
-                    }
-                }
-            }
-        }
-
-        // 导入副栏
-        if (data.secondarySlot) {
-            for (let i = 0; i < data.secondarySlot.length && i < player.quickSlot.secondarySlots.length; i++) {
-                const slotData = data.secondarySlot[i];
-                if (slotData) {
-                    try {
-                        const item = new ItemClass(slotData.type, slotData.level || 1, slotData.rarity);
-                        item.count = slotData.count || 1;
-                        if (slotData.durability) item.durability = slotData.durability;
-                        if (slotData.maxDurability) item.maxDurability = slotData.maxDurability;
-                        if (slotData.isBroken) item.isBroken = slotData.isBroken;
-                        if (slotData.reloadTime) item.reloadTime = slotData.reloadTime;
-                        if (slotData.baseReloadTime) item.baseReloadTime = slotData.baseReloadTime;
-                        if (slotData.armor) item.armor = slotData.armor;
-                        player.quickSlot.secondarySlots[i] = item;
-                    } catch(err) {
-                        console.warn("跳过副栏:", slotData.type, err);
-                    }
-                }
-            }
-        }
-
-        player.inventory.cacheDirty = true;
-        game.requestRedraw();
-
-        // 自动保存
-        if (game.autoSaveSystem && typeof game.autoSaveSystem.saveGame === 'function') {
-            game.autoSaveSystem.saveGame(player, {
-                score: game.score || 0,
-                enemiesKilled: game.enemiesKilled || 0,
-                currentWave: 1
-            });
-        }
-
-        alert(`✅ 导入完成！共 ${player.inventory.items.length} 个物品`);
+        const blob = new Blob([JSON.stringify(allItems, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `flwrr_items_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert(`✅ 已导出 ${player.inventory.items.length} 个物品`);
     };
 
-    input.click();
-};
+    window.handleImportItems = () => {
+        const game = window.gameInstance;
+        if (!game || !game.player) { alert("请先进入游戏！"); return; }
+
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            const text = await file.text();
+            const data = JSON.parse(text);
+            const player = game.player;
+
+            let ItemClass = window.Item || (typeof Item !== 'undefined' ? Item : null)
+                || player.inventory.items[0]?.constructor
+                || player.quickSlot.slots.find(s => s)?.constructor;
+            if (!ItemClass) {
+                try { const m = await import('./game.js'); ItemClass = m.Item; } catch(err) {}
+            }
+            if (!ItemClass) { alert("无法找到 Item 类，请确保游戏完全加载后再试"); return; }
+
+            player.inventory.items = [];
+            for (let i = 0; i < player.quickSlot.slots.length; i++) {
+                player.quickSlot.slots[i] = null;
+                if (player.petals[i]) player.petals[i].resetToDefault();
+            }
+            for (let i = 0; i < player.quickSlot.secondarySlots.length; i++) {
+                player.quickSlot.secondarySlots[i] = null;
+            }
+
+            const restoreItem = (d, ItemClass) => {
+                if (!d) return null;
+                try {
+                    const item = new ItemClass(d.type, d.level || 1, d.rarity);
+                    item.count = d.count || 1;
+                    if (d.durability) item.durability = d.durability;
+                    if (d.maxDurability) item.maxDurability = d.maxDurability;
+                    if (d.isBroken) item.isBroken = d.isBroken;
+                    if (d.reloadTime) item.reloadTime = d.reloadTime;
+                    if (d.baseReloadTime) item.baseReloadTime = d.baseReloadTime;
+                    if (d.armor) item.armor = d.armor;
+                    return item;
+                } catch(err) { console.warn("跳过物品:", d.type, err); return null; }
+            };
+
+            for (const d of data.inventory || []) {
+                const item = restoreItem(d, ItemClass);
+                if (item) player.inventory.items.push(item);
+            }
+            for (let i = 0; i < (data.quickSlot || []).length && i < player.quickSlot.slots.length; i++) {
+                const item = restoreItem(data.quickSlot[i], ItemClass);
+                if (item) { player.quickSlot.slots[i] = item; player.petals[i]?.updateFromQuickSlot(i); }
+            }
+            for (let i = 0; i < (data.secondarySlot || []).length && i < player.quickSlot.secondarySlots.length; i++) {
+                const item = restoreItem(data.secondarySlot[i], ItemClass);
+                if (item) player.quickSlot.secondarySlots[i] = item;
+            }
+
+            player.inventory.cacheDirty = true;
+            game.requestRedraw();
+            if (game.autoSaveSystem?.saveGame) {
+                game.autoSaveSystem.saveGame(player, { score: game.score || 0, enemiesKilled: game.enemiesKilled || 0, currentWave: 1 });
+            }
+            alert(`✅ 导入完成！共 ${player.inventory.items.length} 个物品`);
+        };
+        input.click();
+    };
+
     window.handleClearAllItems = () => {
         const game = window.gameInstance;
-        if (!game || !game.player) {
-            const msgEl = document.getElementById('clear-message');
-            if (msgEl) {
-                msgEl.textContent = '游戏未启动';
-                msgEl.style.display = 'block';
-                setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
-            }
-            return;
-        }
-
+        if (!game || !game.player) return;
         if (!confirm('⚠️ 警告：这将清除当前账号的所有物品！\n此操作不可恢复！\n\n确定要继续吗？')) return;
-
         const player = game.player;
-
         player.inventory.items = [];
         for (let i = 0; i < player.quickSlot.slots.length; i++) {
             player.quickSlot.slots[i] = null;
@@ -887,24 +538,26 @@ function convertName(oldName) {
             if (petal._clearAllSummons) petal._clearAllSummons();
             petal.eggSpawned = false;
         }
-
         player.inventory.cacheDirty = true;
         game.requestRedraw();
-
         if (game.autoSave) game.autoSave();
-
-        const msgEl = document.getElementById('clear-message');
-        if (msgEl) {
-            msgEl.textContent = '✅ 所有物品已清除！';
-            msgEl.style.display = 'block';
-            setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
-        }
     };
+
+    // ========== beforeunload 保存 ==========
+    window.addEventListener('beforeunload', () => {
+        const game = window.gameInstance;
+        if (game?.autoSaveSystem && game?.player) {
+            game.autoSaveSystem.saveToLocal(game.player, {
+                score: game.score || 0,
+                enemiesKilled: game.enemiesKilled || 0,
+                currentWave: 1
+            });
+        }
+    });
 
     // ========== 触摸穿透防护 ==========
     const uiContainers = [
         document.getElementById('multiplayer-panel'),
-        document.getElementById('account-panel'),
         document.getElementById('touch-controls'),
         document.getElementById('toggle-panel'),
         document.getElementById('orientation-tip')
@@ -916,7 +569,6 @@ function convertName(oldName) {
             e.preventDefault();
         }
     }
-
     uiContainers.forEach(container => {
         if (container) {
             container.addEventListener('touchstart', blockTouchPropagation, { passive: false });
@@ -925,7 +577,6 @@ function convertName(oldName) {
         }
     });
 
-    // 动态监听可能由game.js创建的面板
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
@@ -942,21 +593,19 @@ function convertName(oldName) {
     observer.observe(document.body, { childList: true, subtree: true });
 
     function isTouchOnUI(x, y) {
-        const uiElements = document.querySelectorAll('#multiplayer-panel, #account-panel, #touch-controls, #toggle-panel, .dialog, .modal, .shop-panel, .crafting-panel, .inventory-panel');
+        const uiElements = document.querySelectorAll('#multiplayer-panel, #touch-controls, #toggle-panel, .dialog, .modal, .shop-panel, .crafting-panel, .inventory-panel');
         for (let el of uiElements) {
             if (el && el.style.display !== 'none') {
                 const rect = el.getBoundingClientRect();
-                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                    return true;
-                }
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
             }
         }
         return false;
     }
 
-    // ========== 移动端安全检测函数 ==========
+    // ========== 移动端安全检测 ==========
     let lastTouchTime = 0;
-    let maxTouchPoints = 3;
+    const maxTouchPoints = 3;
 
     function isTrustedTouchEvent(e) {
         if (!e.isTrusted) return false;
@@ -966,9 +615,7 @@ function convertName(oldName) {
         lastTouchTime = now;
         if (e.touches && e.touches.length > 0) {
             const touch = e.touches[0];
-            if (touch.clientX < -1000 || touch.clientX > 10000 || touch.clientY < -1000 || touch.clientY > 10000) {
-                return false;
-            }
+            if (touch.clientX < -1000 || touch.clientX > 10000 || touch.clientY < -1000 || touch.clientY > 10000) return false;
         }
         return true;
     }
@@ -978,21 +625,16 @@ function convertName(oldName) {
         e.stopPropagation();
     }
 
-    // 防控制台检测
     setInterval(() => {
         if (window.console && console.profile && console.profileEnd) {}
     }, 5000);
 
-    // 监控关键函数是否被劫持
     const originalAddEventListener = EventTarget.prototype.addEventListener;
     EventTarget.prototype.addEventListener = function(type, listener, options) {
         if (type === 'touchstart' || type === 'touchend' || type === 'click' || type === 'touchmove') {
             if (typeof listener !== 'function') return originalAddEventListener.call(this, type, listener, options);
             const wrapped = function(e) {
-                if (!e.isTrusted) {
-                    console.warn('Untrusted event blocked');
-                    return;
-                }
+                if (!e.isTrusted) { console.warn('Untrusted event blocked'); return; }
                 return listener.apply(this, arguments);
             };
             return originalAddEventListener.call(this, type, wrapped, options);
@@ -1001,9 +643,7 @@ function convertName(oldName) {
     };
 
     function vibrate(ms = 15) {
-        if (window.navigator && window.navigator.vibrate) {
-            try { window.navigator.vibrate(ms); } catch(e) {}
-        }
+        if (window.navigator?.vibrate) { try { window.navigator.vibrate(ms); } catch(e) {} }
     }
 
     let screen = null, ctx = null, gameState = 'main_menu', gameInstance = null;
@@ -1021,24 +661,15 @@ function convertName(oldName) {
         const tip = document.getElementById('orientation-tip');
         if (!tip) return;
         const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-        if (isMobile && window.innerHeight > window.innerWidth) {
-            tip.classList.remove('hidden');
-        } else {
-            tip.classList.add('hidden');
-        }
+        if (isMobile && window.innerHeight > window.innerWidth) tip.classList.remove('hidden');
+        else tip.classList.add('hidden');
     }
 
     function initDOMElements() {
         screen = document.getElementById('gameCanvas');
         if (!screen) throw new Error("Canvas not found!");
-        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-        if (isMobile) {
-            screen.width = window.innerWidth;
-            screen.height = window.innerHeight;
-        } else {
-            screen.width = window.innerWidth;
-            screen.height = window.innerHeight;
-        }
+        screen.width = window.innerWidth;
+        screen.height = window.innerHeight;
         screen.style.width = '100%';
         screen.style.height = '100%';
         screen.style.position = 'fixed';
@@ -1047,30 +678,16 @@ function convertName(oldName) {
         ctx = screen.getContext('2d');
         window.WIDTH = screen.width;
         window.HEIGHT = screen.height;
-        if (gameInstance) {
-            gameInstance.WIDTH = window.WIDTH;
-            gameInstance.HEIGHT = window.HEIGHT;
-        }
+        if (gameInstance) { gameInstance.WIDTH = window.WIDTH; gameInstance.HEIGHT = window.HEIGHT; }
     }
 
     function resizeCanvas() {
         const canvas = document.getElementById('gameCanvas');
-        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-        let w, h;
-        if (isMobile) {
-            w = window.innerWidth;
-            h = window.innerHeight;
-        } else {
-            w = window.innerWidth;
-            h = window.innerHeight;
-        }
-        canvas.width = w;
-        canvas.height = h;
-        canvas.style.width = `${w}px`;
-        canvas.style.height = `${h}px`;
+        const w = window.innerWidth, h = window.innerHeight;
+        canvas.width = w; canvas.height = h;
+        canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
         if (gameInstance) {
-            gameInstance.WIDTH = w;
-            gameInstance.HEIGHT = h;
+            gameInstance.WIDTH = w; gameInstance.HEIGHT = h;
             if (gameInstance.handleResize) gameInstance.handleResize();
         }
         checkOrientation();
@@ -1079,17 +696,15 @@ function convertName(oldName) {
     window.addEventListener('keyup', (e) => {
         if (e.key === 'Shift' && gameInstance && !gameInstance.paused) {
             gameInstance.player.contractMode = false;
-            for (const petal of gameInstance.player.petals) {
-                petal.targetRadius = 35;
-            }
+            for (const petal of gameInstance.player.petals) petal.targetRadius = 35;
         }
     });
 
     window.addEventListener('resize', () => {
         resizeCanvas();
         if (gameInstance?.cameraOffset && gameInstance.player) {
-            gameInstance.cameraOffset.x = gameInstance.player.x - window.WIDTH/2;
-            gameInstance.cameraOffset.y = gameInstance.player.y - window.HEIGHT/2;
+            gameInstance.cameraOffset.x = gameInstance.player.x - window.WIDTH / 2;
+            gameInstance.cameraOffset.y = gameInstance.player.y - window.HEIGHT / 2;
         }
     });
     window.addEventListener('orientationchange', () => {
@@ -1102,12 +717,7 @@ function convertName(oldName) {
         catch(e) { return { roomCode: null }; }
     })();
 
-    window.togglePasswordVisibility = (id) => {
-        const el = document.getElementById(id);
-        if (el) el.type = el.type === 'password' ? 'text' : 'password';
-    };
-
-    // ========== 触屏控制脚本 ==========
+    // ========== 触屏控制 ==========
     (function() {
         const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const joystickArea = document.getElementById('joystick-area');
@@ -1125,25 +735,16 @@ function convertName(oldName) {
         if (savedPanel !== null) panelVisible = savedPanel === 'true';
         else panelVisible = isTouch;
 
-        const touchElements = [joystickArea, document.getElementById('btn-space'), document.getElementById('btn-r'), document.getElementById('btn-esc'), toggleJoystickBtn, togglePanelBtn];
-        touchElements.forEach(el => {
+        [joystickArea, document.getElementById('btn-space'), document.getElementById('btn-r'),
+         document.getElementById('btn-esc'), toggleJoystickBtn, togglePanelBtn].forEach(el => {
             if (!el) return;
-            ['touchstart', 'touchmove', 'touchend'].forEach(evType => {
-                el.addEventListener(evType, blockTouchDefaults, { passive: false });
-            });
+            ['touchstart','touchmove','touchend'].forEach(t => el.addEventListener(t, blockTouchDefaults, { passive: false }));
         });
 
         function setJoystickVisible(visible) {
             joystickEnabled = visible;
-            if (visible) {
-                joystickArea.classList.remove('hidden');
-                toggleJoystickBtn.classList.remove('hidden-mode');
-                toggleJoystickBtn.textContent = '🎮';
-            } else {
-                joystickArea.classList.add('hidden');
-                toggleJoystickBtn.classList.add('hidden-mode');
-                toggleJoystickBtn.textContent = '❌';
-            }
+            if (visible) { joystickArea.classList.remove('hidden'); toggleJoystickBtn.classList.remove('hidden-mode'); toggleJoystickBtn.textContent = '🎮'; }
+            else { joystickArea.classList.add('hidden'); toggleJoystickBtn.classList.add('hidden-mode'); toggleJoystickBtn.textContent = '❌'; }
             localStorage.setItem('joystickEnabled', visible);
         }
         function setPanelVisible(visible) {
@@ -1158,75 +759,58 @@ function convertName(oldName) {
             const maxDist = BASE_R - KNOB_R;
             const clamped = Math.min(dist, maxDist);
             const angle = Math.atan2(dy, dx);
-            const nx = Math.cos(angle) * clamped;
-            const ny = Math.sin(angle) * clamped;
-            knob.style.left = (CENTER + nx - KNOB_R) + 'px';
-            knob.style.top = (CENTER + ny - KNOB_R) + 'px';
+            knob.style.left = (CENTER + Math.cos(angle)*clamped - KNOB_R) + 'px';
+            knob.style.top  = (CENTER + Math.sin(angle)*clamped - KNOB_R) + 'px';
             joyX = dist > 5 ? Math.cos(angle) : 0;
             joyY = dist > 5 ? Math.sin(angle) : 0;
         }
         function resetKnob() {
-                knob.style.left = (CENTER - KNOB_R) + 'px';
-                knob.style.top = (CENTER - KNOB_R) + 'px';
-                joyX = 0;
-                joyY = 0;
-                joystickActive = false;
-                joystickId = null;
-            }
+            knob.style.left = (CENTER - KNOB_R) + 'px';
+            knob.style.top  = (CENTER - KNOB_R) + 'px';
+            joyX = 0; joyY = 0; joystickActive = false; joystickId = null;
+        }
 
         joystickArea.addEventListener('touchstart', e => {
-        if (joystickActive || !joystickEnabled) return;
+            if (joystickActive || !joystickEnabled) return;
+            e.preventDefault();
+            const t = e.changedTouches[0];
+            joystickId = t.identifier; joystickActive = true;
+            const rect = joystickArea.getBoundingClientRect();
+            updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
+        }, { passive: false });
 
-        e.preventDefault();
-        const t = e.changedTouches[0];
-        joystickId = t.identifier;
-        joystickActive = true;
-
-        const rect = joystickArea.getBoundingClientRect();
-        updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-    }, { passive: false });
-
-    window.addEventListener('touchmove', e => {
-        if (!joystickActive || !joystickEnabled) return;
-
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
-            if (t.identifier === joystickId) {
-                const rect = joystickArea.getBoundingClientRect();
-                updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
-                if (e.cancelable) e.preventDefault();
+        window.addEventListener('touchmove', e => {
+            if (!joystickActive || !joystickEnabled) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.identifier === joystickId) {
+                    const rect = joystickArea.getBoundingClientRect();
+                    updateKnob(t.clientX - rect.left - CENTER, t.clientY - rect.top - CENTER);
+                    if (e.cancelable) e.preventDefault();
+                }
             }
-        }
-    }, { passive: false });
+        }, { passive: false });
 
-    window.addEventListener('touchend', e => {
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
-            if (t.identifier === joystickId) {
-                resetKnob();
+        window.addEventListener('touchend', e => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickId) resetKnob();
             }
-        }
-    }, { passive: false });
+        }, { passive: false });
 
-    window.addEventListener('touchcancel', e => {
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
-            if (t.identifier === joystickId) {
-                resetKnob();
+        window.addEventListener('touchcancel', e => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystickId) resetKnob();
             }
-        }
-    }, { passive: false });
+        }, { passive: false });
+
         let lastMoveTime = 0;
         function updateMovement(now) {
-            if (!joystickActive || (Math.abs(joyX) < 0.1 && Math.abs(joyY) < 0.1)) {
-                requestAnimationFrame(updateMovement);
-                return;
-            }
+            if (!joystickActive || (Math.abs(joyX) < 0.1 && Math.abs(joyY) < 0.1)) { requestAnimationFrame(updateMovement); return; }
             if (!lastMoveTime) { lastMoveTime = now; requestAnimationFrame(updateMovement); return; }
             const dt = Math.min(0.033, (now - lastMoveTime) / 1000);
             lastMoveTime = now;
             const game = window.gameInstance;
-            if (game && game.player && game.player.physicsBody) {
+            if (game?.player?.physicsBody) {
                 const p = game.player;
                 const speed = (p.speed || 80) * (p.slowMultiplier || 1);
                 if (joyX !== 0 || joyY !== 0) {
@@ -1251,33 +835,26 @@ function convertName(oldName) {
             if (!el) return;
             el.addEventListener('touchstart', e => {
                 if (!isTrustedTouchEvent(e)) { e.preventDefault(); return; }
-                e.preventDefault();
-                vibrate(10);
-                fn();
+                e.preventDefault(); vibrate(10); fn();
             }, { passive: false });
             el.addEventListener('click', e => { e.preventDefault(); fn(); });
         }
-        function fakeKey(key) {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-        }
-        bindBtn('btn-space', () => {
-            const g = window.gameInstance;
-            if (g && g.player && g.player.toggleSpreadMode) g.player.toggleSpreadMode();
-        });
+        function fakeKey(key) { document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })); }
+
+        bindBtn('btn-space', () => { window.gameInstance?.player?.toggleSpreadMode?.(); });
         bindBtn('btn-r', () => {
             const g = window.gameInstance;
-            if (g && g.player && g.player.quickSlot && g.player.quickSlot.swapAllSlots) g.player.quickSlot.swapAllSlots();
+            if (g?.player?.quickSlot?.swapAllSlots) g.player.quickSlot.swapAllSlots();
             else fakeKey('r');
         });
         bindBtn('btn-esc', () => {
             const g = window.gameInstance;
-            if (g && g.returnToMainMenu) g.returnToMainMenu();
+            if (g?.returnToMainMenu) g.returnToMainMenu();
             else fakeKey('Escape');
         });
 
         toggleJoystickBtn.addEventListener('click', () => setJoystickVisible(!joystickEnabled));
         togglePanelBtn.addEventListener('click', () => setPanelVisible(!panelVisible));
-
         setJoystickVisible(joystickEnabled);
         setPanelVisible(panelVisible);
     })();
@@ -1290,10 +867,8 @@ function convertName(oldName) {
             window.gameInstance = game;
             if (window.URL_PARAMS?.roomCode) {
                 setTimeout(async () => {
-                    try {
-                        await game.joinMultiplayerRoom(window.URL_PARAMS.roomCode);
-                        startGame('Plain');
-                    } catch(e) { console.error(e); }
+                    try { await game.joinMultiplayerRoom(window.URL_PARAMS.roomCode); startGame('Plain'); }
+                    catch(e) { console.error(e); }
                 }, 2000);
             }
             return game;
@@ -1324,18 +899,17 @@ function convertName(oldName) {
             resetMouseMove();
         } else {
             const ang = Math.atan2(dy, dx);
-            const mx = Math.cos(ang) * MOUSE_MOVE_SPEED, my = Math.sin(ang) * MOUSE_MOVE_SPEED;
-            if (p.physicsBody) { p.physicsBody.position.x += mx; p.physicsBody.position.y += my; }
+            if (p.physicsBody) { p.physicsBody.position.x += Math.cos(ang) * MOUSE_MOVE_SPEED; p.physicsBody.position.y += Math.sin(ang) * MOUSE_MOVE_SPEED; }
         }
         if (gameInstance.cameraOffset) {
-            const cx = p.physicsBody?.position?.x || 0, cy = p.physicsBody?.position?.y || 0;
-            gameInstance.cameraOffset.x = cx - window.WIDTH / 2;
-            gameInstance.cameraOffset.y = cy - window.HEIGHT / 2;
+            gameInstance.cameraOffset.x = (p.physicsBody?.position?.x || 0) - window.WIDTH / 2;
+            gameInstance.cameraOffset.y = (p.physicsBody?.position?.y || 0) - window.HEIGHT / 2;
         }
     }
 
     function isPointInInventoryArea(x, y) { return x >= 0 && x <= 400; }
     function isPointInCloseButton(x, y) { return Math.hypot(x - 370, y - 30) <= 15; }
+
     function openInventory() {
         if (!gameInstance?.player?.inventory) { alert('Start a game first.'); return; }
         if (gameInstance.player.inventory.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
@@ -1347,76 +921,65 @@ function convertName(oldName) {
         gameState = 'crafting';
     }
     function closeInventory() {
-        if (gameInstance && gameInstance.gameState === 'in_game') {
-            gameState = 'in_game';
-        } else {
-            if (typeof window.returnToMainMenu === 'function') {
-                window.returnToMainMenu();
-            } else {
-                gameState = 'main_menu';
-            }
-        }
+        gameState = (gameInstance?.gameState === 'in_game') ? 'in_game' : 'main_menu';
     }
     function closeCrafting() {
-        if (gameInstance?.player?.inventory?.craftingSystem) {
-            gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-        }
-
-        if (gameInstance && gameInstance.gameState === 'in_game') {
-            gameState = 'in_game';
-        } else if (gameInstance && gameInstance.gameState === 'main_menu') {
-            gameState = 'main_menu';
-        } else {
-            if (typeof window.returnToMainMenu === 'function') {
-                window.returnToMainMenu();
-            } else {
-                gameState = 'main_menu';
-            }
-        }
+        if (gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        gameState = (gameInstance?.gameState === 'in_game') ? 'in_game' : 'main_menu';
     }
-window.closeCrafting = closeCrafting;
+    window.closeCrafting = closeCrafting;
+
     function handleMouseDown(e) {
         e.preventDefault();
         const { x, y } = getCanvasCoordinates(e);
         if (isTouchOnUI(e.clientX, e.clientY)) return;
 
-        const canvas = document.getElementById('gameCanvas');
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-
         if (gameState === 'in_game' && e.button === 2) setMouseTarget(x, y);
         const ev = { type: 'mousedown', button: e.button, x, y };
 
-        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
-            if (gameInstance.mobGallery.handleClick(x, y)) {
-                gameState = 'main_menu';
-            }
-            return;
-        }
-        if (gameInstance?.talentSystem?.panelOpen) {
-        const result = gameInstance.talentSystem.handleClick([x, y]);
-        if (result === 'talent_levelup' || result === 'talent_no_points' || result === 'talent_close' || result === 'talent_reset') {
-            return;
-        }
-    }
+        // Changelog
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
-            const handled = gameInstance.mainMenu.changelog.handleClick(x, y);
-            if (handled) return;
+            if (gameInstance.mainMenu.changelog.handleClick(x, y)) return;
         }
-        if (gameState === 'main_menu' && gameInstance) {
-            if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
 
-            const mgx = 20;
-            const mgy = 200;
-            const mgw = 100;
-            const mgh = 35;
-            if (x >= mgx && x <= mgx + mgw && y >= mgy && y <= mgy + mgh) {
-                if (gameInstance.mobGallery) {
-                    gameInstance.mobGallery.open();
-                    gameState = 'mob_gallery';
+        // 账号面板（Canvas绘制版，由AccountSystem处理）
+        if (gameState === 'main_menu' && gameInstance?.accountSystem?.panelOpen) {
+            if (gameInstance.accountSystem.handleClick(x, y)) return;
+        }
+
+        // 设置面板
+        if (gameState === 'main_menu' && gameInstance?.mainMenu?.settingsPanelOpen && gameInstance?.mainMenu?.settingsPanelRect) {
+            const [px, py, pw, ph] = gameInstance.mainMenu.settingsPanelRect;
+            if (x >= px && x <= px + pw && y >= py && y <= py + ph) {
+                if (gameInstance.mainMenu.settings) {
+                    gameInstance.mainMenu.settings.handleClick(x, y);
+                    if (!gameInstance.mainMenu.settings.panelOpen) gameInstance.mainMenu.settingsPanelOpen = false;
                 }
                 return;
             }
+        }
+
+        // Mob Gallery
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
+            if (gameInstance.mobGallery.handleClick(x, y)) gameState = 'main_menu';
+            return;
+        }
+
+        // Talent system
+        if (gameInstance?.talentSystem?.panelOpen) {
+            const result = gameInstance.talentSystem.handleClick([x, y]);
+            if (result === 'talent_levelup' || result === 'talent_no_points' || result === 'talent_close' || result === 'talent_reset') return;
+        }
+
+        if (gameState === 'main_menu' && gameInstance) {
+            if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.handleClick([x,y]); return; }
+
+            // Mob gallery button
+            if (x >= 20 && x <= 120 && y >= 200 && y <= 235) {
+                if (gameInstance.mobGallery) { gameInstance.mobGallery.open(); gameState = 'mob_gallery'; }
+                return;
+            }
+
             const res = gameInstance.mainMenu.handleClick(ev);
             if (res) {
                 switch(res) {
@@ -1424,14 +987,16 @@ window.closeCrafting = closeCrafting;
                     case "crafting": openCrafting(); break;
                     case "inventory": openInventory(); break;
                     case "multiplayer": showMultiplayerPanel(); break;
-                    case "account": showAccountPanel(); break;
+                    case "account":
+                        if (gameInstance.accountSystem) gameInstance.accountSystem.openPanel();
+                        break;
                     case "bonus": gameInstance.bonusSystem?.claimBonus(); break;
                     default:
-                        if(res && res.startsWith('start_') && res.endsWith('_map')) {
+                        if (res?.startsWith('start_') && res?.endsWith('_map')) {
                             let bio = res.replace('start_','').replace('_map','');
                             bio = bio.charAt(0).toUpperCase() + bio.slice(1);
                             startGame(bio);
-                        } else if(res === 'start_maze') startMazeMode();
+                        } else if (res === 'start_maze') startMazeMode();
                 }
             }
         } else if (gameState === 'in_game' && gameInstance) {
@@ -1444,6 +1009,7 @@ window.closeCrafting = closeCrafting;
             else if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseDown?.([x,y]);
         }
     }
+
     function handleMouseUp(e) {
         e.preventDefault();
         if (isTouchOnUI(e.clientX, e.clientY)) return;
@@ -1454,9 +1020,7 @@ window.closeCrafting = closeCrafting;
             gameInstance.handleEvents({ type: 'click', x, y });
         } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
             const c = gameInstance.player.inventory.craftingSystem;
-            if (c.handleModeClick) {
-                c.handleModeClick([x, y]);
-            }
+            c.handleModeClick?.([x, y]);
             c.handleMouseUp?.([x,y]);
             c.handleClick?.([x,y]);
         } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
@@ -1467,11 +1031,13 @@ window.closeCrafting = closeCrafting;
             }
         }
     }
+
     function handleMouseMove(e) {
         e.preventDefault();
         if (isTouchOnUI(e.clientX, e.clientY)) return;
         const { x, y } = getCanvasCoordinates(e);
         window.mouseX = x; window.mouseY = y;
+
         if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
             gameInstance.mobGallery.handleMouseMove(x, y);
             return;
@@ -1479,19 +1045,17 @@ window.closeCrafting = closeCrafting;
         if (gameState === 'main_menu' && gameInstance?.mainMenu?.handleMouseMove) {
             gameInstance.mainMenu.handleMouseMove({ type: 'mousemove', x, y });
             if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
+            // 账号面板悬停
+            gameInstance.accountSystem?.handleMouseMove?.(x, y);
         } else if (gameState === 'in_game' && gameInstance?.handleEvents) {
             gameInstance.handleEvents({ type: 'mousemove', x, y });
-            gameInstance.player?.updateMousePosition?.(x,y);
-            if (gameInstance.player) {
-                if (gameInstance.player.inventory) { gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y; }
-                if (gameInstance.player.quickSlot) { gameInstance.player.quickSlot.mouseX = x; gameInstance.player.quickSlot.mouseY = y; }
-            }
+            gameInstance.player?.updateMousePosition?.(x, y);
+            if (gameInstance.player?.inventory) { gameInstance.player.inventory.mouseX = x; gameInstance.player.inventory.mouseY = y; }
+            if (gameInstance.player?.quickSlot) { gameInstance.player.quickSlot.mouseX = x; gameInstance.player.quickSlot.mouseY = y; }
             if (gameInstance.shopSystem) { gameInstance.shopSystem.mouseX = x; gameInstance.shopSystem.mouseY = y; }
         } else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
             const c = gameInstance.player.inventory.craftingSystem;
-            if (c.handleModeClick) {
-        c.handleModeClick([x, y]);
-    }
+            c.handleModeClick?.([x, y]);
             c.handleMouseMove?.([x,y]);
             c.mouseX = x; c.mouseY = y;
         } else if (gameState === 'inventory' && gameInstance?.player?.inventory) {
@@ -1499,24 +1063,15 @@ window.closeCrafting = closeCrafting;
             if (isPointInInventoryArea(x,y)) gameInstance.player.inventory.handleMouseMove?.([x,y]);
         }
     }
+
     function handleWheel(e) {
         e.preventDefault(); e.stopPropagation();
         if (isTouchOnUI(e.clientX, e.clientY)) return;
         const { x, y } = getCanvasCoordinates(e);
         const we = { type: 'wheel', deltaY: e.deltaY, x, y };
-        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) {
-            gameInstance.mobGallery.handleWheel(e.deltaY);
-            return;
-        }
-        if (gameInstance?.talentSystem?.handleScroll(e.deltaY)) {
-            e.preventDefault();
-            return;
-        }
-
-        if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) {
-            gameInstance.mainMenu.changelog.handleScroll(e.deltaY);
-            return;
-        }
+        if (gameState === 'mob_gallery' && gameInstance?.mobGallery) { gameInstance.mobGallery.handleWheel(e.deltaY); return; }
+        if (gameInstance?.talentSystem?.handleScroll(e.deltaY)) { e.preventDefault(); return; }
+        if (gameState === 'main_menu' && gameInstance?.mainMenu?.changelog?.visible) { gameInstance.mainMenu.changelog.handleScroll(e.deltaY); return; }
         if (gameState === 'main_menu' && gameInstance?.shopSystem?.visible) gameInstance.shopSystem.handleClick?.(we);
         else if (gameState === 'in_game' && gameInstance?.handleEvents) gameInstance.handleEvents(we);
         else if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.handleScrollWheel?.(e);
@@ -1545,6 +1100,10 @@ window.closeCrafting = closeCrafting;
         if (gameInstance?.shopSystem?.redeemSystem?.inputVisible && gameInstance.shopSystem.redeemSystem.inputActive) {
             if (gameInstance.shopSystem.redeemSystem.handleKeyDown(e)) { e.preventDefault(); return; }
         }
+        // 账号面板输入框键盘事件
+        if (gameInstance?.accountSystem?.panelOpen && gameInstance.accountSystem.handleKeyDown?.(e)) {
+            e.preventDefault(); return;
+        }
         const k = e.key;
         if (k === 't' || k === 'T') {
             if (gameInstance?.multiplayerMode && gameInstance?.network?.chatSystem) {
@@ -1554,28 +1113,18 @@ window.closeCrafting = closeCrafting;
             e.preventDefault(); return;
         }
         if (k === 'Shift') {
-            e.preventDefault();
-            e.stopPropagation();
-            if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) {
-                gameInstance.player.contractMode = true;
-            }
+            e.preventDefault(); e.stopPropagation();
+            if (gameState === 'in_game' && gameInstance?.player && !gameInstance.paused) gameInstance.player.contractMode = true;
             return;
         }
-
         if (k >= '1' && k <= '9') {
             if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-                let slotIndex = parseInt(k) - 1;
-                if (k === '9') slotIndex = 8;
-                console.log(`按数字键 ${k}，交换槽位 ${slotIndex + 1}`);
-                gameInstance.player.quickSlot.swapSlot(slotIndex);
+                gameInstance.player.quickSlot.swapSlot(parseInt(k) - 1);
             }
             e.preventDefault(); return;
         }
         if (k === '0') {
-            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) {
-                console.log(`按数字键 0，交换槽位 10`);
-                gameInstance.player.quickSlot.swapSlot(9);
-            }
+            if (gameState === 'in_game' && gameInstance?.player?.quickSlot) gameInstance.player.quickSlot.swapSlot(9);
             e.preventDefault(); return;
         }
         if (k === ' ' || k === 'Space') {
@@ -1584,7 +1133,7 @@ window.closeCrafting = closeCrafting;
         }
         if (k === 'c' || k === 'C') {
             if (gameState === 'in_game') openCrafting();
-            else if (gameState === 'crafting') { gameState = 'in_game'; if(gameInstance.player?.inventory?.craftingSystem) gameInstance.player.inventory.craftingSystem.craftingVisible = false; }
+            else if (gameState === 'crafting') { gameState = 'in_game'; gameInstance?.player?.inventory?.craftingSystem && (gameInstance.player.inventory.craftingSystem.craftingVisible = false); }
             e.preventDefault(); return;
         }
         if (k === 'i' || k === 'I') {
@@ -1598,7 +1147,7 @@ window.closeCrafting = closeCrafting;
         }
         if (k === 's' || k === 'S') {
             const g = window.gameInstance;
-            if (g && g.gameState === 'in_game' && !g.paused && g.player) {
+            if (g?.gameState === 'in_game' && !g.paused && g.player) {
                 e.preventDefault(); e.stopPropagation();
                 for (const p of g.player.petals) if (p.toggleStillMode) p.toggleStillMode();
             }
@@ -1618,134 +1167,71 @@ window.closeCrafting = closeCrafting;
         }
         if (k === 'Escape') {
             e.preventDefault(); e.stopPropagation();
+            // 先让账号面板处理 Escape
+            if (gameInstance?.accountSystem?.panelOpen) { gameInstance.accountSystem.closePanel(); return; }
             if (gameState !== 'main_menu') returnToMainMenu();
             else if (gameInstance?.shopSystem?.visible) gameInstance.shopSystem.visible = false;
             return;
         }
         if (['w','W','a','A','s','S','d','D','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)) {
-            resetMouseMove();
-            e.preventDefault(); return;
+            resetMouseMove(); e.preventDefault(); return;
         }
     }
+
     function handleKeyUp(e) {
         if (!e?.key) return;
-        const k = e.key;
-        if (k === 'Shift') {
+        if (e.key === 'Shift') {
             e.preventDefault();
-            if (gameInstance?.player) {
-                gameInstance.player.contractMode = false;
-            }
-            return;
+            if (gameInstance?.player) gameInstance.player.contractMode = false;
         }
     }
 
-let isProcessingEscape = false;
-function returnToMainMenu() {
-    if (isProcessingEscape) return;
-    isProcessingEscape = true;
+    let isProcessingEscape = false;
+    function returnToMainMenu() {
+        if (isProcessingEscape) return;
+        isProcessingEscape = true;
 
-    if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
-        gameInstance.player.inventory.craftingSystem.craftingVisible = false;
-    }
+        if (gameState === 'crafting' && gameInstance?.player?.inventory?.craftingSystem) {
+            gameInstance.player.inventory.craftingSystem.craftingVisible = false;
+        }
+        if (gameInstance?.shopSystem?.visible) gameInstance.shopSystem.visible = false;
+        if (document.getElementById('multiplayer-panel')?.style.display === 'block') hideMultiplayerPanel();
 
-    if (gameInstance?.shopSystem?.visible) {
-        gameInstance.shopSystem.visible = false;
-    }
-
-    if (document.getElementById('multiplayer-panel')?.style.display === 'block') {
-        hideMultiplayerPanel();
-    }
-
-    if (document.getElementById('account-panel')?.style.display === 'block') {
-        hideAccountPanel();
-    }
-
-    if (gameInstance && gameInstance.player && gameInstance.player.quickSlot) {
-        const quickSlot = gameInstance.player.quickSlot;
-
-        if (typeof quickSlot.restoreAllMimics === 'function') {
-            quickSlot.restoreAllMimics();
-        } else {
-            for (let i = 0; i < quickSlot.slots.length; i++) {
-                const item = quickSlot.slots[i];
-                if (item && item._originalMimicData && item._originalMimicData.type === "Mimic") {
-                    const od = item._originalMimicData;
-                    item.type = od.type;
-                    item.rarity = od.rarity;
-                    item.level = od.level;
-                    item.durability = od.durability;
-                    item.maxDurability = od.maxDurability;
-                    item.reloadTime = od.reloadTime;
-                    item.baseReloadTime = od.baseReloadTime;
-                    item.armor = od.armor;
-                    item._originalMimicData = null;
-                    item._isTransformedMimic = false;
+        // 恢复 Mimic
+        if (gameInstance?.player?.quickSlot) {
+            const qs = gameInstance.player.quickSlot;
+            if (typeof qs.restoreAllMimics === 'function') {
+                qs.restoreAllMimics();
+            } else {
+                for (const slots of [qs.slots, qs.secondarySlots]) {
+                    for (const item of slots) {
+                        if (item?._originalMimicData?.type === "Mimic") {
+                            const od = item._originalMimicData;
+                            Object.assign(item, { type: od.type, rarity: od.rarity, level: od.level,
+                                durability: od.durability, maxDurability: od.maxDurability,
+                                reloadTime: od.reloadTime, baseReloadTime: od.baseReloadTime, armor: od.armor });
+                            item._originalMimicData = null;
+                            item._isTransformedMimic = false;
+                        }
+                    }
                 }
             }
-            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
-                const item = quickSlot.secondarySlots[i];
-                if (item && item._originalMimicData && item._originalMimicData.type === "Mimic") {
-                    const od = item._originalMimicData;
-                    item.type = od.type;
-                    item.rarity = od.rarity;
-                    item.level = od.level;
-                    item.durability = od.durability;
-                    item.maxDurability = od.maxDurability;
-                    item.reloadTime = od.reloadTime;
-                    item.baseReloadTime = od.baseReloadTime;
-                    item.armor = od.armor;
-                    item._originalMimicData = null;
-                    item._isTransformedMimic = false;
-                }
-            }
+            if (gameInstance.player._mimicBackups) gameInstance.player._mimicBackups = {};
+            if (gameInstance._mimicBackups) gameInstance._mimicBackups = {};
         }
 
-        if (gameInstance.player._mimicBackups) gameInstance.player._mimicBackups = {};
-        if (gameInstance._mimicBackups) gameInstance._mimicBackups = {};
+        if (gameInstance?.autoSave) gameInstance.autoSave();
 
-        for (let i = 0; i < quickSlot.slots.length; i++) {
-            const item = quickSlot.slots[i];
-            if (item && item.type !== "Mimic") {
-                item._originalMimicData = null;
-                item._isTransformedMimic = false;
-                item._mimicDisplayType = null;
-            }
-        }
-        if (quickSlot.secondarySlots) {
-            for (let i = 0; i < quickSlot.secondarySlots.length; i++) {
-                const item = quickSlot.secondarySlots[i];
-                if (item && item.type !== "Mimic") {
-                    item._originalMimicData = null;
-                    item._isTransformedMimic = false;
-                    item._mimicDisplayType = null;
-                }
-            }
-        }
+        gameState = 'main_menu';
+        editorMode = false;
+        if (gameInstance) { gameInstance.gameState = 'main_menu'; gameInstance.paused = false; }
+        resetMouseMove();
+        if (typeof hideMask === 'function') hideMask();
+
+        setTimeout(() => { isProcessingEscape = false; }, 100);
     }
+    window.returnToMainMenu = returnToMainMenu;
 
-    if (gameInstance?.autoSave) {
-        gameInstance.autoSave();
-    }
-
-    gameState = 'main_menu';
-    editorMode = false;
-    if (gameInstance) {
-        gameInstance.gameState = 'main_menu';
-        gameInstance.paused = false;
-    }
-
-    resetMouseMove();
-
-    if (typeof hideMask === 'function') {
-        hideMask();
-    }
-
-    setTimeout(() => {
-        isProcessingEscape = false;
-        console.log("✅ 已返回主菜单");
-    }, 100);
-}
-window.returnToMainMenu = returnToMainMenu;
     async function startGame(biome) {
         if (!gameInstance) gameInstance = createGameInstance();
         if (!gameInstance) { alert('Failed to create game instance!'); return; }
@@ -1759,6 +1245,7 @@ window.returnToMainMenu = returnToMainMenu;
             resetMouseMove();
         } catch(e) { console.error(e); alert('Failed to start game: ' + e.message); }
     }
+
     async function startMazeMode() {
         if (!gameInstance) gameInstance = createGameInstance();
         if (!gameInstance) { alert('Failed to create game instance!'); return; }
@@ -1781,29 +1268,30 @@ window.returnToMainMenu = returnToMainMenu;
         if (gameState === 'in_game' && gameInstance.update) gameInstance.update(dt);
         else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem?.update) gameInstance.player.inventory.craftingSystem.update(dt);
         else if (gameState === 'inventory' && gameInstance.player?.inventory?.update) gameInstance.player.inventory.update(dt);
-         if (gameState === 'main_menu' && gameInstance?.mainMenu) {
-                gameInstance.mainMenu.updateFloatingPetals(dt);
-            }
+        if (gameState === 'main_menu' && gameInstance?.mainMenu) gameInstance.mainMenu.updateFloatingPetals(dt);
+
         if (gameState === 'main_menu') {
-            ctx.clearRect(0,0,screen.width,screen.height);
-            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
+            ctx.clearRect(0, 0, screen.width, screen.height);
+            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, screen.width, screen.height);
             if (gameInstance?.mainMenu) {
                 gameInstance.mainMenu.draw(ctx);
                 if (gameInstance.shopSystem?.visible) { gameInstance.shopSystem.update(); gameInstance.shopSystem.draw(ctx); }
+                // Maze mode button
                 ctx.save();
                 const bw = 200, bh = 50, bx = screen.width/2 - bw/2, by = screen.height/2 + 440;
                 ctx.fillStyle = '#8B4513'; ctx.fillRect(bx, by, bw, bh);
                 ctx.strokeStyle = '#CD853F'; ctx.strokeRect(bx, by, bw, bh);
                 drawButtonTextWithBorder(ctx, 'MAZE MODE', bx, by, bw, bh, { font: 'bold 20px "Arial", sans-serif', fillColor: '#FFD700' });
                 ctx.restore();
+                // 账号面板由 AccountSystem 自行绘制
+                if (gameInstance.accountSystem?.panelOpen) gameInstance.accountSystem.draw?.(ctx);
             } else drawFallbackMenu(ctx);
         } else if (gameState === 'in_game') {
-            ctx.clearRect(0,0,screen.width,screen.height);
+            ctx.clearRect(0, 0, screen.width, screen.height);
             gameInstance.draw(ctx);
             let hints = '右键点击地面移动 | C:合成 | I:背包 | ESC:菜单 | S:静止 | T:聊天';
-            if (gameInstance.useMaze) hints = '🗺️ 迷宫模式 | E:编辑器 | S:保存地图 | L:加载地图 | M:控制面板 | ' + hints;
+            if (gameInstance.useMaze) hints = '🗺️ 迷宫模式 | E:编辑器 | S:保存 | L:加载 | M:面板 | ' + hints;
             drawTextWithBorder(ctx, hints, 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
-            if (gameInstance.editorMode) drawTextWithBorder(ctx, '🔨 编辑器模式 - 点击清除墙壁 | Shift+点击放置墙壁', screen.width/2, 50, { font: '16px "Arial", sans-serif', textAlign: 'center', textBaseline: 'top', borderWidth: 2, fillColor: '#FFA500' });
             if (isMouseMoving && mouseTargetX !== null && mouseTargetY !== null && gameInstance.cameraOffset) {
                 const sx = mouseTargetX - gameInstance.cameraOffset.x, sy = mouseTargetY - gameInstance.cameraOffset.y;
                 if (sx >= 0 && sx <= screen.width && sy >= 0 && sy <= screen.height) {
@@ -1817,35 +1305,33 @@ window.returnToMainMenu = returnToMainMenu;
                 }
             }
         } else if (gameState === 'crafting' && gameInstance.player?.inventory?.craftingSystem) {
-            ctx.fillStyle = '#16213e'; ctx.fillRect(0,0,screen.width,screen.height);
+            ctx.fillStyle = '#16213e'; ctx.fillRect(0, 0, screen.width, screen.height);
             ctx.globalAlpha = 0.3; gameInstance.draw(ctx); ctx.globalAlpha = 1.0;
             const cs = gameInstance.player.inventory.craftingSystem;
-            cs.craftingVisible = true;
-            cs.draw(ctx);
+            cs.craftingVisible = true; cs.draw(ctx);
             drawTextWithBorder(ctx, 'ESC: 返回游戏', 10, 20, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'top', borderWidth: 2 });
         } else if (gameState === 'inventory' && gameInstance.player?.inventory) {
-
             gameInstance.draw(ctx);
             ctx.save();
-            ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(370,30,15,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(370, 30, 15, 0, Math.PI*2); ctx.fill();
             ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-            drawTextWithBorder(ctx, 'X', 370,30, { font: 'bold 18px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 2, fillColor: 'white' });
+            drawTextWithBorder(ctx, 'X', 370, 30, { font: 'bold 18px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 2, fillColor: 'white' });
             if (gameInstance.player.inventory.draw) gameInstance.player.inventory.draw(ctx);
             ctx.restore();
-            if (gameInstance.player?.quickSlot?.draw) gameInstance.player.quickSlot.draw(ctx);
-            drawTextWithBorder(ctx, '点击物品添加到快捷栏 | ESC: 返回游戏', 10, screen.height-10, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'bottom', borderWidth: 2 });
+            gameInstance.player?.quickSlot?.draw(ctx);
+            drawTextWithBorder(ctx, '点击物品添加到快捷栏 | ESC: 返回游戏', 10, screen.height - 10, { font: '12px "Arial", sans-serif', textAlign: 'left', textBaseline: 'bottom', borderWidth: 2 });
         }
     }
 
     function drawFallbackMenu(ctx) {
-        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,screen.width,screen.height);
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, screen.width, screen.height);
         drawTextWithBorder(ctx, '🌸 flwrr 🌸', screen.width/2, screen.height/2-100, { font: '48px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 4 });
         drawTextWithBorder(ctx, 'Click to Start', screen.width/2, screen.height/2, { font: '24px "Arial", sans-serif', textAlign: 'center', textBaseline: 'middle', borderWidth: 3, fillColor: '#888' });
         const btns = [
-            { text: 'Plain', y: screen.height/2+80 }, { text: 'Bio', y: screen.height/2+140 },
-            { text: 'Desert', y: screen.height/2+200 }, { text: 'Random', y: screen.height/2+260 },
-            { text: 'Crafting', y: screen.height/2+320 }, { text: 'Inventory', y: screen.height/2+380 },
-            { text: 'MAZE MODE', y: screen.height/2+440, color: '#8B4513' }
+            { text:'Plain', y:screen.height/2+80 }, { text:'Bio', y:screen.height/2+140 },
+            { text:'Desert', y:screen.height/2+200 }, { text:'Random', y:screen.height/2+260 },
+            { text:'Crafting', y:screen.height/2+320 }, { text:'Inventory', y:screen.height/2+380 },
+            { text:'MAZE MODE', y:screen.height/2+440, color:'#8B4513' }
         ];
         btns.forEach(b => {
             ctx.fillStyle = b.color || '#4a4a6a';
@@ -1870,85 +1356,61 @@ window.returnToMainMenu = returnToMainMenu;
         drawTextWithBorder(ctx, txt, x+w/2, y+h/2, { font: opt.font || 'bold 20px Arial', align: 'center', baseline: 'middle', border: opt.borderColor || 'black', bw: opt.borderWidth || 3, fill: opt.fillColor || 'white' });
     }
 
-    // 启动游戏
+    // ===== 启动 =====
     initDOMElements();
     resizeCanvas();
     checkOrientation();
     gameInstance = createGameInstance();
     gameLoop();
     initializePlayerControls();
-
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
-
     document.getElementById('orientation-tip')?.addEventListener('click', () => {
         document.getElementById('orientation-tip').classList.add('hidden');
     });
 
-    // UI 函数
+    // ========== 多人游戏面板 ==========
     window.showMultiplayerPanel = () => {
         const panel = document.getElementById('multiplayer-panel');
         if (panel) panel.style.display = 'flex';
-        const menu = document.getElementById('mp-menu');
-        if (menu) menu.style.display = 'block';
-        const createDiv = document.getElementById('mp-create');
-        if (createDiv) createDiv.style.display = 'none';
-        const joinDiv = document.getElementById('mp-join');
-        if (joinDiv) joinDiv.style.display = 'none';
+        document.getElementById('mp-menu').style.display = 'block';
+        document.getElementById('mp-create').style.display = 'none';
+        document.getElementById('mp-join').style.display = 'none';
     };
     window.hideMultiplayerPanel = () => {
         const panel = document.getElementById('multiplayer-panel');
         if (panel) panel.style.display = 'none';
     };
     window.showCreateRoom = async () => {
-        const menu = document.getElementById('mp-menu');
-        if (menu) menu.style.display = 'none';
-        const createDiv = document.getElementById('mp-create');
-        if (createDiv) createDiv.style.display = 'block';
+        document.getElementById('mp-menu').style.display = 'none';
+        document.getElementById('mp-create').style.display = 'block';
         if (!gameInstance) gameInstance = createGameInstance();
         try {
             const code = await gameInstance.createMultiplayerRoom();
-            const codeDisplay = document.getElementById('room-code-display');
-            if (codeDisplay) codeDisplay.textContent = code;
-            const linkDisplay = document.getElementById('room-link-display');
-            if (linkDisplay) linkDisplay.textContent = `${location.href.split('?')[0]}?room=${code}`;
+            document.getElementById('room-code-display').textContent = code;
+            document.getElementById('room-link-display').textContent = `${location.href.split('?')[0]}?room=${code}`;
             const ri = document.getElementById('room-info');
             if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 等待玩家加入...`; }
         } catch(e) { alert('创建房间失败: ' + e.message); backToMenu(); }
     };
     window.showJoinRoom = () => {
-        const menu = document.getElementById('mp-menu');
-        if (menu) menu.style.display = 'none';
-        const joinDiv = document.getElementById('mp-join');
-        if (joinDiv) joinDiv.style.display = 'block';
-        const input = document.getElementById('room-code-input');
-        if (input) input.focus();
+        document.getElementById('mp-menu').style.display = 'none';
+        document.getElementById('mp-join').style.display = 'block';
+        document.getElementById('room-code-input')?.focus();
     };
     window.backToMenu = () => {
-        const menu = document.getElementById('mp-menu');
-        if (menu) menu.style.display = 'block';
-        const createDiv = document.getElementById('mp-create');
-        if (createDiv) createDiv.style.display = 'none';
-        const joinDiv = document.getElementById('mp-join');
-        if (joinDiv) joinDiv.style.display = 'none';
-        const errorMsg = document.getElementById('join-error');
-        if (errorMsg) errorMsg.textContent = '';
+        document.getElementById('mp-menu').style.display = 'block';
+        document.getElementById('mp-create').style.display = 'none';
+        document.getElementById('mp-join').style.display = 'none';
+        document.getElementById('join-error').textContent = '';
     };
     window.copyRoomLink = () => {
-        const linkDisplay = document.getElementById('room-link-display');
-        if (linkDisplay) {
-            navigator.clipboard.writeText(linkDisplay.textContent);
-            alert('✅ 链接已复制！');
-        }
+        const text = document.getElementById('room-link-display')?.textContent;
+        if (text) { navigator.clipboard.writeText(text); alert('✅ 链接已复制！'); }
     };
     window.joinRoom = async () => {
-        const codeInput = document.getElementById('room-code-input');
-        const code = codeInput ? codeInput.value.toUpperCase() : '';
-        if (code.length < 4) {
-            const errorMsg = document.getElementById('join-error');
-            if (errorMsg) errorMsg.textContent = '请输入有效的房间号';
-            return;
-        }
+        const code = document.getElementById('room-code-input')?.value.toUpperCase() || '';
+        if (code.length < 4) { document.getElementById('join-error').textContent = '请输入有效的房间号'; return; }
         if (!gameInstance) gameInstance = createGameInstance();
         try {
             await gameInstance.joinMultiplayerRoom(code);
@@ -1956,146 +1418,8 @@ window.returnToMainMenu = returnToMainMenu;
             const ri = document.getElementById('room-info');
             if (ri) { ri.style.display = 'block'; ri.innerHTML = `🎮 房间: ${code} | 已加入`; }
             startGame('Plain');
-        } catch(e) {
-            const errorMsg = document.getElementById('join-error');
-            if (errorMsg) errorMsg.textContent = '加入失败: ' + e.message;
-        }
+        } catch(e) { document.getElementById('join-error').textContent = '加入失败: ' + e.message; }
     };
-
-    window.showAccountPanel = () => {
-        const panel = document.getElementById('account-panel');
-        if (panel) panel.style.display = 'flex';
-        const menu = document.getElementById('account-menu');
-        if (menu) menu.style.display = 'block';
-        const login = document.getElementById('account-login');
-        if (login) login.style.display = 'none';
-        const register = document.getElementById('account-register');
-        if (register) register.style.display = 'none';
-        const loggedin = document.getElementById('account-loggedin');
-        if (loggedin) loggedin.style.display = 'none';
-        clearAccountMessages();
-        if(gameInstance?.accountSystem?.isLoggedIn()) showLoggedInStatus();
-    };
-    window.hideAccountPanel = () => {
-        const panel = document.getElementById('account-panel');
-        if (panel) panel.style.display = 'none';
-        clearAccountMessages();
-    };
-    window.showAccountLogin = () => {
-        const menu = document.getElementById('account-menu');
-        if (menu) menu.style.display = 'none';
-        const login = document.getElementById('account-login');
-        if (login) login.style.display = 'block';
-        const register = document.getElementById('account-register');
-        if (register) register.style.display = 'none';
-        const loggedin = document.getElementById('account-loggedin');
-        if (loggedin) loggedin.style.display = 'none';
-        clearAccountMessages();
-        const username = document.getElementById('login-username');
-        if (username) username.value = '';
-        const password = document.getElementById('login-password');
-        if (password) password.value = '';
-        setTimeout(() => document.getElementById('login-username')?.focus(), 100);
-    };
-    window.showAccountRegister = () => {
-        const menu = document.getElementById('account-menu');
-        if (menu) menu.style.display = 'none';
-        const login = document.getElementById('account-login');
-        if (login) login.style.display = 'none';
-        const register = document.getElementById('account-register');
-        if (register) register.style.display = 'block';
-        const loggedin = document.getElementById('account-loggedin');
-        if (loggedin) loggedin.style.display = 'none';
-        clearAccountMessages();
-        const regUsername = document.getElementById('register-username');
-        if (regUsername) regUsername.value = '';
-        const regPassword = document.getElementById('register-password');
-        if (regPassword) regPassword.value = '';
-        const regConfirm = document.getElementById('register-confirm');
-        if (regConfirm) regConfirm.value = '';
-        setTimeout(() => document.getElementById('register-username')?.focus(), 100);
-    };
-    window.backToAccountMenu = () => {
-        const menu = document.getElementById('account-menu');
-        if (menu) menu.style.display = 'block';
-        const login = document.getElementById('account-login');
-        if (login) login.style.display = 'none';
-        const register = document.getElementById('account-register');
-        if (register) register.style.display = 'none';
-        const loggedin = document.getElementById('account-loggedin');
-        if (loggedin) loggedin.style.display = 'none';
-        clearAccountMessages();
-    };
-    window.showLoggedInStatus = () => {
-        if (!gameInstance?.accountSystem) return;
-        const un = gameInstance.accountSystem.getCurrentUser();
-        const loggedinUsername = document.getElementById('loggedin-username');
-        if (loggedinUsername) loggedinUsername.textContent = un;
-
-        const accountMenu = document.getElementById('account-menu');
-        if (accountMenu) accountMenu.style.display = 'none';
-        const accountLogin = document.getElementById('account-login');
-        if (accountLogin) accountLogin.style.display = 'none';
-        const accountRegister = document.getElementById('account-register');
-        if (accountRegister) accountRegister.style.display = 'none';
-        const accountLoggedin = document.getElementById('account-loggedin');
-        if (accountLoggedin) accountLoggedin.style.display = 'block';
-
-        const currentUser = document.getElementById('current-user');
-        if (currentUser) {
-            currentUser.style.display = 'block';
-            currentUser.innerHTML = `👤 ${un}`;
-        }
-    };
-    window.handleLogin = () => {
-        const un = document.getElementById('login-username')?.value.trim() || '';
-        const pw = document.getElementById('login-password')?.value.trim() || '';
-        if (!un || !pw) { showAccountMessage('login-message', '请输入用户名和密码', 'error'); return; }
-        if (!gameInstance?.accountSystem) { showAccountMessage('login-message', '游戏系统未初始化', 'error'); return; }
-        const res = gameInstance.accountSystem.login(un, pw);
-        if (res.success) {
-            showAccountMessage('login-message', '登录成功！', 'success');
-            if (res.gameData) gameInstance.accountSystem.applyGameData(gameInstance.player, res.gameData);
-            setTimeout(() => { hideAccountPanel(); showLoggedInStatus(); }, 1500);
-        } else showAccountMessage('login-message', res.message, 'error');
-    };
-    window.handleRegister = () => {
-        const un = document.getElementById('register-username')?.value.trim() || '';
-        const pw = document.getElementById('register-password')?.value.trim() || '';
-        const cf = document.getElementById('register-confirm')?.value.trim() || '';
-        if (!un || !pw || !cf) { showAccountMessage('register-message', '请填写所有字段', 'error'); return; }
-        if (pw !== cf) { showAccountMessage('register-message', '两次输入的密码不一致', 'error'); return; }
-        if (un.length < 3 || un.length > 20) { showAccountMessage('register-message', '用户名长度必须在3-20字符之间', 'error'); return; }
-        if (pw.length < 3 || pw.length > 20) { showAccountMessage('register-message', '密码长度必须在3-20字符之间', 'error'); return; }
-        if (!gameInstance?.accountSystem) { showAccountMessage('register-message', '游戏系统未初始化', 'error'); return; }
-        const res = gameInstance.accountSystem.createAccount(un, pw);
-        if (res.success) {
-            showAccountMessage('register-message', '注册成功！请登录', 'success');
-            setTimeout(() => showAccountLogin(), 1500);
-        } else showAccountMessage('register-message', res.message, 'error');
-    };
-    window.handleLogout = () => {
-        if (!gameInstance?.accountSystem) return;
-        gameInstance.accountSystem.logout();
-        const currentUser = document.getElementById('current-user');
-        if (currentUser) currentUser.style.display = 'none';
-        backToAccountMenu();
-        showAccountMessage('login-message', '已登出', 'success');
-    };
-    function showAccountMessage(eid, msg, type) {
-        const el = document.getElementById(eid);
-        if (!el) return;
-        el.textContent = msg;
-        el.className = `message ${type}`;
-        el.style.display = 'block';
-        setTimeout(() => { if (el) el.style.display = 'none'; }, 3000);
-    }
-    function clearAccountMessages() {
-        const lm = document.getElementById('login-message');
-        const rm = document.getElementById('register-message');
-        if (lm) { lm.style.display = 'none'; lm.textContent = ''; }
-        if (rm) { rm.style.display = 'none'; rm.textContent = ''; }
-    }
     </script>
 </body>
 </html>
