@@ -4,9 +4,7 @@ export const WALL_COLOR = [100, 100, 100]; // 灰色墙壁
 export const WALL_BORDER_COLOR = [50, 50, 50]; // 深灰色边框
 //增加生物进化功能---rna，有概率增加生物level和随机一个指标（速度，血量和攻击力）
 //后期增加成就系统，玩家每获得一个新稀有度物品就有一个成就，玩家获得omega，玩家进入时空隧道，玩家击杀1m一种生物，玩家击杀10k生物没有死亡等，玩家获得成就可以给星星
-//后期增加一个地图，类似工厂，有assembler可以重组物品，比如1singularity+2photon可以重组一个plasma，10 electron+ 2 Proton Egg+ 1 charge组成1 Electron Cloud Egg...
 //可能增加新地图error：所有生物使用黑白紫色
-//增加新地图沼泽--shark,vampire digger, bat(没有写掉落物表）
 // ============================================================
 // Performance Optimization Configuration
 // ============================================================
@@ -715,11 +713,9 @@ export const BIOME_SPAWN_RATES = {
     },
     "Random": {
         "Worker Ant": { weight: 100, minLevel: 1, maxLevel: 5 },
-        "Shark": { weight: 100, minLevel: 1, maxLevel: 5 },
         "Soldier Ant": { weight: 80, minLevel: 1, maxLevel: 5 },
         "SoldierFireAnt": { weight: 70, minLevel: 1, maxLevel: 5 },
-        "BabyFireAnt": { weight: 60, minLevel: 1, maxLevel: 5 },
-        "FireAntOvermind": { weight: 1, minLevel: 1, maxLevel: 5},
+        "Spider": { weight: 60, minLevel: 1, maxLevel: 5 },
     },
 
     // ========== 🌊 新增海洋生物生成概率 ==========
@@ -1626,9 +1622,36 @@ const ITEM_IMAGE_URLS = {
     "Magic Claw": "images/Magic_claw.png",
     "Hemoglobin": "images/Hemoglobin.png",
     "Magic Hemoglobin": "images/Magic_Hemoglobin.png",
+    "Neurotoxin": "images/Neurotoxin.png",
+    "Magic Tooth": "images/Magic Tooth.png",
+    "Tooth": "images/Tooth.png",
+    "Blood": "images/Blood.png",
+    "Silk": "images/Silk.png",
+    "Larva Egg": "images/Larva_egg.png",
+    "Silverfish Egg": "images/Silverfish_egg.png",
+    "Vampire Fang": "images/Vampire_fang.png",
+    "Talisman": "images/Talisman.png",
+    "Blood Rose": "images/Blood_rose.png",
+    "Bat Egg": "images/Bat_egg.png",
+    "Vampire Digger Egg": "images/VampireDigger_egg.png",
+    "Stem Cell": "images/Stem_Cell.png",
 };
 export const ITEM_STATS = {
     // ========== 基础攻击类 ==========
+    "Stem Cell": {base_attack: 1,base_cooldown: 100,use_rarity_multiplier: true,base_reload_time: 3000,dropFactor: 0.1,is_stem_cell: true,heal_thresholds: [0.66, 0.33],heal_chance: 0.10, heal_cooldown: 5000},
+    "Neurotoxin": { base_attack: 10, base_cooldown: 400, use_rarity_multiplier: true, base_reload_time: 3000, dropFactor: 0.08, is_neurotoxin: true, damage_reduction: { "Common": 0.05, "Unusual": 0.10, "Rare": 0.15, "Epic": 0.20, "Legendary": 0.25, "Mythic": 0.30, "Ultra": 0.35, "Super": 0.40, "Omega": 0.45, "Eternal": 0.50 }, duration: 3000 },
+    "Tooth": { base_attack: 100, base_cooldown: 2000, use_rarity_multiplier: true, base_reload_time: 2000, dropFactor: 0.6, health_bonus: 10 },
+    "Magic Tooth": { base_attack: 168, base_cooldown: 2000, use_rarity_multiplier: true, base_reload_time: 2000, dropFactor: 0.004, is_magic: true, mana_cost: 1, health_bonus: 15 },
+    "Blood": { base_attack: 13, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 1.0, is_blood: true, fluid_speed: 4, fluid_duration: 3, fluid_color: "#8B0000" },
+    "Silk": { base_attack: 100, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.5},
+    "Larva Egg": { base_attack: 1, base_cooldown: 10000, use_rarity_multiplier: true, base_reload_time: 10000, dropFactor: 0.3, spawn_larva: true, spawn_count: 2, egg_type: "Larva" },
+    "Silverfish Egg": { base_attack: 1, base_cooldown: 12000, use_rarity_multiplier: true, base_reload_time: 12000, dropFactor: 0.4, spawn_silverfish: true, spawn_count: 1, egg_type: "Silverfish" },
+    "Vampire Digger Egg": { base_attack: 1, base_cooldown: 6000, use_rarity_multiplier: true, base_reload_time: 6000, dropFactor: 0.6, spawn_vampire_digger: true, spawn_count: 1, egg_type: "VampireDigger" },
+    "Bat Egg": { base_attack: 1, base_cooldown: 8000, use_rarity_multiplier: true, base_reload_time: 8000, dropFactor: 0.8, spawn_bat: true, spawn_count: 1, egg_type: "Bat" },
+    "Blood Rose": { base_attack: 4, base_cooldown: 2500, use_rarity_multiplier: true, base_reload_time: 2500, dropFactor: 0.9, health_bonus: 9, armor: 6 },
+    "Vampire Fang": { base_attack: 16, base_cooldown: 200, use_rarity_multiplier: true, base_reload_time: 2000, dropFactor: 0.3, is_vampire_fang: true, lifesteal_on_collision: 1.2 },
+    "Talisman": { base_attack: 20, base_cooldown: 100, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.9, is_talisman: true, luck_bonus: 0.005 },
+    "Soap": {base_attack: 1,base_cooldown: 100,use_rarity_multiplier: true,base_reload_time: 1000,dropFactor: 0.15,is_soap: true,fluid_speed_bonus: {"Common": 0.05,"Unusual": 0.08,"Rare": 0.12,"Epic": 0.18,"Legendary": 0.21,"Mythic": 0.25,"Ultra": 0.29,"Super": 0.31,"Omega": 0.45,"Eternal": 0.772}},
     "Ruby": {base_attack: 25,base_cooldown: 200,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.3,lightning_bounces_add: 3},
     "Magic Ruby": {base_attack: 30,base_cooldown: 250,use_rarity_multiplier: true,base_reload_time: 2500,dropFactor: 0.04,is_magic: true,mana_cost: 8,magic_ruby_effect: true},
     "Hemoglobin": {base_attack: 0,base_cooldown: 0,use_rarity_multiplier: true,base_reload_time: 0,dropFactor: 0.5,is_heal_item: true,heal_speed_bonus: 0.05},
@@ -1639,7 +1662,7 @@ export const ITEM_STATS = {
     "Magic Leaf": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 500, dropFactor: 0.1, is_magic: true, mana_cost: -3, mana_restore: 1, effect_type: "mana_restore" },
     "Magic Starfish": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 300, dropFactor: 0.09, is_magic: true, mana_cost: -6, mana_restore: 4, effect_type: "mana_restore" },
     "Magic Fang": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 500, dropFactor: 0.1, is_magic: true, mana_cost: -6, mana_restore: 1.2, effect_type: "mana_restore" },
-    "Magic Fire Bomb": { base_attack: 50, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.05, is_magic: true, is_bomb: true, mana_cost: 8, fire_damage: 30, fire_duration: 4, explosion_radius: 120 },
+    "Magic Fire Bomb": { base_attack: 50, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.05, is_magic: true, is_bomb: true, mana_cost: 8, fire_damage: 30, fire_duration: 4, explosion_radius: 120, canStack: true },
     "Magic Bubble Bomb": { base_attack: 30, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.09, is_magic: true, is_bomb: true, mana_cost: 4, knockback_power: 800, explosion_radius: 150 },
     "Magic Golden Leaf": { base_attack: 5, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 150, dropFactor: 0.04,    is_golden_leaf: true,reload_reduction: {"Mythic": 0.08, "Ultra": 0.12,"Super": 0.16,"Omega": 0.2, "Eternal": 0.25},is_magic: true, mana_cost_reduction: 0.05, effect_type: "mana_reduction" },
     "Magic Soldier Ant Egg": { base_attack: 1, base_cooldown: 10, use_rarity_multiplier: true, base_reload_time: 1000, dropFactor: 0.06, is_magic: true, mana_cost: 2, spawn_magic_ant: true, spawn_count: 1,effect_type: "mana_reduction" },
@@ -1652,7 +1675,7 @@ export const ITEM_STATS = {
     "Wing": {base_attack:35, base_cooldown:150, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 0.95},
     "Air": {base_attack: 1,base_cooldown: 200,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 1.1},
     "Bur": {base_attack: 5,base_cooldown: 200,armor_reduction: 3,armor_reduction_duration: 3,use_rarity_multiplier: true,base_reload_time: 2000,dropFactor: 0.75},
-    "Mud": {base_attack:10,base_cooldown: 100,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 12,base_fixed_damage: 10,fluid_speed: 8,fluid_duration: 5,fluid_color: "#946C10",use_rarity_multiplier: true,},
+    "Mud": {base_attack:10,base_cooldown: 100,base_reload_time: 3000,dropFactor: 0.65,base_poison_damage: 12,base_fixed_damage: 10,fluid_speed: 4,fluid_duration: 4,fluid_color: "#946C10",use_rarity_multiplier: true,canStack: true},
     "Compass": {base_attack: 1,base_cooldown: 100,is_compass: true,use_rarity_multiplier: true,base_reload_time: 1000,    attack_range_reduction: {"Common": 0.90, "Unusual": 0.80,   "Rare": 0.70,  "Epic": 0.60,   "Legendary": 0.50, "Mythic": 0.40,   "Ultra": 0.30, "Super": 0.20, "Omega": 0.10,"Eternal": 0.00 }, dropFactor: 0.9},
     "Coin": {base_attack:20, base_cooldown:200, use_rarity_multiplier: true, base_reload_time:2000, dropFactor: 1.0},
     "Suger": {base_attack:30, base_cooldown:100, use_rarity_multiplier: true, base_reload_time:1000, dropFactor: 0.95},
@@ -1906,6 +1929,10 @@ export function getCancerCloneRarity(originalRarity) {
 }
 // ========== 添加到 ENEMY_DROP_TABLE ==========
 export const ENEMY_DROP_TABLE = {
+    "Bat":["Vampire Fang","Bat Egg","Blood Rose","Poo","Talisman"],
+    "Larva":["Neurotoxin","Larva Egg","Silk","Slime"],
+    "VampireDigger":["Vampire Digger Egg","Vampire Fang","Quartz"],
+    "Silverfish":["Neurotoxin","Silverfish Egg","Blood"],
     "Magic Stickbug":["Magic Core"],
     "Spider": ["Web", "Fang", "Third Eye","Spider Egg"],
     "Crab": ["Claw", "Powder"],
@@ -1918,7 +1945,7 @@ export const ENEMY_DROP_TABLE = {
     "Sandstorm": ["Stick","Rock"],
     "Rock": ["Moon Egg", "Rock", "Heavy"],
     "Squid": ["Fang", "Starfish", "Squid Egg"],
-    "StemCell": ["Iris", "DNA","Stem Cell Egg", "Chromosome"],
+    "StemCell": ["Iris", "DNA","Stem Cell Egg", "Chromosome","Stem Cell"],
     "RedBloodCell": ["Iris","Suger","Red Blood Cell Egg","Hemoglobin"],
     "WhiteBloodCell": ["Iris", "Suger","White Blood Cell Egg","Chromosome"],
     "Bee": ["Stinger","Pollen","Honey","Bee Egg"],
@@ -2064,8 +2091,8 @@ export function getItemArmorValue(itemType, rarity) {
 export const ENEMY_ARMOR_CLASSES = {
     "A": ["Worker Ant", "Spider", "Centipede", "Bush","Bee","Sponge","Jellyfish","Bacteria","Fly","Virus","Ladybug","ArcticSpider","StickBug","Worker Termite","Firefly","HelWorm","Dummy","Ghost","ElectronCloud"],
     "B": ["Soldier Ant", "Crab", "Cactus", "Starfish", "GoldenAnt","Queen Ant","Bacteriophage","Bee","Tick","Snowman","Worker Termite","Wasp","Scorpion","HelBee","HelHornet","HelJellyfish","HelSpider","Dragon","Photon","Electron","Atom","Urchin","Shark"],
-    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton","UFO","VampireDigger","Bat"],
-    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole","Magic Stickbug"],
+    "C": ["WhiteBloodCell","Anthill","Scallop","Bubble","PooStorm","Crab","RedBloodCell","Hive","SnowStorm","SlagMight","QueenBee","Squid","SpiderCave","Beetle","HelBeetle","HelQueenBee","ToxicDragon","Hel Beekeeper","WhiteHole","Asteroid","Star","GraveStone","Proton","UFO","VampireDigger","Bat","Silverfish"],
+    "D": ["TrashDigger","Digger","Rat", "Roach","CrabHole","Beekeeper","Barnacle","Igloo","ArcticSpiderCave","Ice Dragon","Frost Digger","Trashcan","Shipwreck","TermiteHole","HelHive","HelDigger","Alien","BlackHole","Magic Stickbug","Larva"],
     "E": ["StemCell","MudDigger","ManHole","Rock","Biologist","Ice Cube","DragonNest","NeutronStar"] // E级 - 最难打的Boss级生物
 };
 // E级护甲的倍率（比D级更高）
@@ -2358,7 +2385,24 @@ export const CLOVER_DNA_UPGRADE_BONUS = {
     "Omega": 0.10,
     "Eternal":0.12
 };
+const R = "common"; // 预设默认稀有度
+const AR = [
+  // [产物, [[材料, 数量], ...], 产物数]
+  ["Plasma", [["Singularity", 1], ["Photon", 2]]],
+  ["Electron Cloud Egg", [["Electron", 10], ["Proton Egg", 2], ["Charge", 1]]],
+  ["Magic Starfish", [["Magic Leaf", 1], ["Starfish", 5]]],
+  ["Stem Cell", [["Chromosome", 5], ["Starfish", 5], ["Bone", 5]]],
+  ["Blood Stinger", [["Stinger", 1], ["Blood", 2]]],
+  ["Blood Rose", [["Rose", 2], ["Blood", 2]]],
+  ["Orb", [["Dust", 5], ["Dark Matter", 1], ["Quark", 3], ["Moon Egg", 5]], 2]
+];
 
+// 动态解压回原始格式
+const ASSEMBLER_RECIPES = AR.map(([name, ing, resQty = 1]) => ({
+  name,
+  ingredients: ing.map(([iName, iQty]) => ({ name: iName, rarity: R, qty: iQty })),
+  result: { name, rarity: R, qty: resQty }
+}));
 // ============================================================
 // Game States
 // ============================================================
@@ -8210,7 +8254,8 @@ class Item {
             "Bubble Bomb":0.5,
             "Stinger": 0.3,
             "Lightning": 0.7,  // 闪电耐久较低
-            "Jelly": 0.9,      // 果冻耐久较低
+            "Jelly": 0.9,
+            "Silk": 50.1,
             "Magnet": 1.5,
             "Controller":10000.0,
             "Antennae": 0.8,   // 触角耐久较低
@@ -9206,7 +9251,7 @@ class QuickSlot {
             "Hel Worm Egg", "Hel Spider Egg", "Hel Bee Egg", "Hel Hornet Egg",
             "Hel Beetle Egg", "Dragon Egg", "Dragon Nest Egg", "Hel Hive Egg",
             "Hel Jellyfish Egg", "Hel Queen Bee Egg", "Toxic Dragon Egg",
-            "Hel Digger Egg", "Hel Beekeeper Egg", "Fire Stick", "Poo Stick", "Snow Stick"
+            "Hel Digger Egg", "Hel Beekeeper Egg", "Fire Stick", "Poo Stick", "Snow Stick","Vampire Digger Egg","Larva Egg","Silverfish Egg","Bat Egg"
         ]);
         return EGG_ITEMS.has(itemType);
     }
@@ -14145,6 +14190,169 @@ class EnemyDrawer {
         context.arc(cx, cy, bodyRadius, 0, Math.PI * 2);
         context.fillStyle = bodyColor;
         context.fill();
+
+
+        context.restore();
+    }
+    // ==================== 🦋 茧 (Cocoon) ====================
+    drawLarva(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        const S =scaledSize / 120;
+
+        let fillColor, strokeColor, stripeColor;
+        if (isFriendly) {
+            fillColor = '#FFD700';
+            strokeColor = '#B8860B';
+            stripeColor = '#DAA520';
+        } else {
+            fillColor = '#DEC098';
+            strokeColor = '#B08A5A';
+            stripeColor = '#B8956A';
+        }
+
+        const rx = 60 * S;
+        const ry = 130 * S;
+        const lw = 10 * S;
+
+        context.save();
+        context.translate(x,y);
+        context.rotate(Math.PI/3);
+        // --- 1. 裁剪并填充底色 ---
+        context.save();
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.clip();
+
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.fillStyle = fillColor;
+        context.fill();
+
+        // --- 2. 绘制条纹 ---
+        const stripes = [
+            { sy: -45 * S, bulge: -35 * S },
+            { sy: 0,       bulge: 0 },
+            { sy: 45 * S,  bulge: 35 * S },
+        ];
+
+        stripes.forEach(({ sy, bulge }) => {
+            context.beginPath();
+            context.moveTo(-rx - 10 * S, sy);
+            if (bulge === 0) {
+                context.lineTo(rx + 10 * S, sy);
+            } else {
+                context.quadraticCurveTo(0, sy + bulge, rx + 10 * S, sy);
+            }
+            context.strokeStyle = stripeColor;
+            context.lineWidth = lw;
+            context.lineCap = 'butt';
+            context.stroke();
+        });
+        context.restore();
+
+        // --- 3. 绘制外边框 ---
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.strokeStyle = strokeColor;
+        context.lineWidth = lw;
+        context.stroke();
+
+        context.restore();
+    }
+    // =======================================
+    drawSilverfish(context, x, y, size, animationTimer, angleToPlayer, level, viewScale = 1.0, enemyObj = null) {
+        const scaledSize = size * viewScale;
+        if (scaledSize <= 0) return;
+
+        const isFriendly = enemyObj && enemyObj.isFriendly === true;
+        const rarity = enemyObj?.rarity || "Common";
+
+        const S = scaledSize / 100;
+
+        // 颜色定义
+        let bodyColor, strokeColor, legColor;
+        if (isFriendly) {
+            bodyColor = '#FFD700';      // 金色
+            strokeColor = '#B8860B';    // 深金色描边
+            legColor = '#DAA520';       // 金杖色腿
+        } else {
+            bodyColor = '#c4c4c4';      // 灰色身体
+            strokeColor = '#555555';    // 深灰色描边
+            legColor = '#1a1a1a';       // 黑色腿
+        }
+
+        const LEG_LENGTH = 60 * S;
+        const legConfig = [
+            { y: -80 * S, w: 24 * S },   // 前腿
+            { y: -45 * S, w: 27 * S },   // 中腿
+            { y: -10 * S, w: 28 * S },   // 后腿
+        ];
+
+        context.save();
+        context.translate(x, y);
+
+        const bodySwing = Math.sin(animationTimer * 4) * 0.15;  // 弧度，约 ±8.6度
+        const bodyRotation = angleToPlayer + Math.PI / 2 + bodySwing;
+        context.rotate(bodyRotation);
+
+        // 腿的摆动动画
+        const swing = Math.sin(animationTimer * 4) * 15 * S;
+
+        // ===== 1. 绘制腿部 =====
+        context.strokeStyle = legColor;
+        context.lineWidth = 6 * S;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+
+        legConfig.forEach(({ y, w }) => {
+            // 右边腿
+            context.beginPath();
+            context.moveTo(w, y);
+            context.quadraticCurveTo(w + LEG_LENGTH / 2, y - 10 * S + swing, w + LEG_LENGTH, y + swing);
+            context.stroke();
+
+            // 左边腿
+            context.beginPath();
+            context.moveTo(-w, y);
+            context.quadraticCurveTo(-w - LEG_LENGTH / 2, y - 10 * S + swing, -w - LEG_LENGTH, y + swing);
+            context.stroke();
+        });
+
+        // ===== 2. 绘制触角 =====
+        context.strokeStyle = legColor;
+        context.lineWidth = 5.5 * S;
+
+        // 左触角
+        context.beginPath();
+        context.moveTo(-8 * S, -104 * S);
+        context.bezierCurveTo(-18 * S, -126 * S, -44 * S, -144 * S, -74 * S, -142 * S);
+        context.stroke();
+
+        // 右触角
+        context.beginPath();
+        context.moveTo(8 * S, -104 * S);
+        context.bezierCurveTo(18 * S, -126 * S, 44 * S, -144 * S, 74 * S, -142 * S);
+        context.stroke();
+
+        // ===== 3. 绘制身体 =====
+        context.beginPath();
+        context.moveTo(0, -110 * S);
+        context.bezierCurveTo(38 * S, -110 * S, 42 * S, -20 * S, 22 * S, 40 * S);
+        context.bezierCurveTo(12 * S, 80 * S, 4 * S, 108 * S, 0, 112 * S);
+        context.bezierCurveTo(-4 * S, 108 * S, -12 * S, 80 * S, -22 * S, 40 * S);
+        context.bezierCurveTo(-42 * S, -20 * S, -38 * S, -110 * S, 0, -110 * S);
+        context.closePath();
+
+        context.fillStyle = bodyColor;
+        context.fill();
+        context.strokeStyle = strokeColor;
+        context.lineWidth = 9 * S;
+        context.stroke();
 
 
         context.restore();
@@ -22720,10 +22928,7 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
         if (scaledSize <= 0) return;
         const isFriendly = enemyObj && enemyObj.isFriendly === true;
         const rarity = enemyObj?.rarity || "Common";
-        const raritySizeFactors = {"Common":1.0,"Unusual":1.1,"Rare":1.2,"Epic":1.6,"Legendary":1.8,"Mythic":2.8,"Ultra":4.0,"Super":8.4,"Omega":12.0};
-        const legendaryFactor = raritySizeFactors["Legendary"];
-        const rarityFactor    = raritySizeFactors[rarity] || 1.0;
-        const S = (rarityFactor / legendaryFactor) * (scaledSize / size);
+        const S = scaledSize/170;
 
         let BODY_COLOR, FIN_COLOR, OUTLINE, EYE_COLOR, PUPIL_COLOR;
 
@@ -23700,6 +23905,8 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
             this.drawRock(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "StemCell") {
             this.drawStemCell(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
+        }else if (enemyType === "Silverfish") {
+            this.drawSilverfish(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "RedBloodCell") {
             this.drawRedBloodCell(context, x, y, size, rarity, viewScale, enemyObj);
         } else if (enemyType === "Cancer") {
@@ -23708,6 +23915,8 @@ drawGraveDigger(context, x, y, size, animationTimer, angleToPlayer, level, viewS
             this.drawWhiteBloodCell(context, x, y, size, rarity, viewScale, enemyObj);
         } else if (enemyType === "Anthill" || enemyType === "AntHill") {
             this.drawAnthill(context, x, y, size, viewScale, enemyObj);
+        }else if (enemyType === "Larva") {
+            this.drawLarva(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "Bee") {
             this.drawBee(context, x, y, size, animationTimer, angleToPlayer, level, viewScale, enemyObj);
         } else if (enemyType === "QueenAnt") {
@@ -24470,7 +24679,7 @@ Plain: ["Leaf", "Root", "Cotton", "Sawdust", "Clover", "Corn", "Rose", "Magnet",
     Desert: ["Cactus", "Lotus", "Yucca", "Rock", "Moon Egg", "Heavy", "Pincer", "Bone", "Fire Ant Egg", "Fire Ant Overmind Egg", "Fire Ant Hole Egg", "Scorpion Egg", "Beetle Egg"],
     Jungle: ["Magic Core", "Relic", "Plank", "Soil", "Compass", "Tomato", "Peas", "Rubber", "Lightning", "Wasp Egg", "Termite Egg", "Stickbug Egg", "Mantis Egg", "Firefly Egg", "Spider Cave Egg"],
     Ocean: ["Starfish", "Salt", "Sand", "Jelly", "Shell", "Pearl", "Sponge", "Coral", "Bubble", "Air", "Bubble Bomb", "Coin", "Trident", "Quartz", "Spikeball", "Jellyfish Egg", "Crab Egg", "Squid Egg", "Urchin Egg"],
-    Sewer: ["Poo", "Basil", "Powder", "Poo Stick", "Manhole Egg", "Fly Egg", "Rat Egg", "Roach Egg", "Trashcan Egg"],
+    Sewer: ["Poo", "Basil", "Powder", "Poo Stick", "Manhole Egg", "Fly Egg", "Rat Egg", "Roach Egg", "Trashcan Egg","Neurotoxin"],
     Arctic: ["Icicle", "Ice Cube", "Mimic", "Snowball", "Ice Rose", "Snowflake", "Carrot", "Snow Stick", "Stalagmite Egg", "Ice Dragon Egg", "Igloo Egg", "Tick Egg", "Snowman Egg"],
     Hel: ["Hel Honey", "Hel Lighting", "Blood Stinger", "Faster", "Missile", "Golden Leaf", "Fire Stick", "Glass", "Hel Worm Egg", "Hel Spider Egg", "Hel Bee Egg", "Dragon Egg", "Toxic Dragon Egg"],
     Void: ["Dark Matter", "Gamma Ray", "Stardust", "Singularity", "Nucleus", "Dust", "Fire Bomb", "Dvd", "Plasma", "Orb", "Opal", "Black Hole Egg", "White Hole Egg", "Star Egg", "Asteroid Egg", "Alien Egg", "UFO Egg","Ghost Egg", "Grave Stone Egg"],
@@ -24502,11 +24711,11 @@ Plain: ["Leaf", "Root", "Cotton", "Sawdust", "Clover", "Corn", "Rose", "Magnet",
             "Antennae":12,"Third Eye":15,"Cactus":4,"Magnet":10,"Heavy":5,"Rock":5,
             "Sponge":7,"Cotton":4,"Starfish":5,
             "Hel Worm Egg":15,"Hel Spider Egg":15,"Hel Bee Egg":15,"Hel Hornet Egg":14,
-            "Hel Beetle Egg":16,"Dragon Egg":20,"Dragon Nest Egg":50,"Hel Hive Egg":45,
+            "Hel Beetle Egg":16,"Dragon Egg":20,"Dragon Nest Egg":50,"Hel Hive Egg":45,"Neurotoxin":80,
             "Hel Jellyfish Egg":15,"Hel Queen Bee Egg":45,"Toxic Dragon Egg":28,"Fire Stick":20,
             "Stalagmite Egg":12,"Ice Cube Egg":10,"Ice Dragon Egg":40,"Igloo Egg":40,
             "Tick Egg":12,"Arctic Spider Egg":12,"Arctic Spider Cave Egg":42,"Snowman Egg":10,
-            "Snow Stick":18,
+            "Snow Stick":18,"Soap":50,
             "Wasp Egg":12,"Worker Termite Egg":15,"Soldier Termite Egg":18,
             "Stickbug Egg":12,"Mantis Egg":15,"Firefly Egg":13,"Termite Hole Egg":40,"Emerald":88,
             "Termite Overmind Egg":35,"Spider Cave Egg":40,"Beetle Egg":15,"Scorpion Egg":10,
@@ -26352,7 +26561,15 @@ class StarCraftUI {
         this.dragOffset = [0, 0];
         this.dragStartTime = 0;
         this.dragThreshold = 5;
-
+        this.assemblerMode = false;
+        this.assemblerRecipeIndex = 0;
+        this.assemblerFilled = []; // 每个材料槽填充数量
+        this.assemblerNextReset = 0;
+        this.assemblerActiveRecipes = [];
+        this._initAssemblerTimer();
+        this.isAssembling = false;
+        this.assembleProgress = 0;
+        this.assembledResult = null;
         // 点击处理标志
         this.clickProcessing = false;
 
@@ -27861,11 +28078,10 @@ class StarCraftUI {
                 // 切换模式逻辑
                 this.oracleMode = (area.id === 'oracle');
                 this.tradeMode = (area.id === 'trade');
-
+                this.assemblerMode = (area.id === 'assemble');
                 // 重置状态防止材料残留
                 this.resetCraftingState(false);
                 this.forceRedraw();
-                console.log("Mode switched to:", area.id);
                 return true;
             }
         }
@@ -27883,29 +28099,124 @@ class StarCraftUI {
             const pos = this.normalizePoint(point);
             if (!pos) return null;
 
+            // ---- handleClick() assemblerMode 背包点击分支 ----
+            if (this.assemblerMode) {
+                // 模式切换按钮
+                if (this._modeClickAreas) {
+                    for (const area of this._modeClickAreas) {
+                        if (pos[0] >= area.x && pos[0] <= area.x + area.size &&
+                            pos[1] >= area.y && pos[1] <= area.y + area.size) {
+                            this.assemblerMode = (area.id === 'assemble');
+                            this.oracleMode    = (area.id === 'oracle');
+                            this.tradeMode     = (area.id === 'trade');
+                            if (!this.assemblerMode) this.resetCraftingState(false);
+                            this.forceRedraw();
+                            return area.id;
+                        }
+                    }
+                }
+                // 关闭按钮
+                if (this.isPointInRect(pos, this.closeButton)) {
+                    if (typeof window.closeCrafting === 'function') window.closeCrafting();
+                    return "close_crafting";
+                }
+                // assembler 自身（轨道槽/中心/切换配方）
+                if (this._handleAssemblerClick(pos)) {
+                    this.forceRedraw();
+                    return "assembler";
+                }
+                // 背包点击 → 填入材料
+                const gridCols = 10;
+                const spacing = 8;
+                const totalGridWidth = gridCols * (this.bagSlotSize + spacing) - spacing;
+                const startX = WIDTH / 2 - totalGridWidth / 2;
+                const startY = HEIGHT - 380;
+                const gridRows = 4;
+                const allUniqueTypes = [...new Set(this.inventory.items.map(i => i.type))].sort();
+                const visibleTypes = allUniqueTypes.slice(this.bagScrollOffset, this.bagScrollOffset + gridRows);
+                const RARITY_MAP = {
+                    "Common":0,"Unusual":1,"Rare":2,"Epic":3,"Legendary":4,
+                    "Mythic":5,"Ultra":6,"Super":7,"Omega":8,"Eternal":9
+                };
+                for (const item of this.inventory.items) {
+                    const col = RARITY_MAP[item.rarity];
+                    const rowInVisible = visibleTypes.indexOf(item.type);
+                    if (col === undefined || rowInVisible === -1 || rowInVisible >= gridRows) continue;
+                    const x = startX + col * (this.bagSlotSize + spacing);
+                    const y = startY + rowInVisible * (this.bagSlotSize + spacing);
+                    if (pos[0] < x || pos[0] > x + this.bagSlotSize ||
+                        pos[1] < y || pos[1] > y + this.bagSlotSize) continue;
+
+                    // 找到点击的物品，尝试填入配方槽
+                    const recipe = this.assemblerActiveRecipes?.[this.assemblerRecipeIndex];
+                    if (!recipe) return null;
+
+                    for (let i = 0; i < recipe.ingredients.length; i++) {
+                        const ing = recipe.ingredients[i];
+                        if (item.type !== ing.name) continue;
+                        if (!this.assemblerFilled[i]) this.assemblerFilled[i] = 0;
+                        if (!this.assemblerFilledItems[i]) this.assemblerFilledItems[i] = [];
+                        if (this.assemblerFilled[i] >= ing.qty) continue;
+
+                        const currentRarity = this.assemblerFilledItems[i][0]?.rarity || null;
+
+                        // 稀有度不同 → 退还已填物品，改用新稀有度
+                        if (currentRarity && item.rarity !== currentRarity) {
+                            for (const oldItem of this.assemblerFilledItems[i]) {
+                                const ret = new Item(oldItem.type, 1, oldItem.rarity);
+                                ret.count = 1;
+                                this.inventory.addItem(ret);
+                            }
+                            this.assemblerFilled[i] = 0;
+                            this.assemblerFilledItems[i] = [];
+                        }
+
+                        // 从背包扣除1个
+                        const idx = this.inventory.items.findIndex(
+                            it => it.type === item.type && it.rarity === item.rarity && it.count > 0
+                        );
+                        if (idx !== -1) {
+                            if (this.inventory.items[idx].count > 1) {
+                                this.inventory.items[idx].count--;
+                            } else {
+                                this.inventory.items.splice(idx, 1);
+                            }
+                            this.assemblerFilled[i]++;
+                            this.assemblerFilledItems[i].push({ type: item.type, rarity: item.rarity });
+                            this.forceRedraw();
+                            return "assembler_fill";
+                        }
+                    }
+                    return "assembler_bag_nomatch";
+                }
+                return null;
+            }
+
+            // ===== 普通/Oracle/Trade 模式 =====
+
             // 1. 关闭按钮
             if (this.isPointInRect(pos, this.closeButton)) {
                 if (typeof window.closeCrafting === 'function') window.closeCrafting();
                 return "close_crafting";
             }
-            // 在 handleClick(point) 内部找到处理结果卡片点击的部分
+
+            // 2. 结果卡片点击
             if (this.craftResult && this.resultClickable) {
                 const resX = this.center[0];
-                const resY = this.center[1] - 80; // 必须减 80
-
+                const resY = this.center[1] - 80;
                 const clickArea = [
                     resX - this.slotSize / 2,
                     resY - this.slotSize / 2,
                     this.slotSize,
                     this.slotSize
                 ];
-
                 if (this.isPointInRect(pos, clickArea)) {
-                    this.collectCraftResult(); // 触发你刚才提供的逻辑
+                    this.collectCraftResult();
                     return "collect_result";
                 }
             }
-            // 2. Oracle / Trade 按钮 (位置应与 draw 中 drawInterfaceButtons 一致)
+
+            // 3. Oracle / Trade 旧按钮（兼容保留）
             if (this.oracleButton && this.isPointInRect(pos, this.oracleButton)) {
                 if (!this.craftingLocked) this.enterOracleMode();
                 return "oracle_button";
@@ -27914,32 +28225,29 @@ class StarCraftUI {
                 if (!this.craftingLocked) this.enterTradeMode();
                 return "trade_button";
             }
-            // 在 handleClick(pos) 内部添加
+
+            // 4. 模式切换按钮（左侧面板）
             if (this._modeClickAreas) {
                 for (const area of this._modeClickAreas) {
-                    // 判定点击是否在按钮范围内
-                    if (pos.x >= area.x && pos.x <= area.x + area.size &&
-                        pos.y >= area.y && pos.y <= area.y + area.size) {
-
-                        // 执行切换
-                        this.oracleMode = (area.id === 'oracle');
-                        this.tradeMode = (area.id === 'trade');
-
-                        // 重置状态
-                        this.resetCraftingState(false);
+                    if (pos[0] >= area.x && pos[0] <= area.x + area.size &&
+                        pos[1] >= area.y && pos[1] <= area.y + area.size) {
+                        this.assemblerMode = (area.id === 'assemble');
+                        this.oracleMode    = (area.id === 'oracle');
+                        this.tradeMode     = (area.id === 'trade');
+                        if (!this.assemblerMode) this.resetCraftingState(false);
                         this.forceRedraw();
                         return area.id;
                     }
                 }
             }
-            // 3. 槽位点击判断 (必须使用上移后的坐标)
-            const visualCenterY = this.center[1] - 80; // 与 draw 中保持一致
+
+            // 5. 合成槽位点击
+            const visualCenterY = this.center[1] - 80;
             if (!this.craftingLocked && !this.craftResult) {
                 for (let i = 0; i < 5; i++) {
                     const angle = Math.PI / 180 * (-90 + i * 72);
                     const x = this.center[0] + Math.cos(angle) * this.radius;
                     const y = visualCenterY + Math.sin(angle) * this.radius;
-
                     const slotRect = [x - this.slotSize / 2, y - this.slotSize / 2, this.slotSize, this.slotSize];
                     if (this.isPointInRect(pos, slotRect) && this.slots[i]) {
                         this.removeItemFromSlot(i);
@@ -27948,45 +28256,35 @@ class StarCraftUI {
                 }
             }
 
-            // 4. 背包区域点击 (10x4 网格映射逻辑)
+            // 6. 背包区域点击
             const gridCols = 10;
             const gridRows = 4;
             const spacing = 8;
             const totalGridWidth = gridCols * (this.bagSlotSize + spacing) - spacing;
             const startX = WIDTH / 2 - totalGridWidth / 2;
-            const startY = HEIGHT - 380; // 与 draw 中一致
-
-            // 获取当前显示的类型列表 (A-Z)
+            const startY = HEIGHT - 380;
             const allUniqueTypes = [...new Set(this.inventory.items.map(item => item.type))].sort();
             const visibleTypes = allUniqueTypes.slice(this.bagScrollOffset, this.bagScrollOffset + gridRows);
-
             const RARITY_MAP = {
-                "Common": 0, "Unusual": 1, "Rare": 2, "Epic": 3, "Legendary": 4,
-                "Mythic": 5, "Ultra": 6, "Super": 7, "Omega": 8, "Eternal": 9
+                "Common":0,"Unusual":1,"Rare":2,"Epic":3,"Legendary":4,
+                "Mythic":5,"Ultra":6,"Super":7,"Omega":8,"Eternal":9
             };
-
-            // 遍历背包物品，检测碰撞
-            for (let item of this.inventory.items) {
+            for (const item of this.inventory.items) {
                 const col = RARITY_MAP[item.rarity];
                 const rowInVisible = visibleTypes.indexOf(item.type);
-
-                // 只有在当前可见行内的物品才允许点击
-                if (col !== undefined && rowInVisible !== -1 && rowInVisible < gridRows) {
-                    const x = startX + col * (this.bagSlotSize + spacing);
-                    const y = startY + rowInVisible * (this.bagSlotSize + spacing);
-
-                    if (pos[0] >= x && pos[0] <= x + this.bagSlotSize &&
-                        pos[1] >= y && pos[1] <= y + this.bagSlotSize) {
-
-                        if (!this.craftingLocked && !this.craftResult) {
-                            const success = this.addItemToEmptySlot(item);
-                            if (success) return `item_clicked`;
-                        }
+                if (col === undefined || rowInVisible === -1 || rowInVisible >= gridRows) continue;
+                const x = startX + col * (this.bagSlotSize + spacing);
+                const y = startY + rowInVisible * (this.bagSlotSize + spacing);
+                if (pos[0] >= x && pos[0] <= x + this.bagSlotSize &&
+                    pos[1] >= y && pos[1] <= y + this.bagSlotSize) {
+                    if (!this.craftingLocked && !this.craftResult) {
+                        const success = this.addItemToEmptySlot(item);
+                        if (success) return "item_clicked";
                     }
                 }
             }
 
-            // 5. Craft 按钮点击 (位置与 draw 中 drawInterfaceButtons 一致)
+            // 7. Craft 按钮
             const craftBtnRect = [WIDTH/2 + 180, HEIGHT/2 - 120, 100, 45];
             if (this.isPointInRect(pos, craftBtnRect) && this.canCraft() && !this.craftingLocked) {
                 this.craft();
@@ -27994,6 +28292,7 @@ class StarCraftUI {
             }
 
             return null;
+
         } finally {
             setTimeout(() => { this.clickProcessing = false; }, 100);
         }
@@ -28040,82 +28339,136 @@ class StarCraftUI {
 
         return false;
     }
+    drawStrokedText(ctx, text, x, y, fontSize=20, textAlign='center', fillColor='white') {
+        ctx.save();
+        ctx.font = `bold ${fontSize}px "Arial Black", Arial`;
+        ctx.textAlign = textAlign; ctx.textBaseline = 'middle';
+        ctx.strokeStyle='black'; ctx.lineWidth=4; ctx.lineJoin='round';
+        ctx.strokeText(text,x,y);
+        ctx.fillStyle=fillColor; ctx.fillText(text,x,y);
+        ctx.restore();
+    }
+
+    drawStyledButton(ctx, text, rect, baseColor, fontSize=16) {
+        const adj=(rgb,f)=>rgb.map(c=>Math.min(255,Math.max(0,Math.floor(c*f))));
+        const [x,y,w,h]=rect;
+        ctx.beginPath(); ctx.roundRect(x,y,w,h,10);
+        ctx.fillStyle=`rgb(${baseColor.join(',')})`; ctx.fill();
+        ctx.save();
+        ctx.beginPath(); ctx.roundRect(x,y,w,h,10); ctx.clip();
+        ctx.fillStyle=`rgb(${adj(baseColor,0.72).join(',')})`; ctx.fillRect(x,y,w,h/2);
+        ctx.restore();
+        ctx.strokeStyle=`rgb(${adj(baseColor,0.45).join(',')})`; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.roundRect(x,y,w,h,10); ctx.stroke();
+        if (text) this.drawStrokedText(ctx,text,x+w/2,y+h/2,fontSize);
+    }
+    // 添加关闭按钮绘制方法
+    drawCloseButton(ctx) {
+        const btnSize = 40;
+        const btnX = WIDTH - btnSize - 20;
+        const btnY = 20;
+
+        this.drawStyledButton(ctx, "✕", [btnX, btnY, btnSize, btnSize], [200, 60, 60], 20);
+        this._closeBtnRect = { x: btnX, y: btnY, w: btnSize, h: btnSize };
+    }
     draw(ctx) {
         if (!this.craftingVisible) return;
 
-        // --- 1. 基础背景 (暖棕色) ---
-        ctx.fillStyle = '#CDA46E';
+        // --- 1. 背景 ---
+        let bgColor;
+        if (this.assemblerMode) {
+            bgColor = '#AEAEAE';  // 灰色
+        } else if (this.oracleMode) {
+            bgColor = '#4A6FA5';  // 蓝色
+        } else if (this.tradeMode) {
+            bgColor = '#4A8C5E';  // 绿色
+        } else {
+            bgColor = '#CDA46E';  // 原木色（craft）
+        }
+        ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        // --- 2. 绘制左上角统计 Log (仅绘制，不计算) ---
+        // --- 2. 统计 Log ---
         this.drawCraftLog(ctx);
-
-        // --- 3. 标题 (带深色描边) ---
+        this.drawCloseButton(ctx);
+        // --- 3. 标题 ---
         ctx.save();
         ctx.font = "bold 48px Arial";
         ctx.textAlign = "center";
         ctx.strokeStyle = "rgba(0,0,0,0.4)";
         ctx.lineWidth = 8;
-        ctx.strokeText("Craft", WIDTH / 2, 60);
+        const titleText = this.assemblerMode ? "Assemble" : "Craft";
+        ctx.strokeText(titleText, WIDTH / 2, 60);
         ctx.fillStyle = "white";
-        ctx.fillText("Craft", WIDTH / 2, 60);
+        ctx.fillText(titleText, WIDTH / 2, 60);
         ctx.restore();
 
-        // --- 4. 核心合成区域 (视觉中心上移 80 像素) ---
+        // --- 4. 核心区域 ---
         const visualCenterY = this.center[1] - 80;
         if (this.craftAnimation) {
             this.craftAnimation.center = [this.center[0], visualCenterY];
         }
 
-        const isOracleTradeMode = this.oracleMode || this.tradeMode;
-        let slotsForDisplay, imagesForDisplay;
-
-        // 确定当前应该显示的数据源
-        if (this.craftingLocked && this.craftAnimation && this.craftAnimation.rotating) {
-            slotsForDisplay = this.preAnimationSlots;
-            imagesForDisplay = this.preAnimationCardImgs;
-        } else if (isOracleTradeMode) {
-            slotsForDisplay = [null, null, this.slots[2], null, null];
-            imagesForDisplay = [null, null, this.cardImgs[2], null, null];
-        } else {
-            slotsForDisplay = this.slots;
-            imagesForDisplay = this.cardImgs;
-        }
-
-        if (this.craftAnimation) {
-            // 绘制粒子
-            this.craftAnimation.drawParticles(ctx);
-
-            // 绘制槽位和卡片
-            this.craftAnimation.drawSlots(
-                ctx,
-                slotsForDisplay,
-                imagesForDisplay,
-                this.slotCounts,
-                isOracleTradeMode
-            );
-
-            // 更新物理点击判定坐标 (同步旋转)
-            const [cx, cy] = this.craftAnimation.center;
-            const rad = Math.PI / 180 * this.craftAnimation.angle;
-            const progress = this.craftAnimation.rotating ? (this.craftAnimation.rotTime / this.craftAnimation.rotDuration) : 0;
-
-            for (let i = 0; i < 5; i++) {
-                let [ox, oy] = this.craftAnimation.slotPositions[i];
-                let [px, py] = this.craftAnimation.rotating ?
-                    this.craftAnimation.getContractedPosition(progress, ox, oy) : [ox, oy];
-
-                const wx = cx + px * Math.cos(rad) - py * Math.sin(rad);
-                const wy = cy + px * Math.sin(rad) + py * Math.cos(rad);
-                this.slotPositions[i] = [wx, wy];
+        if (this.assemblerMode) {
+            // Assembler 模式：只绘制粒子 + assembler区域，跳过合成槽
+            if (this.craftAnimation) {
+                this.craftAnimation.drawParticles(ctx);
             }
+            this._drawAssemblerArea(ctx);
+        } else {
+            // 普通/Oracle/Trade 合成模式
+            const isOracleTradeMode = this.oracleMode || this.tradeMode;
+            let slotsForDisplay, imagesForDisplay;
+
+            if (this.craftingLocked && this.craftAnimation && this.craftAnimation.rotating) {
+                slotsForDisplay = this.preAnimationSlots;
+                imagesForDisplay = this.preAnimationCardImgs;
+            } else if (isOracleTradeMode) {
+                slotsForDisplay = [null, null, this.slots[2], null, null];
+                imagesForDisplay = [null, null, this.cardImgs[2], null, null];
+            } else {
+                slotsForDisplay = this.slots;
+                imagesForDisplay = this.cardImgs;
+            }
+
+            if (this.craftAnimation) {
+                this.craftAnimation.drawParticles(ctx);
+                this.craftAnimation.drawSlots(
+                    ctx,
+                    slotsForDisplay,
+                    imagesForDisplay,
+                    this.slotCounts,
+                    isOracleTradeMode
+                );
+
+                const [cx, cy] = this.craftAnimation.center;
+                const rad = Math.PI / 180 * this.craftAnimation.angle;
+                const progress = this.craftAnimation.rotating
+                    ? (this.craftAnimation.rotTime / this.craftAnimation.rotDuration)
+                    : 0;
+
+                for (let i = 0; i < 5; i++) {
+                    let [ox, oy] = this.craftAnimation.slotPositions[i];
+                    let [px, py] = this.craftAnimation.rotating
+                        ? this.craftAnimation.getContractedPosition(progress, ox, oy)
+                        : [ox, oy];
+                    const wx = cx + px * Math.cos(rad) - py * Math.sin(rad);
+                    const wy = cy + px * Math.sin(rad) + py * Math.cos(rad);
+                    this.slotPositions[i] = [wx, wy];
+                }
+            }
+
+            // --- 5. 按钮 (仅非assembler) ---
+            this.drawInterfaceButtons(ctx);
+
+            // --- 8. 结果卡片 (仅非assembler) ---
+            this.drawResultCard(ctx);
         }
 
-        // --- 5. 按钮绘制 (Craft按钮, 概率显示等) ---
-        this.drawInterfaceButtons(ctx);
-        // 绘制模式切换开关 (Oracle / Trade / Normal)
+        // --- 模式切换开关（始终显示）---
         this.drawModeSelectors(ctx);
-        // --- 6. 背包区域 (10x4 布局) ---
+
+        // --- 6. 背包区域（始终显示）---
         const gridCols = 10;
         const gridRows = 4;
         const spacing = 8;
@@ -28126,7 +28479,6 @@ class StarCraftUI {
         const allUniqueTypes = [...new Set(this.inventory.items.map(item => item.type))].sort();
         const visibleTypes = allUniqueTypes.slice(this.bagScrollOffset, this.bagScrollOffset + gridRows);
 
-        // 背包背景底盒
         ctx.fillStyle = "rgba(0,0,0,0.1)";
         this.drawRoundedRect(ctx, startX - 20, startY - 20, totalGridWidth + 40, (gridRows * (this.bagSlotSize + spacing)) + 30, 20);
 
@@ -28135,41 +28487,66 @@ class StarCraftUI {
             "Mythic": 5, "Ultra": 6, "Super": 7, "Omega": 8, "Eternal": 9
         };
 
-        // 绘制 10x4 格子
-        ctx.fillStyle = "rgba(0,0,0,0.2)";
-        for (let r = 0; r < gridRows; r++) {
-            for (let c = 0; c < gridCols; c++) {
-                this.drawRoundedRect(ctx, startX + c * (this.bagSlotSize + spacing), startY + r * (this.bagSlotSize + spacing), this.bagSlotSize, this.bagSlotSize, 8);
+        // ---- draw() 里背包高亮部分 ----
+        let highlightTypes = null;
+        if (this.assemblerMode && this.assemblerActiveRecipes?.length > 0) {
+            const recipe = this.assemblerActiveRecipes[this.assemblerRecipeIndex];
+            if (recipe) {
+                highlightTypes = new Set(
+                    recipe.ingredients
+                        .filter((ing, i) => (this.assemblerFilled[i] || 0) < ing.qty)
+                        .map(ing => ing.name)  // 只匹配 type，不限稀有度
+                );
             }
         }
 
-        // 绘制背包物品
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                this.drawRoundedRect(ctx,
+                    startX + c * (this.bagSlotSize + spacing),
+                    startY + r * (this.bagSlotSize + spacing),
+                    this.bagSlotSize, this.bagSlotSize, 8);
+            }
+        }
+
         this._inventoryClickMap = [];
-        this._hoveredItem = null; // 每一帧重置
+        this._hoveredItem = null;
         this.inventory.items.forEach(item => {
             const col = RARITY_MAP[item.rarity];
             const rowInVisible = visibleTypes.indexOf(item.type);
+            if (col === undefined || rowInVisible === -1) return;
 
-            if (col !== undefined && rowInVisible !== -1) {
-                const x = startX + col * (this.bagSlotSize + spacing);
-                const y = startY + rowInVisible * (this.bagSlotSize + spacing);
+            const x = startX + col * (this.bagSlotSize + spacing);
+            const y = startY + rowInVisible * (this.bagSlotSize + spacing);
 
-                if (item.draw) {
-                    item.draw(ctx, x, y, this.bagSlotSize, -1000, -1000);
-                }
+            if (item.draw) {
+                item.draw(ctx, x, y, this.bagSlotSize, -1000, -1000);
+            }
 
-                this._inventoryClickMap.push({ item, x, y, size: this.bagSlotSize });
+            if (this.assemblerMode && highlightTypes !== null) {
+                if (!highlightTypes.has(item.type)) {
+                    // 暗化不需要的
+                    ctx.fillStyle = "rgba(50,50,50,0.5)";
+                    ctx.beginPath();
+                    ctx.fillRect(x, y, this.bagSlotSize, this.bagSlotSize, 10);
+                } else {
+                    // 高亮需要的：绿框
+                    ctx.save();
 
-                if (this.mouseX >= x && this.mouseX <= x + this.bagSlotSize &&
-                    this.mouseY >= y && this.mouseY <= y + this.bagSlotSize) {
-                    this._hoveredItem = { item, x, y };
+                    ctx.restore();
                 }
             }
-        });
 
+            this._inventoryClickMap.push({ item, x, y, size: this.bagSlotSize });
+            if (this.mouseX >= x && this.mouseX <= x + this.bagSlotSize &&
+                this.mouseY >= y && this.mouseY <= y + this.bagSlotSize) {
+                this._hoveredItem = { item, x, y };
+            }
+        });
         // --- 7. 滚动条 ---
         if (allUniqueTypes.length > gridRows) {
-            const barHeight = (gridRows * (this.bagSlotSize + spacing));
+            const barHeight = gridRows * (this.bagSlotSize + spacing);
             const handleHeight = (gridRows / allUniqueTypes.length) * barHeight;
             const handleY = startY + (this.bagScrollOffset / allUniqueTypes.length) * barHeight;
             ctx.fillStyle = "rgba(255,255,255,0.2)";
@@ -28178,12 +28555,14 @@ class StarCraftUI {
             this.drawRoundedRect(ctx, startX + totalGridWidth + 15, handleY, 4, handleHeight, 2);
         }
 
-        // --- 8. 结果卡片显示 (动画结束后) ---
-        this.drawResultCard(ctx);
-
-        // --- 9. Tooltip 提示框 (置顶显示) ---
+        // --- 9. Tooltip ---
         if (this._hoveredItem) {
-            TooltipSystem.drawItemTooltip(ctx, this._hoveredItem.item, this._hoveredItem.x, this._hoveredItem.y, this.mouseX, this.mouseY, this.bagSlotSize);
+            TooltipSystem.drawItemTooltip(ctx,
+                this._hoveredItem.item,
+                this._hoveredItem.x,
+                this._hoveredItem.y,
+                this.mouseX, this.mouseY,
+                this.bagSlotSize);
         }
     }
     drawCraftLog(ctx) {
@@ -28235,9 +28614,10 @@ class StarCraftUI {
         const spacing = 15;
 
         const modes = [
-            { id: 'normal', label: 'C', color: '#A0A0A0', active: !this.oracleMode && !this.tradeMode },
-            { id: 'oracle', label: 'O', color: '#6600FF', active: this.oracleMode },
-            { id: 'trade', label: 'T', color: '#FFD700', active: this.tradeMode }
+            { id: 'normal', label: 'Cr', color: '#A0A0A0', active: !this.oracleMode && !this.tradeMode && !this.assemblerMode },
+            { id: 'oracle', label: 'Or', color: '#6600FF', active: this.oracleMode },
+            { id: 'trade',  label: 'Tr', color: '#FFD700', active: this.tradeMode },
+            { id: 'assemble', label: 'As', color: '#1D9E75', active: this.assemblerMode }  // 新增
         ];
 
         modes.forEach((mode, i) => {
@@ -28372,20 +28752,6 @@ class StarCraftUI {
             ctx.restore();
         }
 
-        // --- 4. 绘制关闭按钮 (X) ---
-        const [cx, cy, cw, ch] = this.closeButton;
-        ctx.save();
-        ctx.fillStyle = "#FF5555";
-        this.drawRoundedRect(ctx, cx, cy, cw, ch, 5);
-        ctx.strokeStyle = "#990000";
-        ctx.lineWidth = 2;
-        this.strokeRoundedRect(ctx, cx, cy, cw, ch, 5);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 18px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("X", cx + cw / 2, cy + ch / 2 + 2);
-        ctx.restore();
     }
 
     // 辅助函数：专门用于描边圆角矩形
@@ -28469,7 +28835,337 @@ class StarCraftUI {
 
         ctx.globalAlpha = 1.0;
     }
+    _initAssemblerTimer() {
+        const TWO_HOURS = 2 * 60 * 60 * 1000;
+        const lastReset = parseInt(localStorage.getItem("assembler_reset") || "0");
+        this.assemblerNextReset = lastReset + TWO_HOURS;
+        const cached = localStorage.getItem("assembler_recipes");
+        if (cached && Date.now() < this.assemblerNextReset) {
+            this.assemblerActiveRecipes = JSON.parse(cached);
+        } else {
+            this._refreshAssemblerRecipes();
+        }
+    }
+
+    _refreshAssemblerRecipes() {
+        const pool = [...ASSEMBLER_RECIPES];
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        this.assemblerActiveRecipes = pool.slice(0, 3);
+        this.assemblerNextReset = Date.now() + 2 * 60 * 60 * 1000;
+        localStorage.setItem("assembler_recipes", JSON.stringify(this.assemblerActiveRecipes));
+        localStorage.setItem("assembler_reset", Date.now().toString());
+        this.assemblerRecipeIndex = 0;
+        this.assemblerFilled = [];
+        this.assemblerFilledItems = [];
+    }
+
+    _getAssemblerTimeLeft() {
+        const ms = Math.max(0, this.assemblerNextReset - Date.now());
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        return `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    }
+    _drawAssemblerArea(ctx) {
+        if (this.assemblerActiveRecipes.length === 0) return;
+        const recipe = this.assemblerActiveRecipes[this.assemblerRecipeIndex];
+        if (!recipe) return;
+
+        // 1. 数据与状态初始化
+        if (this.assemblerFilled.length !== recipe.ingredients.length) {
+            this.assemblerFilled = recipe.ingredients.map(() => 0);
+            this.assemblerFilledItems = recipe.ingredients.map(() => []);
+        }
+
+        const cx = this.center[0];
+        const cy = this.center[1] - 50;
+        const radius = 135; // 槽位分布半径
+        const cardSize = 75;
+
+        // --- 合成动画状态处理 ---
+        if (this.isAssembling) {
+            this.assembleProgress += 0.03;
+            if (this.assembleProgress >= 1) {
+                this.isAssembling = false;
+                this.assembleProgress = 0;
+                this.assembledResult = this.tempResult;
+                const color = RARITY_COLORS[this.assembledResult.rarity] || [255, 255, 255];
+                this.craftAnimation?.createSuccessParticles(color, 80);
+            }
+        }
+
+        // --- 2. 角度布局绘制材料槽 ---
+        this._assemblerSlotHitAreas = [];
+        const count = recipe.ingredients.length;
+
+        // 逻辑：2槽=180°(Math.PI), 3槽=120°, 4槽=90°
+        const angleStep = (Math.PI * 2) / count;
+        // 2个槽时水平分布(0°)，3个及以上第一个槽在正上方(-90°)
+        const startAngleOffset = count === 2 ? 0 : -Math.PI / 2;
+
+        recipe.ingredients.forEach((ing, i) => {
+            const currentAngle = startAngleOffset + i * angleStep;
+            const sx = cx + Math.cos(currentAngle) * radius;
+            const sy = cy + Math.sin(currentAngle) * radius;
+
+            ctx.save();
+            // 合成中或已合成后，材料槽消失
+            ctx.globalAlpha = this.isAssembling ? Math.max(0, 1 - this.assembleProgress * 4) : (this.assembledResult ? 0 : 1);
+
+            const filledCount = this.assemblerFilled[i] || 0;
+            const hasItems = filledCount > 0;
+
+            if (!hasItems) {
+                // ✅ 需求：初始灰色底 (无稀有度)
+                ctx.fillStyle = "rgba(50, 50, 50, 0.9)";
+                ctx.strokeStyle = "#444";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(sx - cardSize/2, sy - cardSize/2, cardSize, cardSize, 8);
+                ctx.fill();
+                ctx.stroke();
+
+                // 绘制一个淡淡的占位图标
+                const icon = imageLoader.getImage(ing.name, "Common", [cardSize - 25, cardSize - 25]);
+                if (icon) {
+                    ctx.globalAlpha = 0.2;
+                    ctx.drawImage(icon, sx - (cardSize - 25) / 2, sy - (cardSize - 25) / 2);
+                }
+            } else {
+                // ✅ 已填充：调用你提供的完整 draw 方法
+                // 获取已放入物品的真实稀有度，若无则默认为 Common
+                const currentRarity = this.assemblerFilledItems[i][0]?.rarity || "Common";
+                const tempItem = new Item(ing.name, filledCount, currentRarity);
+
+                // 直接调用 draw，不传 mouseX/Y 以免在重组器内触发 Tooltip
+                tempItem.draw(ctx, sx - cardSize / 2, sy - cardSize / 2, cardSize);
+            }
+
+            // 绘制进度文字 (放在槽位下方)
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = (filledCount >= ing.qty) ? "#00FF00" : "#FFFFFF";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`${filledCount}/${ing.qty}`, sx, sy + cardSize/2 + 20);
+
+            ctx.restore();
+
+            // 记录点击区域用于放入物品
+            if (!this.isAssembling && !this.assembledResult) {
+                this._assemblerSlotHitAreas.push({ x: sx, y: sy, r: cardSize / 2, ingIndex: i });
+            }
+        });
+
+        // --- 3. 汇聚动画 (朝中心点飞去) ---
+        if (this.isAssembling) {
+            recipe.ingredients.forEach((ing, i) => {
+                const currentAngle = startAngleOffset + i * angleStep;
+                const startX = cx + Math.cos(currentAngle) * radius;
+                const startY = cy + Math.sin(currentAngle) * radius;
+                const t = this.assembleProgress;
+
+                // 沿角度直线向中心汇聚
+                const curX = startX + (cx - startX) * (t * t);
+                const curY = startY + (cy - startY) * (t * t);
+                const scale = 1 - t * 0.5;
+                const drawSize = cardSize * scale;
+
+                ctx.save();
+                ctx.translate(curX, curY);
+                ctx.rotate(t * Math.PI * 4); // 旋转动画
+
+                // 动画中使用简单的 draw
+                const tempAnimItem = new Item(ing.name, 1, "Common");
+                tempAnimItem.draw(ctx, -drawSize/2, -drawSize/2, drawSize);
+                ctx.restore();
+            });
+        }
+
+        // --- 4. 中心结果槽 ---
+        const resSize = 105;
+        if (this.assembledResult) {
+            ctx.save();
+            // 结果弹出微动动画
+            const pop = 1.0 + Math.sin(Date.now() / 200) * 0.05;
+            const currentSize = resSize * pop;
+
+            this.assembledResult.draw(ctx, cx - currentSize/2, cy - currentSize/2, currentSize);
+
+            ctx.fillStyle = "#FFD700"; ctx.font = "bold 18px Arial"; ctx.textAlign = "center";
+            ctx.fillText("COLLECT", cx, cy + resSize/2 + 35);
+            ctx.restore();
+        } else if (!this.isAssembling) {
+            // 未开始时的中心预览
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            const previewItem = new Item(recipe.result.name, 1, "Common");
+            previewItem.draw(ctx, cx - resSize/2, cy - resSize/2, resSize);
+            ctx.restore();
+        }
+
+        // --- 5. 右侧控制区 ---
+        this._drawSidePanel(ctx, cx + 270, cy - 80, recipe);
+    }
+    _drawSidePanel(ctx, px, py, recipe) {
+        const isLocked = this.isAssembling || this.assembledResult;
+        ctx.save();
+
+        // 如果处于锁定状态（合成中或有产物未领），整体侧边栏变淡
+        if (isLocked) ctx.globalAlpha = 0.4;
+
+        const canGo = this._canAssemble(recipe);
+
+        // 1. 绘制 Assemble 按钮
+        // 定义按钮颜色：能合成用绿色 [76, 175, 80]，不能用灰色 [100, 100, 100]
+        const btnBaseColor = canGo ? [76, 175, 80] : [100, 100, 100];
+        const btnRect = [px - 60, py, 120, 45];
+
+        this.drawStyledButton(ctx, "Assemble", btnRect, btnBaseColor, 18);
+
+        // 更新点击检测区域
+        this._assemblerCenterBtn = {
+            x: px, y: py + 22, // 这里的中心点根据你的逻辑可能需要对应 rect
+            w: 120, h: 45,
+            isRect: true
+        };
+
+        // 2. 绘制步进器 (数量选择)
+        const subY = py + 60;
+        const stepBtnWidth = 35;
+
+        // 左箭头按钮 [减号]
+        this.drawStyledButton(ctx, "◀", [px - 60, subY, stepBtnWidth, stepBtnWidth], [100, 100, 100], 16);
+
+        // 中间数值显示框 (利用按钮样式但不传文字，手动写数字)
+        this.drawStyledButton(ctx, "", [px - 20, subY, 40, stepBtnWidth], [220, 220, 220]);
+        this.drawStrokedText(ctx, "1", px, subY + stepBtnWidth / 2, 18, 'center', 'black');
+
+        // 右箭头按钮 [加号]
+        this.drawStyledButton(ctx, "▶", [px + 25, subY, stepBtnWidth, stepBtnWidth], [100, 100, 100], 16);
+
+        ctx.restore();
+
+        // 3. 增加时间显示区域 (即使锁定也清晰可见)
+        const timeY = py + 125;
+
+        // 绘制倒计时文字
+        const timeLeft = typeof this._getAssemblerTimeLeft === 'function'
+                         ? this._getAssemblerTimeLeft()
+                         : "READY";
+
+        // 绘制标签
+        this.drawStrokedText(ctx, "RESET IN", px, timeY, 12, 'center', '#AAA');
+
+        // 绘制具体时间值
+        const timeColor = (timeLeft === "READY") ? "#00FF00" : "#FFD700";
+        this.drawStrokedText(ctx, timeLeft, px, timeY + 22, 20, 'center', timeColor);
+    }
+    _canAssemble(recipe) {
+        if (!recipe) return false;
+        return recipe.ingredients.every((ing, i) => (this.assemblerFilled[i] || 0) >= ing.qty);
+    }
+
+    _handleAssemblerClick(pos) {
+        const [px, py] = pos;
+        const cx = this.center[0];
+        const cy = this.center[1] - 50;
+
+        // 1. 领取逻辑：如果重组完成了，点击中间领取
+        if (this.assembledResult) {
+            if (Math.hypot(px - cx, py - cy) < 60) {
+                this.inventory.addItem(this.assembledResult);
+                this.showError(`Collected: ${this.assembledResult.count}x ${this.assembledResult.rarity} ${this.assembledResult.type}!`);
+                this.assembledResult = null; // 清除状态，回到初始界面
+                this.forceRedraw();
+                return true;
+            }
+            return true; // 重组完成未领取前，拦截其他点击
+        }
+
+        // 如果正在动画中，禁止任何点击
+        if (this.isAssembling) return true;
+
+        // 2. Assemble 按钮点击
+        if (this._assemblerCenterBtn) {
+            const btn = this._assemblerCenterBtn;
+            const isHit = px >= btn.x - btn.w / 2 && px <= btn.x + btn.w / 2 &&
+                        py >= btn.y - btn.h / 2 && py <= btn.y + btn.h / 2;
+
+            if (isHit) {
+                const recipe = this.assemblerActiveRecipes[this.assemblerRecipeIndex];
+                if (!this._canAssemble(recipe)) return true;
+
+                // 检查所有填入物品稀有度是否一致
+                const filledRarities = recipe.ingredients.map((_, i) =>
+                    this.assemblerFilledItems?.[i]?.[0]?.rarity
+                );
+                const allSame = filledRarities.every(r => r && r === filledRarities[0]);
+                if (!allSame) {
+                    this.showError("All ingredients must be the same rarity!");
+                    return true;
+                }
+
+                const resultRarity = filledRarities[0];
+
+                // --- 启动合成动画 ---
+                this.isAssembling = true;
+                this.assembleProgress = 0;
+
+                // 暂存结果物品
+                this.tempResult = new Item(recipe.result.name, 1, resultRarity);
+                this.tempResult.count = recipe.result.qty || 1;
+
+                // 消耗掉槽位里的数据
+                this.assemblerFilled = recipe.ingredients.map(() => 0);
+                this.assemblerFilledItems = recipe.ingredients.map(() => []);
+
+                this.forceRedraw();
+                return true;
+            }
+        }
+
+        // 3. 材料槽点击（退还）
+        if (this._assemblerSlotHitAreas) {
+            for (const slot of this._assemblerSlotHitAreas) {
+                if (Math.hypot(px - slot.x, py - slot.y) < slot.r) {
+                    if (this.assemblerFilled[slot.ingIndex] > 0) {
+                        const lastItem = this.assemblerFilledItems?.[slot.ingIndex]?.pop();
+                        if (lastItem) {
+                            const ret = new Item(lastItem.type, 1, lastItem.rarity);
+                            this.inventory.addItem(ret);
+                        }
+                        this.assemblerFilled[slot.ingIndex]--;
+                    }
+                    return true;
+                }
+            }
+        }
+
+        // 4. 配方切换
+        const navs = [
+            { btn: this._assemblerPrevBtn, dir: -1 },
+            { btn: this._assemblerNextBtn, dir: 1 }
+        ];
+        for (const {btn, dir} of navs) {
+            if (btn) {
+                const [x, y, w, h] = btn;
+                if (px >= x && px <= x + w && py >= y && py <= y + h) {
+                    this.assemblerRecipeIndex = (this.assemblerRecipeIndex + dir + this.assemblerActiveRecipes.length) % this.assemblerActiveRecipes.length;
+                    this.assemblerFilled = [];
+                    this.assemblerFilledItems = [];
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }
+
 // 辅助函数
 function isPointInRect(point, rect) {
     return point[0] >= rect[0] && point[0] <= rect[0] + rect[2] &&
@@ -28894,6 +29590,8 @@ class Enemy {
         this.repulsionForce = 800;  // 斥力强度
         this.repulsionRadius = this.radius * 0.9;
         // 减速效果
+        // 在 Enemy 构造函数中添加
+        this.lastNeurotoxinTime = 0;
         this.isIceSlowed = false;
         this.slowSourceRarity = null;
         this.slowStartTime = 0;
@@ -29403,6 +30101,31 @@ class Enemy {
                 "heal"
             );
         }
+    }
+// 在 Enemy 类中修改
+    applyNeurotoxin(duration = 2500, reductionPercent = 0.05) {
+        const now = Date.now();
+
+        if (this.lastNeurotoxinTime && (now - this.lastNeurotoxinTime) < duration) {
+            return;
+        }
+
+        this.lastNeurotoxinTime = now;
+
+        if (this.originalAttackDamage === undefined) {
+            this.originalAttackDamage = this.attackDamage;
+        }
+
+        this.attackDamage = Math.max(1, Math.floor(this.attackDamage * (1 - reductionPercent)));
+
+        if (this._neurotoxinTimer) {
+            clearTimeout(this._neurotoxinTimer);
+        }
+
+        this._neurotoxinTimer = setTimeout(() => {
+            this.attackDamage = this.originalAttackDamage;
+            this._neurotoxinTimer = null;
+        }, duration);
     }
     spawnHelBeeAndHelHornet(enemies) {
         if (this.isDead || !enemies) return;
@@ -30002,6 +30725,8 @@ class Enemy {
             case "GraveDigger": return [260, 30, 90, 300, 90];
             case "AlienDigger": return [500, 28, 90, 300, 200];
             case "Shark": return [250, 35, 90, 300, 75];
+            case "Silverfish": return [350, 20, 90, 300, 85];
+            case "Larva": return [80, 22, 90, 300, 20];
             default: return [100, 20, 60, 10, 40];
         }
     }
@@ -30017,7 +30742,7 @@ class Enemy {
             "Jellyfish": 130, "CrabHole": 1, "ManHole": 1, "Fly": 140,
             "Rat": 190, "Roach": 125, "PooStorm": 105, "Leech": 130,
             "Parasite": 140, "Squid": 300, "Wasp": 320, "Scorpion":350,"HelWorm": 150,"HelSpider": 180,"HelBee": 200,"HelHornet": 320,"HelBeetle": 140,
-        "Dragon": 250,"DragonNest": 100,"HelHive": 80,"HelJellyfish": 160,"ToxicDragon": 280,"FireStorm": 170,"HelQueenBee": 150
+        "Dragon": 250,"DragonNest": 100,"HelHive": 80,"HelJellyfish": 160,"ToxicDragon": 280,"FireStorm": 170,"HelQueenBee": 150,"Shark":1
         };
 
         const base = baseRanges[enemyType] || 80;
@@ -31576,7 +32301,12 @@ class Enemy {
         if (this.knockbackTimer > 0) {
             this.knockbackTimer -= dt;
         }
-
+        if (this.neurotoxinActive && Date.now() > this.neurotoxinEndTime) {
+                this.neurotoxinActive = false;
+                if (this.originalAttackDamage) {
+                    this.attackDamage = this.originalAttackDamage;
+                }
+            }
         // 海洋生物移动控制
         const stationaryOceanCreatures = ["Sponge", "Bubble", "CrabHole"];
         if (stationaryOceanCreatures.includes(this.type)) {
@@ -33405,7 +34135,8 @@ class FluidBlob {
         rarity = "Common",
         baseSpeed = 10,
         duration = 5,
-        itemStat = {}
+        itemStat = {},
+        player = null  // ✅ 新增 player 参数
     ) {
         this.x = x;
         this.y = y;
@@ -33439,7 +34170,14 @@ class FluidBlob {
         // 扩散速度 = baseSpeed + 等级×5
         // =========================
         this.baseSpeed = baseSpeed;
-        this.expandSpeed = baseSpeed + (level * 5);
+        let expandSpeed = baseSpeed + (level * 5);
+
+        // ✅ 应用 Soap 速度加成
+        let soapBonus = 0;
+        if (player && typeof player.getTotalSoapBonus === 'function') {
+            soapBonus = player.getTotalSoapBonus();
+        }
+        this.expandSpeed = expandSpeed * (1 + soapBonus);
         this.currentRadius = 0;
 
         // =========================
@@ -33597,26 +34335,14 @@ class FluidManager {
         this.maxFluids = 50;
     }
 
-    addFluid(x, y, color, damage, duration = 5, rarity = "Common", effectType = 'damage', baseSpeed = 20, itemStat = {}) {
+    addFluid(x, y, color, damage, duration = 5, rarity = "Common", effectType = 'damage', baseSpeed = 20, itemStat = {}, player = null) {
         if (this.fluids.length >= this.maxFluids) {
             this.fluids.shift();
         }
 
-        const fluid = new FluidBlob(x, y, color, damage, rarity, baseSpeed, duration, itemStat);
+        // ✅ 传入 player 参数
+        const fluid = new FluidBlob(x, y, color, damage, rarity, baseSpeed, duration, itemStat, player);
         fluid.effectType = effectType;
-
-        // 速度稀有度加成已在 FluidBlob 构造函数中计算
-        // 如果 game.itemStats.fluidBaseSpeed 存在，会覆盖 baseSpeed
-        if (this.game?.itemStats?.fluidBaseSpeed !== undefined) {
-            const RARITY_BONUS = {
-                Common: 0, Unusual: 1, Rare: 2, Epic: 3,
-                Legendary: 4, Mythic: 5, Ultra: 6,
-                Super: 7, Omega: 8, Eternal: 9
-            };
-            const level = RARITY_BONUS[rarity] || 0;
-            fluid.baseSpeed = this.game.itemStats.fluidBaseSpeed;
-            fluid.expandSpeed = fluid.baseSpeed + level * 5;
-        }
 
         this.fluids.push(fluid);
         return fluid;
@@ -33740,6 +34466,8 @@ class Petal {
         this.worldX = 0;
         this.worldY = 0;
         this.color = WHITE;
+        this.ejectProgress = 1;
+        this.ejectSpeed = 1;
         this.absorbDelay = 0;
         this.absorbDelayTime = 1.0;
         this.size = 8;
@@ -33751,7 +34479,7 @@ class Petal {
         this.isFaster = false;
         this.mimicProcessed = false;
         this.wingRotationAngle = 0;
-
+        this._lastStemCellTime = 0;
         this.rarity = "Common";
         this.spawnCooldown = 0;
         this.collisionCooldown = 0;
@@ -33806,6 +34534,15 @@ class Petal {
         this.maxHelWorms = 2;
         this.helSpiderList = [];
         this.maxHelSpiders = 3;
+        // 在 Petal 构造函数中，找到初始化数组的地方添加
+        this.larvaList = [];
+        this.maxLarvas = 2;
+        this.silverfishList = [];
+        this.maxSilverfish = 1;
+        this.vampireDiggerList = [];
+        this.maxVampireDiggers = 1;
+        this.batList = [];
+        this.maxBats = 1;
         this.helBeeList = [];
         this.maxHelBees = 1;
         this.helHornetList = [];
@@ -33915,8 +34652,12 @@ class Petal {
         this.level = 1;
         this.rarity = "Common";
         this.isFaster = false;
+        this.eject = 0;
+        this.ejectProgress = 1;
+        this.ejectSpeed = 3;
         this.originalMimicData = null;
         this.rotationSpeedBonus = 0;
+        this._lastStemCellTime = 0;
         this.isTransformedMimic = false;
         this.shipwreckJellyfishList = [];
         this.maxShipwreckJellyfish = 10;
@@ -34122,9 +34863,6 @@ class Petal {
         this.spiderCaveSpiders = [];
         this.maxSpiderCaveSpiders = 10;
     }
-    // 在 Petal 类的碰撞/攻击处理方法中添加
-// 例如在 `attack` 相关的代码中，或者创建一个专门的方法
-
     applyBurArmorReduction(enemy) {
         const currentItem = this.getCurrentItem();
         if (!currentItem || currentItem.type !== "Bur") return false;
@@ -34342,6 +35080,15 @@ class Petal {
         if (this.spawnCooldown > 0) {
             this.spawnCooldown -= dt * 1000;
         }
+    }
+    // 在 Petal 类中
+    applyNeurotoxinToEnemy(enemy, reductionPercent, duration = 2500) {
+        if (!enemy || enemy.isDead) return false;
+        if (typeof enemy.applyNeurotoxin === 'function') {
+            enemy.applyNeurotoxin(duration, reductionPercent);
+            return true;
+        }
+        return false;
     }
     _triggerBubbleBreak(item) {
         if (!this.player?.gameInstance) return;
@@ -34634,32 +35381,32 @@ class Petal {
         return null;
     }
      static SUMMON_LISTS = [
-            'goldenAntList','urchinList', 'rockList', 'sandstormList', 'whiteBloodCellList',"magicSoldierAntList",
-            'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
-            'beeList', 'ladybugList', 'beetleList', 'scorpionList',
-            'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
-            'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
-            'scallopList', 'starfishList', 'bubbleList', 'crabList',
-            'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
-            'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
-            'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
-            'virusList', 'squareList', 'helWormList', 'helSpiderList',
-            'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
-            'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
-            'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
-            'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
-            'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
-            'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
-            'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
-            'workerAntList', 'centipedeList', 'termiteSoldierList',
-            'waspList', 'stickBugList', 'mantisList', 'fireflyList',
-            'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
-            'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList',
-            'photonList', 'electronList', 'electronCloudList', 'protonList',
-            'atomList', 'blackHoleList', 'whiteHoleList', 'neutronStarList',
-            'starList', 'asteroidList', 'alienList', 'ufoAlienList',
-            'graveGhostList', 'ghostList', 'graveDiggerList', 'alienDiggerList',
-            'mudDiggerList'  // 添加泥浆挖掘者
+    'goldenAntList', 'urchinList', 'rockList', 'sandstormList', 'whiteBloodCellList', "magicSoldierAntList",
+    'spiderList', 'redBloodCellList', 'stemCellList', 'queenAntList',
+    'beeList', 'ladybugList', 'beetleList', 'scorpionList',
+    'workerFireAntList', 'soldierFireAntList', 'babyFireAntList',
+    'fireAntOvermindList', 'fireAntHoleList', 'bacteriaList',
+    'scallopList', 'starfishList', 'bubbleList', 'crabList',
+    'jellyfishList', 'crabHoleCrabs', 'cancerList', 'diggerList',
+    'hiveBeeList', 'manHoleList', 'flyList', 'ratList', 'roachList',
+    'pooStormList', 'leechList', 'parasiteList', 'bacteriophageList',
+    'virusList', 'squareList', 'helWormList', 'helSpiderList',
+    'helBeeList', 'helHornetList', 'helBeetleList', 'dragonList',
+    'NestDragonList', 'HiveHelBeeList', 'helJellyfishList',
+    'helQueenBeeList', 'toxicDragonList', 'helDiggerList',
+    'helBeekeeperList', 'firestormList', 'slagMightList', 'iceCubeList',
+    'iceDragonList', 'iglooSnowmenList', 'tickList', 'arcticSpiderList',
+    'arcticCaveSpiderList', 'snowmanList', 'snowstormList',
+    'frostDiggerList', 'pirateDiggerList', 'soldierAntList',
+    'workerAntList', 'centipedeList', 'termiteSoldierList',
+    'waspList', 'stickBugList', 'mantisList', 'fireflyList',
+    'workerTermiteList', 'soldierTermiteList', 'termiteOvermindList',
+    'spiderCaveSpiders', 'shipwreckJellyfishList', 'barnacleList',
+    'photonList', 'electronList', 'electronCloudList', 'protonList',
+    'atomList', 'blackHoleList', 'whiteHoleList', 'neutronStarList','squidList',
+    'starList', 'asteroidList', 'alienList', 'ufoAlienList',
+    'graveGhostList', 'ghostList', 'graveDiggerList', 'alienDiggerList',
+    'mudDiggerList', 'larvaList', 'silverfishList', 'vampireDiggerList', 'batList'
         ];
     _clearAllSummons() {
         const gameEnemies = this.player?.gameInstance?.enemies;
@@ -34945,7 +35692,7 @@ class Petal {
             this.nextSpawnCooldown = this.baseSpawnCooldown;
         }
     }
-    
+
     updateReloadTimeWithGoldenLeaf() {
         if (!this.player) return;
         let totalReduction = 0;
@@ -35017,7 +35764,16 @@ class Petal {
                 this.resetToDefault();
                 return;
             }
-
+            if (this.itemType !== item?.type) {
+                // 从玩家当前位置开始弹出，而不是从 (0,0)
+                if (this.player?.physicsBody) {
+                    this.worldX = this.player.physicsBody.position.x;
+                    this.worldY = this.player.physicsBody.position.y;
+                    this.screenX = WIDTH / 2;
+                    this.screenY = HEIGHT / 2;
+                }
+                this.eject = 1;
+            }
             if (item) {
                 // 检查是否是同一物品（类型和稀有度都相同）
                 const isSameItem = this.itemType === item.type && this.rarity === item.rarity;
@@ -35130,7 +35886,7 @@ class Petal {
                     "Bee Egg", "Hive Egg", "Beetle Egg",
                     "Photon Egg", "Electron Egg", "Electron Cloud Egg", "Proton Egg", "Atom Egg",
                     "Black Hole Egg", "White Hole Egg", "Neutron Star Egg", "Star Egg", "Asteroid Egg",
-                    "Alien Egg", "UFO Egg", "Ghost Egg", "Grave Stone Egg",
+                    "Alien Egg", "UFO Egg", "Ghost Egg", "Grave Stone Egg","Grave Digger Egg","Vampire Digger Egg","Larva Egg","Silverfish Egg","Bat Egg"
                 ]);
                 this.isEggItem = EGG_ITEMS.has(item.type);
 
@@ -35174,6 +35930,7 @@ class Petal {
     _registerSpawnMethods() {
         const SPAWN_CONFIGS = [
         // 在 Petal 类的 _registerSpawnMethods 中添加海胆配置
+            { listName: "larvaList", maxName: "maxLarvas", maxDefault: 2, spawnCount: 2, enemyType: "Larva", eggType: "Larva Egg", cooldown: 10000, spawnMethod: "Larva", cleanMethod: "Larva", updateMethod: "Larva" }, { listName: "silverfishList", maxName: "maxSilverfish", maxDefault: 1, spawnCount: 1, enemyType: "Silverfish", eggType: "Silverfish Egg", cooldown: 12000, spawnMethod: "Silverfish", cleanMethod: "Silverfish", updateMethod: "Silverfish" }, { listName: "vampireDiggerList", maxName: "maxVampireDiggers", maxDefault: 1, spawnCount: 1, enemyType: "VampireDigger", eggType: "Vampire Digger Egg", cooldown: 6000, spawnMethod: "VampireDigger", cleanMethod: "VampireDigger", updateMethod: "VampireDigger" }, { listName: "batList", maxName: "maxBats", maxDefault: 1, spawnCount: 1, enemyType: "Bat", eggType: "Bat Egg", cooldown: 8000, spawnMethod: "Bat", cleanMethod: "Bat", updateMethod: "Bat" },
             { listName: "urchinList", maxName: "maxUrchins", maxDefault: 1, spawnCount: 1,enemyType: "Urchin", eggType: "Urchin Egg", cooldown: 15000,spawnMethod: "Urchin", cleanMethod: "Urchin", updateMethod: "Urchin" },
             { listName: "magicSoldierAntList", maxName: "maxMagicSoldierAnts", maxDefault: 20, spawnCount: 1,enemyType: "Soldier Ant", eggType: "Magic Soldier Ant Egg", cooldown: 1000,spawnMethod: "trySpawnMagicSoldierAnt", cleanMethod: "MagicSoldierAnt", updateMethod: "updateMagicSoldierAnts" },
             { listName:"helWormList",       maxName:"maxHelWorms",          maxDefault:2,  spawnCount:2,  enemyType:"HelWorm",        eggType:"Hel Worm Egg",          cooldown:10000, spawnMethod:"HelWorm",             cleanMethod:"HelWorm",             updateMethod:"HelWorm" },
@@ -35398,24 +36155,36 @@ class Petal {
             }
         };
     }
+// 修改 calculateOrbitPosition 或 update 中的位置计算部分
     calculateOrbitPosition(dt) {
         if (!this.player || !this.player.physicsBody) return;
 
         const playerPos = this.player.physicsBody.position;
 
+        // --- 关键改进：平滑中心点 ---
+        // 不要直接用 playerPos，而是创建一个平滑跟随的虚拟中心
+        if (!this.smoothCenter) {
+            this.smoothCenter = { x: playerPos.x, y: playerPos.y };
+        }
+
+        // 调整跟随灵敏度 (数值越小，滞后感和拉伸感越强)
+        const followLerp = 0.15;
+        this.smoothCenter.x += (playerPos.x - this.smoothCenter.x) * followLerp;
+        this.smoothCenter.y += (playerPos.y - this.smoothCenter.y) * followLerp;
+
         if (this.stillMode) {
-            // 静止模式
             this.worldX = this.stillPosition.x;
             this.worldY = this.stillPosition.y;
-            this.screenX = WIDTH / 2 + (this.worldX - playerPos.x);
-            this.screenY = HEIGHT / 2 + (this.worldY - playerPos.y);
         } else {
-
-            this.worldX = playerPos.x + Math.cos(this.angle) * this.radius;
-            this.worldY = playerPos.y + Math.sin(this.angle) * this.radius;
-            this.screenX = WIDTH / 2 + Math.cos(this.angle) * this.radius;
-            this.screenY = HEIGHT / 2 + Math.sin(this.angle) * this.radius;
+            // 使用 smoothCenter 而不是 playerPos 来计算世界坐标
+            // 这会产生视频中那种：移动时花瓣圈向后拉伸，停下时回弹的效果
+            this.worldX = this.smoothCenter.x + Math.cos(this.angle) * this.radius;
+            this.worldY = this.smoothCenter.y + Math.sin(this.angle) * this.radius;
         }
+
+        // 更新屏幕坐标（始终以玩家为相机中心）
+        this.screenX = WIDTH / 2 + (this.worldX - playerPos.x);
+        this.screenY = HEIGHT / 2 + (this.worldY - playerPos.y);
     }
     repairPetalsWithChromosome(dt) {
         if (!this.player || !this.player.petals) return;
@@ -35450,6 +36219,51 @@ class Petal {
         }
     }
 
+// 在 Petal 类中添加
+    _applyStemCellEffect() {
+        if (!this.player || !this.player.gameInstance) return;
+
+        const currentItem = this.getCurrentItem();
+        if (!currentItem || currentItem.type !== "Stem Cell") return;
+
+        // 冷却检查
+        if (this._lastStemCellTime && Date.now() - this._lastStemCellTime < 5000) {
+            return;
+        }
+
+        const stemCellRarity = currentItem.rarity;
+        const stemCellIndex = RARITY_LIST.indexOf(stemCellRarity);
+        // 基础概率 10%
+        const baseChance = 0.10;
+        const game = this.player.gameInstance;
+        // 遍历所有友方生物
+        for (const enemy of game.enemies) {
+            if (!enemy.isFriendly) continue;
+            if (enemy.isDead) continue;
+            if (enemy.health <= 0) continue;
+
+            const healthPercent = enemy.health / enemy.maxHealth;
+
+            // 检查血量是否低于阈值 (66% 或 33%)
+            const isBelowThreshold = healthPercent <= 0.66 || healthPercent <= 0.33;
+
+            if (isBelowThreshold) {
+                // ✅ 稀有度检查：Stem Cell 稀有度必须 >= 友方生物稀有度
+                const enemyRarity = enemy.rarity || "Common";
+                const enemyIndex = RARITY_LIST.indexOf(enemyRarity);
+
+                if (stemCellIndex >= enemyIndex) {
+                    // 10% 概率触发
+                    if (Math.random() < baseChance) {
+                        const oldHealth = enemy.health;
+                        enemy.health = enemy.maxHealth;
+                        this._lastStemCellTime = Date.now();
+                        return; // 一次只治疗一个生物
+                    }
+                }
+            }
+        }
+    }
     update(dt, spreadMode = false, playerWorldPos = null) {
         const currentItem = this.getCurrentItem();
         if (currentItem && currentItem.is_magic) {
@@ -35524,12 +36338,19 @@ class Petal {
                 const config = ITEM_STATS["Mud"] || {};
 
                 const fluidSpeed = config.fluid_speed || 10;
-                const finalSpeed = fluidSpeed * multiplier / 1000;
+                let finalSpeed = fluidSpeed * multiplier / 1000;
+
+                // ✅ 应用 Soap 速度加成
+                let soapBonus = 0;
+                if (this.player && typeof this.player.getTotalSoapBonus === 'function') {
+                    soapBonus = this.player.getTotalSoapBonus();
+                }
+                finalSpeed = finalSpeed * (1 + soapBonus);
 
                 const spawnX = this.player.physicsBody.position.x;
                 const spawnY = this.player.physicsBody.position.y;
 
-                // 3. 创建流体
+                // 3. 创建流体（传入 player 参数）
                 const fluid = this.player.gameInstance.fluidManager.addFluid(
                     spawnX, spawnY,
                     config.fluid_color || "#8B5A2B",
@@ -35538,11 +36359,11 @@ class Petal {
                     rarity,
                     "poison",
                     finalSpeed,
-                    config // 传入配置对象
+                    config,
+                    this.player  // ✅ 传入 player 参数
                 );
 
                 // 4. ✅ 确保这些关键属性被挂载到了流体实例上
-                // 这里的 config.base_poison_damage 必须对应 ITEM_STATS 里的属性名
                 fluid.poisonDamage = (config.base_poison_damage || config.poison_damage || 109350) * multiplier;
                 fluid.effectType = "poison";
                 fluid.rarity = rarity;
@@ -35567,7 +36388,9 @@ class Petal {
         // 计算轨道位置
         this.calculateOrbitPosition(dt);
         this.updateNucleusHeal(dt);
-
+        if (currentItem && currentItem.type === "Stem Cell") {
+            this._applyStemCellEffect();
+        }
         // 零开销斥力：只检测当前正在碰撞的敌人
         if (this.touchingEnemy) {
             const enemy = this.touchingEnemy;
@@ -35625,6 +36448,14 @@ class Petal {
                     currentItem.durability = this.maxDurability;
                 }
                 this.eggSpawned = false;
+                // 从玩家中心弹出
+                if (this.player?.physicsBody) {
+                    this.worldX = this.player.physicsBody.position.x;
+                    this.worldY = this.player.physicsBody.position.y;
+                    this.screenX = WIDTH / 2;
+                    this.screenY = HEIGHT / 2;
+                }
+                this.eject = 1;
             }
             this._updateExistingSummonedCreatures(dt);
             return;
@@ -35685,7 +36516,7 @@ class Petal {
                 "Hel Jellyfish Egg","Hel Queen Bee Egg","Toxic Dragon Egg","Hel Digger Egg",
                 "Hel Beekeeper Egg","Fire Stick","Photon Egg","Electron Egg","Electron Cloud Egg",
                 "Proton Egg","Atom Egg","Black Hole Egg","White Hole Egg","Neutron Star Egg",
-                "Star Egg","Asteroid Egg","Alien Egg","UFO Egg","Ghost Egg","Grave Stone Egg","Alien Digger Egg","Grave Digger Egg"
+                "Star Egg","Asteroid Egg","Alien Egg","UFO Egg","Ghost Egg","Grave Stone Egg","Alien Digger Egg","Grave Digger Egg","Vampire Digger Egg","Larva Egg","Silverfish Egg","Bat Egg"
             ]);
 
             if (this.hasAntennae) {
@@ -35717,7 +36548,14 @@ class Petal {
                 if (currentItem && currentItem.type === "Wing" && !isEggItem && !isFixed && this.itemType !== "Heavy") {
                     this.targetRadius *= 1.4;
                 }
-                this.radius += (this.targetRadius - this.radius) * 0.1;
+                if (this._lastTargetRadius !== undefined && this._lastTargetRadius !== this.targetRadius) {
+                    this._radiusVelocity = (this.targetRadius - this.radius) * 0.3; // 给一个初速度
+                }
+                this._lastTargetRadius = this.targetRadius;
+
+                // 替换原来的 this.radius += (this.targetRadius - this.radius) * 0.1;
+                this._radiusVelocity = (this._radiusVelocity || 0) * 0.75 + (this.targetRadius - this.radius) * 0.18;
+                this.radius += this._radiusVelocity;
             }
 
             this.screenX = screenCenterX + Math.cos(this.angle) * this.radius;
@@ -35732,6 +36570,27 @@ class Petal {
                 this.worldY = screenCenterY + Math.sin(this.angle) * this.radius;
                 this.fixedPosition = {x: this.worldX, y: this.worldY};
             }
+
+            if (this.eject > 0) {
+            this.eject -= dt * 3;
+            const t = Math.max(0, Math.min(1, 1 - this.eject));
+
+            // 弹性缓动：overshoot 后回弹
+            const overshoot = 1.15;  // 冲过头幅度减小
+            const easeElastic = t < 0.7
+                ? (t / 0.7) * overshoot
+                : overshoot - (overshoot - 1) * ((t - 0.7) / 0.3);
+            const playerPos = this.player.physicsBody.position;
+            const targetX = playerPos.x + Math.cos(this.angle) * this.radius;
+            const targetY = playerPos.y + Math.sin(this.angle) * this.radius;
+
+            this.worldX = playerPos.x + (targetX - playerPos.x) * easeElastic;
+            this.worldY = playerPos.y + (targetY - playerPos.y) * easeElastic;
+            this.screenX = WIDTH / 2 + (this.worldX - playerPos.x);
+            this.screenY = HEIGHT / 2 + (this.worldY - playerPos.y);
+
+            if (this.eject <= 0) this.eject = 0;
+        }
         }
 
         // 攻击冷却更新
@@ -35875,6 +36734,10 @@ class Petal {
                 "Electron Cloud Egg": ["ElectronCloud", 20000, "updateElectronCloud"],
                 "Proton Egg": ["Proton", 8000, "updateProton"],
                 "Atom Egg": ["Atom", 18000, "updateAtom"],
+                "Larva Egg": ["Larva", 10000, "updateLarva"],
+                "Silverfish Egg": ["Silverfish", 12000, "updateSilverfish"],
+                "Vampire Digger Egg": ["VampireDigger", 6000, "updateVampireDigger"],
+                "Bat Egg": ["Bat", 8000, "updateBat"],
                 "Black Hole Egg": ["BlackHole", 25000, "updateBlackHole"],
                 "White Hole Egg": ["WhiteHole", 22000, "updateWhiteHole"],
                 "Neutron Star Egg": ["NeutronStar", 28000, "updateNeutronStar"],
@@ -38003,6 +38866,8 @@ class Player {
             this.collisionCooldown = 0;
             this.bounceCooldown = 0;
             this.bounceStrength = 15;
+            this.velocity = new Vector2(0, 0);  // 惯性速度
+             this.INERTIA = 0.82;               // 衰减系数（越小越滑）
             this.isBouncing = false;
             this.isDead = false;
             this.slowMultiplier = 1.0;      // 速度倍率，1.0 为正常速度
@@ -38062,6 +38927,29 @@ class Player {
         if (this.mana > this.maxMana) {
             this.mana = this.maxMana;
         }
+    }
+    // 在 Player 类中添加
+    getTotalSoapBonus() {
+        let totalBonus = 0;
+
+        // 检查所有花瓣
+        for (const petal of this.petals) {
+            const item = petal.getCurrentItem();
+            if (item && item.type === "Soap" && !petal.isBroken && !petal.isReloading) {
+                const bonus = ITEM_STATS["Soap"]?.fluid_speed_bonus?.[item.rarity] || 0;
+                totalBonus += bonus;
+            }
+        }
+
+        // 检查快捷栏
+        for (const slotItem of this.quickSlot.slots) {
+            if (slotItem && slotItem.type === "Soap" && !slotItem.isBroken) {
+                const bonus = ITEM_STATS["Soap"]?.fluid_speed_bonus?.[slotItem.rarity] || 0;
+                totalBonus += bonus;
+            }
+        }
+
+        return Math.min(totalBonus, 10.0); // 最大 500% 加成
     }
     // 在 Player 类中添加
     getManaDamageMultiplier() {
@@ -38977,40 +39865,51 @@ class Player {
         let dy = this.mousePosition.y - screenCenterY;
         const deadZone = 30;
 
-        if (Math.abs(dx) < deadZone && Math.abs(dy) < deadZone) {
-            return;
-        }
+        const inDeadZone = Math.abs(dx) < deadZone && Math.abs(dy) < deadZone;
 
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > 0) {
+        if (!inDeadZone) {
+            const distance = Math.sqrt(dx * dx + dy * dy);
             const normDx = dx / distance;
             const normDy = dy / distance;
             let moveSpeed = this.speed * speedMult;
-
-            // 应用减速效果
-            if (this.slowMultiplier < 1.0) {
-                moveSpeed *= this.slowMultiplier;
-            }
+            if (this.slowMultiplier < 1.0) moveSpeed *= this.slowMultiplier;
 
             const distanceFactor = Math.min(2.0, distance / 100.0);
-            const finalSpeed = moveSpeed * distanceFactor * dt;
+            const targetVx = normDx * moveSpeed * distanceFactor;
+            const targetVy = normDy * moveSpeed * distanceFactor;
 
-            const nextX = this.physicsBody.position.x + normDx * finalSpeed;
-            const nextY = this.physicsBody.position.y + normDy * finalSpeed;
+            // 平滑加速趋向目标速度
+            const accel = 1 - Math.pow(0.15, dt * 60);
+            this.velocity.x += (targetVx - this.velocity.x) * accel;
+            this.velocity.y += (targetVy - this.velocity.y) * accel;
+        } else {
+            // 死区内：惯性衰减
+            const friction = Math.pow(this.INERTIA, dt * 60);
+            this.velocity.x *= friction;
+            this.velocity.y *= friction;
+        }
 
-            // 迷宫碰撞检测
-            if (this.gameInstance && typeof this.gameInstance.isInMazeWall === 'function') {
-                if (!this.gameInstance.isInMazeWall(nextX, nextY)) {
-                    this.physicsBody.position.x = nextX;
-                    this.physicsBody.position.y = nextY;
-                }
-            } else {
+        // 应用速度
+        const nextX = this.physicsBody.position.x + this.velocity.x * dt;
+        const nextY = this.physicsBody.position.y + this.velocity.y * dt;
+
+        if (this.gameInstance && typeof this.gameInstance.isInMazeWall === 'function') {
+            if (!this.gameInstance.isInMazeWall(nextX, nextY)) {
                 this.physicsBody.position.x = nextX;
                 this.physicsBody.position.y = nextY;
+            } else {
+                // 撞墙时速度清零
+                this.velocity.x = 0;
+                this.velocity.y = 0;
             }
+        } else {
+            this.physicsBody.position.x = nextX;
+            this.physicsBody.position.y = nextY;
+        }
 
-            this.keepInBounds();
-            this.facingAngle = Math.atan2(normDy, normDx);
+        this.keepInBounds();
+        if (Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.y) > 0.1) {
+            this.facingAngle = Math.atan2(this.velocity.y, this.velocity.x);
         }
     }
     applyBubbleForce(forceX, forceY) {
@@ -39097,7 +39996,7 @@ class Player {
 
 
         this.moveTowardsMouse(dt, cameraOffset);  // 始终执行
-// 处理冲量衰减（独立于鼠标移动）
+
     if (this.impulseVelocity.x !== 0 || this.impulseVelocity.y !== 0) {
         // ✅ 乘以 dt 使位移帧率无关（dt≈0.016，impulse=25 → 每帧约 0.4px，太小）
         // 所以 applyBounce 里 bounceSpeed 要调大，建议改为 400
@@ -39935,7 +40834,13 @@ class Player {
                                 isCrit = true;
                             }
                         }
-
+                        if (currentItem && currentItem.type === "Neurotoxin") {
+                            const reduction = ITEM_STATS["Neurotoxin"]?.damage_reduction?.[currentItem.rarity] || 0.05;
+                            if (typeof enemy.applyNeurotoxin === 'function') {
+                                enemy.applyNeurotoxin(2500, reduction);
+                                petal.startReload();
+                            }
+                        }
                         // Web：减速效果
                         if (petal.itemType === "Web") {
                             const applied = petal.applyWeb(enemy);
@@ -40133,7 +41038,10 @@ class Player {
     // 在 Player 类中，替换 draw 方法为：
     draw(ctx, cameraOffset, viewScale = 1.0) {
         if (this.isDead) return;
-
+        // 绘制花瓣
+        for (const petal of this.petals) {
+            petal.draw(ctx, cameraOffset, viewScale);
+        }
         // 玩家始终在屏幕中心
         const x = WIDTH / 2;
         const y = HEIGHT / 2;
@@ -40184,6 +41092,7 @@ class Player {
         ctx.lineCap = 'round';
         ctx.beginPath();
 
+
         const healthPercent = this.health / this.maxHealth;
 
         // ✅ 张开模式（spreadMode）时显示苦脸
@@ -40210,10 +41119,6 @@ class Player {
 
         ctx.restore();
 
-        // 绘制花瓣
-        for (const petal of this.petals) {
-            petal.draw(ctx, cameraOffset, viewScale);
-        }
 
         // 绘制生命值条和护盾条
         this.drawHealthAndShieldBars(ctx, x, y, viewScale);
@@ -47627,7 +48532,7 @@ class WorldMapGame {
             "Golden Leaf": "Magic Golden Leaf", "Soldier Ant Egg": "Magic Soldier Ant Egg",
             "Blood Stinger": "Magic Blood Stinger", "Cactus": "Magic Cactus",
             "Claw": "Magic Claw", "Stinger": "Magic Stinger", "Hemoglobin": "Magic Hemoglobin",
-            "Ruby": "Magic Ruby"
+            "Ruby": "Magic Ruby", "Tooth": "Magic Tooth",
         };
 
         for (const itemType of dropItems) {
@@ -47654,9 +48559,8 @@ class WorldMapGame {
                     }
                 }
 
-                if (dropRarity && dropRarity !== "Common") {
-                    this._spawnItemDrop(enemy, finalItemType, dropRarity, i);
-                }
+                this._spawnItemDrop(enemy, finalItemType, dropRarity, i);
+
             }
         }
     }
@@ -48169,10 +49073,7 @@ class WorldMapGame {
                 card.draw(context, cameraOffset, 1.0, this.player.playerId);
             }
 
-            // 绘制玩家（传 viewScale=1.0）
-            if (this.player && !this.player.isDead) {
-                this.player.draw(context, cameraOffset, 1.0);
-            }
+
 
             // 多人模式逻辑
             if (this.multiplayerMode) {
@@ -48277,7 +49178,10 @@ class WorldMapGame {
                     }
                 }
             }
-
+            // 绘制玩家（传 viewScale=1.0）
+            if (this.player && !this.player.isDead) {
+                this.player.draw(context, cameraOffset, 1.0);
+            }
             context.restore(); // --- 恢复画布，以下绘制不随世界缩放 ---
 
             // ========== 3. UI 界面 (不受缩放影响) ==========
